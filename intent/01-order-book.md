@@ -28,3 +28,12 @@ news, assistant, UI.
 What "learned to trade" means for a user — unknown, to be discovered by
 building. How the engine will be protected from concurrent access (a test
 proving the race comes first, then the decision).
+
+## Invariants
+1. At the same price, the earlier order executes first.
+2. A limit order never executes at a price worse than its limit.
+3. The book is never crossed: best bid is always strictly lower than best ask.
+4. Only priced orders rest in the book; an unfilled market-order remainder is cancelled.
+5. A cancelled order is not in the book and never executes again.
+6. An empty price level is removed; the best price is always backed by real quantity.
+7. Filled quantity never exceeds order quantity; remaining = quantity − filled.
