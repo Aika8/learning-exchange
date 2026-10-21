@@ -2,19 +2,19 @@ package repl;
 
 import engine.Order;
 import engine.OrderBook;
+import engine.SubmitResult;
 import engine.Trade;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.List;
 
-/** Line-based console for the order book. Ids and timestamps come from one counter. */
+/** Line-based console for the order book. Order ids are assigned by the book. */
 public final class Repl {
 
     private static final int DEPTH = 5;
 
     private final OrderBook book = new OrderBook();
-    private long nextId = 1;
 
     public static void main(String[] args) throws IOException {
         new Repl().run(new BufferedReader(new InputStreamReader(System.in)));
@@ -70,18 +70,18 @@ public final class Repl {
     }
 
     private List<Trade> submit(Order.Side side, String terms) {
-        long id = nextId++;
         int at = terms.indexOf('@');
         Order order = at < 0
-                ? Order.market(id, side, parseLong(terms, "qty"), id)
-                : Order.limit(id, side, parseLong(terms.substring(at + 1), "price"),
-                        parseLong(terms.substring(0, at), "qty"), id);
-        List<Trade> trades = book.submit(order);
-        System.out.println("order " + order);
-        if (order.type() == Order.Type.MARKET && order.remaining() > 0) {
-            System.out.println("cancelled unfilled market remainder: " + order.remaining());
+                ? Order.market(side, parseLong(terms, "qty"))
+                : Order.limit(side, parseLong(terms.substring(at + 1), "price"),
+                        parseLong(terms.substring(0, at), "qty"));
+        SubmitResult result = book.submit(order);
+        System.out.println("order #" + result.orderId() + " " + order + ", filled " + result.filledQty());
+        long unfilled = order.qty() - result.filledQty();
+        if (order.type() == Order.Type.MARKET && unfilled > 0) {
+            System.out.println("cancelled unfilled market remainder: " + unfilled);
         }
-        return trades;
+        return result.trades();
     }
 
     private void printBook() {

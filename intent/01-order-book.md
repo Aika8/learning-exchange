@@ -16,8 +16,9 @@ price. Deterministic, single-threaded, no persistence, no API.
 None yet. Consumers later: account/positions, bots, REST, assistant.
 
 ## Constraints
-Java 25, Gradle, JUnit 5. Package `engine` and its tests are written by
-Aika; the agent does not create or edit them. In-memory only by design
+Java 25, Gradle, JUnit 5. Engine and tests are written by the agent from
+this intent; Aika reviews DECISIONS.md and tests behaviour via the REPL.
+In-memory only by design
 (journal comes in the next increment).
 
 ## Out of scope
