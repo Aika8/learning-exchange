@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Словарь</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F6F8;color:#14202B;font-family:'Golos Text',sans-serif;padding:20px 16px;display:flex;flex-direction:column;gap:12px">
+  <div style="font-size:22px;font-weight:600">Словарь</div>
+  <label><span style="position:absolute;left:-9999px">Поиск</span><input placeholder="Найти термин" style="width:100%;box-sizing:border-box;height:44px;border:1px solid #D3DAE1;border-radius:12px;padding:0 12px;font:15px 'Golos Text'"></label>
+  <sc-for list="{{terms}}" as="t" hint-placeholder-count="5">
+    <div style="background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:4px">
+      <div style="font-size:15px;font-weight:600">{{t.n}}</div>
+      <div style="font-size:14px">{{t.d}}</div>
+      <div style="font-size:12px;color:#526170">{{t.e}}</div>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { terms:[
+{n:'Спред',d:'Разница между ценой покупки и продажи.',e:'У вас: 12.11 обмен UKZT → UUSD, спред 210 UKZT.'},
+{n:'Стакан',d:'Список заявок на покупку и продажу по ценам.',e:'У вас: смотрели стакан TKR 11.11.'},
+{n:'Стоп-лосс',d:'Заявка, которая закроет позицию при заданной цене.',e:'У вас: стоп TKR на 4 760,0.'},
+{n:'Лимитная заявка',d:'Сделка только по вашей цене или лучше.',e:'У вас: лимит UUSD по 505,00 до 18.11.'},
+{n:'Гэп',d:'Скачок цены между закрытием и открытием.',e:'У вас: стоп QRS не исполнен из-за гэпа.'}
+]};
+}
+}
+</script>
+</body>
+</html>

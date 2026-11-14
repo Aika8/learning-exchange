@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Обмен / Exchange</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}</style>
+</helmet>
+<div style="width:1330px;height:844px;display:flex;gap:80px;font-family:'Golos Text',sans-serif">
+<sc-for list="{{v}}" as="p" hint-placeholder-count="3">
+<div style="width:390px;height:844px;box-sizing:border-box;background:{{p.bg}};color:{{p.tx}};display:flex;flex-direction:column;gap:12px;padding:20px 16px">
+  <div style="display:flex;justify-content:space-between;align-items:center"><div style="font-size:22px;font-weight:600">{{p.s.title}}</div><span style="background:#FFF4E5;color:#8F5A00;padding:2px 8px;border-radius:999px;font-weight:600;font-size:12px">{{p.s.badge}}</span></div>
+  <div style="font-size:15px;color:{{p.t2}}">UUSD / UKZT · {{p.s.pair}}</div>
+  <div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px">
+    <div style="background:{{p.sf}};border-radius:12px;padding:12px"><div style="font-size:12px;color:{{p.t2}}">{{p.s.buy}}</div><div class="num" style="font-size:22px;font-weight:600">512,40</div></div>
+    <div style="background:{{p.sf}};border-radius:12px;padding:12px"><div style="font-size:12px;color:{{p.t2}}">{{p.s.sell}}</div><div class="num" style="font-size:22px;font-weight:600">506,10</div></div>
+  </div>
+  <div class="num" style="border:1px dashed {{p.sp}};color:{{p.sp}};border-radius:12px;padding:8px 12px;font-size:13px">{{p.s.spread}}: 6,30 UKZT · 1,23%</div>
+  <div style="background:{{p.sf}};border-radius:12px;padding:12px;height:110px;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;gap:6px;font-size:12px"><span style="padding:4px 10px;border-radius:999px;background:{{p.pr}};color:{{p.op}}">1D</span><span style="padding:4px 10px">1W</span><span style="padding:4px 10px">1M</span></div>
+    <svg viewBox="0 0 340 60" style="width:100%;height:60px" role="img" aria-label="{{p.s.chart}}"><polyline points="0,40 30,38 60,42 90,30 120,34 150,25 180,28 210,20 240,24 270,18 300,22 340,15" fill="none" stroke="{{p.pr}}" stroke-width="2"></polyline></svg>
+  </div>
+  <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:{{p.t2}}">{{p.s.amount}}<input class="num" value="100 UUSD" style="height:48px;border:1px solid {{p.bd}};border-radius:12px;padding:0 12px;font-size:20px;background:{{p.sf}};color:{{p.tx}}"></label>
+  <div class="num" style="background:{{p.sf}};border-radius:12px;padding:8px 12px;font-size:14px;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;justify-content:space-between"><span>{{p.s.get}}</span><span>100,00 UUSD</span></div>
+    <div style="display:flex;justify-content:space-between"><span>{{p.s.pay}}</span><span>51 240 UKZT</span></div>
+    <div style="display:flex;justify-content:space-between;color:{{p.t2}}"><span>{{p.s.fee}}</span><span>150 UKZT</span></div>
+  </div>
+  <div style="border:1px solid {{p.bd}};border-radius:12px;padding:10px 12px;font-size:14px">{{p.s.limit}}</div>
+  <button style="height:48px;border:0;border-radius:12px;background:{{p.pr}};color:{{p.op}};font:600 15px 'Golos Text';margin-top:auto">{{p.s.cta}}</button>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1330,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const L={bg:'#F4F6F8',sf:'#FFFFFF',tx:'#14202B',t2:'#526170',pr:'#1D5C7A',op:'#FFFFFF',bd:'#D3DAE1',sp:'#5B4BA6'};
+const D={bg:'#0E151B',sf:'#16212A',tx:'#E8EEF3',t2:'#9AA9B6',pr:'#6FB3D6',op:'#06202E',bd:'#2C3B48',sp:'#B3A6F2'};
+const RU={title:'Обмен',badge:'учебные деньги',pair:'учебный доллар / учебный тенге',buy:'Покупка',sell:'Продажа',spread:'Спред',chart:'График курса',amount:'Сумма',get:'Вы получите',pay:'Вы заплатите',fee:'Комиссия',limit:'Купить, когда курс составит… (до 5 дней)',cta:'Обменять'};
+const EN={title:'Exchange',badge:'practice money',pair:'practice dollar / practice tenge',buy:'Buy',sell:'Sell',spread:'Spread',chart:'Rate chart',amount:'Amount',get:'You get',pay:'You pay',fee:'Fee',limit:'Buy when the rate reaches… (up to 5 days)',cta:'Exchange'};
+return { v:[{...L,s:RU},{...D,s:RU},{...L,s:EN}] };
+}
+}
+</script>
+</body>
+</html>

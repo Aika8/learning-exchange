@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Компания</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}</style>
+</helmet>
+<div style="width:390px;height:1240px;box-sizing:border-box;background:#F4F6F8;color:#14202B;font-family:'Golos Text',sans-serif;padding:20px 16px;display:flex;flex-direction:column;gap:12px">
+  <div style="font-size:22px;font-weight:600">Компания TKR</div>
+  <div style="border:1px solid #8F5A00;color:#8F5A00;border-radius:12px;padding:10px 12px;font-size:13px">⚠ Отчёт ночью: утром возможен гэп, стоп может не исполниться. У вас стоп на 4 760,0.</div>
+  <div style="background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:15px;font-weight:600">Цена и отсечка</div>
+    <svg viewBox="0 0 330 80" style="width:100%;height:80px" role="img" aria-label="График цены с отметкой отсечки"><polyline points="0,50 40,46 80,48 120,40 160,42 200,30 220,42 260,38 300,34 330,30" fill="none" stroke="#1D5C7A" stroke-width="2"></polyline><line x1="210" y1="5" x2="210" y2="75" stroke="#5B4BA6" stroke-dasharray="3 3"></line></svg>
+    <div style="font-size:12px;color:#5B4BA6">┆ Отсечка: цена снизится на размер дивиденда.</div>
+  </div>
+  <sc-for list="{{cards}}" as="c" hint-placeholder-count="3">
+    <div style="background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+      <div style="font-size:15px;font-weight:600">{{c.h}}</div>
+      <sc-for list="{{c.l}}" as="r" hint-placeholder-count="3"><div class="num" style="display:flex;justify-content:space-between;gap:12px;font-size:14px"><span>{{r.k}}</span><span style="text-align:right">{{r.v}}</span></div></sc-for>
+    </div>
+  </sc-for>
+  <div style="font-size:12px;color:#526170">Мы не даём рекомендаций покупать или продавать.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":1240}}'>
+class Component extends DCLogic {
+renderVals() {
+return { cards:[
+{h:'Ключевые показатели',l:[{k:'Выручка и рост',v:'48,2 млрд · ↑ +12%'},{k:'Чистая прибыль',v:'6,1 млрд'},{k:'EPS',v:'305'},{k:'P/E',v:'16,4'},{k:'Долг / прибыль',v:'1,8'},{k:'Дивидендная доходность',v:'4,2%'}]},
+{h:'Последний отчёт: факт / ожидание / сюрприз',l:[{k:'Выручка',v:'12,4 / 12,0 / ↑ +3,3%'},{k:'Прибыль',v:'1,5 / 1,6 / ↓ −6,2%'},{k:'EPS',v:'75 / 80 / ↓ −6,3%'},{k:'Реакция цены в день отчёта',v:'↓ −4,1%'}]},
+{h:'Календарь отчётов',l:[{k:'Следующий отчёт',v:'через 3 дня, после закрытия торгов'}]},
+{h:'Сделки инсайдеров',l:[{k:'Директор купил 2 000 акций',v:'3 дня назад'},{k:'Финдиректор продал 500 акций',v:'2 недели назад'}]}
+]};
+}
+}
+</script>
+</body>
+</html>

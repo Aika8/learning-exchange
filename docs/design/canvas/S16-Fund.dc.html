@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Фонд</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F6F8;color:#14202B;font-family:'Golos Text',sans-serif;padding:20px 16px;display:flex;flex-direction:column;gap:12px">
+  <div style="font-size:22px;font-weight:600">Фонд «Широкий рынок»</div>
+  <div style="background:#1D5C7A;color:#FFFFFF;border-radius:20px;padding:16px;display:flex;justify-content:space-between;align-items:flex-end">
+    <div><div style="font-size:13px">Расходы фонда (TER)</div><div class="num" style="font-size:34px;font-weight:700">0,10%</div></div>
+    <div style="font-size:12px;text-align:right">в год от ваших<br>вложений</div>
+  </div>
+  <div style="background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:15px;font-weight:600">Что внутри</div>
+    <sc-for list="{{inside}}" as="r" hint-placeholder-count="4"><div class="num" style="display:flex;justify-content:space-between;font-size:14px"><span>{{r.k}}</span><span>{{r.v}}</span></div></sc-for>
+  </div>
+  <div style="background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:15px;font-weight:600">20 лет: 0,1% против 2% расходов</div>
+    <svg viewBox="0 0 330 90" style="width:100%;height:90px" role="img" aria-label="Сравнение роста при расходах 0,1% и 2%"><polyline points="0,85 66,75 132,62 198,46 264,27 330,5" fill="none" stroke="#1D5C7A" stroke-width="2.5"></polyline><polyline points="0,85 66,78 132,69 198,58 264,46 330,32" fill="none" stroke="#B8621B" stroke-width="2.5" stroke-dasharray="6 4"></polyline></svg>
+    <div class="num" style="font-size:13px">— 0,1%: 1 000 000 → 3 780 000 UKZT</div>
+    <div class="num" style="font-size:13px">┄ 2%: 1 000 000 → 2 650 000 UKZT</div>
+    <div style="font-size:12px;color:#526170">При 7% годовых до расходов. Разница — 1,13 млн UKZT.</div>
+  </div>
+  <div style="background:#FFFFFF;border-radius:16px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;min-height:44px"><span style="font-size:15px">Напоминать о ребалансировке</span><span style="font-size:14px;color:#1D5C7A;font-weight:600">раз в полгода ›</span></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { inside:[{k:'Акции 120 компаний',v:'70%'},{k:'Облигации',v:'25%'},{k:'Деньги',v:'5%'},{k:'Крупнейшая доля',v:'TKR · 6,2%'}] };
+}
+}
+</script>
+</body>
+</html>

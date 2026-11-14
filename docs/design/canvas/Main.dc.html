@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Ветрило — дизайн-система</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>
+body{margin:0}
+a{color:#1D5C7A}a:hover{color:#14202B}
+.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums lining-nums}
+</style>
+</helmet>
+<div style="width:1280px;height:1700px;box-sizing:border-box;padding:56px;background:#F4F6F8;color:#14202B;font-family:'Golos Text',sans-serif;display:flex;flex-direction:column;gap:40px">
+
+<div style="display:flex;gap:40px;align-items:flex-start">
+  <div style="flex:1;display:flex;flex-direction:column;gap:16px">
+    <div style="display:flex;align-items:center;gap:16px">
+      <svg width="56" height="56" viewBox="0 0 56 56" aria-hidden="true"><rect width="56" height="56" rx="16" fill="#1D5C7A"></rect><path d="M28 12 L28 42 M28 14 C38 20 40 30 30 38" stroke="#FFFFFF" stroke-width="3" fill="none" stroke-linecap="round"></path><path d="M16 44 H40" stroke="#E59A55" stroke-width="3" stroke-linecap="round"></path></svg>
+      <div><div style="font-size:34px;font-weight:700;line-height:40px">Ветрило</div><div style="font-size:15px;color:#526170">Vetrilo · учебный банк и биржа</div></div>
+    </div>
+    <p style="margin:0;font-size:15px;line-height:22px;max-width:520px;color:#14202B">Символ — парус на мачте над линией горизонта: ветер ведёт, но курс выбираете вы. Голос: спокойный и прямой. Мы называем вещи их настоящими именами, показываем каждую комиссию и не торопим. Здесь можно ошибаться — деньги учебные, опыт настоящий.</p>
+  </div>
+  <div style="width:420px;background:#FFFFFF;border:1px solid #D3DAE1;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-size:12px;font-weight:500;color:#526170">ШРИФТЫ · Google Fonts, кириллица</div>
+    <div style="font-size:34px;font-weight:700;line-height:40px">Display 34/40</div>
+    <div style="font-size:22px;font-weight:600">Title 22/28 · Заголовок</div>
+    <div style="font-size:17px;font-weight:600">Headline 17/22 · Стоп-лосс</div>
+    <div style="font-size:15px">Body 15/20 · Golos Text</div>
+    <div style="font-size:12px;font-weight:500;color:#526170">Caption 12/16</div>
+    <div class="num" style="font-size:32px;font-weight:600">1 284 500,00 UKZT</div>
+    <div style="font-size:12px;color:#526170">Цифры: Inter, tabular figures (tnum)</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px">
+  <div style="background:#FFFFFF;border-radius:20px;padding:20px;border:1px solid #D3DAE1">
+    <div style="font-size:17px;font-weight:600;margin-bottom:12px">Светлая тема</div>
+    <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;font-size:11px">
+      <div><div style="height:44px;border-radius:8px;background:#F4F6F8;border:1px solid #D3DAE1"></div>bg</div>
+      <div><div style="height:44px;border-radius:8px;background:#FFFFFF;border:1px solid #D3DAE1"></div>surface</div>
+      <div><div style="height:44px;border-radius:8px;background:#EAEEF2"></div>surfaceAlt</div>
+      <div><div style="height:44px;border-radius:8px;background:#14202B"></div>textPrimary</div>
+      <div><div style="height:44px;border-radius:8px;background:#526170"></div>textSecondary</div>
+      <div><div style="height:44px;border-radius:8px;background:#1D5C7A"></div>primary</div>
+      <div><div style="height:44px;border-radius:8px;background:#B8621B"></div>accent</div>
+      <div><div style="height:44px;border-radius:8px;background:#D3DAE1"></div>border</div>
+      <div><div style="height:44px;border-radius:8px;background:#1D7348"></div>positive</div>
+      <div><div style="height:44px;border-radius:8px;background:#B3362C"></div>negative</div>
+      <div><div style="height:44px;border-radius:8px;background:#8F5A00"></div>warning</div>
+      <div><div style="height:44px;border-radius:8px;background:#2458B3"></div>info</div>
+      <div><div style="height:44px;border-radius:8px;background:#2458B3"></div>bid</div>
+      <div><div style="height:44px;border-radius:8px;background:#B8621B"></div>ask</div>
+      <div><div style="height:44px;border-radius:8px;background:#5B4BA6"></div>spread</div>
+      <div><div style="height:44px;border-radius:8px;background:#FFFFFF;border:1px solid #D3DAE1"></div>onPrimary</div>
+    </div>
+  </div>
+  <div style="background:#16212A;color:#E8EEF3;border-radius:20px;padding:20px">
+    <div style="font-size:17px;font-weight:600;margin-bottom:12px">Тёмная тема</div>
+    <div style="display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:8px;font-size:11px;color:#9AA9B6">
+      <div><div style="height:44px;border-radius:8px;background:#0E151B;border:1px solid #2C3B48"></div>bg</div>
+      <div><div style="height:44px;border-radius:8px;background:#16212A;border:1px solid #2C3B48"></div>surface</div>
+      <div><div style="height:44px;border-radius:8px;background:#1F2C37"></div>surfaceAlt</div>
+      <div><div style="height:44px;border-radius:8px;background:#E8EEF3"></div>textPrimary</div>
+      <div><div style="height:44px;border-radius:8px;background:#9AA9B6"></div>textSecondary</div>
+      <div><div style="height:44px;border-radius:8px;background:#6FB3D6"></div>primary</div>
+      <div><div style="height:44px;border-radius:8px;background:#E59A55"></div>accent</div>
+      <div><div style="height:44px;border-radius:8px;background:#2C3B48"></div>border</div>
+      <div><div style="height:44px;border-radius:8px;background:#5CC48E"></div>positive</div>
+      <div><div style="height:44px;border-radius:8px;background:#F07F74"></div>negative</div>
+      <div><div style="height:44px;border-radius:8px;background:#E3B356"></div>warning</div>
+      <div><div style="height:44px;border-radius:8px;background:#86AEF5"></div>info</div>
+      <div><div style="height:44px;border-radius:8px;background:#86AEF5"></div>bid</div>
+      <div><div style="height:44px;border-radius:8px;background:#E59A55"></div>ask</div>
+      <div><div style="height:44px;border-radius:8px;background:#B3A6F2"></div>spread</div>
+      <div><div style="height:44px;border-radius:8px;background:#06202E"></div>onPrimary</div>
+    </div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+  <div style="background:#FFFFFF;border-radius:20px;padding:20px;border:1px solid #D3DAE1;display:flex;flex-direction:column;gap:10px">
+    <div style="font-size:12px;font-weight:500;color:#526170">КНОПКИ · default / pressed / disabled / loading / error</div>
+    <button style="height:48px;border:0;border-radius:12px;background:#1D5C7A;color:#FFFFFF;font:600 15px 'Golos Text'">Купить</button>
+    <button style="height:48px;border:0;border-radius:12px;background:#154660;color:#FFFFFF;font:600 15px 'Golos Text'">Купить · pressed</button>
+    <button disabled style="height:48px;border:0;border-radius:12px;background:#D3DAE1;color:#526170;font:600 15px 'Golos Text'">Купить · disabled</button>
+    <button style="height:48px;border:0;border-radius:12px;background:#1D5C7A;color:#FFFFFF;font:600 15px 'Golos Text'">○ ○ ○  Отправляем…</button>
+    <button style="height:48px;border:2px solid #B3362C;border-radius:12px;background:#FFFFFF;color:#B3362C;font:600 15px 'Golos Text'">! Не отправлено — повторить</button>
+    <div style="display:flex;gap:8px"><button style="flex:1;height:44px;border:1px solid #1D5C7A;border-radius:12px;background:#FFFFFF;color:#1D5C7A;font:600 15px 'Golos Text'">Secondary</button><button style="flex:1;height:44px;border:0;border-radius:12px;background:transparent;color:#1D5C7A;font:600 15px 'Golos Text'">Ghost</button></div>
+  </div>
+  <div style="background:#FFFFFF;border-radius:20px;padding:20px;border:1px solid #D3DAE1;display:flex;flex-direction:column;gap:12px">
+    <div style="font-size:12px;font-weight:500;color:#526170">ПОЛЯ · сегменты · чипы</div>
+    <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#526170">Сумма<input class="num" value="50 000" style="height:48px;border:1px solid #D3DAE1;border-radius:12px;padding:0 12px;font-size:20px;color:#14202B"></label>
+    <label style="display:flex;flex-direction:column;gap:4px;font-size:12px;color:#B3362C">Стоп-лосс · обязательно<input class="num" placeholder="Цена стопа" style="height:48px;border:2px solid #B3362C;border-radius:12px;padding:0 12px;font-size:17px"><span>! Укажите стоп до входа</span></label>
+    <div style="display:flex;background:#EAEEF2;border-radius:12px;padding:4px"><button style="flex:1;height:40px;border:0;border-radius:8px;background:#FFFFFF;font:600 14px 'Golos Text';color:#14202B">Лимитная</button><button style="flex:1;height:40px;border:0;background:transparent;font:500 14px 'Golos Text';color:#526170">Рыночная</button></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap"><span style="padding:6px 12px;border-radius:999px;background:#EAEEF2;font-size:13px">1Д</span><span style="padding:6px 12px;border-radius:999px;background:#1D5C7A;color:#FFFFFF;font-size:13px">1Н</span><span style="padding:6px 12px;border-radius:999px;border:1px dashed #5B4BA6;color:#5B4BA6;font-size:13px">спред ⓘ</span><span style="padding:6px 12px;border-radius:999px;background:#FFF4E5;color:#8F5A00;font-size:13px;font-weight:600">учебные деньги</span></div>
+    <div style="background:#14202B;color:#FFFFFF;border-radius:12px;padding:10px 12px;font-size:13px">Спред — разница между ценой покупки и продажи.</div>
+  </div>
+  <div style="background:#FFFFFF;border-radius:20px;padding:20px;border:1px solid #D3DAE1;display:flex;flex-direction:column;gap:10px">
+    <div style="font-size:12px;font-weight:500;color:#526170">СТАКАН · строка с глубиной · спред</div>
+    <div class="num" style="font-size:14px;display:flex;flex-direction:column;gap:2px">
+      <div style="position:relative;display:flex;justify-content:space-between;padding:4px 8px"><div style="position:absolute;right:0;top:0;bottom:0;width:60%;background:#F6E7DA;border-radius:4px"></div><span style="position:relative;color:#B8621B">▲ 5 012,0</span><span style="position:relative">1 240</span></div>
+      <div style="position:relative;display:flex;justify-content:space-between;padding:4px 8px"><div style="position:absolute;right:0;top:0;bottom:0;width:30%;background:#F6E7DA;border-radius:4px"></div><span style="position:relative;color:#B8621B">▲ 5 010,5</span><span style="position:relative">410</span></div>
+      <div style="text-align:center;padding:6px;border-top:1px dashed #5B4BA6;border-bottom:1px dashed #5B4BA6;color:#5B4BA6;font-size:13px">Спред 2,5 UKZT · 0,05%</div>
+      <div style="position:relative;display:flex;justify-content:space-between;padding:4px 8px"><div style="position:absolute;right:0;top:0;bottom:0;width:45%;background:#E1E9F7;border-radius:4px"></div><span style="position:relative;color:#2458B3">▼ 5 008,0</span><span style="position:relative">820</span></div>
+      <div style="position:relative;display:flex;justify-content:space-between;padding:4px 8px"><div style="position:absolute;right:0;top:0;bottom:0;width:75%;background:#E1E9F7;border-radius:4px"></div><span style="position:relative;color:#2458B3">▼ 5 007,0</span><span style="position:relative">1 560</span></div>
+    </div>
+    <div style="font-size:12px;color:#526170">Покупатели (bid) — синие ▼, продавцы (ask) — оранжевые ▲: различаются и цветом, и знаком.</div>
+  </div>
+</div>
+
+<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:24px">
+  <div style="background:#1D5C7A;color:#FFFFFF;border-radius:20px;padding:20px;display:flex;flex-direction:column;gap:6px">
+    <div style="display:flex;justify-content:space-between;font-size:13px"><span>Весь баланс</span><span style="background:#FFF4E5;color:#8F5A00;padding:2px 8px;border-radius:999px;font-weight:600">учебные деньги</span></div>
+    <div class="num" style="font-size:32px;font-weight:600">1 284 500 UKZT</div>
+    <div class="num" style="font-size:13px">↑ +12 400 (+0,97%) за месяц</div>
+  </div>
+  <div style="background:#FFFFFF;border-radius:20px;border:1px solid #D3DAE1;padding:8px 16px">
+    <div style="display:flex;align-items:center;gap:12px;min-height:56px"><div style="width:40px;height:40px;border-radius:12px;background:#EAEEF2;display:flex;align-items:center;justify-content:center">⇄</div><div style="flex:1"><div style="font-size:15px">Обмен UKZT → UUSD</div><div style="font-size:12px;color:#526170">Комиссия 150 · спред 210</div></div><div class="num" style="text-align:right;font-size:15px">− 50 000</div></div>
+    <div style="display:flex;justify-content:space-around;border-top:1px solid #D3DAE1;padding-top:8px;font-size:11px;color:#526170"><span style="color:#1D5C7A;font-weight:600">● Главная</span><span>Платежи</span><span>Обмен</span><span>Инвестиции</span><span>Ещё</span></div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:12px">
+    <div style="background:#14202B;color:#FFFFFF;border-radius:12px;padding:12px 16px;font-size:14px">✓ Заявка отправлена. Ждёт исполнения.</div>
+    <div style="background:#FFFFFF;border:1px dashed #D3DAE1;border-radius:20px;padding:20px;text-align:center;color:#526170;font-size:14px">Пока нет операций.<br>Начните с обмена или вклада.</div>
+    <div style="background:#FFFFFF;border-radius:20px 20px 0 0;box-shadow:0 -4px 24px rgba(20,32,43,0.16);padding:12px 20px"><div style="width:36px;height:4px;border-radius:2px;background:#D3DAE1;margin:0 auto 8px"></div><div style="font-size:15px;font-weight:600">Bottom sheet · радиус 20</div></div>
+  </div>
+</div>
+
+<div style="font-size:13px;color:#526170">Spacing 0·4·8·12·16·20·24·32·40 · Radius 8/12/20/pill · Motion 120/220 мс, cubic-bezier(0.2,0,0,1) · Касание ≥ 44 pt · Контраст WCAG AA. Без конфетти, таймеров и «казино»-эффектов.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1280,"height":1700}}'>
+class Component extends DCLogic {
+renderVals() { return {}; }
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Заявки и стопы</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F6F8;color:#14202B;font-family:'Golos Text',sans-serif;padding:20px 16px;display:flex;flex-direction:column;gap:12px">
+  <div style="font-size:22px;font-weight:600">Заявки и стопы</div>
+  <div style="display:flex;background:#EAEEF2;border-radius:12px;padding:4px"><button style="flex:1;height:40px;border:0;border-radius:8px;background:#FFFFFF;font:600 14px 'Golos Text';color:#14202B">Активные</button><button style="flex:1;height:40px;border:0;background:transparent;font:500 14px 'Golos Text';color:#526170">Условные</button><button style="flex:1;height:40px;border:0;background:transparent;font:500 14px 'Golos Text';color:#526170">История</button></div>
+  <div style="background:#FFFFFF;border-radius:12px;padding:12px;font-size:13px;display:flex;flex-direction:column;gap:8px">
+    <div style="font-weight:600">Жизненный цикл условной заявки</div>
+    <div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:12px"><span style="padding:4px 8px;border-radius:999px;background:#EAEEF2">Ждёт</span>→<span style="padding:4px 8px;border-radius:999px;background:#E1E9F7;color:#2458B3">Сработал</span>→<span style="padding:4px 8px;border-radius:999px;background:#EAEEF2">Отправлена</span>→<span style="padding:4px 8px;border-radius:999px;background:#E3F1E9;color:#1D7348">Исполнена</span>/<span style="padding:4px 8px;border-radius:999px;background:#F8E3E1;color:#B3362C">Не исполнена</span></div>
+    <div style="color:#526170">ⓘ «Сработал» ≠ «исполнена»: стоп превращается в заявку, но цена могла уйти, и сделки может не быть.</div>
+  </div>
+  <sc-for list="{{rows}}" as="r" hint-placeholder-count="4">
+    <div style="background:#FFFFFF;border-radius:12px;padding:12px;display:flex;justify-content:space-between;align-items:center;min-height:44px">
+      <div><div style="font-size:15px">{{r.t}}</div><div class="num" style="font-size:12px;color:#526170">{{r.d}}</div></div>
+      <span style="font-size:12px;padding:4px 8px;border-radius:999px;background:{{r.bg}};color:{{r.c}}">{{r.s}}</span>
+    </div>
+  </sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { rows:[
+{t:'Стоп-лосс TKR',d:'Продать 40 по 4 760,0',s:'Ждёт',bg:'#EAEEF2',c:'#14202B'},
+{t:'Лимит UUSD/UKZT',d:'Купить 100 по 505,00 · до 18.11',s:'Отправлена',bg:'#EAEEF2',c:'#14202B'},
+{t:'Стоп-лосс ABC',d:'Продать 10 по 1 200,0',s:'Сработал',bg:'#E1E9F7',c:'#2458B3'},
+{t:'Тейк-профит XYZ',d:'Продать 5 по 860,0',s:'Исполнена',bg:'#E3F1E9',c:'#1D7348'},
+{t:'Стоп-лосс QRS',d:'Гэп: открытие 410,0 ниже стопа 430,0',s:'Не исполнена',bg:'#F8E3E1',c:'#B3362C'}
+]};
+}
+}
+</script>
+</body>
+</html>
