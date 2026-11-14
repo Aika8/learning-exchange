@@ -1,6 +1,6 @@
 # 0011. Game engine: Godot 4
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): inside the game — Scene composition, Signals (Observer), State machine for game flow, Autoload singletons for services
 

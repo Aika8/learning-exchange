@@ -14,7 +14,7 @@ Never connected to a real market. Built as a one-year learning project.
 | `api/` | OpenAPI 3.1 / AsyncAPI 3 contract | M1 |
 | `clients/web/` | React debug client | M1 |
 | `clients/mobile/` | Expo app «Ветрило» | M1 |
-| `game/` | Godot 4 game «Летопись Ветров» | separate session |
+| `game/` | Godot 4 game «Летопись Ветров» | M1 slice: menu → harbour → Ladder (`make game`) |
 | `docs/`, `intent/` | ADRs, lore, design, prompts, intents | — |
 
 ## How to run each part
