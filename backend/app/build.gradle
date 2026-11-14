@@ -1,0 +1,25 @@
+// The deployable: Spring Boot adapters around the hexagon (ADR-0002): REST, WebSocket, file journal, bot scheduler.
+plugins {
+    id 'org.springframework.boot' version '4.1.2'
+}
+
+dependencies {
+    implementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    implementation project(':backend:application')
+    implementation project(':backend:bots')
+    implementation 'org.springframework.boot:spring-boot-starter-webmvc'
+    implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+    testImplementation platform(org.springframework.boot.gradle.plugin.SpringBootPlugin.BOM_COORDINATES)
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'com.networknt:json-schema-validator:2.0.8'
+    testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'
+}
+
+// Run from the repo root so bots.yaml and data/ are found where the README says.
+bootRun {
+    workingDir = rootProject.projectDir
+}
+
+// The contract is on the test classpath, so ContractTest validates against the real api/openapi.yaml.
+sourceSets.test.resources.srcDir rootProject.file('api')
