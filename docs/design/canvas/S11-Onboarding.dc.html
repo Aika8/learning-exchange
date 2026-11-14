@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Онбординг</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}</style>
+</helmet>
+<div style="width:1330px;height:844px;display:flex;gap:80px;font-family:'Golos Text',sans-serif">
+<sc-for list="{{pages}}" as="p" hint-placeholder-count="3">
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F6F8;color:#14202B;padding:40px 24px 24px;display:flex;flex-direction:column;gap:16px">
+  <div style="font-size:13px;color:#526170">{{p.step}}</div>
+  <div style="height:260px;border-radius:20px;background:#EAEEF2;display:flex;align-items:center;justify-content:center"><svg width="120" height="120" viewBox="0 0 56 56" aria-hidden="true"><path d="M28 12 L28 42 M28 14 C38 20 40 30 30 38" stroke="#1D5C7A" stroke-width="3" fill="none" stroke-linecap="round"></path><path d="M16 44 H40" stroke="#B8621B" stroke-width="3" stroke-linecap="round"></path></svg></div>
+  <div style="font-size:28px;font-weight:700;line-height:34px">{{p.h}}</div>
+  <div style="font-size:16px;line-height:22px">{{p.t}}</div>
+  <sc-for list="{{p.opts}}" as="o" hint-placeholder-count="0"><button style="min-height:52px;border:1px solid {{o.bd}};border-radius:12px;background:#FFFFFF;text-align:left;padding:8px 14px;font:15px 'Golos Text';color:#14202B">{{o.t}}</button></sc-for>
+  <button style="margin-top:auto;height:48px;border:0;border-radius:12px;background:#1D5C7A;color:#FFFFFF;font:600 15px 'Golos Text'">{{p.cta}}</button>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1330,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+return { pages:[
+{step:'1 из 3',h:'Учебный банк и биржа',t:'Здесь всё как в настоящем банке, но деньги учебные. Ошибки ничего не стоят — опыт остаётся.',opts:[],cta:'Дальше'},
+{step:'2 из 3',h:'Одно правило: выход до входа',t:'Прежде чем купить, решите, где выйдете при убытке. Без стоп-лосса заявку отправить нельзя.',opts:[],cta:'Понятно'},
+{step:'3 из 3',h:'Выберите профиль',t:'Профиль задаёт стартовый капитал и подсказки. Его можно сменить в настройках.',opts:[{t:'Новичок · 1 000 000 UKZT, подсказки везде',bd:'#1D5C7A'},{t:'Опытный · без подсказок',bd:'#D3DAE1'},{t:'Разработчик · отладочные данные',bd:'#D3DAE1'}],cta:'Начать'}
+]};
+}
+}
+</script>
+</body>
+</html>

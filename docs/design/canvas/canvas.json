@@ -1,0 +1,28 @@
+{"v":3,"createdOnFiles":{"v":1,"at":"2026-11-14T10:00:00Z"},"title":"Ветрило — mobile design","launch":{"view":"canvas"},"pages":[],"designSystems":[],
+"boards":{
+"Main.dc.html":{"x":0,"y":0,"w":1280,"h":1700,"title":"Part 1 · Design system"},
+"S01-Home.dc.html":{"x":0,"y":2120,"w":1330,"h":844,"title":"1 · Главная / Home"},
+"S02-Exchange.dc.html":{"x":1410,"y":2120,"w":1330,"h":844,"title":"2 · Обмен / Exchange"},
+"S03-Instrument.dc.html":{"x":0,"y":3200,"w":1330,"h":844,"title":"3 · Инструмент / Instrument"},
+"S04-OrderTicket.dc.html":{"x":1410,"y":3200,"w":1330,"h":844,"title":"4 · Заявка / Order ticket"},
+"S05-Orders.dc.html":{"x":0,"y":4300,"w":390,"h":844,"title":"5 · Заявки и стопы"},
+"S06-Leverage.dc.html":{"x":470,"y":4300,"w":390,"h":844,"title":"6 · Позиция с плечом"},
+"S07-Deposit.dc.html":{"x":940,"y":4300,"w":390,"h":844,"title":"7 · Вклад"},
+"S08-Statement.dc.html":{"x":1410,"y":4300,"w":390,"h":844,"title":"8 · Выписка"},
+"S09-Assistant.dc.html":{"x":1880,"y":4300,"w":390,"h":844,"title":"9 · Помощник"},
+"S10-Glossary.dc.html":{"x":2350,"y":4300,"w":390,"h":844,"title":"10 · Словарь"},
+"S10b-Settings.dc.html":{"x":2820,"y":4300,"w":390,"h":844,"title":"10 · Настройки"},
+"S11-Onboarding.dc.html":{"x":0,"y":5400,"w":1330,"h":844,"title":"11 · Онбординг"},
+"S12-RealWorld.dc.html":{"x":1410,"y":5400,"w":390,"h":844,"title":"12 · Реальный мир"},
+"S13-Company.dc.html":{"x":1880,"y":5400,"w":390,"h":1240,"title":"13 · Компания"},
+"S14-Calendar.dc.html":{"x":2350,"y":5400,"w":390,"h":844,"title":"14 · Календарь событий"},
+"S15-Bond.dc.html":{"x":2820,"y":5400,"w":390,"h":844,"title":"15 · Облигация"},
+"S16-Fund.dc.html":{"x":3290,"y":5400,"w":390,"h":844,"title":"16 · Фонд"},
+"S17-TicketJournal.dc.html":{"x":3760,"y":5400,"w":390,"h":844,"title":"17 · Заявка: ATR и журнал"}
+},
+"order":["Main.dc.html","S01-Home.dc.html","S02-Exchange.dc.html","S03-Instrument.dc.html","S04-OrderTicket.dc.html","S05-Orders.dc.html","S06-Leverage.dc.html","S07-Deposit.dc.html","S08-Statement.dc.html","S09-Assistant.dc.html","S10-Glossary.dc.html","S10b-Settings.dc.html","S11-Onboarding.dc.html","S12-RealWorld.dc.html","S13-Company.dc.html","S14-Calendar.dc.html","S15-Bond.dc.html","S16-Fund.dc.html","S17-TicketJournal.dc.html"],
+"notes":{
+"t1":{"x":0,"y":1820,"text":"Screens 1–4 · RU light · RU dark · EN light","kind":"title1","maxW":2740},
+"t2":{"x":0,"y":4000,"text":"Screens 5–10 · RU light","kind":"title1","maxW":3210},
+"t3":{"x":0,"y":5100,"text":"Screens 11–17 · RU light","kind":"title1","maxW":4150}
+}}

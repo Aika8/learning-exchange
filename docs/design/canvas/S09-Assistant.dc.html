@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Помощник</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}</style>
+</helmet>
+<div style="width:390px;height:844px;box-sizing:border-box;background:#F4F6F8;color:#14202B;font-family:'Golos Text',sans-serif;padding:20px 16px;display:flex;flex-direction:column;gap:12px">
+  <div style="font-size:22px;font-weight:600">Помощник</div>
+  <div style="align-self:flex-end;max-width:80%;background:#1D5C7A;color:#FFFFFF;border-radius:16px 16px 4px 16px;padding:10px 12px;font-size:15px">Как прошла неделя?</div>
+  <div style="max-width:90%;background:#FFFFFF;border-radius:16px 16px 16px 4px;padding:12px;display:flex;flex-direction:column;gap:6px">
+    <div style="font-size:15px;font-weight:600">Разбор недели</div>
+    <div class="num" style="display:flex;justify-content:space-between;font-size:14px"><span>Сделок</span><span>7</span></div>
+    <div class="num" style="display:flex;justify-content:space-between;font-size:14px"><span>Итог</span><span>↑ +1,4R</span></div>
+    <div class="num" style="display:flex;justify-content:space-between;font-size:14px"><span>Пошлины и спред</span><span>− 2 300 UKZT</span></div>
+    <div class="num" style="display:flex;justify-content:space-between;font-size:14px"><span>Просто держать индекс</span><span>↑ +0,8%</span></div>
+    <div style="font-size:13px;color:#526170">Две сделки без записи «Почему вхожу». В трёх стоп стоял ближе 1 ATR.</div>
+  </div>
+  <div style="font-size:12px;color:#526170;text-align:center">Это не инвестиционный совет.</div>
+  <div style="margin-top:auto;display:flex;gap:8px"><label style="flex:1"><span style="position:absolute;left:-9999px">Сообщение</span><input placeholder="Спросите о своих операциях" style="width:100%;box-sizing:border-box;height:48px;border:1px solid #D3DAE1;border-radius:12px;padding:0 12px;font:15px 'Golos Text'"></label><button aria-label="Отправить" style="width:48px;height:48px;border:0;border-radius:12px;background:#1D5C7A;color:#FFFFFF">↑</button></div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+class Component extends DCLogic { renderVals(){ return {}; } }
+</script>
+</body>
+</html>

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<title>Инструмент / Instrument</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600;700&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet">
+<style>body{margin:0}.num{font-family:Inter,sans-serif;font-variant-numeric:tabular-nums}</style>
+</helmet>
+<div style="width:1330px;height:844px;display:flex;gap:80px;font-family:'Golos Text',sans-serif">
+<sc-for list="{{v}}" as="p" hint-placeholder-count="3">
+<div style="width:390px;height:844px;box-sizing:border-box;background:{{p.bg}};color:{{p.tx}};display:flex;flex-direction:column;gap:8px;padding:16px">
+  <div style="font-size:13px;color:{{p.t2}}">{{p.s.kind}} · TKR</div>
+  <div style="display:flex;align-items:baseline;gap:12px"><span class="num" style="font-size:32px;font-weight:600">5 010,0</span><span class="num" style="font-size:15px;color:{{p.pos}}">↑ +42,5 (+0,86%)</span></div>
+  <svg viewBox="0 0 358 70" style="width:100%;height:70px;background:{{p.sf}};border-radius:12px" role="img" aria-label="{{p.s.chart}}"><polyline points="0,55 40,50 80,52 120,40 160,44 200,32 240,36 280,24 320,28 358,20" fill="none" stroke="{{p.pr}}" stroke-width="2"></polyline></svg>
+  <div style="display:flex;justify-content:space-between;font-size:12px;color:{{p.t2}}"><span>{{p.s.book}}</span><span>{{p.s.qty}}</span></div>
+  <div class="num" style="display:flex;flex-direction:column;gap:1px;font-size:12px">
+    <sc-for list="{{p.asks}}" as="r" hint-placeholder-count="10"><div style="position:relative;display:flex;justify-content:space-between;padding:1px 8px;height:17px"><div style="position:absolute;right:0;top:1px;bottom:1px;width:{{r.w}};background:{{p.askBg}};border-radius:3px"></div><span style="position:relative;color:{{p.ask}}">▲ {{r.p}}</span><span style="position:relative">{{r.q}}</span></div></sc-for>
+    <div style="text-align:center;padding:3px;border-top:1px dashed {{p.sp}};border-bottom:1px dashed {{p.sp}};color:{{p.sp}}">{{p.s.spread}} 2,0 · 0,04%</div>
+    <sc-for list="{{p.bids}}" as="r" hint-placeholder-count="10"><div style="position:relative;display:flex;justify-content:space-between;padding:1px 8px;height:17px"><div style="position:absolute;right:0;top:1px;bottom:1px;width:{{r.w}};background:{{p.bidBg}};border-radius:3px"></div><span style="position:relative;color:{{p.bid}}">▼ {{r.p}}</span><span style="position:relative">{{r.q}}</span></div></sc-for>
+  </div>
+  <div style="font-size:12px;color:{{p.t2}}">{{p.s.tape}}</div>
+  <div class="num" style="font-size:12px;background:{{p.sf}};border-radius:12px;padding:6px 10px;display:flex;flex-direction:column;gap:2px">
+    <div style="display:flex;justify-content:space-between"><span>14:02:11</span><span>5 010,0</span><span>120</span></div>
+    <div style="display:flex;justify-content:space-between"><span>14:02:07</span><span>5 011,0</span><span>40</span></div>
+  </div>
+  <div style="display:flex;gap:8px;margin-top:auto"><button style="flex:1;height:48px;border:0;border-radius:12px;background:{{p.pr}};color:{{p.op}};font:600 15px 'Golos Text'">{{p.s.buyB}}</button><button style="flex:1;height:48px;border:1px solid {{p.pr}};border-radius:12px;background:transparent;color:{{p.pr}};font:600 15px 'Golos Text'">{{p.s.sellB}}</button></div>
+</div>
+</sc-for>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":1330,"height":844}}'>
+class Component extends DCLogic {
+renderVals() {
+const L={bg:'#F4F6F8',sf:'#FFFFFF',tx:'#14202B',t2:'#526170',pr:'#1D5C7A',op:'#FFFFFF',bd:'#D3DAE1',sp:'#5B4BA6',pos:'#1D7348',bid:'#2458B3',ask:'#B8621B',bidBg:'#E1E9F7',askBg:'#F6E7DA'};
+const D={bg:'#0E151B',sf:'#16212A',tx:'#E8EEF3',t2:'#9AA9B6',pr:'#6FB3D6',op:'#06202E',bd:'#2C3B48',sp:'#B3A6F2',pos:'#5CC48E',bid:'#86AEF5',ask:'#E59A55',bidBg:'#1C2F4A',askBg:'#3A2A1C'};
+const qs=[420,1240,310,880,150,960,600,230,1500,700];
+const asks=qs.map((q,i)=>({p:(5021-i).toFixed(1).replace('.',','),q:String(q),w:Math.round(q/15)+'%'}));
+const bids=qs.slice().reverse().map((q,i)=>({p:(5010-i).toFixed(1).replace('.',','),q:String(q),w:Math.round(q/15)+'%'}));
+const RU={kind:'Акция',chart:'График цены',book:'Стакан · цена',qty:'Кол-во',spread:'Спред',tape:'Лента сделок',buyB:'Купить',sellB:'Продать'};
+const EN={kind:'Share',chart:'Price chart',book:'Order book · price',qty:'Qty',spread:'Spread',tape:'Trades tape',buyB:'Buy',sellB:'Sell'};
+return { v:[{...L,s:RU,asks,bids},{...D,s:RU,asks,bids},{...L,s:EN,asks,bids}] };
+}
+}
+</script>
+</body>
+</html>
