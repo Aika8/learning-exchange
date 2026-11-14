@@ -21,7 +21,7 @@ superseding ADR explaining why reality differed.
 | [0008](0008-conditional-orders-outside-book.md) | Stop orders and stop-out outside the book | Observer, State machine | Proposed |
 | [0009](0009-monorepo-layout.md) | Monorepo with one folder per deployable | Monorepo, walking skeleton | Accepted |
 | [0010](0010-mobile-stack-expo.md) | Mobile: React Native + Expo + TypeScript | — | Accepted (M1) |
-| [0011](0011-game-engine-godot.md) | Game: Godot 4 | — | Proposed |
+| [0011](0011-game-engine-godot.md) | Game: Godot 4 | — | Accepted |
 | [0012](0012-dual-naming-catalogue.md) | Real names everywhere, lore names as flavour | Anti-corruption via BFF mapping | Proposed |
 | [0013](0013-assistant-llm-with-fallback.md) | Assistant: LLM behind a port, rules fallback | Port, Fallback / Graceful degradation | Proposed |
 | [0014](0014-i18n-runtime-switch.md) | Russian + English, switchable at runtime | Message catalogues, Observer | Accepted (M1) |

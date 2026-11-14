@@ -87,3 +87,13 @@ Clients
 - Mobile shows the instrument as the API names it (`SILK/SPARK`); the real/lore catalogue (ADR-0012) maps names in M2. No game words otherwise.
 - i18n tests: web — vitest (same keys, no empty values); mobile — `node --test` (same keys, no empty values, every `t('…')` key used in screens exists).
 - Charts (ADR-0010) are not in M1; the instrument screen shows the last price and the book.
+
+Game (Godot)
+- Godot 4.7.2 stable, typed GDScript, GL Compatibility renderer; GUT 9.7.1 vendored in `game/addons/gut` (MIT) so tests run with no editor step.
+- Scenes are a root node + script; the UI tree is built in code. Less `.tscn` noise to review, and widgets share `UI` helpers and one palette.
+- i18n: one CSV (`game/i18n/strings.csv`: `keys,ru,en`) loaded at start into `TranslationServer` by the `Locale` autoload instead of Godot's CSV importer
+  (`importer="keep"`): no generated `.translation` files, the same file is read by the test. Controls whose text is a key re-translate themselves; formatted texts listen to `Locale.locale_changed`.
+- Godot's JSON parser returns floats; `BookModel` and the Ladder convert to `int` at the boundary (exact below 2^53, same limit as the TypeScript clients). Formatting and parsing of money never use floats (`Money`).
+- M1 talks to the core API directly; `bff-game` (ADR-0004) and the catalogue of real/lore names (ADR-0012) are not there yet, so lore captions come from the game's own catalogue.
+- The game logs in by captain's name with the same dev-login as the other clients; the same name = the same account in web and mobile.
+- `-- --demo=<dir>` makes the game walk menu → harbour → Ladder, place a limit and a market order and save screenshots; it is the manual E2E for M1 (GUT covers logic, not the live socket).

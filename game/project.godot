@@ -1,0 +1,40 @@
+; Engine configuration file. Godot 4.7, typed GDScript (ADR-0011).
+
+config_version=5
+
+[application]
+
+config/name="Летопись Ветров"
+config/description="Chronicle of Winds — game client of learning-exchange"
+run/main_scene="res://scenes/main_menu.tscn"
+config/features=PackedStringArray("4.7", "GL Compatibility")
+
+[autoload]
+
+Locale="*res://scripts/locale.gd"
+ExchangeApi="*res://scripts/exchange_api.gd"
+MarketStream="*res://scripts/market_stream.gd"
+
+[debug]
+
+gdscript/warnings/untyped_declaration=1
+gdscript/warnings/inferred_declaration=0
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=760
+window/stretch/mode="canvas_items"
+
+[editor_plugins]
+
+enabled=PackedStringArray()
+
+[internationalization]
+
+locale/fallback="ru"
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
