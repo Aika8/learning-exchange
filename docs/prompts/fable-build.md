@@ -77,7 +77,7 @@ Monorepo layout per ADR-0009. `make dev`, `make test`. README "how to run each p
 - **Trading journal**: every order can carry "why", market conditions and mood; the session review uses them.
 - **Dividends**: record/ex-dates, price adjusted at the ex-date open, statement shows dividend and tax.
 - Mobile: FX exchange screen (buy/sell rates and spread shown explicitly), brokerage with stop orders and position sizing helper
-  (`qty = capital × risk% / (entry − stop)`), deposits with a rule-of-72 hint, statement, glossary toggle «Словарь мира».
+  (`qty = capital × risk% / (entry − stop)`), deposits with a rule-of-72 hint, statement, glossary of finance terms (no lore names: the app knows nothing about the game).
 - Mobile: company card (key metrics, last report vs consensus, earnings calendar, warning "report tonight — gap risk for your stop",
   insider trades list, dividend ex-date on the chart).
 - Mobile: economic calendar screen, bond screen (YTM, rating, duration), fund card with TER, journal fields in the order ticket.
