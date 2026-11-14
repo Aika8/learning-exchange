@@ -1,6 +1,6 @@
 # 0009. Monorepo with one folder per deployable, walking skeleton first
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Monorepo, Walking Skeleton (Alistair Cockburn), Vertical slices
 

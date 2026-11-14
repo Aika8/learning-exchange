@@ -1,0 +1,15 @@
+plugins {
+    id 'application'
+}
+
+dependencies {
+    implementation project(':backend:engine')
+}
+
+application {
+    mainClass = 'repl.Repl'
+}
+
+run {
+    standardInput = System.in
+}
