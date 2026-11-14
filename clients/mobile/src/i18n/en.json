@@ -1,0 +1,36 @@
+{
+  "app": { "practice": "practice money", "notAdvice": "This is not investment advice." },
+  "login": {
+    "title": "Log in", "subtitle": "A learning bank and broker. All money is practice money.", "name": "Your name", "submit": "Log in",
+    "hint": "Developer mode: no password. A new name opens a new account."
+  },
+  "tabs": { "home": "Home", "invest": "Invest", "more": "More" },
+  "home": {
+    "hello": "Good afternoon, {{name}}", "total": "Cash balance", "accounts": "Accounts", "current": "Current account",
+    "broker": "Brokerage · securities", "inOrders": "in orders {{amount}}", "trade": "Buy or sell", "pcs": "{{count}} pcs"
+  },
+  "instrument": {
+    "kind": "Practice instrument", "book": "Order book · price", "qty": "Qty", "spread": "Spread", "tape": "Trades tape",
+    "noTrades": "No trades yet", "buy": "Buy", "sell": "Sell", "last": "Last trade", "myOrders": "My open orders",
+    "noOrders": "No open orders", "cancel": "Cancel"
+  },
+  "ticket": {
+    "titleBuy": "Buy {{base}}", "titleSell": "Sell {{base}}", "limit": "Limit", "market": "Market",
+    "price": "Price, {{quote}}", "qty": "Quantity, {{base}}", "fee": "Fee", "total": "Total", "cta": "Place order",
+    "marketHint": "Fills now at the best book prices; any unfilled rest is cancelled.",
+    "placed": "Order #{{id}}: {{status}}", "close": "Close",
+    "errPrice": "Enter a price above zero with at most two decimals", "errQty": "Enter a whole quantity above zero"
+  },
+  "status": { "NEW": "New", "PARTIALLY_FILLED": "Partially filled", "FILLED": "Filled", "CANCELLED": "Cancelled", "EXPIRED": "Remainder cancelled" },
+  "settings": {
+    "title": "Settings", "language": "Язык / Language", "ru": "Русский", "en": "English", "account": "Account",
+    "logout": "Log out", "footer": "Vetrilo is a learning app. All money is practice money."
+  },
+  "errors": {
+    "UNAUTHORIZED": "Please log in again", "BAD_REQUEST": "Bad request", "INVALID_NAME": "Name: letters, digits, space, _ or -, up to 32",
+    "INVALID_ORDER": "Invalid order parameters", "INVALID_AMOUNT": "Invalid amount", "INSUFFICIENT_FUNDS": "Insufficient funds",
+    "NO_LIQUIDITY": "No opposite orders", "UNKNOWN_INSTRUMENT": "Unknown instrument", "UNKNOWN_ORDER": "Order not found",
+    "UNKNOWN_ACCOUNT": "Account not found", "NOT_OWNER": "Not your order", "NOT_OPEN": "Order is no longer open", "ACCOUNT_EXISTS": "Account exists",
+    "NETWORK": "Server unreachable"
+  }
+}
