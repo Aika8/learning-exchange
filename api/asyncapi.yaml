@@ -1,0 +1,81 @@
+asyncapi: 3.0.0
+info:
+  title: learning-exchange market data stream
+  version: 0.1.0
+  description: |
+    One WebSocket at `ws://localhost:8080/ws` (ADR-0003). Optional `?token=<dev token>` is needed only for
+    `account.*` channels. The client sends `WsClientMessage` (`{"op":"subscribe","channel":"..."}`); the server
+    answers with a snapshot right away and then pushes updates. Every server message is `{"channel", "data"}` or
+    `{"channel", "error"}`. Payload schemas live in `openapi.yaml` so that one generated client covers both.
+
+    Market data tick: book snapshots are sent at most every 100 ms, only when the book changed; trades are sent in the
+    same tick (intent 02, invariant 2: a trade reaches every client within one tick).
+defaultContentType: application/json
+servers:
+  local:
+    host: localhost:8080
+    pathname: /ws
+    protocol: ws
+channels:
+  book:
+    address: market.{instrumentId}.book
+    parameters:
+      instrumentId: { description: e.g. SILK-SPARK }
+    messages:
+      book: { $ref: '#/components/messages/Book' }
+  trades:
+    address: market.{instrumentId}.trades
+    parameters:
+      instrumentId: { description: e.g. SILK-SPARK }
+    messages:
+      trades: { $ref: '#/components/messages/Trades' }
+  clock:
+    address: clock
+    messages:
+      clock: { $ref: '#/components/messages/Clock' }
+  account:
+    address: account.{accountId}
+    parameters:
+      accountId: { description: Your own account id; needs ?token= }
+    messages:
+      account: { $ref: '#/components/messages/Account' }
+  control:
+    address: /ws
+    messages:
+      subscribe: { $ref: '#/components/messages/Subscribe' }
+      error: { $ref: '#/components/messages/Error' }
+operations:
+  receiveBook:
+    action: receive
+    channel: { $ref: '#/channels/book' }
+  receiveTrades:
+    action: receive
+    channel: { $ref: '#/channels/trades' }
+  receiveClock:
+    action: receive
+    channel: { $ref: '#/channels/clock' }
+  receiveAccount:
+    action: receive
+    channel: { $ref: '#/channels/account' }
+  sendSubscribe:
+    action: send
+    channel: { $ref: '#/channels/control' }
+    messages: [{ $ref: '#/channels/control/messages/subscribe' }]
+  receiveError:
+    action: receive
+    channel: { $ref: '#/channels/control' }
+    messages: [{ $ref: '#/channels/control/messages/error' }]
+components:
+  messages:
+    Book:
+      payload: { $ref: './openapi.yaml#/components/schemas/WsBookMessage' }
+    Trades:
+      payload: { $ref: './openapi.yaml#/components/schemas/WsTradesMessage' }
+    Clock:
+      payload: { $ref: './openapi.yaml#/components/schemas/WsClockMessage' }
+    Account:
+      payload: { $ref: './openapi.yaml#/components/schemas/WsAccountMessage' }
+    Subscribe:
+      payload: { $ref: './openapi.yaml#/components/schemas/WsClientMessage' }
+    Error:
+      payload: { $ref: './openapi.yaml#/components/schemas/WsErrorMessage' }

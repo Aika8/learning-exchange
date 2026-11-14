@@ -1,0 +1,408 @@
+openapi: 3.1.0
+info:
+  title: learning-exchange core API
+  version: 0.1.0
+  description: |
+    Commands and queries of the exchange (ADR-0003). Streams are in `asyncapi.yaml`.
+
+    Money, prices and quantities are integers in minor units (int64). An instrument says how many decimals its
+    quote asset shows (`priceScale`): SILK-SPARK price `10050` with `priceScale: 2` is shown as `100.50 SPARK`.
+    A price is quote minor units for one base unit; quantities are whole base units.
+
+    Auth: dev only. `POST /auth/dev-login` with any name returns a bearer token; no passwords (learning app).
+    All money is practice money.
+servers:
+  - url: http://localhost:8080/api/v1
+security:
+  - bearer: []
+paths:
+  /auth/dev-login:
+    post:
+      operationId: devLogin
+      summary: Log in by name; a new name opens an account with the starting balance
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Logged in
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '400': { $ref: '#/components/responses/Problem' }
+  /me:
+    get:
+      operationId: getMe
+      summary: My account and balances
+      responses:
+        '200':
+          description: Account
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountDetails' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /me/deposits:
+    post:
+      operationId: devDeposit
+      summary: Dev top-up of practice money (journalled as a deposit)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DepositRequest' }
+      responses:
+        '200':
+          description: Balances after the deposit
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AccountDetails' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /instruments:
+    get:
+      operationId: listInstruments
+      summary: Tradable instruments and their scales
+      security: []
+      responses:
+        '200':
+          description: Tradable instruments
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Instrument' }
+  /instruments/{instrumentId}/book:
+    get:
+      operationId: getBook
+      summary: Order book snapshot, aggregated by price level, best first
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+        - name: depth
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 50, default: 10 }
+      responses:
+        '200':
+          description: Snapshot
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/BookSnapshot' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /instruments/{instrumentId}/trades:
+    get:
+      operationId: getTrades
+      summary: Recent trades, newest first
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '200':
+          description: Trades
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Trade' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /orders:
+    get:
+      operationId: listMyOrders
+      summary: My orders, newest first
+      parameters:
+        - name: open
+          in: query
+          description: Only NEW and PARTIALLY_FILLED orders
+          schema: { type: boolean, default: false }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 200, default: 50 }
+      responses:
+        '200':
+          description: Orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/Order' }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: placeOrder
+      summary: Place a limit or market order
+      description: |
+        Funds are reserved before the order reaches the book: a buy reserves `price × qty + fee` (market buy: the cost
+        of walking the book now + fee), a sell reserves `qty`. A repeated `Idempotency-Key` returns the first order.
+      parameters:
+        - name: Idempotency-Key
+          in: header
+          schema: { type: string, maxLength: 64 }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlaceOrderRequest' }
+      responses:
+        '201':
+          description: Accepted (it may already be filled)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  /orders/{orderId}:
+    delete:
+      operationId: cancelOrder
+      summary: Cancel my open order; releases the rest of its reservation
+      parameters:
+        - name: orderId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Order' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /clock:
+    get:
+      operationId: getClock
+      summary: Simulation clock state
+      security: []
+      responses:
+        '200':
+          description: Simulation clock
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Clock' }
+    put:
+      operationId: setClock
+      summary: Pause, resume or change speed (dev; any logged-in user)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ClockUpdate' }
+      responses:
+        '200':
+          description: New clock state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Clock' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+components:
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      description: Token from dev-login.
+  parameters:
+    InstrumentId:
+      name: instrumentId
+      in: path
+      required: true
+      schema: { type: string, examples: [SILK-SPARK] }
+  responses:
+    Problem:
+      description: Error
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Problem' }
+  schemas:
+    LoginRequest:
+      type: object
+      required: [name]
+      properties:
+        name: { type: string, minLength: 1, maxLength: 32, description: 'Letters, digits, space, _ or -' }
+    LoginResponse:
+      type: object
+      required: [token, account]
+      properties:
+        token: { type: string }
+        account: { $ref: '#/components/schemas/Account' }
+    Account:
+      type: object
+      required: [accountId, name]
+      properties:
+        accountId: { type: string, examples: [acc-aika] }
+        name: { type: string }
+    Balance:
+      type: object
+      required: [asset, available, reserved]
+      properties:
+        asset: { type: string, examples: [SPARK] }
+        available: { type: integer, format: int64, description: Minor units that can be spent }
+        reserved: { type: integer, format: int64, description: Minor units held by open orders }
+    AccountDetails:
+      type: object
+      required: [accountId, name, balances]
+      properties:
+        accountId: { type: string }
+        name: { type: string }
+        balances:
+          type: array
+          items: { $ref: '#/components/schemas/Balance' }
+    DepositRequest:
+      type: object
+      required: [asset, amount]
+      properties:
+        asset: { type: string }
+        amount: { type: integer, format: int64, minimum: 1, maximum: 100000000000 }
+    Instrument:
+      type: object
+      required: [id, base, quote, feeBps, priceScale, qtyScale]
+      properties:
+        id: { type: string, examples: [SILK-SPARK] }
+        base: { type: string, examples: [SILK] }
+        quote: { type: string, examples: [SPARK] }
+        feeBps: { type: integer, description: 'Fee on each side of a trade, basis points of notional (10 = 0.1%)' }
+        priceScale: { type: integer, description: Decimals of the quote asset on screen }
+        qtyScale: { type: integer, description: Decimals of the base asset on screen }
+    Side:
+      type: string
+      enum: [BUY, SELL]
+    OrderType:
+      type: string
+      enum: [LIMIT, MARKET]
+    OrderStatus:
+      type: string
+      enum: [NEW, PARTIALLY_FILLED, FILLED, CANCELLED, EXPIRED]
+      description: EXPIRED is the unfilled remainder of a market order, which never rests.
+    PlaceOrderRequest:
+      type: object
+      required: [instrument, side, type, qty]
+      properties:
+        instrument: { type: string }
+        side: { $ref: '#/components/schemas/Side' }
+        type: { $ref: '#/components/schemas/OrderType' }
+        price: { type: integer, format: int64, minimum: 1, description: Required for LIMIT; ignored for MARKET }
+        qty: { type: integer, format: int64, minimum: 1 }
+    Order:
+      type: object
+      required: [orderId, instrument, side, type, price, qty, filledQty, remainingQty, status, createdAt]
+      properties:
+        orderId: { type: integer, format: int64 }
+        instrument: { type: string }
+        side: { $ref: '#/components/schemas/Side' }
+        type: { $ref: '#/components/schemas/OrderType' }
+        price: { type: integer, format: int64, description: 0 for MARKET }
+        qty: { type: integer, format: int64 }
+        filledQty: { type: integer, format: int64 }
+        remainingQty: { type: integer, format: int64 }
+        status: { $ref: '#/components/schemas/OrderStatus' }
+        createdAt: { type: integer, format: int64, description: 'Simulation time (ms since epoch)' }
+    BookLevel:
+      type: object
+      required: [price, qty, orders]
+      properties:
+        price: { type: integer, format: int64 }
+        qty: { type: integer, format: int64 }
+        orders: { type: integer }
+    BookSnapshot:
+      type: object
+      required: [instrument, bids, asks, lastPrice, ts]
+      properties:
+        instrument: { type: string }
+        bids:
+          type: array
+          description: Highest price first
+          items: { $ref: '#/components/schemas/BookLevel' }
+        asks:
+          type: array
+          description: Lowest price first
+          items: { $ref: '#/components/schemas/BookLevel' }
+        lastPrice: { type: [integer, 'null'], format: int64, description: 'Last trade price; null before the first trade' }
+        ts: { type: integer, format: int64, description: Simulation time of the snapshot }
+    Trade:
+      type: object
+      required: [tradeId, instrument, price, qty, aggressorSide, ts]
+      properties:
+        tradeId: { type: integer, format: int64 }
+        instrument: { type: string }
+        price: { type: integer, format: int64 }
+        qty: { type: integer, format: int64 }
+        aggressorSide: { $ref: '#/components/schemas/Side' }
+        ts: { type: integer, format: int64 }
+    Clock:
+      type: object
+      required: [now, paused, speed]
+      properties:
+        now: { type: integer, format: int64, description: 'Simulation time (ms since epoch)' }
+        paused: { type: boolean }
+        speed: { type: integer, minimum: 1, maximum: 60 }
+    ClockUpdate:
+      type: object
+      required: [paused, speed]
+      properties:
+        paused: { type: boolean }
+        speed: { type: integer, minimum: 1, maximum: 60 }
+    Problem:
+      type: object
+      required: [code, message]
+      properties:
+        code:
+          type: string
+          description: Machine code for clients to translate (never shown raw)
+          enum: [UNAUTHORIZED, BAD_REQUEST, INVALID_NAME, INVALID_ORDER, INVALID_AMOUNT, INSUFFICIENT_FUNDS,
+                 NO_LIQUIDITY, UNKNOWN_INSTRUMENT, UNKNOWN_ORDER, UNKNOWN_ACCOUNT, NOT_OWNER, NOT_OPEN, ACCOUNT_EXISTS]
+        message: { type: string, description: English text for developers }
+    # ---- WebSocket messages (channels in asyncapi.yaml) ----
+    WsClientMessage:
+      type: object
+      required: [op, channel]
+      properties:
+        op: { type: string, enum: [subscribe, unsubscribe] }
+        channel: { type: string, examples: [market.SILK-SPARK.book, market.SILK-SPARK.trades, clock, account.acc-aika] }
+    WsBookMessage:
+      type: object
+      required: [channel, data]
+      properties:
+        channel: { type: string, pattern: '^market\.[A-Z-]+\.book$' }
+        data: { $ref: '#/components/schemas/BookSnapshot' }
+    WsTradesMessage:
+      type: object
+      required: [channel, data]
+      properties:
+        channel: { type: string, pattern: '^market\.[A-Z-]+\.trades$' }
+        data:
+          type: array
+          description: New trades since the previous message, oldest first
+          items: { $ref: '#/components/schemas/Trade' }
+    WsClockMessage:
+      type: object
+      required: [channel, data]
+      properties:
+        channel: { const: clock }
+        data: { $ref: '#/components/schemas/Clock' }
+    AccountChanged:
+      type: object
+      required: [reasons]
+      properties:
+        reasons:
+          type: array
+          items: { type: string, enum: [ORDER, TRADE, DEPOSIT] }
+    WsAccountMessage:
+      type: object
+      required: [channel, data]
+      description: Something changed in the account; refetch `/me` and `/orders`.
+      properties:
+        channel: { type: string, pattern: '^account\..+$' }
+        data: { $ref: '#/components/schemas/AccountChanged' }
+    WsErrorMessage:
+      type: object
+      required: [channel, error]
+      properties:
+        channel: { type: string }
+        error: { $ref: '#/components/schemas/Problem' }
