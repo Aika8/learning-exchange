@@ -3,6 +3,7 @@ package engine;
 /** Why a command was refused. A refused command changes nothing and is not journalled. */
 public enum Rejection {
     UNKNOWN_ACCOUNT,
+    INVALID_NAME,
     ACCOUNT_EXISTS,
     UNKNOWN_INSTRUMENT,
     INVALID_ORDER,
