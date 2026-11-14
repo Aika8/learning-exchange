@@ -1,1 +1,4 @@
 // Framework-free, deterministic matching engine: no dependencies besides the JDK.
+dependencies {
+    testImplementation 'net.jqwik:jqwik:1.10.2'
+}
