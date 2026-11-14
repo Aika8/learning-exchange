@@ -19,7 +19,7 @@ superseding ADR explaining why reality differed.
 | [0006](0006-single-writer-and-sim-clock.md) | Single writer per instrument, simulation clock | Single Writer, Actor-like, Clock abstraction | Proposed |
 | [0007](0007-bots-are-api-clients.md) | Bots are ordinary clients with strategies | Strategy, Observer | Proposed |
 | [0008](0008-conditional-orders-outside-book.md) | Stop orders and stop-out outside the book | Observer, State machine | Proposed |
-| [0009](0009-monorepo-layout.md) | Monorepo with one folder per deployable | Monorepo, walking skeleton | Proposed |
+| [0009](0009-monorepo-layout.md) | Monorepo with one folder per deployable | Monorepo, walking skeleton | Accepted |
 | [0010](0010-mobile-stack-expo.md) | Mobile: React Native + Expo + TypeScript | — | Proposed |
 | [0011](0011-game-engine-godot.md) | Game: Godot 4 | — | Proposed |
 | [0012](0012-dual-naming-catalogue.md) | Real names everywhere, lore names as flavour | Anti-corruption via BFF mapping | Proposed |
