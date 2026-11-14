@@ -1,0 +1,7 @@
+// Trading bots: ordinary clients of the TradingService port (ADR-0007). Plain Java.
+apply plugin: 'java-library'
+
+dependencies {
+    api project(':backend:application')
+    implementation 'org.yaml:snakeyaml:2.7'
+}
