@@ -1,6 +1,6 @@
 # 0005. Event-sourced journal as the source of truth
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Event Sourcing, CQRS (light), Snapshot, Append-only log
 

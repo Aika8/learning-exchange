@@ -1,6 +1,6 @@
 # 0006. Single writer per instrument and a simulation clock
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Single Writer Principle (LMAX), Actor-like command queue, Clock abstraction (testable time)
 

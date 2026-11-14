@@ -1,6 +1,6 @@
 # 0007. Bots are ordinary clients with pluggable strategies
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Strategy, Observer (market data subscription), Template Method (bot lifecycle), Factory (from config)
 

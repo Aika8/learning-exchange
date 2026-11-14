@@ -1,6 +1,6 @@
 # 0002. Hexagonal core with a framework-free engine
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Hexagonal architecture / Ports & Adapters (Alistair Cockburn), Dependency Inversion
 
