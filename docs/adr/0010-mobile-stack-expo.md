@@ -1,6 +1,6 @@
 # 0010. Mobile app: React Native with Expo and TypeScript
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): — (technology choice); inside the app: container/presentational components, server-state cache
 

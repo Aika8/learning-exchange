@@ -36,3 +36,54 @@ Choices the brief left open. Each one is the simplest behaviour; revisit any of 
 - The REPL is its own module `backend/repl` depending on `engine`, so `engine` stays dependency-free. It is a dev tool, not one of the ADR-0009 deployables; it can be dropped once `make dev` starts the real backend.
 - `make dev` runs the REPL until the backend exists (M1).
 - Invariant №3 (never crossed) and №2 (limit respected) are tested by examples plus a seeded random flow (5 000 operations, seed 42) that checks both after every step.
+
+# Decisions — M1 (walking skeleton)
+
+Engine and money
+- `Exchange` wraps the untouched `OrderBook` and owns accounts (`Ledger`), order states and fees; owners live in `Exchange`, not in the book.
+- One instrument `SILK-SPARK` (base SILK in whole units, quote SPARK in minor units, 2 decimals on screen). A price is SPARK minor units per 1 SILK.
+- Fee: 10 bps of the notional on **each** side, in the quote asset, rounded **down** (so fees on parts never exceed the fee reserved for the whole). Both fees go to the account `exchange-fees`; money is moved, never destroyed — invariant 1 counts that account.
+- Reservation: limit buy reserves `price × qty + fee`; market buy reserves the cost of walking the asks now + fee (exact, because the single writer sees the same book); any sell reserves `qty`. What a finished or cancelled order did not use is released.
+- Market order into an empty opposite side is rejected (`NO_LIQUIDITY`) instead of accepted-and-expired; a market remainder after partial fill expires (`OrderExpired`).
+- Self-trade is allowed (a bot may hit its own quote); fees are still charged. Prevention can come with M2 if it confuses statements.
+- Exchange order ids are global (one counter), separate from the book's per-book ids; `Exchange` maps them.
+- Rejections are not journalled (they change nothing) and come back as `Rejection` codes; REST maps them to 400/401/403/404/409/422 and a `Problem.code` that clients translate.
+- Idempotency key is per account; it is stored in `OrderAccepted`, so it survives a restart.
+
+Journal and replay (ADR-0005)
+- The journal stores events, not commands. Replay re-executes the *decision* events (`AccountOpened`, `FundsDeposited`, `OrderAccepted`, `OrderCancelled`) and checks that the engine produces exactly the journalled *consequences* (`TradeExecuted`, `OrderExpired`); any difference stops the start loudly.
+- `ClockChanged` is journalled; on start the simulation clock continues from the last journalled time with the last pause/speed.
+- No snapshots yet: 32 000 events replay in well under a second. Snapshots when start-up gets slow.
+- Journal I/O happens on the sequencer thread right after the command (buffered write + flush per command), not batched; simpler, fast enough for a learning load. Batching is the first optimisation if the sequencer becomes the bottleneck.
+- File format: JSON lines with a `type` field (`{"type":"TradeExecuted",...}`), Jackson mix-in in the adapter so engine records carry no annotations. No version field yet; the first incompatible change adds `v` and an upcaster.
+- `make reset` deletes `data/journal.jsonl`. With bots the journal grows ~30 MB per hour of running (the market maker re-quotes every step).
+
+Concurrency (ADR-0006)
+- One `Sequencer` (single platform thread) owns the whole `Exchange` (ledger + books) in M1. With one instrument that is "one writer per instrument"; per-instrument sequencers come with the second instrument, when cross-instrument reservation needs its own design.
+- Race demonstration: `engine.OrderBookRaceTest` (8 threads on a bare `OrderBook` → corrupted state, asserted). Fix: `application.SequencerTest` runs the same workload through the sequencer and is always consistent.
+- Pause freezes simulation time and stops the bots; people can still place and cancel orders while paused (orders get the frozen timestamp). Speed 1..60: the bot runner makes `speed` steps per real tick.
+
+API and auth
+- Base path `/api/v1`; instrument ids in paths are `SILK-SPARK` (no slash).
+- Dev login: name → account id `acc-<lower-case name, spaces as dashes>`; token `dev-<accountId>`. Same name, any case → same account. Tokens survive restarts. Never for real money.
+- A new account gets 100 000.00 SPARK and 1 000 SILK (`exchange.starting-balance.*`), journalled as deposits. `POST /me/deposits` is a dev top-up.
+- `PUT /clock` needs any logged-in user (dev).
+- One WebSocket `/ws`, JSON `{op, channel}`; snapshot on subscribe, then updates once per 100 ms tick; the account channel only nudges ("refetch"), it does not carry balances. Account channels need `?token=`.
+- Money in JSON is `int64` numbers. TypeScript reads them as `number`, exact up to 2^53 — far above any practice balance; switch to strings if that ever changes.
+
+Bots (ADR-0007)
+- Bots run in-process and call the `TradingService` port only (ArchUnit forbids `bots` → `Exchange`/`OrderBook`/`ExchangeService`).
+- A bot logs in like a person (gets the human starting balance) and, the first time only, deposits its `capital` from `bots.yaml`. "First time" = it has no orders yet.
+- Fair value is a seeded random walk shared by the market maker; strategies get their own seeded `Random`. Same seed and same clock → same journal (`BotsTest`).
+- Market maker cancels and re-quotes every step (simple, but it is most of the journal); inventory skew keeps it near `targetBase`.
+- Only `market-maker` and `noise` exist in M1; the other strategies of ADR-0007 are M2.
+
+Clients
+- TypeScript 5.9 in the web client (openapi-typescript 7.13 requires `typescript ^5`); the mobile app keeps Expo's TypeScript 6. Mobile runs the generator with `npx openapi-typescript@7.13.0` to avoid the peer conflict.
+- `openapi-typescript` (types only) + `openapi-fetch` (tiny runtime) instead of `orval`: no generated runtime code to read, typed paths and bodies.
+- `money.ts` is copied into mobile; a test keeps both files identical until a shared package exists.
+- Mobile tokens are a copy of `docs/design/tokens.json` (Metro does not read outside the app folder by default); a test keeps them equal.
+- Expo Router ships stacks only, so the design's tab bar is a small own component on the main screens.
+- Mobile shows the instrument as the API names it (`SILK/SPARK`); the real/lore catalogue (ADR-0012) maps names in M2. No game words otherwise.
+- i18n tests: web — vitest (same keys, no empty values); mobile — `node --test` (same keys, no empty values, every `t('…')` key used in screens exists).
+- Charts (ADR-0010) are not in M1; the instrument screen shows the last price and the book.

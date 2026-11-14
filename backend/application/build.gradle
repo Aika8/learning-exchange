@@ -1,0 +1,6 @@
+// Use cases and ports around the engine (ADR-0002). Plain Java: no Spring here either.
+apply plugin: 'java-library'
+
+dependencies {
+    api project(':backend:engine')
+}

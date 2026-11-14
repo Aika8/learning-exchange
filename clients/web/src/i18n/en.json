@@ -1,0 +1,110 @@
+{
+  "app": {
+    "title": "Exchange · debug",
+    "practice": "practice money",
+    "logout": "Log out"
+  },
+  "login": {
+    "title": "Developer login",
+    "name": "Name",
+    "submit": "Log in",
+    "hint": "No password: a new name opens a new account with practice money."
+  },
+  "balances": {
+    "title": "Balances",
+    "asset": "Asset",
+    "available": "Available",
+    "reserved": "In orders"
+  },
+  "book": {
+    "title": "Order book",
+    "price": "Price",
+    "qty": "Qty",
+    "orders": "Orders",
+    "spread": "Spread",
+    "last": "Last trade",
+    "empty": "No orders"
+  },
+  "tape": {
+    "title": "Trades tape",
+    "time": "Time",
+    "price": "Price",
+    "qty": "Qty",
+    "empty": "No trades yet"
+  },
+  "form": {
+    "title": "New order",
+    "buy": "Buy",
+    "sell": "Sell",
+    "limit": "Limit",
+    "market": "Market",
+    "price": "Price, {{quote}}",
+    "qty": "Quantity, {{base}}",
+    "submit": "Place order",
+    "estimate": "Total ≈ {{amount}} {{quote}}, fee ≈ {{fee}} {{quote}}",
+    "marketHint": "Fills at the best book prices; the rest is cancelled.",
+    "placed": "Order #{{id}}: {{status}}",
+    "invalid": "Check price and quantity",
+    "bestBid": "best bid",
+    "bestAsk": "best ask"
+  },
+  "orders": {
+    "title": "My orders",
+    "id": "#",
+    "side": "Side",
+    "type": "Type",
+    "price": "Price",
+    "filled": "Filled",
+    "status": "Status",
+    "cancel": "Cancel",
+    "empty": "No orders",
+    "openOnly": "Open only"
+  },
+  "side": {
+    "BUY": "Buy",
+    "SELL": "Sell"
+  },
+  "type": {
+    "LIMIT": "Limit",
+    "MARKET": "Market"
+  },
+  "status": {
+    "NEW": "New",
+    "PARTIALLY_FILLED": "Partially filled",
+    "FILLED": "Filled",
+    "CANCELLED": "Cancelled",
+    "EXPIRED": "Remainder cancelled"
+  },
+  "clock": {
+    "title": "Simulation time",
+    "pause": "Pause",
+    "resume": "Resume",
+    "speed": "Speed",
+    "paused": "paused"
+  },
+  "lang": {
+    "label": "Language",
+    "ru": "Русский",
+    "en": "English"
+  },
+  "ws": {
+    "live": "live",
+    "offline": "offline"
+  },
+  "errors": {
+    "UNAUTHORIZED": "Please log in again",
+    "BAD_REQUEST": "Bad request",
+    "INVALID_NAME": "Name: letters, digits, space, _ or -, up to 32",
+    "INVALID_ORDER": "Invalid order parameters",
+    "INVALID_AMOUNT": "Invalid amount",
+    "INSUFFICIENT_FUNDS": "Insufficient funds",
+    "NO_LIQUIDITY": "No opposite orders",
+    "UNKNOWN_INSTRUMENT": "Unknown instrument",
+    "UNKNOWN_ORDER": "Order not found",
+    "UNKNOWN_ACCOUNT": "Account not found",
+    "NOT_OWNER": "Not your order",
+    "NOT_OPEN": "Order is no longer open",
+    "ACCOUNT_EXISTS": "Account exists",
+    "NETWORK": "Server unreachable — is make dev running?"
+  }
+}

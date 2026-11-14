@@ -1,0 +1,30 @@
+# Bots that keep the market alive (ADR-0007). Read by the backend at start (`make dev`).
+# Every bot is an ordinary account: it logs in, gets its capital as a journalled deposit the first time,
+# and trades through the same port as a person, paying the same fees.
+# Prices are SPARK minor units (2 decimals): 10000 = 100.00 SPARK. Quantities are whole SILK.
+seed: 42              # same seed + same clock → same market
+instrument: SILK-SPARK
+tickMillis: 500       # real time between bot steps at speed 1 (speed N → N steps per tick)
+fairValue:
+  start: 10000        # 100.00 SPARK
+  volatilityBps: 4    # random-walk step, basis points of the price
+  floor: 100
+bots:
+  - name: bot-market-maker
+    strategy: market-maker
+    capital: { SPARK: 100000000, SILK: 10000 }   # 1 000 000.00 SPARK, 10 000 SILK
+    params:
+      halfSpread: 10    # 0.10 SPARK from fair value to the best quote
+      step: 5           # 0.05 between its levels
+      levels: 6
+      qty: 12
+      targetBase: 10000
+      skewPerUnit: 0.02 # price shift (minor units) per SILK away from target
+  - name: bot-noise
+    strategy: noise
+    count: 4
+    capital: { SPARK: 5000000, SILK: 500 }       # 50 000.00 SPARK, 500 SILK
+    params:
+      activity: 0.6     # chance to trade in a step
+      maxQty: 6
+      marketShare: 0.5  # half market orders, half limit orders near the last price

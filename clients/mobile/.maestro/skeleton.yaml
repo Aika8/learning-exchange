@@ -1,0 +1,35 @@
+# M1 walking skeleton on a simulator (Maestro). Needs `make dev` and the app running in a dev build / Expo Go.
+# Run: maestro test .maestro/skeleton.yaml
+appId: dev.learningexchange.vetrilo
+---
+- launchApp:
+    clearState: true
+- tapOn:
+    id: "lang-en"
+- tapOn:
+    id: "login-name"
+- inputText: "Maestro"
+- tapOn:
+    id: "login-submit"
+- assertVisible:
+    id: "cash-total"
+- tapOn:
+    id: "tab-instrument"
+- assertVisible:
+    id: "order-book"
+- tapOn:
+    id: "buy"
+- tapOn:
+    id: "ticket-type-MARKET"
+- tapOn:
+    id: "ticket-submit"
+- assertVisible:
+    id: "ticket-result"
+- assertVisible: "Order #.*: Filled"
+- tapOn:
+    id: "ticket-close"
+- tapOn:
+    id: "tab-settings"
+- tapOn:
+    id: "lang-ru"
+- assertVisible: "Настройки"

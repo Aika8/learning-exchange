@@ -6,3 +6,6 @@ rootProject.name = 'learning-exchange'
 
 include 'backend:engine'
 include 'backend:repl'
+include 'backend:application'
+include 'backend:bots'
+include 'backend:app'

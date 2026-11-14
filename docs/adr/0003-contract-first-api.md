@@ -1,6 +1,6 @@
 # 0003. Contract first: OpenAPI for commands, AsyncAPI for streams
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Contract-first API design, Code generation, Consumer-driven contracts (later)
 

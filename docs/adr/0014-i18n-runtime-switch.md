@@ -1,6 +1,6 @@
 # 0014. Russian and English from day one, switchable at runtime
 
-- Status: Proposed
+- Status: Accepted
 - Date: 2026-11-12
 - Pattern(s): Message catalogue / Externalised strings, Observer (locale change notifies UI), Fallback locale
 

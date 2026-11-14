@@ -1,0 +1,44 @@
+# Status
+
+Updated: 2026-11-14, end of M1 (walking skeleton) without the game.
+
+## What works
+| Part | State | How to see it |
+|---|---|---|
+| Engine (`backend/engine`) | Order book (increment 1) + accounts, funds reservation, fees, replayable events | `./gradlew :backend:engine:test` |
+| Application (`backend/application`) | Sequencer (single writer), simulation clock with pause/speed, journal port, exchange service | `./gradlew :backend:application:test` |
+| Bots (`backend/bots`) | Market maker + 4 noise traders from `bots.yaml`, seeded, through the port only | `make dev` |
+| App (`backend/app`) | Spring Boot 4.1: REST `/api/v1`, WebSocket `/ws`, JSON-lines journal + replay on start | `make dev` |
+| Contract (`api/`) | OpenAPI 3.1 + AsyncAPI 3; contract test validates every REST response and WS message | `ContractTest`, `WebSocketTest` |
+| Web (`clients/web`) | Ladder, trades tape, order form, my orders, balances, clock control, ru/en | `make web`, `make e2e` |
+| Mobile (`clients/mobile`) | Login, home with balances, instrument with book + order ticket, settings with ru/en | `make mobile` / `make mobile-web` |
+| Game (`game/`) | Not in this branch — built by a separate session against `api/` | — |
+
+Demo: `docs/demo/M1.md`.
+
+## Tests
+- Backend: 43 (`./gradlew test`) — engine examples, jqwik properties (money conservation, reservations = open orders, replay
+  gives the same state), the race test, sequencer, bots determinism, contract (REST + WS), journal round-trip, ArchUnit.
+- Web: 4 vitest (money, i18n keys) + `tsc`; Playwright E2E 1 (login → live book → limit order → cancel → market fill → ru).
+- Mobile: 5 `node --test` (i18n keys incl. keys used in code, tokens = design, money = web) + `tsc`; `expo-doctor` 20/20.
+
+## ADRs
+Accepted: 0001, 0002, 0003 (server part amended by 0016), 0005, 0006, 0007, 0009, 0010, 0014, 0016.
+Proposed: 0004 (BFF — no screen-shaped endpoints needed yet), 0008 (stops, M2), 0011 (Godot, game session), 0012 (catalogue, M2),
+0013 (assistant, M4), 0015 (real market data, M2).
+
+## Not verified / known gaps
+- iOS simulator: Xcode is not installed on this Mac (only Command Line Tools), so the mobile app was checked in the browser
+  via Expo web (react-native-web) at 375×812, not in a simulator. Maestro flow `clients/mobile/.maestro/skeleton.yaml` is written but not run.
+- No charts on the instrument screen yet (ADR-0010 leaves the library choice to the implementer; deferred to M2).
+- BFFs (ADR-0004) not started: the core API is enough for M1 screens.
+
+## Risks
+- Journal growth: ~30 MB/hour with bots (market maker re-quotes every step). Replay is still sub-second at 32 k events;
+  add snapshots or requote-on-change when start-up slows down. `make reset` clears it.
+- Dev auth is name-only by design; never expose the backend beyond localhost.
+- Money as JSON numbers: exact in TypeScript up to 2^53 minor units; fine for practice balances.
+
+## Next steps
+- Game client M1 slice against this contract (separate session).
+- M2 per `docs/prompts/fable-build.md`: second instrument and catalogue, conditional orders, statement, deposits, more bots.
