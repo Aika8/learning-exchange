@@ -16,7 +16,8 @@ lore names are the world's flavour, never a replacement (world bible §6).
   (ids + ru/en for both names + one-line definition) and is served by both BFFs.
 - `bff-game`: every control, column and number label uses the **real** term; the lore name goes as a secondary label/tooltip
   ("Стоп-лосс · Якорь"); dialogue uses lore words and introduces the real one on first use.
-- `bff-mobile`: real terms only; lore names only when the user enables «Словарь мира».
+- `bff-mobile`: real terms only; it never serves lore names (the app knows nothing about the game).
+- The dependency goes one way: the game knows the app and may use its screen names and navigation to prepare the player.
 - Number formats are real-world (ticker-style codes, price steps, R, P&L) in both clients.
 
 ## Why this and not the alternatives

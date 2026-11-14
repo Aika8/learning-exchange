@@ -13,10 +13,13 @@ Two very different audiences need the same honest market:
 One backend (the exchange) with a stable contract, and three clients on top:
 1. **Mobile super-app** «Ветрило» (working name) — accounts, transfers, deposits,
    FX exchange, brokerage with order book and stop orders, statement with fees
-   and tax. Real-world terms.
+   and tax. A plain learning bank for people who skip the game: real-world terms
+   only, it knows nothing about the game.
 2. **PC game** «Летопись Ветров» / *Chronicle of Winds* — trading RPG in a sky
    archipelago (`docs/lore/world-bible.md`). Same accounts and markets; controls
-   and numbers use real-world terms, lore names add flavour (world bible §6).
+   and numbers use real-world terms, lore names add flavour (world bible §6). The game knows the app:
+   it uses the app's words and sometimes its navigation, to prepare the player
+   for using the app.
 3. **Web debug client** — thin, for developers and demos.
 
 The market is alive without humans: bots (market maker, momentum, index,
