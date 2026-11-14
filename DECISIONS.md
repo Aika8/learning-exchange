@@ -28,3 +28,11 @@ Choices the brief left open. Each one is the simplest behaviour; revisit any of 
 - Repl prints the id assigned by the book after each submit; an order rejected by the factories never reaches the book and consumes no id.
 - Repl: `book` prints only the book; unknown or malformed commands print an error and the book is not reprinted; end of input acts like `quit`.
 - Repl prints asks highest-first above the spread and bids highest-first below it.
+
+# Decisions — M0 (repo reshape)
+
+- Java 25 toolchain: Gradle uses an installed JDK 25 (sdkman here); `foojay-resolver-convention` 1.0.0 in `settings.gradle` downloads one when none is installed.
+- One Gradle build at the repo root (wrapper stays at the root); backend modules are `:backend:engine` and `:backend:repl`. Further ADR-0009 modules are added when their milestone needs them.
+- The REPL is its own module `backend/repl` depending on `engine`, so `engine` stays dependency-free. It is a dev tool, not one of the ADR-0009 deployables; it can be dropped once `make dev` starts the real backend.
+- `make dev` runs the REPL until the backend exists (M1).
+- Invariant №3 (never crossed) and №2 (limit respected) are tested by examples plus a seeded random flow (5 000 operations, seed 42) that checks both after every step.
