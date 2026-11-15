@@ -22,3 +22,11 @@ instruments:
     kind: BOND
     real: { ru: "Высокодоходные облигации GBND, рейтинг CCC", en: "High-yield bonds GBND, rated CCC" }
     lore: { ru: "Расписки Щедрой гильдии", en: "Generous Guild notes" }
+  - id: IDX-SPARK
+    kind: FUND
+    real: { ru: "Индексный фонд IDX (все компании, TER 0,20%)", en: "Index fund IDX (all companies, TER 0.20%)" }
+    lore: { ru: "Корзина Бабушки Ветлы", en: "Grandma Vetla's basket" }
+  - id: ACT-SPARK
+    kind: FUND
+    real: { ru: "Активный фонд ACT (выбор управляющего, TER 2%)", en: "Active fund ACT (manager's picks, TER 2%)" }
+    lore: { ru: "Золотой Парус", en: "Golden Sail" }

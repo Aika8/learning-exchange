@@ -3,6 +3,12 @@ import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError, unwrap, type BookSnapshot, type Instrument } from '../api/client';
 import { formatMinor, parseToMinor } from '../money';
+import type { MarketState, Mood } from '../api/client';
+import { buildJournal } from '../m2c';
+import { PositionSize } from './PositionSize';
+
+const MARKET_STATES: MarketState[] = ['TREND_UP', 'TREND_DOWN', 'RANGE', 'VOLATILE', 'NEWS'];
+const MOODS: Mood[] = ['CALM', 'CONFIDENT', 'ANXIOUS', 'FOMO', 'REVENGE', 'BORED'];
 
 export function OrderForm({ instrument, book }: { instrument: Instrument; book: BookSnapshot | null }) {
   const { t, i18n } = useTranslation();
@@ -11,6 +17,10 @@ export function OrderForm({ instrument, book }: { instrument: Instrument; book: 
   const [type, setType] = useState<'LIMIT' | 'MARKET'>('LIMIT');
   const [price, setPrice] = useState('');
   const [qty, setQty] = useState('1');
+  const [why, setWhy] = useState('');
+  const [marketState, setMarketState] = useState<MarketState | ''>('');
+  const [mood, setMood] = useState<Mood | ''>('');
+  const [riskMinor, setRiskMinor] = useState<number | null>(null);
   const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
 
   const priceMinor = type === 'LIMIT' ? parseToMinor(price, instrument.priceScale) : null;
@@ -25,7 +35,9 @@ export function OrderForm({ instrument, book }: { instrument: Instrument; book: 
       unwrap(
         await api.POST('/orders', {
           params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
-          body: { instrument: instrument.id, side, type, qty: qtyUnits!, ...(type === 'LIMIT' ? { price: priceMinor! } : {}) },
+          body: { instrument: instrument.id, side, type, qty: qtyUnits!,
+            journal: buildJournal(why, marketState, mood, riskMinor),
+            ...(type === 'LIMIT' ? { price: priceMinor! } : {}) },
         }),
       ),
     onSuccess: (o) => {
@@ -79,6 +91,33 @@ export function OrderForm({ instrument, book }: { instrument: Instrument; book: 
         {t('form.qty', { base: instrument.base })}
         <input inputMode="numeric" value={qty} onChange={(e) => setQty(e.target.value)} data-testid="qty" />
       </label>
+      <PositionSize instrument={instrument} entry={refPrice} onRisk={setRiskMinor} onQty={(q) => setQty(formatMinor(q, instrument.qtyScale, 'en').replace(/,/g, ''))} />
+      <fieldset data-testid="journal">
+        <legend>{t('journal.title')}</legend>
+        <label>
+          {t('journal.why')}
+          <textarea maxLength={280} rows={2} value={why} onChange={(e) => setWhy(e.target.value)} data-testid="journal-why" />
+        </label>
+        <label>
+          {t('journal.marketState')}
+          <select value={marketState} onChange={(e) => setMarketState(e.target.value as MarketState | '')} data-testid="journal-market">
+            <option value="">—</option>
+            {MARKET_STATES.map((m) => (
+              <option key={m} value={m}>{t(`marketState.${m}`)}</option>
+            ))}
+          </select>
+        </label>
+        <label>
+          {t('journal.mood')}
+          <select value={mood} onChange={(e) => setMood(e.target.value as Mood | '')} data-testid="journal-mood">
+            <option value="">—</option>
+            {MOODS.map((m) => (
+              <option key={m} value={m}>{t(`mood.${m}`)}</option>
+            ))}
+          </select>
+        </label>
+        <p className="hint">{riskMinor != null ? t('journal.plannedRisk', { r: formatMinor(riskMinor, instrument.priceScale, i18n.language), quote: instrument.quote }) : t('journal.noRisk')}</p>
+      </fieldset>
       {notional !== null && fee !== null && (
         <p className="hint">
           {t('form.estimate', {

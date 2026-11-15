@@ -103,7 +103,16 @@ public final class FileJournal implements Journal {
             @JsonSubTypes.Type(Event.TradingStatusChanged.class),
             @JsonSubTypes.Type(Event.PayoutStarted.class),
             @JsonSubTypes.Type(Event.PayoutPaid.class),
-            @JsonSubTypes.Type(Event.BondDefaulted.class)
+            @JsonSubTypes.Type(Event.BondDefaulted.class),
+            // M2c: new event types only; the line format stays v2 (ADR-0020)
+            @JsonSubTypes.Type(Event.OrderAnnotated.class),
+            @JsonSubTypes.Type(Event.DividendDeclared.class),
+            @JsonSubTypes.Type(Event.DividendExDate.class),
+            @JsonSubTypes.Type(Event.DividendEntitled.class),
+            @JsonSubTypes.Type(Event.ReferencePriceAdjusted.class),
+            @JsonSubTypes.Type(Event.DividendPaymentStarted.class),
+            @JsonSubTypes.Type(Event.DividendPaid.class),
+            @JsonSubTypes.Type(Event.FundFeeCharged.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     abstract static class EventMixin {

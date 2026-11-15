@@ -117,7 +117,8 @@
     "kind": {
       "STOCK": "stock",
       "FX": "FX",
-      "BOND": "bond"
+      "BOND": "bond",
+      "FUND": "fund"
     }
   },
   "tabs": {
@@ -128,7 +129,9 @@
     "companies": "Companies",
     "calendar": "Economic calendar",
     "bonds": "Bonds",
-    "realWorld": "Real world"
+    "realWorld": "Real world",
+    "review": "Session review",
+    "funds": "Funds"
   },
   "stops": {
     "formTitle": "New conditional order",
@@ -264,7 +267,8 @@
     "pnlCol": "P&L",
     "marginFlag": "margin",
     "empty": "No operations in this period",
-    "payouts": "Dividends & coupons"
+    "payouts": "Dividends & coupons",
+    "taxWithheld": "Tax withheld"
   },
   "skind": {
     "DEPOSIT": "Deposit",
@@ -277,7 +281,8 @@
     "INTEREST": "Interest",
     "DIVIDEND": "Dividend",
     "COUPON": "Coupon",
-    "REDEMPTION": "Bond redemption"
+    "REDEMPTION": "Bond redemption",
+    "DIVIDEND_TAX": "Dividend tax withheld"
   },
   "common": {
     "yes": "yes",
@@ -321,7 +326,9 @@
     "insider": "Insider",
     "role": "Role",
     "qty": "Qty",
-    "price": "Price"
+    "price": "Price",
+    "recordDate": "Record date",
+    "payDate": "Pay date"
   },
   "macro": {
     "policyRate": "Policy rate",
@@ -395,5 +402,85 @@
     "close": "Close",
     "closed": "closed",
     "noPapers": "No paper positions"
+  },
+  "psize": {
+    "title": "Position size (1 R)",
+    "risk": "Risk 1 R, {{quote}}",
+    "mode": {
+      "price": "Stop by price",
+      "atr": "Stop = k × ATR"
+    },
+    "stopPrice": "Stop price",
+    "k": "k (× ATR)",
+    "notReady": "ATR not ready yet: {{candles}} of {{need}} daily candles",
+    "atr": "ATR({{period}}) = {{atr}} ({{pct}}% of price)",
+    "distance": "Stop distance: {{d}}",
+    "qty": "Size: {{qty}}",
+    "use": "Use this qty"
+  },
+  "journal": {
+    "title": "Trade journal (optional)",
+    "why": "Why I enter (≤ 280)",
+    "marketState": "Market state",
+    "mood": "Mood",
+    "plannedRisk": "Planned risk 1 R = {{r}} {{quote}}",
+    "noRisk": "Planned risk: fill in 1 R in the position-size helper"
+  },
+  "marketState": {
+    "TREND_UP": "Trend up",
+    "TREND_DOWN": "Trend down",
+    "RANGE": "Range",
+    "VOLATILE": "Volatile",
+    "NEWS": "News",
+    "NONE": "Not set"
+  },
+  "mood": {
+    "CALM": "Calm",
+    "CONFIDENT": "Confident",
+    "ANXIOUS": "Anxious",
+    "FOMO": "FOMO",
+    "REVENGE": "Revenge",
+    "BORED": "Bored",
+    "NONE": "Not set"
+  },
+  "review": {
+    "title": "Session review",
+    "summary": "Orders: {{orders}}, with a note: {{annotated}}, wins: {{wins}}, result: {{result}} {{currency}}, expectancy: {{exp}}",
+    "hint": "Describes what happened, not advice. R = result / planned risk.",
+    "order": "Order",
+    "note": "Note",
+    "result": "Result",
+    "r": "R",
+    "byMood": "By mood",
+    "byMarket": "By market state",
+    "group": "Group",
+    "orders": "Orders",
+    "wins": "Wins",
+    "avgR": "Avg R",
+    "empty": "No orders in this period"
+  },
+  "funds": {
+    "title": "Funds",
+    "empty": "No funds",
+    "kind": {
+      "INDEX": "Index fund",
+      "ACTIVE": "Active fund"
+    },
+    "ter": "TER",
+    "nav": "NAV",
+    "navPerUnit": "NAV per unit",
+    "unitPrice": "Unit price",
+    "premium": "Premium to NAV",
+    "units": "Units",
+    "cash": "Cash",
+    "feesPaid": "Fees paid (TER)",
+    "holdings": "Holdings",
+    "weight": "Weight",
+    "value": "Value",
+    "vsBasket": "Fund vs its basket",
+    "fundReturn": "Fund return",
+    "basketReturn": "Basket return (no fee)",
+    "gap": "Difference",
+    "tenYear": "TER over 10 years (zero growth)"
   }
 }

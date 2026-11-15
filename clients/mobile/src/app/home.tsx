@@ -48,6 +48,10 @@ export default function Home() {
         <Button testID="go-fx" title={t('home.fx')} color={c.accent} onPress={() => router.replace('/fx')} />
         <Button testID="go-statement" title={t('home.statement')} color={c.textSecondary} onPress={() => router.push('/statement')} />
       </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button testID="go-funds" title={t('home.funds')} color={c.primary} onPress={() => router.push('/funds')} />
+        <Button testID="go-review" title={t('home.review')} color={c.textSecondary} onPress={() => router.push('/review')} />
+      </View>
     </Screen>
   );
 }

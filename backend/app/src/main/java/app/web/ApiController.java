@@ -98,7 +98,35 @@ public class ApiController {
         Order.Side side = parse(Order.Side.class, body.side());
         Order.Type type = parse(Order.Type.class, body.type());
         long price = type == Order.Type.LIMIT ? (body.price() == null ? 0 : body.price()) : 0;
-        return OrderDto.of(market.place(id, body.instrument(), side, type, price, body.qty(), key(idempotencyKey)));
+        application.SessionReviewProjection.Note note = null;
+        if (body.journal() != null) {
+            Dto.TradeNote n = body.journal();
+            if (n.why() != null && n.why().length() > 280) {
+                throw new BadRequest("journal.why is at most 280 characters");
+            }
+            if (n.marketState() != null && !MARKET_STATES.contains(n.marketState())) {
+                throw new BadRequest("journal.marketState must be one of " + MARKET_STATES);
+            }
+            if (n.mood() != null && !MOODS.contains(n.mood())) {
+                throw new BadRequest("journal.mood must be one of " + MOODS);
+            }
+            if (n.plannedRisk() != null && n.plannedRisk() < 1) {
+                throw new BadRequest("journal.plannedRisk must be at least 1");
+            }
+            note = new application.SessionReviewProjection.Note(n.why(), n.marketState(), n.mood(), n.plannedRisk());
+        }
+        return OrderDto.of(market.place(id, body.instrument(), side, type, price, body.qty(), key(idempotencyKey), note));
+    }
+
+    static final java.util.List<String> MARKET_STATES = java.util.List.of("TREND_UP", "TREND_DOWN", "RANGE", "VOLATILE", "NEWS");
+    static final java.util.List<String> MOODS = java.util.List.of("CALM", "CONFIDENT", "ANXIOUS", "FOMO", "REVENGE", "BORED");
+
+    @GetMapping("/session-review")
+    public application.SessionReviewProjection.Review sessionReview(
+            @RequestHeader(value = "Authorization", required = false) String authz,
+            @RequestParam(required = false) Long from, @RequestParam(required = false) Long to) {
+        String id = auth.accountId(authz);
+        return market.sessionReview(id, from == null ? 0 : from, to == null ? market.clock().now() + 1 : to);
     }
 
     @DeleteMapping("/orders/{orderId}")

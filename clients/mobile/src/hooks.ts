@@ -130,3 +130,21 @@ export function useRealWorld() {
 export function usePaperPositions() {
   return useQuery({ queryKey: ['paper'], queryFn: () => call(api.GET('/real-world/paper-positions')), refetchInterval: 30_000 });
 }
+
+// ---- M2c: ATR, funds, session review ----
+
+export function useAtr(id: string, period = 14) {
+  return useQuery({ queryKey: ['atr', id, period], queryFn: () => call(api.GET('/instruments/{instrumentId}/atr', { params: { path: { instrumentId: id }, query: { period } } })), refetchInterval: 30_000 });
+}
+
+export function useFunds() {
+  return useQuery({ queryKey: ['funds'], queryFn: () => call(api.GET('/funds')), refetchInterval: 10_000 });
+}
+
+export function useFund(id: string) {
+  return useQuery({ queryKey: ['fund', id], queryFn: () => call(api.GET('/funds/{instrumentId}', { params: { path: { instrumentId: id } } })), refetchInterval: 10_000 });
+}
+
+export function useSessionReview() {
+  return useQuery({ queryKey: ['session-review'], queryFn: () => call(api.GET('/session-review')), refetchInterval: 15_000 });
+}

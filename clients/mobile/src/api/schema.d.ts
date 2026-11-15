@@ -559,6 +559,85 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/instruments/{instrumentId}/atr": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Average True Range of daily candles, Wilder smoothing (a measure of how much the price swings, not of direction)
+         * @description True range of a bank day = max(high − low, |high − previous close|, |low − previous close|). The first ATR is
+         *     the mean of the first `period` true ranges; then ATR = (previous ATR × (period − 1) + TR) / period
+         *     (Wilder, 1978), rounded to the nearest minor unit. Needs `period + 1` candles; `ready` is false until then.
+         */
+        get: operations["getAtr"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/session-review": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Review of my orders in a period by the trade-journal notes (why, market state, mood), in money and in R
+         * @description Every order I placed in the period, with its journal note when I wrote one. Result of an order = what its
+         *     fills earned against the last price (or against the price I later sold/bought back at), fees included; R =
+         *     result / planned risk when the note gives the risk. Grouped by mood and by market state, so the review can
+         *     show "my FOMO trades lost 1.4 R on average". Not advice: it describes what happened.
+         */
+        get: operations["getSessionReview"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/funds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Funds (index and active) with TER, NAV per unit, holdings and the fund against its own basket */
+        get: operations["listFunds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/funds/{instrumentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One fund card */
+        get: operations["getFund"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clock": {
         parameters: {
             query?: never;
@@ -625,7 +704,7 @@ export interface components {
              */
             id: string;
             /** @enum {string} */
-            kind: "STOCK" | "FX" | "BOND";
+            kind: "STOCK" | "FX" | "BOND" | "FUND";
             /** @description false while halted (report night) or after a bond is repaid */
             tradingOpen: boolean;
             /** @example SILK */
@@ -661,6 +740,8 @@ export interface components {
             price?: number;
             /** Format: int64 */
             qty: number;
+            /** @description Optional trade-journal note («почему»), journalled with the order */
+            journal?: components["schemas"]["TradeNote"] | null;
         };
         Order: {
             /** Format: int64 */
@@ -936,7 +1017,7 @@ export interface components {
             deposits: components["schemas"]["SavingsDeposit"][];
         };
         /** @enum {string} */
-        StatementKind: "DEPOSIT" | "TRADE" | "MARGIN_OPEN" | "MARGIN_CLOSE" | "STOP_OUT" | "SAVINGS_OPEN" | "SAVINGS_CLOSE" | "INTEREST" | "DIVIDEND" | "COUPON" | "REDEMPTION";
+        StatementKind: "DEPOSIT" | "TRADE" | "MARGIN_OPEN" | "MARGIN_CLOSE" | "STOP_OUT" | "SAVINGS_OPEN" | "SAVINGS_CLOSE" | "INTEREST" | "DIVIDEND" | "COUPON" | "REDEMPTION" | "DIVIDEND_TAX";
         StatementLine: {
             /** Format: int64 */
             ts: number;
@@ -993,7 +1074,7 @@ export interface components {
             taxRateBps: number;
             /**
              * Format: int64
-             * @description (max(0, realisedPnl) + payouts) × 10%, rounded down
+             * @description Still to pay: (max(0, realisedPnl) + payouts) × 10%, rounded down, minus taxWithheld (never below 0)
              */
             tax: number;
             /**
@@ -1003,9 +1084,14 @@ export interface components {
             interest: number;
             /**
              * Format: int64
-             * @description Dividends and coupons received (taxed 10%)
+             * @description Dividends and coupons received, gross (taxed 10%)
              */
             payouts: number;
+            /**
+             * Format: int64
+             * @description Tax withheld at source on dividends (DIVIDEND_TAX lines)
+             */
+            taxWithheld: number;
         };
         Statement: {
             /** Format: int64 */
@@ -1098,7 +1184,7 @@ export interface components {
             volume: number;
         };
         /** @enum {string} */
-        CalendarKind: "RATE_DECISION" | "EARNINGS" | "CONSENSUS" | "DIVIDEND_EX" | "COUPON" | "MATURITY" | "STORM";
+        CalendarKind: "RATE_DECISION" | "EARNINGS" | "CONSENSUS" | "DIVIDEND_EX" | "DIVIDEND_RECORD" | "DIVIDEND_PAY" | "COUPON" | "MATURITY" | "STORM";
         CalendarEntry: {
             /** Format: int64 */
             at: number;
@@ -1222,9 +1308,19 @@ export interface components {
             perShare: number;
             /**
              * Format: int64
-             * @description Holders at this time are paid; the price drops by about the dividend
+             * @description From the open of this day the share trades without the dividend; the price is adjusted down by it
              */
             exDate: number;
+            /**
+             * Format: int64
+             * @description Holders in the register on this day are paid (bought before the ex-date, settled T+1); null for M2b dividends
+             */
+            recordDate?: number | null;
+            /**
+             * Format: int64
+             * @description Payment day; null for M2b dividends (paid at the ex-date)
+             */
+            payDate?: number | null;
             paid: boolean;
         };
         Company: {
@@ -1418,6 +1514,176 @@ export interface components {
             /** Format: int64 */
             pnl: number;
         };
+        Atr: {
+            instrument: string;
+            period: number;
+            /** @description Enough candles (period + 1) */
+            ready: boolean;
+            /** @description Daily candles used */
+            candles: number;
+            /**
+             * Format: int64
+             * @description Quote minor units
+             */
+            atr?: number | null;
+            /** Format: int64 */
+            lastPrice?: number | null;
+            /**
+             * Format: int64
+             * @description ATR / last price in basis points
+             */
+            atrBps?: number | null;
+        };
+        /** @enum {string} */
+        MarketState: "TREND_UP" | "TREND_DOWN" | "RANGE" | "VOLATILE" | "NEWS";
+        /** @enum {string} */
+        Mood: "CALM" | "CONFIDENT" | "ANXIOUS" | "FOMO" | "REVENGE" | "BORED";
+        TradeNote: {
+            /** @description Why I enter */
+            why?: string | null;
+            marketState?: components["schemas"]["MarketState"] | null;
+            mood?: components["schemas"]["Mood"] | null;
+            /**
+             * Format: int64
+             * @description 1 R: what I accept to lose, quote minor units (from the position-size helper)
+             */
+            plannedRisk?: number | null;
+        };
+        ReviewEntry: {
+            /** Format: int64 */
+            orderId: number;
+            instrument: string;
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            placedAt: number;
+            /** Format: int64 */
+            qty: number;
+            /** Format: int64 */
+            filledQty: number;
+            /** Format: int64 */
+            avgPrice?: number | null;
+            /**
+             * Format: int64
+             * @description Last price the result is measured against
+             */
+            markPrice?: number | null;
+            /** Format: int64 */
+            fees: number;
+            /**
+             * Format: int64
+             * @description Quote minor units, fees included
+             */
+            result: number;
+            /**
+             * Format: int64
+             * @description Result in R × 100 (−150 = −1.5 R)
+             */
+            resultRx100?: number | null;
+            note?: components["schemas"]["TradeNote"] | null;
+        };
+        ReviewGroup: {
+            /** @description Mood or market state; NONE when the note left it empty */
+            key: string;
+            orders: number;
+            wins: number;
+            /** Format: int64 */
+            result: number;
+            /**
+             * Format: int64
+             * @description Average R × 100 of the orders with a planned risk
+             */
+            avgRx100?: number | null;
+        };
+        SessionReview: {
+            /** Format: int64 */
+            from: number;
+            /** Format: int64 */
+            to: number;
+            currency: string;
+            entries: components["schemas"]["ReviewEntry"][];
+            byMood: components["schemas"]["ReviewGroup"][];
+            byMarketState: components["schemas"]["ReviewGroup"][];
+            orders: number;
+            /** @description Orders with a journal note */
+            annotated: number;
+            wins: number;
+            /** Format: int64 */
+            result: number;
+            /**
+             * Format: int64
+             * @description Average R × 100 over the orders with a planned risk
+             */
+            expectancyRx100?: number | null;
+        };
+        /** @enum {string} */
+        FundKind: "INDEX" | "ACTIVE";
+        FundHolding: {
+            instrument: string;
+            /** Format: int64 */
+            qty: number;
+            /** Format: int64 */
+            price?: number | null;
+            /** Format: int64 */
+            value: number;
+            /** Format: int64 */
+            weightBps: number;
+        };
+        Fund: {
+            instrument: string;
+            kind: components["schemas"]["FundKind"];
+            /**
+             * Format: int64
+             * @description Total expense ratio a year (20 = 0.20%), charged daily by the simulation clock
+             */
+            terBps: number;
+            /** Format: int64 */
+            unitsOutstanding: number;
+            holdings: components["schemas"]["FundHolding"][];
+            /** Format: int64 */
+            cash: number;
+            /**
+             * Format: int64
+             * @description Holdings at last prices + cash
+             */
+            nav: number;
+            /** Format: int64 */
+            navPerUnit?: number | null;
+            /**
+             * Format: int64
+             * @description Price of a unit on the exchange
+             */
+            lastPrice?: number | null;
+            /**
+             * Format: int64
+             * @description (price − NAV per unit) / NAV per unit
+             */
+            premiumBps?: number | null;
+            /**
+             * Format: int64
+             * @description TER charged so far
+             */
+            feesPaid: number;
+            /**
+             * Format: int64
+             * @description The same basket held without the fund: NAV + fees paid (same shares and dividends, no fee)
+             */
+            basketValue: number;
+            /**
+             * Format: int64
+             * @description NAV change since the first fee day
+             */
+            fundReturnBps?: number | null;
+            /**
+             * Format: int64
+             * @description Basket value change over the same time
+             */
+            basketReturnBps?: number | null;
+            /**
+             * Format: int64
+             * @description Share of the money TER takes over 10 years at zero growth: 1 − (1 − TER)^10
+             */
+            tenYearCostBps?: number;
+        };
         LocalisedName: {
             ru: string;
             en: string;
@@ -1425,7 +1691,7 @@ export interface components {
         CatalogueItem: {
             instrument: string;
             /** @enum {string} */
-            kind: "STOCK" | "FX" | "BOND";
+            kind: "STOCK" | "FX" | "BOND" | "FUND";
             real: components["schemas"]["LocalisedName"];
             /** @description Only from the game BFF */
             lore?: components["schemas"]["LocalisedName"] | null;
@@ -2337,6 +2603,100 @@ export interface operations {
                     "application/json": components["schemas"]["GlossaryTerm"][];
                 };
             };
+        };
+    };
+    getAtr: {
+        parameters: {
+            query?: {
+                period?: number;
+            };
+            header?: never;
+            path: {
+                instrumentId: components["parameters"]["InstrumentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description ATR */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Atr"];
+                };
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    getSessionReview: {
+        parameters: {
+            query?: {
+                /** @description Simulation time (ms), inclusive; default the beginning */
+                from?: number;
+                /** @description Simulation time (ms), exclusive; default now */
+                to?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Review */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SessionReview"];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    listFunds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Funds */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fund"][];
+                };
+            };
+        };
+    };
+    getFund: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                instrumentId: components["parameters"]["InstrumentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Fund */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Fund"];
+                };
+            };
+            404: components["responses"]["Problem"];
         };
     };
     getClock: {

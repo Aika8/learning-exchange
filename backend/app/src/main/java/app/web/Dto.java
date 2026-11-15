@@ -76,7 +76,12 @@ public final class Dto {
     public record GlossaryTermDto(String id, app.bff.Catalogue.Name real, app.bff.Catalogue.Name definition,
                                   app.bff.Catalogue.Name lore) {}
 
-    public record PlaceOrderRequest(String instrument, String side, String type, Long price, Long qty) {}
+    public record PlaceOrderRequest(String instrument, String side, String type, Long price, Long qty, TradeNote journal) {}
+
+    /** M2c trade-journal note. */
+    public record TradeNote(String why, String marketState, String mood, Long plannedRisk) {}
+
+    public record AtrDto(String instrument, int period, boolean ready, int candles, Long atr, Long lastPrice, Long atrBps) {}
 
     public record OrderDto(long orderId, String instrument, String side, String type, long price, long qty,
                            long filledQty, long remainingQty, String status, long createdAt) {
@@ -172,13 +177,14 @@ public final class Dto {
     }
 
     public record StatementTotalsDto(long fees, long spreadPaid, long realisedPnl, long taxRateBps, long tax, long interest,
-                                     long payouts) {}
+                                     long payouts, long taxWithheld) {}
 
     public record StatementDto(long from, long to, String currency, List<StatementLineDto> lines, StatementTotalsDto totals) {
         static StatementDto of(StatementProjection.Statement s) {
             StatementProjection.Totals t = s.totals();
             return new StatementDto(s.from(), s.to(), s.currency(), s.lines().stream().map(StatementLineDto::of).toList(),
-                    new StatementTotalsDto(t.fees(), t.spreadPaid(), t.realisedPnl(), t.taxRateBps(), t.tax(), t.interest(), t.payouts()));
+                    new StatementTotalsDto(t.fees(), t.spreadPaid(), t.realisedPnl(), t.taxRateBps(), t.tax(), t.interest(), t.payouts(),
+                            t.taxWithheld()));
         }
     }
 }

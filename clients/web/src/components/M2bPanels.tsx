@@ -5,9 +5,11 @@ import { Companies } from './Companies';
 import { Calendar } from './Calendar';
 import { Bonds } from './Bonds';
 import { RealWorldPanel } from './RealWorldPanel';
+import { SessionReview } from './SessionReview';
+import { Funds } from './Funds';
 
-type Tab = 'companies' | 'calendar' | 'bonds' | 'realWorld';
-const TABS: Tab[] = ['companies', 'calendar', 'bonds', 'realWorld'];
+type Tab = 'companies' | 'calendar' | 'bonds' | 'funds' | 'review' | 'realWorld';
+const TABS: Tab[] = ['companies', 'calendar', 'bonds', 'funds', 'review', 'realWorld'];
 
 export function M2bPanels({ instrument, clock }: { instrument: Instrument; clock: Clock | null }) {
   const { t } = useTranslation();
@@ -24,6 +26,8 @@ export function M2bPanels({ instrument, clock }: { instrument: Instrument; clock
       {tab === 'companies' && <Companies current={instrument} now={clock?.now} />}
       {tab === 'calendar' && <Calendar />}
       {tab === 'bonds' && <Bonds />}
+      {tab === 'funds' && <Funds />}
+      {tab === 'review' && <SessionReview />}
       {tab === 'realWorld' && <RealWorldPanel />}
     </>
   );

@@ -9,14 +9,21 @@ import { useFmt } from './format';
 
 const HEIGHT = 140;
 
-/** Daily candles drawn with plain Views (no chart library), with dividend ex-dates marked as vertical lines. */
-export function PriceChart({ candles, exDates, priceScale }: { candles: Schemas['Candle'][]; exDates: { at: number; perShare: number }[]; priceScale: number }) {
+export type DividendMarkKind = 'ex' | 'record' | 'pay';
+export type DividendMark = { at: number; perShare: number; kind: DividendMarkKind };
+
+/**
+ * Daily candles drawn with plain Views (no chart library), with dividend dates marked as vertical lines:
+ * ex-date (the cut-off: from that open the share trades without the dividend), record date and pay date.
+ */
+export function PriceChart({ candles, exDates, priceScale }: { candles: Schemas['Candle'][]; exDates: DividendMark[]; priceScale: number }) {
   const c = useColors();
   const { t } = useTranslation();
   const f = useFmt();
   const [width, setWidth] = useState(0);
   const { bars, min, max, xOf } = scaleCandles(candles, width, HEIGHT);
-  const marks = exDates.map((e) => ({ ...e, x: xOf(e.at) })).filter((e): e is { at: number; perShare: number; x: number } => e.x !== null);
+  const marks = exDates.map((e) => ({ ...e, x: xOf(e.at) })).filter((e): e is DividendMark & { x: number } => e.x !== null);
+  const color = (k: DividendMarkKind) => (k === 'ex' ? c.info : k === 'record' ? c.warning : c.positive);
   if (candles.length === 0) return <Caption>{t('chart.empty')}</Caption>;
   return (
     <View style={{ gap: 4 }}>
@@ -36,9 +43,9 @@ export function PriceChart({ candles, exDates, priceScale }: { candles: Schemas[
           );
         })}
         {marks.map((m) => (
-          <View key={m.at} testID="exdate-mark" style={{ position: 'absolute', left: m.x, top: 0, height: HEIGHT, width: 0, borderLeftWidth: 1, borderStyle: 'dashed', borderColor: c.info }}>
-            <View style={{ position: 'absolute', top: 0, left: 2, backgroundColor: c.info, borderRadius: 4, paddingHorizontal: 3 }}>
-              <Caption color={c.onPrimary}>{t('chart.exShort')}</Caption>
+          <View key={`${m.kind}-${m.at}`} testID={`${m.kind}date-mark`} style={{ position: 'absolute', left: m.x, top: 0, height: HEIGHT, width: 0, borderLeftWidth: m.kind === 'ex' ? 2 : 1, borderStyle: m.kind === 'ex' ? 'solid' : 'dashed', borderColor: color(m.kind) }}>
+            <View style={{ position: 'absolute', top: m.kind === 'ex' ? 0 : m.kind === 'record' ? 18 : 36, left: 2, backgroundColor: color(m.kind), borderRadius: 4, paddingHorizontal: 3 }}>
+              <Caption color={c.onPrimary}>{t(`chart.${m.kind}Short`)}</Caption>
             </View>
           </View>
         ))}
@@ -48,8 +55,8 @@ export function PriceChart({ candles, exDates, priceScale }: { candles: Schemas[
         <Caption>{f.date(candles[candles.length - 1]?.start ?? 0)}</Caption>
       </View>
       {marks.map((m) => (
-        <Caption key={m.at} color={c.info}>
-          {t('chart.exDate', { date: f.when(m.at), amount: f.money(m.perShare, priceScale) })}
+        <Caption key={`${m.kind}-${m.at}`} color={color(m.kind)}>
+          {t(`chart.${m.kind}Date`, { date: f.when(m.at), amount: f.money(m.perShare, priceScale) })}
         </Caption>
       ))}
     </View>

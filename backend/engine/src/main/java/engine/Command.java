@@ -67,4 +67,21 @@ public sealed interface Command {
     record Payout(String instrument, Event.PayoutKind kind, String issuer, long perUnit) implements Command {}
 
     record DeclareDefault(String instrument, String issuer) implements Command {}
+
+    // ---- M2c (ADR-0022) ----
+
+    /** Attaches the owner's trade-journal note to an order (once). */
+    record AnnotateOrder(String account, long orderId, String why, String marketState, String mood, long plannedRisk)
+            implements Command {}
+
+    /** At the open of the ex-date: fixes who is paid and adjusts the reference price. */
+    record DividendExDate(String instrument, String issuer, long perShare, long recordDate, long payDate)
+            implements Command {}
+
+    /** At the pay date: pays the oldest fixed, unpaid dividend of the instrument, withholding {@code taxBps}. */
+    record PayDividend(String instrument, long taxBps) implements Command {}
+
+    /** Moves a fund's fee from custody to manager; the amount is decided by the caller from prices (journalled). */
+    record ChargeFundFee(String fund, String custody, String manager, String asset, long amount, int days, long nav,
+                         long basketValue) implements Command {}
 }

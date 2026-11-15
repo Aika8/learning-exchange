@@ -109,3 +109,20 @@ export function useRealWorld() {
 export function usePaperPositions() {
   return useQuery({ queryKey: ['paper'], queryFn: async () => unwrap(await api.GET('/real-world/paper-positions')), ...LIVE });
 }
+
+// M2c
+export function useAtr(instrumentId: string, period = 14) {
+  return useQuery({
+    queryKey: ['atr', instrumentId, period],
+    queryFn: async () => unwrap(await api.GET('/instruments/{instrumentId}/atr', { params: { path: { instrumentId }, query: { period } } })),
+    ...LIVE,
+  });
+}
+
+export function useSessionReview() {
+  return useQuery({ queryKey: ['review'], queryFn: async () => unwrap(await api.GET('/session-review')), ...LIVE });
+}
+
+export function useFunds() {
+  return useQuery({ queryKey: ['funds'], queryFn: async () => unwrap(await api.GET('/funds')), ...LIVE });
+}

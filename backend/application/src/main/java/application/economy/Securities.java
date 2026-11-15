@@ -53,8 +53,11 @@ public final class Securities {
         return BONDS.stream().filter(b -> b.instrument().equals(instrument)).findFirst();
     }
 
-    /** STOCK, FX or BOND. */
+    /** STOCK, FX, BOND or FUND. */
     public static String kind(String instrument) {
+        if (Funds.fund(instrument).isPresent()) {
+            return "FUND";
+        }
         if (company(instrument).isPresent()) {
             return "STOCK";
         }

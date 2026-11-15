@@ -87,3 +87,27 @@ export function Segmented<T extends string>({ value, options, onChange, testIDPr
     </View>
   );
 }
+
+/** Wrapping single-choice chips; pressing the chosen one clears it (an optional choice). */
+export function Chips<T extends string>({ value, options, onChange, testIDPrefix }: { value: T | null; options: { value: T; label: string }[]; onChange: (v: T | null) => void; testIDPrefix?: string }) {
+  const c = useColors();
+  return (
+    <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: 6 }}>
+      {options.map((o) => {
+        const on = o.value === value;
+        return (
+          <Pressable
+            key={o.value}
+            testID={testIDPrefix ? `${testIDPrefix}-${o.value}` : undefined}
+            accessibilityRole="button"
+            accessibilityState={{ selected: on }}
+            onPress={() => onChange(on ? null : o.value)}
+            style={{ paddingHorizontal: 12, paddingVertical: 6, borderRadius: radius.pill, backgroundColor: on ? c.primary : c.surfaceAlt }}
+          >
+            <Text style={{ color: on ? c.onPrimary : c.textPrimary, fontWeight: '600', fontSize: typo.caption.size + 1 }}>{o.label}</Text>
+          </Pressable>
+        );
+      })}
+    </View>
+  );
+}

@@ -22,7 +22,13 @@ public final class EconomyProjection implements MarketListener {
 
     static final int INSIDERS_KEPT = 30;
 
-    public record Dividend(Event.DividendAnnounced announced, boolean paid) {}
+    /** {@code recordDate}/{@code payDate} are null for M2b dividends (paid at the ex-date). */
+    public record Dividend(String instrument, long perShare, long exDate, Long recordDate, Long payDate, boolean paid) {
+
+        Dividend markPaid() {
+            return new Dividend(instrument, perShare, exDate, recordDate, payDate, true);
+        }
+    }
 
     public record BondState(int couponsPaid, boolean defaulted, boolean redeemed, long redeemedPerUnit) {}
 
@@ -44,7 +50,11 @@ public final class EconomyProjection implements MarketListener {
             switch (e) {
                 case Event.ConsensusPublished c -> consensus.put(c.instrument(), c);
                 case Event.EarningsReported r -> reports.computeIfAbsent(r.instrument(), k -> new ArrayList<>()).add(r);
-                case Event.DividendAnnounced d -> dividends.computeIfAbsent(d.instrument(), k -> new ArrayList<>()).add(new Dividend(d, false));
+                case Event.DividendAnnounced d -> dividends.computeIfAbsent(d.instrument(), k -> new ArrayList<>())
+                        .add(new Dividend(d.instrument(), d.perShare(), d.exDate(), null, null, false));
+                case Event.DividendDeclared d -> dividends.computeIfAbsent(d.instrument(), k -> new ArrayList<>())
+                        .add(new Dividend(d.instrument(), d.perShare(), d.exDate(), d.recordDate(), d.payDate(), false));
+                case Event.DividendPaymentStarted p -> markPaid(p.instrument(), p.perShare());
                 case Event.InsiderTradeDisclosed i -> {
                     Deque<Event.InsiderTradeDisclosed> q = insiders.computeIfAbsent(i.instrument(), k -> new ArrayDeque<>());
                     q.addFirst(i);
@@ -72,17 +82,19 @@ public final class EconomyProjection implements MarketListener {
         }
     }
 
+    private void markPaid(String instrument, long perShare) {
+        List<Dividend> list = dividends.getOrDefault(instrument, List.of());
+        for (int i = 0; i < list.size(); i++) {
+            if (!list.get(i).paid() && list.get(i).perShare() == perShare) {
+                list.set(i, list.get(i).markPaid());
+                break;
+            }
+        }
+    }
+
     private void onPayout(Event.PayoutStarted p) {
         switch (p.kind()) {
-            case DIVIDEND -> {
-                List<Dividend> list = dividends.getOrDefault(p.instrument(), List.of());
-                for (int i = 0; i < list.size(); i++) {
-                    if (!list.get(i).paid() && list.get(i).announced().perShare() == p.perUnit()) {
-                        list.set(i, new Dividend(list.get(i).announced(), true));
-                        break;
-                    }
-                }
-            }
+            case DIVIDEND -> markPaid(p.instrument(), p.perUnit());
             case COUPON -> bonds.merge(p.instrument(), new BondState(1, false, false, 0),
                     (a, x) -> new BondState(a.couponsPaid() + 1, a.defaulted(), a.redeemed(), a.redeemedPerUnit()));
             case REDEMPTION -> bonds.merge(p.instrument(), new BondState(0, false, true, p.perUnit()),

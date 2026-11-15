@@ -56,6 +56,12 @@ public final class WorldFeed implements MarketListener {
                     }
                     fundamentals.put(r.instrument(), Math.max(0, r.guidanceEps()) * 4);
                 }
+                case Event.DividendExDate d -> {
+                    FairValue f = fairValues.get(d.instrument());
+                    if (f != null) {
+                        f.shift(-d.perShare());
+                    }
+                }
                 case Event.PayoutStarted p when p.kind() == Event.PayoutKind.DIVIDEND -> {
                     FairValue f = fairValues.get(p.instrument());
                     if (f != null) {
@@ -69,6 +75,16 @@ public final class WorldFeed implements MarketListener {
                     }
                 }
                 default -> { }
+            }
+        }
+    }
+
+    /** Re-anchors each fund to its NAV per unit (M2c): its dealer quotes around what the basket is worth. */
+    public void refreshFunds() {
+        for (EconomyViews.Fund fund : market.funds()) {
+            FairValue f = fairValues.get(fund.instrument());
+            if (f != null && fund.navPerUnit() != null && fund.navPerUnit() > 0) {
+                f.anchor(fund.navPerUnit());
             }
         }
     }
