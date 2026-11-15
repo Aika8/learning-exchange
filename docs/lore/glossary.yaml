@@ -1,0 +1,132 @@
+# Concept glossary (ADR-0012, world bible §6): one entry per finance concept, real and lore names in ru and en, and a
+# one-line definition. Single source for both BFFs: the mobile BFF serves real names and definitions only, the game BFF
+# adds the lore names. A test checks every entry has all six strings.
+terms:
+  - id: order-book
+    real: { ru: "Биржевой стакан", en: "Order book" }
+    lore: { ru: "Лестница", en: "the Ladder" }
+    definition: { ru: "Все лимитные заявки на покупку и продажу по ценам.", en: "All resting buy and sell limit orders by price." }
+  - id: spread
+    real: { ru: "Спред", en: "Spread" }
+    lore: { ru: "Пропасть", en: "the Gap" }
+    definition: { ru: "Разница между лучшей ценой продажи и лучшей ценой покупки.", en: "The difference between the best ask and the best bid." }
+  - id: limit-order
+    real: { ru: "Лимитная заявка", en: "Limit order" }
+    lore: { ru: "Встать на ступень", en: "Take a rung" }
+    definition: { ru: "Купить или продать не хуже указанной цены; может ждать в стакане.", en: "Buy or sell at the given price or better; may wait in the book." }
+  - id: market-order
+    real: { ru: "Рыночная заявка", en: "Market order" }
+    lore: { ru: "Прыжок через Пропасть", en: "Jump the Gap" }
+    definition: { ru: "Исполняется сразу по лучшим доступным ценам.", en: "Fills at once at the best prices available." }
+  - id: fee
+    real: { ru: "Комиссия", en: "Fee" }
+    lore: { ru: "Пошлина Биржи", en: "Exchange toll" }
+    definition: { ru: "Плата бирже с каждой сделки.", en: "What the exchange charges on every trade." }
+  - id: stop-loss
+    real: { ru: "Стоп-лосс", en: "Stop-loss" }
+    lore: { ru: "Якорь", en: "the Anchor" }
+    definition: { ru: "Заявка, которая закрывает позицию, если цена сделки дошла до уровня стопа.", en: "An order that closes a position when a trade prints at the stop level." }
+  - id: gap
+    real: { ru: "Гэп", en: "Gap" }
+    lore: { ru: "Обрыв ветра", en: "Wind break" }
+    definition: { ru: "Цена открылась далеко от закрытия; стоп может исполниться хуже своего уровня.", en: "The price opens far from the close; a stop may fill worse than its level." }
+  - id: leverage
+    real: { ru: "Плечо", en: "Leverage" }
+    lore: { ru: "Заёмные паруса", en: "Borrowed sails" }
+    definition: { ru: "Торговля на заёмные деньги: прибыль и убыток умножаются.", en: "Trading with borrowed money: profit and loss are multiplied." }
+  - id: stop-out
+    real: { ru: "Стоп-аут", en: "Stop-out" }
+    lore: { ru: "Рубка канатов", en: "Cutting the ropes" }
+    definition: { ru: "Принудительное закрытие позиции с плечом, когда залог упал вдвое.", en: "A leveraged position is force-closed when its collateral has halved." }
+  - id: income-tax
+    real: { ru: "Налог на доход (ИПН 10%)", en: "Income tax (10%)" }
+    lore: { ru: "Десятина", en: "the Tithe" }
+    definition: { ru: "10% с прибыли от продаж, дивидендов и купонов.", en: "10% of profit from sales, dividends and coupons." }
+  - id: deposit
+    real: { ru: "Депозит со сложным процентом", en: "Deposit with compound interest" }
+    lore: { ru: "Сад Причала", en: "the Quay garden" }
+    definition: { ru: "Проценты начисляются на проценты; ставка новых вкладов следует за базовой ставкой.", en: "Interest earns interest; new deposit rates follow the policy rate." }
+  - id: inflation
+    real: { ru: "Инфляция", en: "Inflation" }
+    lore: { ru: "Туман", en: "the Fog" }
+    definition: { ru: "Рост цен; реальная доходность = ставка − инфляция.", en: "Rising prices; real return = rate − inflation." }
+  - id: central-bank
+    real: { ru: "Центральный банк", en: "Central bank" }
+    lore: { ru: "Совет Казначеев", en: "Treasurers' Council" }
+    definition: { ru: "Устанавливает базовую ставку по заранее объявленному календарю.", en: "Sets the policy rate on a calendar published in advance." }
+  - id: policy-rate
+    real: { ru: "Базовая ставка", en: "Policy rate" }
+    lore: { ru: "Ставка Совета", en: "Council rate" }
+    definition: { ru: "Ставка выше — вклады доходнее, облигации дешевле, местная валюта крепче.", en: "Higher rate: better deposits, cheaper bonds, a stronger local currency." }
+  - id: economic-calendar
+    real: { ru: "Экономический календарь", en: "Economic calendar" }
+    lore: { ru: "Календарь ветров", en: "Calendar of winds" }
+    definition: { ru: "Даты решений по ставке, отчётов и выплат: чтобы не держать лишний риск перед событием.", en: "Dates of rate decisions, reports and payouts: so you don't carry extra risk into an event." }
+  - id: earnings-report
+    real: { ru: "Квартальный отчёт", en: "Quarterly report" }
+    lore: { ru: "Ведомость мастерской", en: "Workshop ledger" }
+    definition: { ru: "Выручка, прибыль, EPS, долг, денежный поток, дивиденд и прогноз за квартал.", en: "Revenue, profit, EPS, debt, cash flow, dividend and guidance for a quarter." }
+  - id: consensus
+    real: { ru: "Консенсус-прогноз", en: "Consensus estimate" }
+    lore: { ru: "Ожидания Счётчиков", en: "the Counters' expectations" }
+    definition: { ru: "Средний прогноз аналитиков; цена реагирует на сюрприз = факт − консенсус.", en: "Analysts' average forecast; the price reacts to the surprise = actual − consensus." }
+  - id: earnings-season
+    real: { ru: "Сезон отчётностей", en: "Earnings season" }
+    lore: { ru: "Сезон ведомостей", en: "Ledger season" }
+    definition: { ru: "Недели, когда компании публикуют квартальные отчёты.", en: "The weeks when companies publish their quarterly reports." }
+  - id: eps
+    real: { ru: "Прибыль на акцию (EPS)", en: "Earnings per share (EPS)" }
+    lore: { ru: "Доля прибыли мастерской", en: "Workshop profit share" }
+    definition: { ru: "Чистая прибыль, делённая на число акций.", en: "Net profit divided by the number of shares." }
+  - id: pe-ratio
+    real: { ru: "P/E", en: "P/E ratio" }
+    lore: { ru: "Мерило Грана", en: "Gran's measure" }
+    definition: { ru: "Цена акции / годовая прибыль на акцию: сколько лет прибыли стоит акция.", en: "Share price / yearly EPS: how many years of profit the share costs." }
+  - id: dividend
+    real: { ru: "Дивиденд", en: "Dividend" }
+    lore: { ru: "Доля с прибыли", en: "Profit share-out" }
+    definition: { ru: "Часть прибыли, которую компания платит акционерам.", en: "Part of the profit a company pays to its shareholders." }
+  - id: ex-dividend
+    real: { ru: "Дата отсечки (ex-dividend)", en: "Ex-dividend date" }
+    lore: { ru: "День отсечки", en: "Cut-off day" }
+    definition: { ru: "Владельцы на эту дату получают дивиденд; цена падает примерно на его размер.", en: "Holders on this date get the dividend; the price drops by about that much." }
+  - id: insider-trades
+    real: { ru: "Сделки инсайдеров", en: "Insider trades" }
+    lore: { ru: "Записи в Палате о сделках мастеров", en: "Masters' records in the Chamber" }
+    definition: { ru: "Раскрытые сделки директоров с акциями своей компании; покупки значат больше продаж.", en: "Disclosed trades of directors in their own company's shares; buys mean more than sells." }
+  - id: bond
+    real: { ru: "Облигация", en: "Bond" }
+    lore: { ru: "Долговая расписка гильдии", en: "Guild note" }
+    definition: { ru: "Долг: эмитент платит купоны и возвращает номинал в дату погашения.", en: "A loan: the issuer pays coupons and repays the face value at maturity." }
+  - id: coupon
+    real: { ru: "Купон", en: "Coupon" }
+    lore: { ru: "Процент по расписке", en: "Note interest" }
+    definition: { ru: "Регулярная выплата по облигации, процент от номинала.", en: "A regular bond payment, a percentage of the face value." }
+  - id: ytm
+    real: { ru: "Доходность к погашению (YTM)", en: "Yield to maturity (YTM)" }
+    lore: { ru: "Доход расписки до срока", en: "Note yield to term" }
+    definition: { ru: "Годовая доходность, если купить по текущей цене и держать до погашения.", en: "The yearly return if you buy at today's price and hold to maturity." }
+  - id: duration
+    real: { ru: "Дюрация", en: "Duration" }
+    lore: { ru: "Длина расписки", en: "Note length" }
+    definition: { ru: "На сколько % изменится цена облигации при изменении ставки на 1 п.п.", en: "How many % a bond's price moves when rates move 1 percentage point." }
+  - id: credit-rating
+    real: { ru: "Кредитный рейтинг", en: "Credit rating" }
+    lore: { ru: "Рейтинг Дома Оценщиков", en: "Assessors' House rating" }
+    definition: { ru: "Оценка риска дефолта по шкале AAA…CCC; ниже рейтинг — выше доходность.", en: "Default risk on the AAA…CCC scale; lower rating, higher yield." }
+  - id: default
+    real: { ru: "Дефолт", en: "Default" }
+    lore: { ru: "Разорение гильдии", en: "Guild collapse" }
+    definition: { ru: "Эмитент не платит купон или номинал; держатели получают только то, что осталось.", en: "The issuer misses a coupon or repayment; holders get only what is left." }
+  - id: volatility
+    real: { ru: "Волатильность", en: "Volatility" }
+    lore: { ru: "Шторм", en: "Storm" }
+    definition: { ru: "Насколько сильно колеблется цена; в шторм — в разы сильнее.", en: "How much the price swings; in a storm, several times more." }
+  - id: index-fund
+    real: { ru: "Индексный фонд", en: "Index fund" }
+    lore: { ru: "Корзина Ветлы", en: "Vetla's basket" }
+    definition: { ru: "Покупает весь рынок понемногу и держит; низкие комиссии.", en: "Buys a little of the whole market and holds; low fees." }
+  - id: paper-trading
+    real: { ru: "Учебная позиция", en: "Paper position" }
+    lore: { ru: "Пробный рейс", en: "Trial voyage" }
+    definition: { ru: "Сделка понарошку по реальной цене: деньги не двигаются.", en: "A pretend trade at a real price: no money moves." }

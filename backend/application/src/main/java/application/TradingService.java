@@ -53,13 +53,25 @@ public interface TradingService {
     /** A stop or take-profit kept outside the book (ADR-0008). Unused prices are 0. */
     ConditionalView placeConditional(String accountId, String instrument, Conditional.Kind kind, Order.Side side,
                                      long qty, long triggerPrice, long limitPrice, long activationPrice, long offset,
-                                     long protectiveSpread);
+                                     long protectiveSpread, String idempotencyKey);
+
+    default ConditionalView placeConditional(String accountId, String instrument, Conditional.Kind kind, Order.Side side,
+                                             long qty, long triggerPrice, long limitPrice, long activationPrice,
+                                             long offset, long protectiveSpread) {
+        return placeConditional(accountId, instrument, kind, side, qty, triggerPrice, limitPrice, activationPrice, offset,
+                protectiveSpread, null);
+    }
 
     ConditionalView cancelConditional(String accountId, long conditionalId);
 
     List<ConditionalView> conditionals(String accountId, int limit);
 
-    MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage);
+    MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage,
+                          String idempotencyKey);
+
+    default MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage) {
+        return openMargin(accountId, instrument, side, qty, leverage, null);
+    }
 
     MarginView closeMargin(String accountId, long positionId);
 
@@ -67,7 +79,11 @@ public interface TradingService {
 
     SavingsProduct savingsProduct();
 
-    SavingsView openSavings(String accountId, long amount);
+    SavingsView openSavings(String accountId, long amount, String idempotencyKey);
+
+    default SavingsView openSavings(String accountId, long amount) {
+        return openSavings(accountId, amount, null);
+    }
 
     SavingsView closeSavings(String accountId, long depositId);
 
@@ -75,6 +91,37 @@ public interface TradingService {
 
     /** Pays interest for the bank days passed by now; called by a timer. */
     void accrueInterest();
+
+    // ---- M2b: economy, securities, real world (ADR-0015, ADR-0021) ----
+
+    /** Runs the economy items due by now (reports, rate decisions, coupons…); called by a timer. */
+    void runEconomy();
+
+    /** Trading on the instrument is open (false at report nights and after a bond is repaid). */
+    boolean tradingOpen(String instrument);
+
+    List<application.economy.EconomyViews.CalendarEntry> calendar(long from, long to);
+
+    application.economy.EconomyViews.Macro macro();
+
+    List<application.economy.EconomyViews.Company> companies();
+
+    List<application.economy.EconomyViews.Bond> bonds();
+
+    List<CandleProjection.Candle> candles(String instrument, int limit);
+
+    List<application.realworld.RealMarketData.Quote> realQuotes();
+
+    List<application.realworld.RealMarketData.Point> realHistory(String symbol);
+
+    Optional<application.realworld.RealMarketData.BaseRate> realBaseRate();
+
+    List<application.realworld.PaperBook.Position> paperPositions(String accountId);
+
+    application.realworld.PaperBook.Position openPaper(String accountId, String symbol, Order.Side side, long qty,
+                                                        String idempotencyKey);
+
+    application.realworld.PaperBook.Position closePaper(String accountId, long paperId);
 
     /** My statement for simulation time {@code [from, to)}. */
     StatementProjection.Statement statement(String accountId, long from, long to);

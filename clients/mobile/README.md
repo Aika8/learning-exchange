@@ -16,6 +16,22 @@ it knows nothing about the game. Design: `docs/design/` (tokens copied to `src/t
 (S03 + S04: last price, order book with spread, my open orders, trades tape, Buy/Sell → order ticket with fee and total),
 `settings` (S10b: ru/en switch, log out).
 
+## Screens (M2a, M2b)
+- `fx` (currency exchange), `deposits` (savings, rule of 72), `statement`; Invest tab now lists every instrument from
+  `GET /instruments` with real names from `/bff/mobile/catalogue`, shows «Торги остановлены» when `tradingOpen` is false,
+  and links a STOCK to its company card and a BOND to its bond screen.
+- `company?id=…` — company card from `/bff/mobile/companies/{id}`: key metrics (price, EPS TTM, P/E, debt/profit,
+  dividend yield), last report vs consensus with surprise, earnings calendar and past reports, dividends, insider trades,
+  a candle chart from `/instruments/{id}/candles` drawn with Views (no chart library) with dividend ex-dates marked,
+  and the red «Отчёт сегодня ночью — риск гэпа для твоего стопа» banner when the BFF sends `gapWarning`.
+- `calendar` (from «Ещё») — central bank (policy, inflation, real and deposit rates, next decision and consensus, regime)
+  and the economic calendar with done/scheduled and consensus vs actual.
+- `bonds` and `bonds?id=…` (from «Ещё» or the Invest tab) — YTM always shown, modified duration, coupons, rating, status.
+- `real` (tab «Реальный мир») — real quotes with source, time and a «образец данных» badge, base rate with decisions,
+  paper («учебные») positions: open (with `Idempotency-Key`) and close, P&L.
+- Pure helpers in `src/m2b.ts` (gap-warning rule, chart scaling, ×100 ratios, idempotency keys), tested in `test/m2b.test.mjs`.
+  POSTs that create something (orders, stops, deposits, paper positions) send an `Idempotency-Key`.
+
 ## Code map
 - `src/api/schema.d.ts` — generated from `api/openapi.yaml` (`npm run gen:api`); never edit.
 - `src/api/client.ts` (openapi-fetch + bearer token), `src/api/socket.ts` (WebSocket channels, auto-resubscribe).
@@ -25,5 +41,5 @@ it knows nothing about the game. Design: `docs/design/` (tokens copied to `src/t
 
 ## Tests
 - `npm test`: i18n keys equal in ru/en and every `t('…')` key exists; tokens equal the design file; `money.ts` equals the
-  web client's; `tsc --noEmit`.
+  web client's; M2b helpers (`test/m2b.test.mjs`); `tsc --noEmit`.
 - E2E: `.maestro/skeleton.yaml` (Maestro) — written, not yet run in CI (needs a simulator and Maestro installed).

@@ -23,6 +23,12 @@ public final class TradingBot {
     private final Random random;
     private final TradingService market;
     private long rejected;
+    private final java.util.ArrayDeque<Long> recent = new java.util.ArrayDeque<>();
+    private long steps;
+    private WorldFeed world;
+
+    /** Price history kept for momentum and mean-reversion: the last trade price seen at each step. */
+    static final int WINDOW = 20;
 
     public TradingBot(String name, String accountId, String instrument, Strategy strategy, long seed, TradingService market) {
         this.name = name;
@@ -31,6 +37,12 @@ public final class TradingBot {
         this.strategy = strategy;
         this.random = new Random(seed);
         this.market = market;
+    }
+
+    /** Gives the bot the published fundamentals (for the fundamentalist). */
+    public TradingBot withWorld(WorldFeed world) {
+        this.world = world;
+        return this;
     }
 
     public final void step(long fairValue) {
@@ -60,10 +72,17 @@ public final class TradingBot {
         List<Balance> balances = market.balances(accountId);
         Balance base = find(balances, i.base());
         Balance quote = find(balances, i.quote());
+        if (book.lastPrice() != null) {
+            recent.addLast(book.lastPrice());
+            while (recent.size() > WINDOW) {
+                recent.removeFirst();
+            }
+        }
         return new MarketView(instrument,
                 book.bids().isEmpty() ? null : book.bids().getFirst().price(),
                 book.asks().isEmpty() ? null : book.asks().getFirst().price(),
-                book.lastPrice(), fairValue, mine, base.available(), quote.available(), base.total());
+                book.lastPrice(), fairValue, mine, base.available(), quote.available(), base.total(),
+                List.copyOf(recent), world == null ? null : world.annualEps(instrument), steps++);
     }
 
     private void act(Intent intent) {

@@ -66,7 +66,7 @@ public class ApiController {
 
     @GetMapping("/instruments")
     public List<InstrumentDto> instruments() {
-        return market.instruments().stream().map(InstrumentDto::of).toList();
+        return market.instruments().stream().map(i -> InstrumentDto.of(i, market.tradingOpen(i.id()))).toList();
     }
 
     @GetMapping("/instruments/{id}/book")
@@ -98,10 +98,7 @@ public class ApiController {
         Order.Side side = parse(Order.Side.class, body.side());
         Order.Type type = parse(Order.Type.class, body.type());
         long price = type == Order.Type.LIMIT ? (body.price() == null ? 0 : body.price()) : 0;
-        if (idempotencyKey != null && idempotencyKey.length() > 64) {
-            throw new BadRequest("Idempotency-Key is longer than 64");
-        }
-        return OrderDto.of(market.place(id, body.instrument(), side, type, price, body.qty(), idempotencyKey));
+        return OrderDto.of(market.place(id, body.instrument(), side, type, price, body.qty(), key(idempotencyKey)));
     }
 
     @DeleteMapping("/orders/{orderId}")
@@ -135,6 +132,7 @@ public class ApiController {
     @PostMapping("/conditional-orders")
     @ResponseStatus(HttpStatus.CREATED)
     public Dto.ConditionalDto placeConditional(@RequestHeader(value = "Authorization", required = false) String authz,
+                                               @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
                                                @RequestBody Dto.PlaceConditionalRequest b) {
         String id = auth.accountId(authz);
         if (b == null || b.instrument() == null || b.kind() == null || b.side() == null || b.qty() == null) {
@@ -142,7 +140,7 @@ public class ApiController {
         }
         return Dto.ConditionalDto.of(market.placeConditional(id, b.instrument(), parse(Conditional.Kind.class, b.kind()),
                 parse(Order.Side.class, b.side()), b.qty(), or0(b.triggerPrice()), or0(b.limitPrice()),
-                or0(b.activationPrice()), or0(b.offset()), or0(b.protectiveSpread())));
+                or0(b.activationPrice()), or0(b.offset()), or0(b.protectiveSpread()), key(idempotencyKey)));
     }
 
     @DeleteMapping("/conditional-orders/{conditionalId}")
@@ -159,12 +157,14 @@ public class ApiController {
     @PostMapping("/margin/positions")
     @ResponseStatus(HttpStatus.CREATED)
     public Dto.MarginPositionDto openMargin(@RequestHeader(value = "Authorization", required = false) String authz,
+                                            @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
                                             @RequestBody Dto.OpenMarginRequest b) {
         String id = auth.accountId(authz);
         if (b == null || b.instrument() == null || b.side() == null || b.qty() == null || b.leverage() == null) {
             throw new BadRequest("instrument, side, qty and leverage are required");
         }
-        return Dto.MarginPositionDto.of(market.openMargin(id, b.instrument(), parse(Order.Side.class, b.side()), b.qty(), b.leverage()));
+        return Dto.MarginPositionDto.of(market.openMargin(id, b.instrument(), parse(Order.Side.class, b.side()), b.qty(), b.leverage(),
+                key(idempotencyKey)));
     }
 
     @PostMapping("/margin/positions/{positionId}/close")
@@ -184,12 +184,13 @@ public class ApiController {
     @PostMapping("/savings")
     @ResponseStatus(HttpStatus.CREATED)
     public Dto.SavingsDepositDto openSavings(@RequestHeader(value = "Authorization", required = false) String authz,
+                                             @RequestHeader(value = "Idempotency-Key", required = false) String idempotencyKey,
                                              @RequestBody Dto.OpenSavingsRequest b) {
         String id = auth.accountId(authz);
         if (b == null || b.amount() == null) {
             throw new BadRequest("amount is required");
         }
-        return Dto.SavingsDepositDto.of(market.openSavings(id, b.amount()));
+        return Dto.SavingsDepositDto.of(market.openSavings(id, b.amount(), key(idempotencyKey)));
     }
 
     @PostMapping("/savings/{depositId}/close")
@@ -205,6 +206,14 @@ public class ApiController {
         long f = from == null ? 0 : from;
         long t = to == null ? market.clock().now() + 1 : to;
         return Dto.StatementDto.of(market.statement(id, f, t));
+    }
+
+    /** Idempotency key: optional, at most 64 characters (same rule on every POST that creates something). */
+    static String key(String idempotencyKey) {
+        if (idempotencyKey != null && idempotencyKey.length() > 64) {
+            throw new BadRequest("Idempotency-Key is longer than 64");
+        }
+        return idempotencyKey;
     }
 
     private static long or0(Long v) {

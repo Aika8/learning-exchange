@@ -6,6 +6,7 @@ import { api, ApiError, call } from '../api/client';
 import { refetchAccount, useAccountNudges, useMe, useSavings } from '../hooks';
 import { bpsToPercent, ruleOf72Tenths } from '../finance';
 import { formatMinor, parseToMinor } from '../money';
+import { newIdempotencyKey } from '../m2b';
 import { type as typo, useColors } from '../theme/theme';
 import { Body, Button, Caption, Card, Screen, Title } from '../components/ui';
 import { Field, Line } from '../components/Field';
@@ -30,7 +31,7 @@ export default function Deposits() {
   const err = (e: unknown) => setMsg({ ok: false, text: t(`errors.${e instanceof ApiError ? e.code : 'NETWORK'}`, { defaultValue: t('errors.BAD_REQUEST') }) });
 
   const openDeposit = useMutation({
-    mutationFn: (minor: number) => call(api.POST('/savings', { body: { amount: minor } })),
+    mutationFn: (minor: number) => call(api.POST('/savings', { params: { header: { 'Idempotency-Key': newIdempotencyKey() } }, body: { amount: minor } })),
     onSuccess: (d) => {
       setMsg({ ok: true, text: t('deposits.opened', { id: d.depositId }) });
       setAmount('');

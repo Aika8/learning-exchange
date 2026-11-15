@@ -4,12 +4,13 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { touchMin, useColors } from '../theme/theme';
 
-// The design's tab bar (Главная · Инвестиции · Обмен · Вклады · Ещё), drawn here because the router ships stacks only.
+// The design's tab bar (Главная · Инвестиции · Обмен · Вклады · Реальный мир · Ещё), drawn here because the router ships stacks only.
 const TABS = [
   { href: '/home', icon: '⌂', key: 'tabs.home' },
   { href: '/instrument', icon: '▲', key: 'tabs.invest' },
   { href: '/fx', icon: '⇄', key: 'tabs.fx' },
   { href: '/deposits', icon: '%', key: 'tabs.deposits' },
+  { href: '/real', icon: '◎', key: 'tabs.real' },
   { href: '/settings', icon: '⋯', key: 'tabs.more' },
 ] as const;
 
@@ -25,7 +26,7 @@ export function TabBar() {
         return (
           <Pressable key={tab.href} testID={`tab-${tab.href.slice(1)}`} onPress={() => router.replace(tab.href)} style={{ flex: 1, alignItems: 'center', justifyContent: 'center', minHeight: touchMin + 8 }}>
             <Text style={{ fontSize: 18, color: on ? c.primary : c.textSecondary }}>{tab.icon}</Text>
-            <Text style={{ fontSize: 11, color: on ? c.primary : c.textSecondary, fontWeight: on ? '600' : '400' }}>{t(tab.key)}</Text>
+            <Text style={{ fontSize: 10, textAlign: 'center', color: on ? c.primary : c.textSecondary, fontWeight: on ? '600' : '400' }}>{t(tab.key)}</Text>
           </Pressable>
         );
       })}

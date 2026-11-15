@@ -20,7 +20,7 @@ public class ApiErrors {
             case UNKNOWN_INSTRUMENT, UNKNOWN_ORDER, UNKNOWN_POSITION, UNKNOWN_DEPOSIT -> HttpStatus.NOT_FOUND;
             case LEVERAGE_NOT_ALLOWED -> HttpStatus.UNPROCESSABLE_CONTENT;
             case NOT_OWNER -> HttpStatus.FORBIDDEN;
-            case NOT_OPEN, ACCOUNT_EXISTS -> HttpStatus.CONFLICT;
+            case NOT_OPEN, ACCOUNT_EXISTS, MARKET_CLOSED, DEFAULTED -> HttpStatus.CONFLICT;
             case UNKNOWN_ACCOUNT -> HttpStatus.UNAUTHORIZED;
             case INVALID_NAME, INVALID_ORDER, INVALID_AMOUNT -> HttpStatus.BAD_REQUEST;
         };

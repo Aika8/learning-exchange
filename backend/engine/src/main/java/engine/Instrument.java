@@ -36,8 +36,20 @@ public record Instrument(String id, String base, String quote, long feeBps, int 
      */
     public static final Instrument AMBER_SPARK = new Instrument("AMBER-SPARK", "AMBER", "SPARK", 5, 4);
 
-    /** Both instruments of M2a, in catalogue order. */
-    public static final java.util.List<Instrument> ALL = java.util.List.of(SILK_SPARK, AMBER_SPARK);
+    /** M2b: a second company stock (a workshop of the Forge), with quarterly reports and dividends. */
+    public static final Instrument FORGE_SPARK = new Instrument("FORGE-SPARK", "FORGE", "SPARK", 10);
+
+    /**
+     * M2b bonds: one unit = one bond with a face value of 1 000.00 SPARK; the price is per bond in SPARK minor units.
+     * HBND is the harbour treasury's (AAA), GBND a weak guild's (CCC, high coupon, may default). Terms live in the
+     * application's securities catalogue; the engine only moves coupons and redemptions (ADR-0021).
+     */
+    public static final Instrument HBND_SPARK = new Instrument("HBND-SPARK", "HBND", "SPARK", 5);
+    public static final Instrument GBND_SPARK = new Instrument("GBND-SPARK", "GBND", "SPARK", 5);
+
+    /** Every instrument, in catalogue order. */
+    public static final java.util.List<Instrument> ALL = java.util.List.of(SILK_SPARK, AMBER_SPARK, FORGE_SPARK,
+            HBND_SPARK, GBND_SPARK);
 
     /**
      * Fee on a notional, rounded down. Rounding down means the sum of fees on the parts of an order never

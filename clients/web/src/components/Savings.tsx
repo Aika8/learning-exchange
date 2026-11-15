@@ -21,7 +21,7 @@ export function Savings() {
 
   const open = useMutation({
     mutationFn: async () =>
-      unwrap(await api.POST('/savings', {  body: { amount: minor! } })),
+      unwrap(await api.POST('/savings', { params: { header: { 'Idempotency-Key': crypto.randomUUID() } }, body: { amount: minor! } })),
     onSuccess: (d) => {
       setMessage({ ok: true, text: t('savings.opened', { id: d.depositId }) });
       refresh();

@@ -29,6 +29,18 @@ markets:
           activity: 0.6     # chance to trade in a step
           maxQty: 6
           marketShare: 0.5  # half market orders, half limit orders near the last price
+      - name: bot-silk-momentum
+        strategy: momentum
+        capital: { SPARK: 10000000, SILK: 50 }
+        params: { thresholdBps: 60, qty: 3, activity: 0.3 }
+      - name: bot-silk-fundamentalist
+        strategy: fundamentalist
+        capital: { SPARK: 20000000, SILK: 100 }
+        params: { targetPe: 10, marginBps: 800, qty: 5, activity: 0.2 }
+      - name: bot-silk-index
+        strategy: index-investor
+        capital: { SPARK: 20000000 }
+        params: { everySteps: 120, qty: 1 }
   - instrument: AMBER-SPARK         # FX: a foreign currency, like USD/KZT; leverage ×4 allowed
     fairValue:
       start: 50000        # 500.00 SPARK per AMBER
@@ -53,3 +65,65 @@ markets:
           activity: 0.5
           maxQty: 40
           marketShare: 0.5
+  # ---- M2b ----
+  - instrument: FORGE-SPARK         # a second company; reports move it by the surprise (ADR-0007)
+    fairValue:
+      start: 25000        # 250.00 SPARK ≈ P/E 12.5 on ~20 SPARK yearly EPS
+      volatilityBps: 4
+      floor: 100
+    bots:
+      - name: bot-forge-maker
+        strategy: market-maker
+        capital: { SPARK: 200000000, FORGE: 10000 }
+        params: { halfSpread: 20, step: 10, levels: 6, qty: 8, targetBase: 10000, skewPerUnit: 0.04 }
+      - name: bot-forge-noise
+        strategy: noise
+        count: 2
+        capital: { SPARK: 5000000, FORGE: 200 }
+        params: { activity: 0.5, maxQty: 4, marketShare: 0.5 }
+      - name: bot-forge-momentum
+        strategy: momentum
+        capital: { SPARK: 10000000, FORGE: 50 }
+        params: { thresholdBps: 60, qty: 3, activity: 0.3 }
+      - name: bot-forge-meanrev
+        strategy: mean-reversion
+        capital: { SPARK: 10000000, FORGE: 50 }
+        params: { bandBps: 50, qty: 3, activity: 0.3 }
+      - name: bot-forge-fundamentalist
+        strategy: fundamentalist
+        capital: { SPARK: 20000000, FORGE: 100 }
+        params: { targetPe: 12, marginBps: 800, qty: 5, activity: 0.2 }
+      - name: bot-forge-index
+        strategy: index-investor
+        capital: { SPARK: 20000000 }
+        params: { everySteps: 120, qty: 1 }
+  - instrument: HBND-SPARK          # government bond, AAA: price follows the policy rate through duration
+    fairValue:
+      start: 98000
+      volatilityBps: 1
+      floor: 100
+    bots:
+      - name: bot-hbnd-dealer
+        strategy: market-maker
+        capital: { SPARK: 500000000, HBND: 2000 }
+        params: { halfSpread: 50, step: 20, levels: 5, qty: 10, targetBase: 2000, skewPerUnit: 0.5 }
+      - name: bot-hbnd-noise
+        strategy: noise
+        count: 2
+        capital: { SPARK: 20000000, HBND: 50 }
+        params: { activity: 0.3, maxQty: 3, marketShare: 0.5 }
+  - instrument: GBND-SPARK          # high-yield bond, CCC: its issuer can pay ~3 coupons, then defaults
+    fairValue:
+      start: 90000
+      volatilityBps: 3
+      floor: 100
+    bots:
+      - name: bot-gbnd-dealer
+        strategy: market-maker
+        capital: { SPARK: 300000000, GBND: 1500 }
+        params: { halfSpread: 150, step: 50, levels: 5, qty: 10, targetBase: 1500, skewPerUnit: 0.5 }
+      - name: bot-gbnd-noise
+        strategy: noise
+        count: 3
+        capital: { SPARK: 20000000, GBND: 50 }
+        params: { activity: 0.3, maxQty: 3, marketShare: 0.5 }

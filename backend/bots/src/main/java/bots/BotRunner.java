@@ -18,6 +18,16 @@ public final class BotRunner {
 
     private final List<Group> groups;
     private final Clock clock;
+    private WorldFeed world;
+
+    public BotRunner withWorld(WorldFeed world) {
+        this.world = world;
+        return this;
+    }
+
+    public WorldFeed world() {
+        return world;
+    }
 
     public BotRunner(List<Group> groups, Clock clock) {
         this.groups = List.copyOf(groups);
@@ -32,6 +42,9 @@ public final class BotRunner {
     public void tick() {
         if (clock.paused()) {
             return;
+        }
+        if (world != null) {
+            world.refreshBonds();
         }
         for (int s = 0; s < clock.speed(); s++) {
             for (Group g : groups) {

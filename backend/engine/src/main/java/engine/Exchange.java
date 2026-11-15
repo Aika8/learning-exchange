@@ -70,6 +70,10 @@ public final class Exchange {
             case Command.OpenSavings c -> openSavings(c, ts);
             case Command.CloseSavings c -> closeSavings(c, ts);
             case Command.AccrueInterest c -> accrueInterest(ts);
+            case Command.Publish c -> Outcome.ok(List.of(c.disclosure()), 0);
+            case Command.SetTradingStatus c -> setTradingStatus(c, ts);
+            case Command.Payout c -> payout(c, ts);
+            case Command.DeclareDefault c -> declareDefault(c, ts);
         };
     }
 
@@ -285,7 +289,7 @@ public final class Exchange {
             sb.append(account).append(ledger.balances(account)).append('\n');
         }
         for (Market m : markets.values()) {
-            sb.append(m.instrument.id()).append(" bids ").append(m.book.bids(Integer.MAX_VALUE))
+            sb.append(m.instrument.id()).append(m.open ? " open" : " closed").append(m.defaulted ? " defaulted" : "").append(" bids ").append(m.book.bids(Integer.MAX_VALUE))
                     .append(" asks ").append(m.book.asks(Integer.MAX_VALUE)).append('\n');
         }
         orders.values().stream().map(OrderState::view).sorted((a, b) -> Long.compare(a.orderId(), b.orderId()))
@@ -323,9 +327,12 @@ public final class Exchange {
         if (!ledger.exists(c.account()) || Accounts.isSubAccount(c.account())) {
             return Outcome.rejected(Rejection.UNKNOWN_ACCOUNT);
         }
-        String key = c.idempotencyKey() == null || c.idempotencyKey().isBlank() ? null : c.account() + "|" + c.idempotencyKey();
+        String key = idempotencyKey("O", c.account(), c.idempotencyKey());
         if (key != null && idempotency.containsKey(key)) {
             return Outcome.ok(List.of(), idempotency.get(key));
+        }
+        if (closed(c.instrument())) {
+            return Outcome.rejected(Rejection.MARKET_CLOSED);
         }
         List<Event> events = new ArrayList<>();
         Placed placed = placeInto(c, ts, events);
@@ -541,14 +548,23 @@ public final class Exchange {
         if (!markets.containsKey(c.instrument())) {
             return Outcome.rejected(Rejection.UNKNOWN_INSTRUMENT);
         }
+        if (closed(c.instrument())) {
+            return Outcome.rejected(Rejection.MARKET_CLOSED);
+        }
+        String key = idempotencyKey("C", c.account(), c.idempotencyKey());
+        if (key != null && idempotency.containsKey(key)) {
+            return Outcome.ok(List.of(), idempotency.get(key));
+        }
         Rejection invalid = Conditional.validate(c);
         if (invalid != null) {
             return Outcome.rejected(invalid);
         }
         long id = nextConditionalId++;
         conditionals.put(id, new Conditional(id, c, ts));
+        remember(key, id);
         return Outcome.ok(List.of(new Event.ConditionalPlaced(ts, id, c.account(), c.instrument(), c.kind(), c.side(),
-                c.qty(), c.triggerPrice(), c.limitPrice(), c.activationPrice(), c.offset(), c.protectiveSpread())), id);
+                c.qty(), c.triggerPrice(), c.limitPrice(), c.activationPrice(), c.offset(), c.protectiveSpread(),
+                c.idempotencyKey())), id);
     }
 
     private Outcome cancelConditional(Command.CancelConditional c, long ts) {
@@ -571,6 +587,13 @@ public final class Exchange {
     private Outcome openMargin(Command.OpenMargin c, long ts) {
         if (!ledger.exists(c.account()) || Accounts.isSubAccount(c.account())) {
             return Outcome.rejected(Rejection.UNKNOWN_ACCOUNT);
+        }
+        String key = idempotencyKey("M", c.account(), c.idempotencyKey());
+        if (key != null && idempotency.containsKey(key)) {
+            return Outcome.ok(List.of(), idempotency.get(key));
+        }
+        if (closed(c.instrument())) {
+            return Outcome.rejected(Rejection.MARKET_CLOSED);
         }
         Market m = markets.get(c.instrument());
         if (m == null) {
@@ -616,7 +639,8 @@ public final class Exchange {
         ledger.open(sub);
         List<Event> events = new ArrayList<>();
         events.add(new Event.MarginPositionOpened(ts, id, c.account(), i.id(), c.side(), c.qty(), c.leverage(),
-                collateral, loanQuote, loanBase));
+                collateral, loanQuote, loanBase, c.idempotencyKey()));
+        remember(key, id);
         ledger.transferAvailable(c.account(), sub, i.quote(), collateral);
         ledger.transferAvailable(Ledger.BANK_ACCOUNT, sub, i.quote(), loanQuote);
         ledger.transferAvailable(Ledger.BANK_ACCOUNT, sub, i.base(), loanBase);
@@ -735,6 +759,10 @@ public final class Exchange {
         if (!ledger.exists(c.account()) || Accounts.isSubAccount(c.account())) {
             return Outcome.rejected(Rejection.UNKNOWN_ACCOUNT);
         }
+        String key = idempotencyKey("S", c.account(), c.idempotencyKey());
+        if (key != null && idempotency.containsKey(key)) {
+            return Outcome.ok(List.of(), idempotency.get(key));
+        }
         if (c.asset() == null || c.amount() <= 0 || c.rateBps() < 0 || c.rateBps() > 10_000 || c.dayMillis() <= 0) {
             return Outcome.rejected(Rejection.INVALID_AMOUNT);
         }
@@ -746,8 +774,9 @@ public final class Exchange {
         ledger.open(sub);
         ledger.transferAvailable(c.account(), sub, c.asset(), c.amount());
         savings.put(id, new Savings(id, c.account(), sub, c.asset(), c.amount(), c.rateBps(), c.dayMillis(), ts));
+        remember(key, id);
         return Outcome.ok(List.of(new Event.SavingsOpened(ts, id, c.account(), c.asset(), c.amount(), c.rateBps(),
-                c.dayMillis())), id);
+                c.dayMillis(), c.idempotencyKey())), id);
     }
 
     private Outcome closeSavings(Command.CloseSavings c, long ts) {
@@ -799,6 +828,110 @@ public final class Exchange {
             events.add(new Event.InterestAccrued(ts, d.id, d.owner, total, (int) days, balance));
         }
         return Outcome.ok(events, 0);
+    }
+
+    // ---- M2b: trading status, payouts, default (ADR-0021) ----
+
+    private boolean closed(String instrument) {
+        Market m = markets.get(instrument);
+        return m != null && !m.open;
+    }
+
+    public boolean isOpen(String instrument) {
+        return !closed(instrument);
+    }
+
+    public boolean isDefaulted(String instrument) {
+        Market m = markets.get(instrument);
+        return m != null && m.defaulted;
+    }
+
+    private Outcome setTradingStatus(Command.SetTradingStatus c, long ts) {
+        Market m = markets.get(c.instrument());
+        if (m == null) {
+            return Outcome.rejected(Rejection.UNKNOWN_INSTRUMENT);
+        }
+        if (m.open == c.open()) {
+            return Outcome.ok(List.of(), 0);
+        }
+        m.open = c.open();
+        return Outcome.ok(List.of(new Event.TradingStatusChanged(ts, c.instrument(), c.open(), c.reason())), 0);
+    }
+
+    /**
+     * Pays every holder of the instrument's base asset (available + reserved, everyone but the issuer and the
+     * exchange's own accounts) {@code perUnit} each, from the issuer's available quote asset. Money moves, it is never
+     * created: if the issuer cannot pay the whole amount, nothing is paid and the command is refused. A redemption
+     * first cancels the open orders on the instrument (releasing reserved units), then takes the units back.
+     */
+    private Outcome payout(Command.Payout c, long ts) {
+        Market m = markets.get(c.instrument());
+        if (m == null) {
+            return Outcome.rejected(Rejection.UNKNOWN_INSTRUMENT);
+        }
+        if (!ledger.exists(c.issuer()) || c.perUnit() < 0 || (c.perUnit() == 0 && c.kind() != Event.PayoutKind.REDEMPTION)) {
+            return Outcome.rejected(Rejection.INVALID_AMOUNT);
+        }
+        if (m.defaulted && c.kind() == Event.PayoutKind.COUPON) {
+            return Outcome.rejected(Rejection.DEFAULTED);
+        }
+        Instrument i = m.instrument;
+        java.util.Map<String, Long> holders = new java.util.TreeMap<>();
+        long units = 0;
+        for (String account : ledger.accountIds()) {
+            if (account.equals(c.issuer()) || account.equals(Ledger.FEES_ACCOUNT) || account.equals(Ledger.BANK_ACCOUNT)) {
+                continue;
+            }
+            long held = ledger.available(account, i.base()) + ledger.reserved(account, i.base());
+            if (held > 0) {
+                holders.put(account, held);
+                units += held;
+            }
+        }
+        long total;
+        try {
+            total = Math.multiplyExact(units, c.perUnit());
+        } catch (ArithmeticException e) {
+            return Outcome.rejected(Rejection.INVALID_AMOUNT);
+        }
+        if (ledger.available(c.issuer(), i.quote()) < total) {
+            return Outcome.rejected(Rejection.INSUFFICIENT_FUNDS);
+        }
+        List<Event> events = new ArrayList<>();
+        events.add(new Event.PayoutStarted(ts, i.id(), c.kind(), c.issuer(), c.perUnit(), units, total));
+        if (c.kind() == Event.PayoutKind.REDEMPTION) {
+            for (OrderState o : orders.values().stream().filter(o -> o.isOpen() && o.instrument.equals(i.id()))
+                    .sorted(java.util.Comparator.comparingLong(o -> o.orderId)).toList()) {
+                events.addAll(cancel(new Command.CancelOrder(o.account, o.orderId), ts).events());
+            }
+            m.open = false;
+        }
+        for (var h : holders.entrySet()) {
+            long amount = h.getValue() * c.perUnit();
+            if (amount > 0) {
+                ledger.transferAvailable(c.issuer(), h.getKey(), i.quote(), amount);
+            }
+            if (c.kind() == Event.PayoutKind.REDEMPTION) {
+                ledger.transferAvailable(h.getKey(), c.issuer(), i.base(), h.getValue());
+            }
+            events.add(new Event.PayoutPaid(ts, i.id(), c.kind(), h.getKey(), h.getValue(), amount));
+        }
+        if (c.kind() == Event.PayoutKind.REDEMPTION) {
+            events.add(new Event.TradingStatusChanged(ts, i.id(), false, "REDEEMED"));
+        }
+        return Outcome.ok(events, 0);
+    }
+
+    private Outcome declareDefault(Command.DeclareDefault c, long ts) {
+        Market m = markets.get(c.instrument());
+        if (m == null) {
+            return Outcome.rejected(Rejection.UNKNOWN_INSTRUMENT);
+        }
+        if (m.defaulted) {
+            return Outcome.rejected(Rejection.DEFAULTED);
+        }
+        m.defaulted = true;
+        return Outcome.ok(List.of(new Event.BondDefaulted(ts, c.instrument(), c.issuer())), 0);
     }
 
     /** What buying {@code qty} at market costs now, walking the asks (only the available part if the book is thin). */
@@ -863,13 +996,21 @@ public final class Exchange {
                     o.price(), o.qty(), o.idempotencyKey());
             case Event.OrderCancelled o -> new Command.CancelOrder(o.account(), o.orderId());
             case Event.ConditionalPlaced c -> new Command.PlaceConditional(c.account(), c.instrument(), c.kind(),
-                    c.side(), c.qty(), c.triggerPrice(), c.limitPrice(), c.activationPrice(), c.offset(), c.protectiveSpread());
+                    c.side(), c.qty(), c.triggerPrice(), c.limitPrice(), c.activationPrice(), c.offset(), c.protectiveSpread(),
+                    c.idempotencyKey());
             case Event.ConditionalCancelled c -> new Command.CancelConditional(c.account(), c.conditionalId());
-            case Event.MarginPositionOpened m -> new Command.OpenMargin(m.account(), m.instrument(), m.side(), m.qty(), m.leverage());
+            case Event.MarginPositionOpened m -> new Command.OpenMargin(m.account(), m.instrument(), m.side(), m.qty(), m.leverage(),
+                    m.idempotencyKey());
             case Event.MarginCloseRequested m -> new Command.CloseMargin(m.account(), m.positionId());
-            case Event.SavingsOpened s -> new Command.OpenSavings(s.account(), s.asset(), s.amount(), s.rateBps(), s.dayMillis());
+            case Event.SavingsOpened s -> new Command.OpenSavings(s.account(), s.asset(), s.amount(), s.rateBps(), s.dayMillis(),
+                    s.idempotencyKey());
             case Event.SavingsClosed s -> new Command.CloseSavings(s.account(), s.depositId());
             case Event.InterestAccrued i -> new Command.AccrueInterest();
+            case Event.Disclosure d -> new Command.Publish(d);
+            case Event.TradingStatusChanged t -> new Command.SetTradingStatus(t.instrument(), t.open(), t.reason());
+            case Event.PayoutStarted p -> new Command.Payout(p.instrument(), p.kind(), p.issuer(), p.perUnit());
+            case Event.BondDefaulted b -> new Command.DeclareDefault(b.instrument(), b.issuer());
+            case Event.PayoutPaid p -> throw unexpected(p);
             case Event.ClockChanged c -> throw new IllegalStateException("not a command: " + c);
             case Event.TradeExecuted t -> throw unexpected(t);
             case Event.OrderExpired o -> throw unexpected(o);
@@ -878,6 +1019,20 @@ public final class Exchange {
             case Event.MarginStopOut m -> throw unexpected(m);
             case Event.MarginPositionClosed m -> throw unexpected(m);
         };
+    }
+
+    /**
+     * Pattern: Idempotency key — a client retrying a POST after a timeout must not open a second stop, position or
+     * deposit. Keys are scoped by account and by kind of command, so one key can't clash across endpoints.
+     */
+    private static String idempotencyKey(String kind, String account, String clientKey) {
+        return clientKey == null || clientKey.isBlank() ? null : kind + "|" + account + "|" + clientKey;
+    }
+
+    private void remember(String key, long id) {
+        if (key != null) {
+            idempotency.put(key, id);
+        }
     }
 
     private static IllegalStateException unexpected(Event consequence) {
@@ -959,6 +1114,8 @@ public final class Exchange {
 
     private static final class Market {
         final Instrument instrument;
+        boolean open = true;
+        boolean defaulted;
         final OrderBook book = new OrderBook();
         final Map<Long, Long> byBookId = new HashMap<>();
         final List<Event.TradeExecuted> trades = new ArrayList<>();

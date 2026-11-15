@@ -82,3 +82,51 @@ export function useAccountNudges() {
     return socket.subscribe(`account.${me.accountId}`, () => refetchAccount(qc));
   }, [socket, me, qc]);
 }
+
+// ---- M2b: catalogue (real names only), companies, economy, bonds, real world ----
+
+export function useInstruments() {
+  return useQuery({ queryKey: ['instruments'], queryFn: () => call(api.GET('/instruments')), refetchInterval: 10_000 });
+}
+
+/** Mobile BFF catalogue: real display names only; the app never asks the game BFF. */
+export function useCatalogue() {
+  return useQuery({ queryKey: ['catalogue'], queryFn: () => call(api.GET('/bff/mobile/catalogue')), staleTime: Infinity });
+}
+
+/** Display name of an instrument in the current language, falling back to its id. */
+export function useDisplayName() {
+  const list = useCatalogue().data;
+  return (id: string, lang: string) => {
+    const item = list?.find((i) => i.instrument === id);
+    return item ? (lang.startsWith('ru') ? item.real.ru : item.real.en) : id;
+  };
+}
+
+export function useCompanyCard(id: string) {
+  return useQuery({ queryKey: ['company', id], queryFn: () => call(api.GET('/bff/mobile/companies/{instrumentId}', { params: { path: { instrumentId: id } } })), refetchInterval: 5000 });
+}
+
+export function useCandles(id: string, limit = 60) {
+  return useQuery({ queryKey: ['candles', id, limit], queryFn: () => call(api.GET('/instruments/{instrumentId}/candles', { params: { path: { instrumentId: id }, query: { limit } } })), refetchInterval: 10_000 });
+}
+
+export function useCalendar() {
+  return useQuery({ queryKey: ['calendar'], queryFn: () => call(api.GET('/economy/calendar')), refetchInterval: 5000 });
+}
+
+export function useMacro() {
+  return useQuery({ queryKey: ['macro'], queryFn: () => call(api.GET('/economy/rates')), refetchInterval: 5000 });
+}
+
+export function useBonds() {
+  return useQuery({ queryKey: ['bonds'], queryFn: () => call(api.GET('/bonds')), refetchInterval: 5000 });
+}
+
+export function useRealWorld() {
+  return useQuery({ queryKey: ['real-world'], queryFn: () => call(api.GET('/real-world')), refetchInterval: 60_000 });
+}
+
+export function usePaperPositions() {
+  return useQuery({ queryKey: ['paper'], queryFn: () => call(api.GET('/real-world/paper-positions')), refetchInterval: 30_000 });
+}

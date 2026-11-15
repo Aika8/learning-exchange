@@ -179,6 +179,13 @@ public class MarketDataHub extends TextWebSocketHandler implements MarketListene
                 case Event.SavingsOpened d -> reason(accountReasons, d.account(), "SAVINGS");
                 case Event.InterestAccrued d -> reason(accountReasons, d.account(), "SAVINGS");
                 case Event.SavingsClosed d -> reason(accountReasons, d.account(), "SAVINGS");
+                case Event.PayoutPaid p -> reason(accountReasons, p.holder(), "PAYOUT");
+                case Event.PaperPositionOpened p -> reason(accountReasons, p.account(), "PAPER");
+                case Event.PaperPositionClosed p -> reason(accountReasons, p.account(), "PAPER");
+                case Event.TradingStatusChanged t -> dirtyBooks.add(t.instrument());
+                case Event.Disclosure d -> { }
+                case Event.PayoutStarted p -> { }
+                case Event.BondDefaulted b -> { }
             }
         }
         if (clients.isEmpty()) {

@@ -70,3 +70,15 @@ form.row { flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 12p
 table.totals { margin-bottom: 6px; } table.totals th { font-size: 12px; }
 td .chip { margin-left: 6px; font-size: 11px; }
 .card h2 .segmented { font-size: 12px; font-weight: 400; }
+
+/* M2b panels */
+.grid { grid-template-areas: 'book tape form' 'book tape balances' 'orders orders orders' 'extra extra extra' 'm2b m2b m2b'; }
+.m2b { grid-area: m2b; }
+@media (max-width: 900px) { .grid { grid-template-areas: 'form' 'book' 'balances' 'tape' 'orders' 'extra' 'm2b'; } }
+.badge { display: inline-block; border-radius: 6px; padding: 2px 8px; font-size: 12px; background: var(--surface-alt); color: var(--text2); margin: 0 4px 6px 0; }
+.badge.warn { background: var(--ask-bg); color: var(--ask); font-weight: 600; }
+.badge.small { font-size: 11px; margin: 0 0 0 6px; }
+.card h3 { font-size: 13px; margin: 12px 0 4px; }
+.split2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+@media (max-width: 900px) { .split2 { grid-template-columns: 1fr; } }
+tr.done td { color: var(--text2); }

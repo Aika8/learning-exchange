@@ -18,6 +18,14 @@ export type MarginPosition = Schemas['MarginPosition'];
 export type SavingsOverview = Schemas['SavingsOverview'];
 export type Statement = Schemas['Statement'];
 export type AccountChanged = Schemas['AccountChanged'];
+export type Company = Schemas['Company'];
+export type EarningsReport = Schemas['EarningsReport'];
+export type CalendarEntry = Schemas['CalendarEntry'];
+export type Macro = Schemas['Macro'];
+export type Bond = Schemas['Bond'];
+export type RealWorld = Schemas['RealWorld'];
+export type RealSource = Schemas['RealSource'];
+export type PaperPosition = Schemas['PaperPosition'];
 
 let token: string | null = sessionStorage.getItem('token');
 

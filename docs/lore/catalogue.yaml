@@ -1,0 +1,24 @@
+# Instrument catalogue (ADR-0012): the core uses neutral codes; people see real names, the game also lore names.
+# Served by the BFFs: /bff/mobile/catalogue (real only) and /bff/game/catalogue (real + lore). A test checks that every
+# engine instrument is here with all four names.
+instruments:
+  - id: SILK-SPARK
+    kind: STOCK
+    real: { ru: "Акции SILK (текстильная компания)", en: "SILK shares (textile company)" }
+    lore: { ru: "Мастерская Шёлкового Плёса", en: "Silk Reach workshop" }
+  - id: AMBER-SPARK
+    kind: FX
+    real: { ru: "Валютная пара AMBER/SPARK (как USD/KZT)", en: "FX pair AMBER/SPARK (like USD/KZT)" }
+    lore: { ru: "Янтарь за искры", en: "Amber for sparks" }
+  - id: FORGE-SPARK
+    kind: STOCK
+    real: { ru: "Акции FORGE (машиностроение)", en: "FORGE shares (engineering)" }
+    lore: { ru: "Мастерская Кузни Седьмого Ветра", en: "Seventh Wind Forge workshop" }
+  - id: HBND-SPARK
+    kind: BOND
+    real: { ru: "Государственные облигации HBND, рейтинг AAA", en: "Government bonds HBND, rated AAA" }
+    lore: { ru: "Расписки Совета Казначеев", en: "Treasurers' Council notes" }
+  - id: GBND-SPARK
+    kind: BOND
+    real: { ru: "Высокодоходные облигации GBND, рейтинг CCC", en: "High-yield bonds GBND, rated CCC" }
+    lore: { ru: "Расписки Щедрой гильдии", en: "Generous Guild notes" }

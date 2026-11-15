@@ -58,15 +58,21 @@ public final class BotFactory {
     /** Bots of all markets, each market with its own seeded fair value. */
     public static BotRunner runner(BotConfig config, TradingService market, application.Clock clock) {
         List<BotRunner.Group> groups = new ArrayList<>();
+        Map<String, FairValue> fairValues = new java.util.LinkedHashMap<>();
         long n = 0;
         for (int k = 0; k < config.markets().size(); k++) {
             BotConfig.MarketConfig mc = config.markets().get(k);
             List<TradingBot> bots = create(config, mc, market, n);
             n += bots.size();
             BotConfig.FairValueConfig fv = mc.fairValue();
-            groups.add(new BotRunner.Group(new FairValue(fv.start(), fv.volatilityBps(), fv.floor(), config.seed() + 7_919L * k), bots));
+            FairValue value = new FairValue(fv.start(), fv.volatilityBps(), fv.floor(), config.seed() + 7_919L * k);
+            fairValues.put(mc.instrument(), value);
+            groups.add(new BotRunner.Group(value, bots));
         }
-        return new BotRunner(groups, clock);
+        WorldFeed world = new WorldFeed(fairValues, "AMBER-SPARK", market);
+        market.subscribe(world);
+        groups.forEach(g -> g.bots().forEach(b -> b.withWorld(world)));
+        return new BotRunner(groups, clock).withWorld(world);
     }
 
     /** Bots of the first market. */
@@ -97,6 +103,11 @@ public final class BotFactory {
             case "market-maker" -> new MarketMaker(num(p, "halfSpread", 10), num(p, "step", 5),
                     (int) num(p, "levels", 5), num(p, "qty", 10), num(p, "targetBase", 0), dbl(p, "skewPerUnit", 0.01));
             case "noise" -> new Noise(dbl(p, "activity", 0.5), num(p, "maxQty", 5), dbl(p, "marketShare", 0.5));
+            case "momentum" -> new Momentum(num(p, "thresholdBps", 50), num(p, "qty", 3), dbl(p, "activity", 0.3));
+            case "mean-reversion" -> new MeanReversion(num(p, "bandBps", 40), num(p, "qty", 3), dbl(p, "activity", 0.3));
+            case "index-investor" -> new IndexInvestor(num(p, "everySteps", 120), num(p, "qty", 1));
+            case "fundamentalist" -> new Fundamentalist(num(p, "targetPe", 10), num(p, "marginBps", 1_000),
+                    num(p, "qty", 5), dbl(p, "activity", 0.2));
             default -> throw new IllegalArgumentException("unknown strategy in bots.yaml: " + spec.strategy());
         };
     }

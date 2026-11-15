@@ -28,13 +28,19 @@ public final class StatementProjection implements MarketListener {
     /** Lines kept per person; older ones drop out (bots trade all day). */
     static final int LINES_KEPT = 20_000;
 
-    public enum Kind { DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST }
+    public enum Kind { DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST, DIVIDEND, COUPON,
+        REDEMPTION }
 
     /** One statement line; nullable fields do not apply to every kind. All money in minor units. */
     public record Line(long ts, Kind kind, String instrument, Order.Side side, Long price, Long qty, Long mid,
                        String asset, long amount, long fee, long spreadPaid, long realisedPnl, boolean margin, Long refId) {}
 
-    public record Totals(long fees, long spreadPaid, long realisedPnl, long taxRateBps, long tax, long interest) {}
+    /**
+     * {@code payouts}: dividends and coupons received; taxed at 10% like trading profit (ИПН, M2b). {@code tax} =
+     * 10% × (max(0, realised profit) + payouts).
+     */
+    public record Totals(long fees, long spreadPaid, long realisedPnl, long taxRateBps, long tax, long interest,
+                         long payouts) {}
 
     public record Statement(long from, long to, String currency, List<Line> lines, Totals totals) {}
 
@@ -68,6 +74,7 @@ public final class StatementProjection implements MarketListener {
         long spread = 0;
         long realised = 0;
         long interest = 0;
+        long payouts = 0;
         for (Line l : lines.getOrDefault(owner, new ArrayDeque<>())) {
             if (l.ts() < from || l.ts() >= to) {
                 continue;
@@ -79,9 +86,12 @@ public final class StatementProjection implements MarketListener {
             if (l.kind() == Kind.INTEREST) {
                 interest += l.amount();
             }
+            if (l.kind() == Kind.DIVIDEND || l.kind() == Kind.COUPON) {
+                payouts += l.amount();
+            }
         }
-        long tax = Math.max(0, realised) * TAX_RATE_BPS / 10_000;
-        return new Statement(from, to, "SPARK", out, new Totals(fees, spread, realised, TAX_RATE_BPS, tax, interest));
+        long tax = (Math.max(0, realised) + payouts) * TAX_RATE_BPS / 10_000;
+        return new Statement(from, to, "SPARK", out, new Totals(fees, spread, realised, TAX_RATE_BPS, tax, interest, payouts));
     }
 
     private void apply(Event e) {
@@ -105,7 +115,26 @@ public final class StatementProjection implements MarketListener {
                     "SPARK", s.payout(), 0, 0, 0, false, s.depositId()));
             case Event.InterestAccrued i -> add(i.account(), new Line(i.ts(), Kind.INTEREST, null, null, null, null, null,
                     "SPARK", i.amount(), 0, 0, 0, false, i.depositId()));
+            case Event.PayoutPaid p -> paid(p);
             default -> { }
+        }
+    }
+
+    /** Dividends and coupons are income; a redemption sells the bonds back to the issuer at {@code perUnit}. */
+    private void paid(Event.PayoutPaid p) {
+        String owner = Accounts.owner(p.holder());
+        if (isSystem(owner) || Accounts.isSubAccount(p.holder())) {
+            return;
+        }
+        String quote = quoteOf(p.instrument());
+        switch (p.kind()) {
+            case DIVIDEND -> add(owner, new Line(p.ts(), Kind.DIVIDEND, p.instrument(), null, null, p.units(), null, quote,
+                    p.amount(), 0, 0, 0, false, null));
+            case COUPON -> add(owner, new Line(p.ts(), Kind.COUPON, p.instrument(), null, null, p.units(), null, quote,
+                    p.amount(), 0, 0, 0, false, null));
+            case REDEMPTION -> add(owner, new Line(p.ts(), Kind.REDEMPTION, p.instrument(), Order.Side.SELL,
+                    p.units() == 0 ? 0 : p.amount() / p.units(), p.units(), null, quote, p.amount(), 0, 0,
+                    realise(owner, p.instrument(), p.units(), p.amount()), false, null));
         }
     }
 
