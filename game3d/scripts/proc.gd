@@ -181,6 +181,55 @@ static func island_mesh(radius: float, depth: float, seed_value: int, bumps: flo
 	return st.commit()
 
 
+## Dense island for the PBR look (ADR-0019): 120 sides, 26 rings, noise-carved cliffs with ledges (strata) and a
+## grass lip that rolls over the edge. Cap stays flat at y=0 inside 0.9 radius so walking and placement are unchanged.
+static func island_mesh_hd(radius: float, depth: float, seed_value: int, bumps: float = 0.0) -> ArrayMesh:
+	var n := FastNoiseLite.new()
+	n.seed = seed_value
+	n.frequency = 0.08
+	n.fractal_octaves = 4
+	var sides := 120
+	var rings := 26
+	var pts: Array[PackedVector3Array] = []
+	for ri in rings + 1:
+		var t := float(ri) / rings  # 0 = centre of the cap, 1 = bottom tip
+		var row := PackedVector3Array()
+		for s in sides:
+			var a := TAU * s / sides
+			var dir := Vector2(cos(a), sin(a))
+			var outline := 1.0 + 0.12 * sin(s * TAU / sides * 6.0 + seed_value) + 0.06 * sin(s * TAU / sides * 17.0 + seed_value * 0.3)
+			var r: float
+			var y: float
+			if t <= 0.3:  # cap: flat disc out to 0.9 r, then a rounded lip
+				var k := t / 0.3
+				r = radius * (k * 0.97)
+				y = 0.0
+				if k > 0.93:
+					y = -(k - 0.93) / 0.07 * 0.5
+				if bumps > 0.0 and k > 0.4 and k < 0.85:
+					y += maxf(0.0, sin(a * 3.0 + seed_value)) * bumps * sin((k - 0.4) / 0.45 * PI)
+			else:  # body: tapering cone with stepped ledges
+				var k := (t - 0.3) / 0.7
+				var taper := pow(1.0 - k, 0.85)
+				var strata: float = 0.06 * floor(k * 9.0 + n.get_noise_2d(a * 3.0, 0.0) * 1.5) / 9.0
+				r = radius * (0.97 * taper + strata)
+				r *= 1.0 + 0.22 * n.get_noise_3d(dir.x * 9.0, k * 14.0, dir.y * 9.0) * (1.0 - k * 0.5)
+				y = -0.5 - k * depth + n.get_noise_2d(dir.x * 20.0 + dir.y * 7.0, k * 5.0) * depth * 0.05 * (1.0 - k)
+			r *= outline if t > 0.0 else 1.0
+			row.append(Vector3(dir.x * r, y, dir.y * r))
+		pts.append(row)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	for ri in rings:
+		for s in sides:
+			var m := (s + 1) % sides
+			_tri(st, pts[ri][s], pts[ri + 1][s], pts[ri][m], Color.WHITE, Color.WHITE, Color.WHITE)
+			_tri(st, pts[ri][m], pts[ri + 1][s], pts[ri + 1][m], Color.WHITE, Color.WHITE, Color.WHITE)
+	st.index()  # weld shared vertices so the rock reads smooth, not faceted
+	st.generate_normals()
+	return st.commit()
+
+
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
 	if a.distance_squared_to(b) < 1e-6 or a.distance_squared_to(c) < 1e-6 or b.distance_squared_to(c) < 1e-6:
 		return

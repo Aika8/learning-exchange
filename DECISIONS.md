@@ -173,3 +173,7 @@ Build and CI
 - game3d harbour fps (ADR-0019): the Poly Haven tree carries ~700k leaf triangles drawn with a depth pre-pass and no
   LODs after load, which cost ~30 fps. `Assets.thinned()` keeps every 3rd leaf card, switches leaves to alpha scissor and
   regenerates LODs; plus LOD threshold 6 px and half-resolution GI. Worst harbour view: 41 → 65 fps (Apple M5, 1080p).
+- game3d islands (ADR-0019): with assets the island mesh is `Proc.island_mesh_hd` (120 sides, 26 rings, noise cliffs
+  with ledges, welded smooth normals; the cap stays flat inside 0.9 r so walking and props are unchanged), dressed with
+  Poly Haven rock faces, cliffs, roots and pebbles; far islands get a light set. Thinned trees use `lod_bias` 2.5 so
+  generated LODs don't strip the crown. Harbour stays ≥ 60 fps (worst view 64).

@@ -204,7 +204,7 @@ func _demo() -> void:
 	_fly.look_at(Vector3(5, 4, -8))
 	_fly_yaw = _fly.rotation.y
 	_fly_pitch = _fly.rotation.x
-	await Session.wait(1.0)
+	await Session.wait(2.0)  # fps average settles after the camera jump
 	await Session.shot(self, "5-harbour-fly")
 	set_flying(false)
 	_captain.position = Archipelago.EXCHANGE_DOOR + Vector3(0, 0.5, 2)

@@ -143,7 +143,8 @@ static func _noise(seed_value: int, freq: float) -> NoiseTexture2D:
 ## A floating island node with collision on its cap; crystals underneath.
 static func island(radius: float, depth: float, seed_value: int, bumps: float = 0.0, collide: bool = false) -> Node3D:
 	var root := Node3D.new()
-	var mesh := Proc.island_mesh(radius, depth, seed_value, bumps)
+	var hd := Assets.available()
+	var mesh := Proc.island_mesh_hd(radius, depth, seed_value, bumps) if hd else Proc.island_mesh(radius, depth, seed_value, bumps)
 	var mi := Proc.mesh_node(mesh, Proc.terrain_mat())
 	root.add_child(mi)
 	if collide:
@@ -153,7 +154,47 @@ static func island(radius: float, depth: float, seed_value: int, bumps: float = 
 		body.add_child(shape)
 		root.add_child(body)
 	Proc.crystals(root, radius, depth, int(radius / 3.0), seed_value + 1)
+	if hd:
+		_dress_island(root, radius, depth, seed_value, collide)
 	return root
+
+
+## Real rock faces on the rim, cliffs lower down, roots hanging from under the grass lip (ADR-0019).
+## `near` islands (the ones you walk on) get the full set; far ones a light one to keep the frame rate.
+static func _dress_island(root: Node3D, radius: float, depth: float, seed_value: int, near: bool) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value * 31
+	var count := int(radius * (0.7 if near else 0.35))
+	for i in count:
+		var a := TAU * (i + rng.randf() * 0.6) / count
+		var dir := Vector3(cos(a), 0, sin(a))
+		var face := Node3D.new()
+		var kind: String = ["rock_face_01", "rock_face_02", "namaqualand_cliff_01"][i % 3]
+		var m := Assets.model(kind)
+		if m == null:
+			return
+		face.add_child(m)
+		var sc := clampf(radius / 16.0, 0.5, 2.0) * rng.randf_range(0.8, 1.2)
+		var k := rng.randf_range(0.1, 0.45)  # how far down the body, 0 = just under the grass lip
+		var y := -1.2 - k * depth * 0.8 - 3.5 * sc
+		face.position = dir * radius * (0.97 * pow(1.0 - (k * 0.8 + 0.1), 0.85) - 0.02) + Vector3(0, y, 0)
+		face.scale = Vector3.ONE * sc
+		face.rotation = Vector3(0, -a + PI / 2 + rng.randf_range(-0.6, 0.6), rng.randf_range(-0.15, 0.15))
+		root.add_child(face)
+	if not near:
+		return
+	for i in int(radius * 0.4):
+		var a := rng.randf() * TAU
+		var dir := Vector3(cos(a), 0, sin(a))
+		var root_kind := "root_cluster_01" if i % 8 == 0 else "single_root"
+		var r := Assets.model(root_kind)
+		r.position = dir * radius * rng.randf_range(0.86, 0.95) + Vector3(0, -0.6, 0)
+		r.rotation = Vector3(PI / 2 + rng.randf_range(-0.2, 0.2), -a + PI / 2, rng.randf_range(-0.3, 0.3))
+		r.scale = Vector3.ONE * (rng.randf_range(1.5, 2.5) if root_kind == "single_root" else rng.randf_range(0.8, 1.2))
+		root.add_child(r)
+	for i in int(radius * 0.8):  # pebbles on the cap edge
+		var a := rng.randf() * TAU
+		Assets.put(root, "rock_07" if i % 2 == 0 else "rock_09", Vector3(cos(a), 0, sin(a)) * radius * rng.randf_range(0.8, 0.9), rng.randf() * TAU, rng.randf_range(4.0, 9.0))
 
 
 ## Whole world. `detail` false = skip small props (used by far views).
