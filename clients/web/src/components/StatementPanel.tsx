@@ -51,6 +51,8 @@ export function StatementPanel({ clock }: { clock: Clock | null }) {
                 <td>{money(st.totals.tax)}</td>
                 <th>{t('statement.interest')}</th>
                 <td className="ok">{money(st.totals.interest)}</td>
+                <th>{t('statement.payouts')}</th>
+                <td className="ok" data-testid="statement-payouts">{money(st.totals.payouts)}</td>
               </tr>
             </tbody>
           </table>

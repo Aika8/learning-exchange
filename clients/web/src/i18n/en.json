@@ -112,13 +112,23 @@
   },
   "instrument": {
     "label": "Instrument",
-    "leverageUpTo": "leverage up to ×{{n}}"
+    "leverageUpTo": "leverage up to ×{{n}}",
+    "halted": "Trading halted",
+    "kind": {
+      "STOCK": "stock",
+      "FX": "FX",
+      "BOND": "bond"
+    }
   },
   "tabs": {
     "stops": "Stops & take-profit",
     "margin": "Leverage & margin",
     "statement": "Statement",
-    "savings": "Savings"
+    "savings": "Savings",
+    "companies": "Companies",
+    "calendar": "Economic calendar",
+    "bonds": "Bonds",
+    "realWorld": "Real world"
   },
   "stops": {
     "formTitle": "New conditional order",
@@ -152,7 +162,14 @@
     "STOP_LIMIT": "Stop-limit",
     "STOP_MARKET": "Stop-market",
     "TRAILING_TP": "Trailing take-profit",
-    "TP_SL": "Take-profit + stop-loss (OCO)"
+    "TP_SL": "Take-profit + stop-loss (OCO)",
+    "RATE_DECISION": "Rate decision",
+    "EARNINGS": "Earnings report",
+    "CONSENSUS": "Consensus published",
+    "DIVIDEND_EX": "Dividend ex-date",
+    "COUPON": "Coupon",
+    "MATURITY": "Maturity",
+    "STORM": "Market storm"
   },
   "ckindHint": {
     "STOP_LIMIT": "When the last trade reaches the stop price, a limit order is placed at the limit price. On a gap it may stay unfilled.",
@@ -246,7 +263,8 @@
     "spreadCol": "Spread",
     "pnlCol": "P&L",
     "marginFlag": "margin",
-    "empty": "No operations in this period"
+    "empty": "No operations in this period",
+    "payouts": "Dividends & coupons"
   },
   "skind": {
     "DEPOSIT": "Deposit",
@@ -256,6 +274,126 @@
     "STOP_OUT": "Stop-out",
     "SAVINGS_OPEN": "Deposit opened",
     "SAVINGS_CLOSE": "Deposit closed",
-    "INTEREST": "Interest"
+    "INTEREST": "Interest",
+    "DIVIDEND": "Dividend",
+    "COUPON": "Coupon",
+    "REDEMPTION": "Bond redemption"
+  },
+  "common": {
+    "yes": "yes",
+    "no": "no"
+  },
+  "role": {
+    "CEO": "CEO",
+    "CFO": "CFO",
+    "DIRECTOR": "Director"
+  },
+  "companies": {
+    "title": "Companies",
+    "empty": "No companies",
+    "gapWarning": "Report tonight — gap risk for your stop",
+    "lastPrice": "Last price",
+    "epsTtm": "EPS (TTM)",
+    "pe": "P/E",
+    "debtToProfit": "Debt / profit",
+    "dividendYield": "Dividend yield",
+    "nextReport": "Next report",
+    "lastReport": "Last report vs consensus",
+    "noReport": "No report yet",
+    "season": "Season {{n}}, {{at}}",
+    "surprise": "EPS surprise {{pct}}%",
+    "revenue": "Revenue",
+    "netProfit": "Net profit",
+    "eps": "EPS",
+    "consensusShort": "consensus",
+    "debt": "Debt",
+    "ocf": "Operating cash flow",
+    "dividend": "Dividend per share",
+    "guidance": "Guidance (next EPS)",
+    "consensus": "Consensus for the next report",
+    "noConsensus": "Not published yet",
+    "reportAt": "Report date",
+    "dividends": "Dividends",
+    "exDate": "Ex-date",
+    "perShare": "Per share",
+    "paid": "Paid",
+    "insiders": "Insider trades",
+    "insider": "Insider",
+    "role": "Role",
+    "qty": "Qty",
+    "price": "Price"
+  },
+  "macro": {
+    "policyRate": "Policy rate",
+    "inflation": "Inflation",
+    "realRate": "Real rate",
+    "depositRate": "Deposit rate",
+    "nextDecision": "Next decision",
+    "regime": "Regime",
+    "volatility": "volatility {{pct}}%"
+  },
+  "regime": {
+    "CALM": "Calm",
+    "STORM": "Storm"
+  },
+  "calendar": {
+    "title": "Economic calendar",
+    "event": "Event",
+    "status": "Status",
+    "previous": "Previous",
+    "consensus": "Consensus",
+    "actual": "Actual",
+    "done": "done",
+    "scheduled": "scheduled",
+    "empty": "Nothing scheduled"
+  },
+  "bonds": {
+    "title": "Bonds",
+    "face": "Face",
+    "coupon": "Coupon",
+    "rating": "Rating",
+    "maturity": "Maturity",
+    "status": "Status",
+    "price": "Price",
+    "fair": "(fair, no trades)",
+    "ytm": "YTM",
+    "fairYield": "fair",
+    "duration": "Mod. duration",
+    "years": "{{n}} y",
+    "nextCoupon": "Next coupon",
+    "coupons": "Coupons paid / left",
+    "empty": "No bonds",
+    "hint": "YTM is the yearly return if you buy at this price and hold to maturity. Price up → yield down. Duration ≈ % price change for a 1 pp rate move."
+  },
+  "bstatus": {
+    "ACTIVE": "Active",
+    "DEFAULTED": "Defaulted",
+    "REDEEMED": "Redeemed"
+  },
+  "real": {
+    "title": "Real world",
+    "hint": "Read-only real quotes with source and time; you cannot trade them, only open paper positions.",
+    "symbol": "Symbol",
+    "price": "Price",
+    "asOf": "Quote time",
+    "asOfShort": "as of {{at}}",
+    "source": "Source",
+    "sample": "sample data",
+    "delayed": "delayed",
+    "baseRate": "Base rate, {{bank}}",
+    "history": "Decisions",
+    "upcoming": "Upcoming",
+    "papers": "Paper positions",
+    "paperLabel": "Paper position",
+    "qty": "Qty",
+    "open": "Open paper position",
+    "opened": "Paper position #{{id}} opened",
+    "entry": "Entry",
+    "current": "Current / exit",
+    "pnl": "P&L",
+    "quotedAt": "Quote used",
+    "close": "Close",
+    "closed": "closed",
+    "noPapers": "No paper positions"
   }
 }

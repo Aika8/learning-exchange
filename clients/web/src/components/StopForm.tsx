@@ -31,7 +31,7 @@ export function StopForm({ instrument }: { instrument: Instrument }) {
       const prices = Object.fromEntries(Object.entries(parsed).filter(([, v]) => v != null)) as Record<string, number>;
       return unwrap(
         await api.POST('/conditional-orders', {
-          
+          params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
           body: { instrument: instrument.id, kind, side, qty: qtyUnits!, ...prices },
         }),
       );

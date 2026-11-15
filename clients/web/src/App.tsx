@@ -15,6 +15,7 @@ import { ClockBar } from './components/ClockBar';
 import { LangSwitch } from './components/LangSwitch';
 import { InstrumentSwitch } from './components/InstrumentSwitch';
 import { M2aPanels } from './components/M2aPanels';
+import { M2bPanels } from './components/M2bPanels';
 
 export function App() {
   const { t } = useTranslation();
@@ -43,6 +44,11 @@ export function App() {
         <h1>{t('app.title')}</h1>
         <span className="chip">{t('app.practice')}</span>
         {token && <InstrumentSwitch list={instruments} value={instrumentId} onChange={setInstrumentId} />}
+        {token && instrument && !instrument.tradingOpen && (
+          <span className="badge warn" data-testid="halted">
+            {t('instrument.halted')}
+          </span>
+        )}
         <div className="spacer" />
         {token && <ClockBar clock={clock} />}
         <LangSwitch />
@@ -73,6 +79,9 @@ export function App() {
           </section>
           <section className="card extra">
             <M2aPanels instrument={instrument} book={book} clock={clock} />
+          </section>
+          <section className="card m2b">
+            <M2bPanels instrument={instrument} clock={clock} />
           </section>
         </main>
       )}

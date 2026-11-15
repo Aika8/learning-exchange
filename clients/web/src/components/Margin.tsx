@@ -26,7 +26,7 @@ export function Margin({ instrument, book }: { instrument: Instrument; book: Boo
     mutationFn: async () =>
       unwrap(
         await api.POST('/margin/positions', {
-          
+          params: { header: { 'Idempotency-Key': crypto.randomUUID() } },
           body: { instrument: instrument.id, side, qty: qtyUnits!, leverage },
         }),
       ),
