@@ -57,3 +57,30 @@ export function bpsToPercent(bps: number, decimalSep = '.'): string {
   const frac = String(a % 100).padStart(2, '0').replace(/0+$/, '');
   return (neg ? '−' : '') + whole + (frac ? decimalSep + frac : '');
 }
+
+/**
+ * Position size with the stop set by volatility: stop distance = k × ATR, qty = floor(riskBudget / distance).
+ * capital and atr are minor units of the quote; riskBps is basis points of capital (that budget is 1 R);
+ * k is given ×100 (150 = 1.5 × ATR) so it stays an integer. The distance is rounded down to a minor unit.
+ * Returns null when there is no ATR, no budget or the distance rounds to zero.
+ */
+export function atrPositionSize(capital: number, riskBps: number, atr: number | null | undefined, kX100: number): { distance: number; qty: number; riskBudget: number; atRisk: number } | null {
+  if (!(capital > 0) || !(riskBps > 0) || !(kX100 > 0) || atr == null || !(atr > 0)) return null;
+  const distance = Math.floor((atr * kX100) / 100);
+  if (distance === 0) return null;
+  const riskBudget = Math.floor((capital * riskBps) / 10_000);
+  const qty = Math.floor(riskBudget / distance);
+  return { distance, qty, riskBudget, atRisk: qty * distance };
+}
+
+/** Stop price at `distance` from the entry: below it for a long (BUY), above it for a short (SELL); null if it would be ≤ 0. */
+export function stopFromDistance(entry: number, distance: number, side: 'BUY' | 'SELL'): number | null {
+  if (!(entry > 0) || !(distance > 0)) return null;
+  const stop = side === 'BUY' ? entry - distance : entry + distance;
+  return stop > 0 ? stop : null;
+}
+
+/** Result in R ×100 as a signed string: −140 → "−1.4 R", 250 → "+2.5 R". */
+export function formatR(rX100: number, decimalSep = '.'): string {
+  return (rX100 > 0 ? '+' : '') + bpsToPercent(rX100, decimalSep) + ' R';
+}
