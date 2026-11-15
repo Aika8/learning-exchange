@@ -1,4 +1,4 @@
-# 0017. One writer for the whole exchange, not one per instrument (amends 0006)
+# 0018. One writer for the whole exchange, not one per instrument (amends 0006)
 
 - Status: Accepted (M2a)
 - Date: 2026-11-15

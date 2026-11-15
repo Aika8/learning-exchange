@@ -26,8 +26,8 @@ Demo: `docs/demo/M1.md`.
 - Mobile: 5 `node --test` (i18n keys incl. keys used in code, tokens = design, money = web) + `tsc`; `expo-doctor` 20/20.
 
 ## ADRs
-Accepted: 0001, 0002, 0003 (server part amended by 0016), 0005, 0006, 0008, 0017, 0007, 0009, 0010, 0011, 0014, 0016.
-M2a: 0008 Accepted, 0017 Accepted (amends 0006).
+Accepted: 0001, 0002, 0003 (server part amended by 0016), 0005, 0006, 0008, 0018, 0007, 0009, 0010, 0011, 0014, 0016.
+M2a: 0008 Accepted, 0018 Accepted (amends 0006).
 Proposed: 0004 (BFF — no screen-shaped endpoints needed yet), 0012 (catalogue, M2),
 0013 (assistant, M4), 0015 (real market data, M2).
 

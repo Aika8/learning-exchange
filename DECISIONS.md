@@ -110,7 +110,7 @@ Instruments
 - `bots.yaml` now has a `markets:` list (the M1 single-market shape still parses). The FX dealer quotes ±0.30 SPARK
   around fair value — the spread a bank earns on an exchange office (vault: `finance/fx-market-kz.md`).
 
-Engine, one writer (ADR-0008 accepted, ADR-0017 amends ADR-0006)
+Engine, one writer (ADR-0008 accepted, ADR-0018 amends ADR-0006)
 - Conditional orders, the margin monitor and deposits live in the engine, on the single writer, outside the books.
   After every command the queue of new trade prices is drained: each price, in order, goes to the conditional orders
   (by id) and then to the margin monitor (by position id). Generated orders use the same `placeInto` as a person's.

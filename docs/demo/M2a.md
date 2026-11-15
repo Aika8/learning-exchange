@@ -60,4 +60,4 @@ Stop and start `make dev`: stops, positions, deposits and the statement come bac
 ## What to read
 - `engine/Conditional.java` (state machine), `Exchange.drain` (Observer over trade prices, cascade), `Exchange.openMargin` / `tryClose`.
 - `application/StatementProjection.java` (projection / CQRS read model).
-- ADR-0008 (accepted), ADR-0017 (one writer), `DECISIONS.md` → M2a.
+- ADR-0008 (accepted), ADR-0018 (one writer), `DECISIONS.md` → M2a.

@@ -1,0 +1,98 @@
+keys,ru,en
+GAME_TITLE,Летопись Ветров,Chronicle of Winds
+LANG_LABEL,Язык,Language
+LANG_RU,Русский,Русский
+LANG_EN,English,English
+LADDER_TITLE,Стакан заявок,Order book
+LADDER_LORE,Лестница,the Ladder
+LADDER_PRICE,"Цена, %s","Price, %s"
+LADDER_QTY,"Кол-во, %s","Qty, %s"
+LADDER_ORDERS,Заявок,Orders
+LADDER_SPREAD,"Спред %s %s","Spread %s %s"
+LADDER_SPREAD_LORE,Пропасть,the Chasm
+LADDER_SPREAD_NONE,Спред: нет встречных заявок,Spread: one side is empty
+LADDER_LAST,"Последняя сделка %s","Last trade %s"
+LADDER_LAST_NONE,Сделок ещё не было,No trades yet
+LADDER_ASKS,Продавцы (ask) ▼,Sellers (ask) ▼
+LADDER_BIDS,Покупатели (bid) ▲,Buyers (bid) ▲
+LADDER_BACK,В Гавань,To the Harbour
+LADDER_LIVE,онлайн,live
+LADDER_OFFLINE,нет связи,offline
+BALANCES_TITLE,Балансы,Balances
+BALANCE_ROW,"%s: доступно %s · в заявках %s","%s: available %s · in orders %s"
+FORM_TITLE,Новая заявка,New order
+FORM_BUY,Купить,Buy
+FORM_SELL,Продать,Sell
+FORM_LIMIT,Лимитная заявка,Limit order
+FORM_LIMIT_LORE,встать на ступень,step onto a rung
+FORM_MARKET,Рыночная заявка,Market order
+FORM_MARKET_LORE,прыжок через Пропасть,leap over the Chasm
+FORM_PRICE,"Цена, %s","Price, %s"
+FORM_QTY,"Количество, %s","Quantity, %s"
+FORM_SUBMIT,Отправить заявку,Place order
+FORM_MARKET_HINT,Исполнится по лучшим ценам стакана; остаток отменится.,Fills at the best prices in the book; the rest is cancelled.
+FORM_INVALID,Проверьте цену и количество,Check price and quantity
+FORM_PLACED,"Заявка №%s: %s, исполнено %s из %s","Order #%s: %s, filled %s of %s"
+FORM_SENDING,Отправляю…,Sending…
+FEE_LORE,"Комиссия %s%% · пошлина Биржи","Fee %s%% · the Exchange toll"
+ORDERS_TITLE,Мои заявки,My orders
+ORDERS_EMPTY,Заявок нет,No orders
+ORDERS_ROW,"№%s %s %s %s × %s — %s","#%s %s %s %s × %s — %s"
+TAPE_TITLE,Лента сделок,Trades
+TAPE_EMPTY,Сделок ещё не было,No trades yet
+SIDE_BUY,Покупка,Buy
+SIDE_SELL,Продажа,Sell
+TYPE_LIMIT,Лимитная,Limit
+TYPE_MARKET,Рыночная,Market
+STATUS_NEW,Новая,New
+STATUS_PARTIALLY_FILLED,Частично исполнена,Partially filled
+STATUS_FILLED,Исполнена,Filled
+STATUS_CANCELLED,Отменена,Cancelled
+STATUS_EXPIRED,Остаток отменён,Remainder cancelled
+ERR_UNAUTHORIZED,Нужно войти заново,Please log in again
+ERR_BAD_REQUEST,Неверный запрос,Bad request
+ERR_INVALID_NAME,"Имя: буквы, цифры, пробел, _ или -, до 32 символов","Name: letters, digits, space, _ or -, up to 32 characters"
+ERR_INVALID_ORDER,Неверные параметры заявки,Invalid order parameters
+ERR_INVALID_AMOUNT,Неверная сумма,Invalid amount
+ERR_INSUFFICIENT_FUNDS,Недостаточно средств,Insufficient funds
+ERR_NO_LIQUIDITY,Нет встречных заявок,No liquidity on the other side
+ERR_UNKNOWN_INSTRUMENT,Неизвестный инструмент,Unknown instrument
+ERR_UNKNOWN_ORDER,Заявка не найдена,Order not found
+ERR_UNKNOWN_ACCOUNT,Счёт не найден,Account not found
+ERR_NOT_OWNER,Это не ваша заявка,Not your order
+ERR_NOT_OPEN,Заявка уже не активна,Order is no longer open
+ERR_ACCOUNT_EXISTS,Счёт уже есть,Account already exists
+ERR_NETWORK,Биржа недоступна — запущен ли make dev?,Exchange unreachable — is make dev running?
+GAME_SUBTITLE3D,торговая история в небе · учебные деньги,a trading tale in the sky · practice money
+MENU_NAME,Имя капитана (счёт на бирже),Captain's name (exchange account)
+MENU_START,Отправиться в Гавань,Set sail for the Harbour
+MENU_QUIT,Выход,Quit
+MENU_LOGGING_IN,Вход на биржу…,Logging in to the exchange…
+MENU_SERVER,"Биржа: %s","Exchange: %s"
+HARBOUR_TITLE,Гавань Искр,Spark Harbour
+HARBOUR_HELP,"WASD — идти · мышь — обзор · Tab — облёт камерой · E — действие","WASD — walk · mouse — look · Tab — fly the camera · E — interact"
+HARBOUR_FLY,Облёт камерой (Tab — вернуться к капитану),Camera flight (Tab — back to the captain)
+HARBOUR_ACCOUNT,"Счёт %s · %s","Account %s · %s"
+HARBOUR_MARA,"Мара Якорная: «Мельница наверху — Ветряная Биржа. В её зале горит Лестница — по-вашему, стакан заявок. А у причала ждёт твой «Попутчик».»","Mara Anchor: «The windmill up there is the Wind Exchange. The Ladder glows in its hall — the order book, as your world calls it. And your «Wayfarer» waits at the pier.»"
+PROMPT_EXCHANGE,E — войти в зал Биржи,E — enter the Exchange hall
+PROMPT_SHIP,E — отплыть на Шёлковый Плёс,E — sail to Silk Reach
+PROMPT_MARA,E — поговорить с Марой,E — talk to Mara
+HALL_TITLE,Зал Биржи,Exchange hall
+HALL_LORE,Ветряная Биржа,the Wind Exchange
+HALL_BACK,Выйти в Гавань,Back to the Harbour
+HALL_HELP,"Табло — живой стакан с биржи. Мышь — осмотреться, колесо — ближе/дальше.","The board is the live order book. Mouse — look around, wheel — zoom."
+VOYAGE_TITLE,Рейс: Гавань Искр → Шёлковый Плёс,Voyage: Spark Harbour → Silk Reach
+VOYAGE_CLOCK,"Время биржи %s","Exchange time %s"
+VOYAGE_CLOCK_LORE,часы Течений,the Current clock
+VOYAGE_PAUSED,Часы биржи на паузе,Exchange clock paused
+VOYAGE_SPEED,"скорость ×%s","speed ×%s"
+VOYAGE_ELAPSED,"В пути %s биржевого времени","At sea for %s of exchange time"
+VOYAGE_PROGRESS,"Пройдено %s%%","Covered %s%%"
+VOYAGE_WIND,"Ветер %s","Wind %s"
+VOYAGE_WIND_FAIR,попутный,fair
+VOYAGE_WIND_SIDE,боковой,crosswind
+VOYAGE_MARKET,"Шёлк на Бирже: последняя сделка %s","Silk on the Exchange: last trade %s"
+VOYAGE_ARRIVED,Шёлковый Плёс! Здесь растёт ветряной шёлк.,Silk Reach! Wind silk grows here.
+VOYAGE_HOME,Обратно в Гавань,Back to the Harbour
+VOYAGE_HELP,"Мышь — камера · колесо — ближе/дальше · Пробел — поднять парус","Mouse — camera · wheel — zoom · Space — raise the sail"
+FPS,"%s кадр/с","%s fps"

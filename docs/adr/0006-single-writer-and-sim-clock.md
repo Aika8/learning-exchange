@@ -1,6 +1,6 @@
 # 0006. Single writer per instrument and a simulation clock
 
-- Status: Accepted; "one writer per instrument" superseded by [0017](0017-one-writer-for-the-whole-exchange.md)
+- Status: Accepted; "one writer per instrument" superseded by [0018](0018-one-writer-for-the-whole-exchange.md)
 - Date: 2026-11-12
 - Pattern(s): Single Writer Principle (LMAX), Actor-like command queue, Clock abstraction (testable time)
 
