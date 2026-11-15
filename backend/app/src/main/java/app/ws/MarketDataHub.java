@@ -168,6 +168,17 @@ public class MarketDataHub extends TextWebSocketHandler implements MarketListene
                 case Event.FundsDeposited d -> reason(accountReasons, d.account(), "DEPOSIT");
                 case Event.ClockChanged c -> clockChanged = true;
                 case Event.AccountOpened a -> { }
+                case Event.ConditionalPlaced c -> reason(accountReasons, c.account(), "CONDITIONAL");
+                case Event.ConditionalCancelled c -> reason(accountReasons, c.account(), "CONDITIONAL");
+                case Event.ConditionalArmed c -> reason(accountReasons, c.account(), "CONDITIONAL");
+                case Event.ConditionalTriggered c -> reason(accountReasons, c.account(), "CONDITIONAL");
+                case Event.MarginPositionOpened m -> reason(accountReasons, m.account(), "MARGIN");
+                case Event.MarginCloseRequested m -> reason(accountReasons, m.account(), "MARGIN");
+                case Event.MarginStopOut m -> reason(accountReasons, m.account(), "MARGIN");
+                case Event.MarginPositionClosed m -> reason(accountReasons, m.account(), "MARGIN");
+                case Event.SavingsOpened d -> reason(accountReasons, d.account(), "SAVINGS");
+                case Event.InterestAccrued d -> reason(accountReasons, d.account(), "SAVINGS");
+                case Event.SavingsClosed d -> reason(accountReasons, d.account(), "SAVINGS");
             }
         }
         if (clients.isEmpty()) {
@@ -246,6 +257,11 @@ public class MarketDataHub extends TextWebSocketHandler implements MarketListene
     }
 
     private static void reason(Map<String, Set<String>> map, String account, String reason) {
+        // A leveraged position trades from a sub-account; its owner is the one to nudge (with MARGIN as well).
+        if (engine.Accounts.isSubAccount(account)) {
+            map.computeIfAbsent(engine.Accounts.owner(account), k -> new LinkedHashSet<>()).add("MARGIN");
+            account = engine.Accounts.owner(account);
+        }
         map.computeIfAbsent(account, k -> new LinkedHashSet<>()).add(reason);
     }
 

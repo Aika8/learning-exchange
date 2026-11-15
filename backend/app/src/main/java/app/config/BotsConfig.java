@@ -5,7 +5,6 @@ import application.TradingService;
 import bots.BotConfig;
 import bots.BotFactory;
 import bots.BotRunner;
-import bots.FairValue;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -32,10 +31,8 @@ public class BotsConfig {
         try (InputStream in = Files.newInputStream(Path.of(props.botsFile()))) {
             cfg = BotFactory.parse(in);
         }
-        BotConfig.FairValueConfig fv = cfg.fairValue();
-        BotRunner runner = new BotRunner(BotFactory.create(cfg, market),
-                new FairValue(fv.start(), fv.volatilityBps(), fv.floor(), cfg.seed()), clock);
-        log.info("{} bots from {} (seed {})", runner.bots().size(), props.botsFile(), cfg.seed());
+        BotRunner runner = BotFactory.runner(cfg, market, clock);
+        log.info("{} bots on {} markets from {} (seed {})", runner.bots().size(), cfg.markets().size(), props.botsFile(), cfg.seed());
         ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor(
                 Thread.ofPlatform().name("bots").daemon().factory());
         scheduler.scheduleWithFixedDelay(() -> {

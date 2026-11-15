@@ -1,7 +1,6 @@
 package app.journal;
 
 import application.Journal;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
@@ -79,11 +78,20 @@ public final class FileJournal implements Journal {
             @JsonSubTypes.Type(Event.TradeExecuted.class),
             @JsonSubTypes.Type(Event.OrderCancelled.class),
             @JsonSubTypes.Type(Event.OrderExpired.class),
-            @JsonSubTypes.Type(Event.ClockChanged.class)
+            @JsonSubTypes.Type(Event.ClockChanged.class),
+            @JsonSubTypes.Type(Event.ConditionalPlaced.class),
+            @JsonSubTypes.Type(Event.ConditionalCancelled.class),
+            @JsonSubTypes.Type(Event.ConditionalArmed.class),
+            @JsonSubTypes.Type(Event.ConditionalTriggered.class),
+            @JsonSubTypes.Type(Event.MarginPositionOpened.class),
+            @JsonSubTypes.Type(Event.MarginCloseRequested.class),
+            @JsonSubTypes.Type(Event.MarginStopOut.class),
+            @JsonSubTypes.Type(Event.MarginPositionClosed.class),
+            @JsonSubTypes.Type(Event.SavingsOpened.class),
+            @JsonSubTypes.Type(Event.InterestAccrued.class),
+            @JsonSubTypes.Type(Event.SavingsClosed.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     abstract static class EventMixin {
-        @JsonIgnore
-        abstract boolean isDecision();
     }
 }
