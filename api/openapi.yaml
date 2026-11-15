@@ -470,19 +470,19 @@ paths:
           content:
             application/json:
               schema: { $ref: '#/components/schemas/RealWorld' }
-  /real-world/quotes/{symbol}/history:
+  /real-world/history:
     get:
       operationId: getRealHistory
       summary: Daily history of a real-world quote
       security: []
       parameters:
         - name: symbol
-          in: path
+          in: query
           required: true
           schema: { type: string, examples: [USD/KZT] }
       responses:
         '200':
-          description: Points, oldest first
+          description: Points, oldest first (empty for an unknown symbol)
           content:
             application/json:
               schema: { type: array, items: { $ref: '#/components/schemas/RealPoint' } }
