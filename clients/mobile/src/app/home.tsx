@@ -8,7 +8,7 @@ import { Body, Button, Caption, Card, PracticeChip, Screen, Title } from '../com
 import { TabBar } from '../components/TabBar';
 import { Text } from 'react-native';
 
-const SCALE: Record<string, number> = { SPARK: 2, SILK: 0 };
+const SCALE: Record<string, number> = { SPARK: 2, SILK: 0, AMBER: 0 };
 
 /** Design S01 (home), skeleton: greeting, cash balance with the practice badge, accounts, one quick action. */
 export default function Home() {
@@ -37,10 +37,16 @@ export default function Home() {
       <Card style={{ gap: 14 }}>
         <Row title={t('home.current')} value={cash ? `${fmt(cash.available, 'SPARK')} SPARK` : '—'} sub={cash && cash.reserved > 0 ? t('home.inOrders', { amount: fmt(cash.reserved, 'SPARK') }) : undefined} testID="balance-SPARK" />
         <View style={{ height: 1, backgroundColor: c.border }} />
+        <Row title={t('home.fxAccount')} value={`AMBER · ${t('home.pcs', { count: me.data?.balances.find((b) => b.asset === 'AMBER')?.available ?? 0 })}`} testID="balance-AMBER" />
+        <View style={{ height: 1, backgroundColor: c.border }} />
         <Row title={t('home.broker')} value={silk ? `SILK · ${t('home.pcs', { count: silk.available })}` : '—'} sub={silk && silk.reserved > 0 ? t('home.inOrders', { amount: fmt(silk.reserved, 'SILK') }) : undefined} testID="balance-SILK" />
       </Card>
       <View style={{ flexDirection: 'row' }}>
         <Button testID="go-trade" title={t('home.trade')} onPress={() => router.replace('/instrument')} />
+      </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button testID="go-fx" title={t('home.fx')} color={c.accent} onPress={() => router.replace('/fx')} />
+        <Button testID="go-statement" title={t('home.statement')} color={c.textSecondary} onPress={() => router.push('/statement')} />
       </View>
     </Screen>
   );
