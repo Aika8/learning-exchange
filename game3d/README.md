@@ -7,7 +7,8 @@ Vertical slice: main menu (ru/en) → Spark Harbour (walk or fly) → Exchange h
 limit and market orders) → voyage to Silk Reach while the exchange's simulation clock runs.
 
 ## Run
-1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make game3d`.
+1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make assets` (once, ~170 MB of CC0 art from Poly Haven, MD5-checked; ADR-0019). 4. `make game3d`.
+Without `make assets` the game still runs with the old procedural look.
 Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, mouse, Tab (fly camera), E (interact),
 Space (sail during the voyage), F3 (fps), Esc (release the mouse / leave the hall).
 
