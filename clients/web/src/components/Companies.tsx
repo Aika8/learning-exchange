@@ -106,13 +106,15 @@ export function Companies({ current, now }: { current: Instrument; now: number |
               <h3>{t('companies.dividends')}</h3>
               <table>
                 <thead>
-                  <tr><th>{t('companies.exDate')}</th><th>{t('companies.perShare')}</th><th>{t('companies.paid')}</th></tr>
+                  <tr><th>{t('companies.exDate')}</th><th>{t('companies.recordDate')}</th><th>{t('companies.payDate')}</th><th>{t('companies.perShare')}</th><th>{t('companies.paid')}</th></tr>
                 </thead>
                 <tbody>
-                  {c.dividends.length === 0 && <tr><td colSpan={3}>—</td></tr>}
+                  {c.dividends.length === 0 && <tr><td colSpan={5}>—</td></tr>}
                   {c.dividends.map((d, i) => (
                     <tr key={i}>
                       <td>{time(d.exDate)}</td>
+                      <td>{time(d.recordDate)}</td>
+                      <td>{time(d.payDate)}</td>
                       <td>{money(d.perShare)}</td>
                       <td>{d.paid ? t('common.yes') : t('common.no')}</td>
                     </tr>
