@@ -63,3 +63,10 @@ export function unwrap<T>(r: { data?: T; error?: unknown }): T {
   }
   return r.data;
 }
+// M2c
+export type Atr = Schemas['Atr'];
+export type MarketState = Schemas['MarketState'];
+export type Mood = Schemas['Mood'];
+export type SessionReview = Schemas['SessionReview'];
+export type ReviewGroup = Schemas['ReviewGroup'];
+export type Fund = Schemas['Fund'];
