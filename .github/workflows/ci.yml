@@ -1,0 +1,38 @@
+# CI: `make test` on every push and pull request — backend, web and mobile unit tests and type checks.
+# No Godot here (the game's GUT tests are skipped by the Makefile) and no E2E (they need a running backend and a browser).
+# See DECISIONS.md, "M2a".
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            clients/web/package-lock.json
+            clients/mobile/package-lock.json
+      - run: make test
+      - name: Test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: backend/*/build/reports/tests/
