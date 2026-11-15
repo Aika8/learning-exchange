@@ -328,8 +328,10 @@ static func _spark_harbour(detail: bool) -> Node3D:
 			h.add_child(stall)
 		var villagers := [[Color("4e6fa8"), Color("d9a441"), Vector3(-2, 0, 2)], [Color("a8574e"), Color("3a4766"), Vector3(9, 0, 4)],
 			[Color("6a8f4e"), Color("8a5a3c"), Vector3(-9, 0, 8)]]
-		for v: Array in villagers:
-			var f := Proc.figure(v[0], v[1])
+		var who := ["sailor", "oldman", "child"]
+		for vi in villagers.size():
+			var v: Array = villagers[vi]
+			var f := Proc.figure(v[0], v[1], who[vi])
 			f.position = v[2]
 			f.rotation.y = rng.randf() * TAU
 			h.add_child(f)
