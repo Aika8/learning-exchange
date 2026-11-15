@@ -1,6 +1,6 @@
 # 0015. Real market data as a read-only feed, with paper trading
 
-- Status: Proposed
+- Status: Accepted (M2b)
 - Date: 2026-11-12
 - Pattern(s): Adapter (behind a `RealMarketData` port), Cache-aside, Circuit breaker / graceful degradation, Anti-corruption layer
 
@@ -39,3 +39,7 @@ Free real-time exchange data is often licensed; official daily rates are usually
 ## How to explain it
 "Real data comes through a port with swappable adapters, cached and protected by a circuit breaker.
 It's read-only — we never mix real prices into the simulated order book."
+
+## M2b note
+Implemented with the `StaticSampleData` adapter only: the terms of use of the live sources were not checked in M2b, so the
+recorded sample is labelled as such on every screen. No cache or circuit breaker yet (nothing live to protect).

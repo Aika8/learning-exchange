@@ -1,6 +1,6 @@
 # 0004. One Backend-for-Frontend per client type
 
-- Status: Proposed
+- Status: Accepted (M2b)
 - Date: 2026-11-12
 - Pattern(s): Backend for Frontend (Sam Newman / SoundCloud), API Gateway (simplified)
 

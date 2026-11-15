@@ -1,6 +1,6 @@
 # 0012. Real names everywhere, lore names as flavour
 
-- Status: Proposed
+- Status: Accepted (M2b)
 - Date: 2026-11-12 (revised the same day after Aika's decision: real terms visible everywhere)
 - Pattern(s): Anti-Corruption Layer (in the BFF), Reference data catalogue, Ubiquitous language per bounded context (DDD)
 
