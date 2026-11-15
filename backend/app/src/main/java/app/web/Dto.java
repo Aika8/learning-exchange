@@ -23,7 +23,7 @@ public final class Dto {
     }
 
     /** Decimals shown for each asset; the catalogue (ADR-0012) will own this in M2. */
-    static final Map<String, Integer> SCALE = Map.of("SPARK", 2, "SILK", 0, "AMBER", 0);
+    static final Map<String, Integer> SCALE = Map.of("SPARK", 2, "SILK", 0, "AMBER", 0, "FORGE", 0, "HBND", 0, "GBND", 0);
 
     public record LoginRequest(String name) {}
 
@@ -42,12 +42,39 @@ public final class Dto {
     public record DepositRequest(String asset, Long amount) {}
 
     public record InstrumentDto(String id, String base, String quote, long feeBps, int priceScale, int qtyScale,
-                                int maxLeverage) {
-        static InstrumentDto of(Instrument i) {
+                                int maxLeverage, String kind, boolean tradingOpen) {
+        static InstrumentDto of(Instrument i, boolean open) {
             return new InstrumentDto(i.id(), i.base(), i.quote(), i.feeBps(), SCALE.getOrDefault(i.quote(), 0),
-                    SCALE.getOrDefault(i.base(), 0), i.maxLeverage());
+                    SCALE.getOrDefault(i.base(), 0), i.maxLeverage(), application.economy.Securities.kind(i.id()), open);
         }
     }
+
+    // ---- M2b ----
+
+    public record OpenPaperRequest(String symbol, String side, Long qty) {}
+
+    public record PaperPositionDto(long paperId, String symbol, String side, long qty, long entryPrice, long openedAt,
+                                   long quotedAt, String source, boolean open, Long exitPrice, Long closedAt,
+                                   long currentPrice, long pnl) {
+        static PaperPositionDto of(application.realworld.PaperBook.Position p, long currentPrice) {
+            return new PaperPositionDto(p.paperId(), p.symbol(), p.side().name(), p.qty(), p.entryPrice(), p.openedAt(),
+                    p.quotedAt(), p.source(), p.open(), p.exitPrice(), p.closedAt(),
+                    p.exitPrice() != null ? p.exitPrice() : currentPrice, p.pnl(currentPrice));
+        }
+    }
+
+    public record RealWorldDto(List<application.realworld.RealMarketData.Quote> quotes,
+                               application.realworld.RealMarketData.BaseRate baseRate) {}
+
+    public record GapWarningDto(long reportAt, List<Long> conditionalIds) {}
+
+    public record MobileCompanyCardDto(application.economy.EconomyViews.Company company, app.bff.Catalogue.Name name,
+                                       GapWarningDto gapWarning) {}
+
+    public record CatalogueItemDto(String instrument, String kind, app.bff.Catalogue.Name real, app.bff.Catalogue.Name lore) {}
+
+    public record GlossaryTermDto(String id, app.bff.Catalogue.Name real, app.bff.Catalogue.Name definition,
+                                  app.bff.Catalogue.Name lore) {}
 
     public record PlaceOrderRequest(String instrument, String side, String type, Long price, Long qty) {}
 
@@ -144,13 +171,14 @@ public final class Dto {
         }
     }
 
-    public record StatementTotalsDto(long fees, long spreadPaid, long realisedPnl, long taxRateBps, long tax, long interest) {}
+    public record StatementTotalsDto(long fees, long spreadPaid, long realisedPnl, long taxRateBps, long tax, long interest,
+                                     long payouts) {}
 
     public record StatementDto(long from, long to, String currency, List<StatementLineDto> lines, StatementTotalsDto totals) {
         static StatementDto of(StatementProjection.Statement s) {
             StatementProjection.Totals t = s.totals();
             return new StatementDto(s.from(), s.to(), s.currency(), s.lines().stream().map(StatementLineDto::of).toList(),
-                    new StatementTotalsDto(t.fees(), t.spreadPaid(), t.realisedPnl(), t.taxRateBps(), t.tax(), t.interest()));
+                    new StatementTotalsDto(t.fees(), t.spreadPaid(), t.realisedPnl(), t.taxRateBps(), t.tax(), t.interest(), t.payouts()));
         }
     }
 }

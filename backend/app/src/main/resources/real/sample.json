@@ -1,0 +1,24 @@
+{
+  "source": {
+    "id": "static-sample",
+    "name": "Recorded sample (illustrative values, not official)",
+    "url": null,
+    "terms": "Terms of use of the National Bank of Kazakhstan and KASE data were not verified in M2b, so no live adapter is shipped; these numbers are an illustrative sample kept in the repo for offline demos (docs/STATUS.md).",
+    "sample": true,
+    "delayed": true
+  },
+  "quotes": [
+    { "symbol": "USD/KZT", "base": "USD", "quote": "KZT", "scale": 2, "asOf": "2026-11-13T12:00:00Z",
+      "history": [["2026-11-02", 52310], ["2026-11-03", 52288], ["2026-11-04", 52402], ["2026-11-05", 52455], ["2026-11-06", 52390],
+                  ["2026-11-09", 52512], ["2026-11-10", 52604], ["2026-11-11", 52580], ["2026-11-12", 52471], ["2026-11-13", 52431]] },
+    { "symbol": "EUR/KZT", "base": "EUR", "quote": "KZT", "scale": 2, "asOf": "2026-11-13T12:00:00Z",
+      "history": [["2026-11-09", 60820], ["2026-11-10", 60955], ["2026-11-11", 60890], ["2026-11-12", 60710], ["2026-11-13", 60744]] }
+  ],
+  "baseRate": {
+    "bank": "National Bank of Kazakhstan (sample)",
+    "asOf": "2026-11-13T12:00:00Z",
+    "history": [["2026-01-16", 1800], ["2026-03-06", 1800], ["2026-04-17", 1750], ["2026-06-05", 1750],
+                ["2026-07-17", 1700], ["2026-08-28", 1700], ["2026-10-09", 1650]],
+    "upcoming": ["2026-11-27", "2027-01-15"]
+  }
+}

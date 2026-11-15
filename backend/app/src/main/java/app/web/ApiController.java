@@ -66,7 +66,7 @@ public class ApiController {
 
     @GetMapping("/instruments")
     public List<InstrumentDto> instruments() {
-        return market.instruments().stream().map(InstrumentDto::of).toList();
+        return market.instruments().stream().map(i -> InstrumentDto.of(i, market.tradingOpen(i.id()))).toList();
     }
 
     @GetMapping("/instruments/{id}/book")

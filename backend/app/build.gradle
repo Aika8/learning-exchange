@@ -23,3 +23,8 @@ bootRun {
 
 // The contract is on the test classpath, so ContractTest validates against the real api/openapi.yaml.
 sourceSets.test.resources.srcDir rootProject.file('api')
+
+// Tests read docs/lore/*.yaml and bots.yaml by repo-relative paths, like bootRun.
+test {
+    workingDir = rootProject.projectDir
+}
