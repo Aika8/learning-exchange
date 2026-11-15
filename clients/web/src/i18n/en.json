@@ -117,7 +117,8 @@
     "kind": {
       "STOCK": "stock",
       "FX": "FX",
-      "BOND": "bond"
+      "BOND": "bond",
+      "FUND": "fund"
     }
   },
   "tabs": {
