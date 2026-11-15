@@ -49,6 +49,8 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     private final EconomyProjection economy = new EconomyProjection();
     private final PaperBook paper = new PaperBook();
     private final CandleProjection candles;
+    private final SessionReviewProjection reviews = new SessionReviewProjection();
+    private final application.economy.FundProjection funds = new application.economy.FundProjection();
     private final RealMarketData realData;
     private final EconomySchedule schedule;
     private final long depositMarginBps;
@@ -59,7 +61,12 @@ public final class ExchangeService implements TradingService, AutoCloseable {
      * the economy's seed, issuers' cash (journalled once, like bank capital) and the real-world data adapter.
      */
     public record Options(Map<String, Long> bankCapital, SavingsProduct savings, long economySeed,
-                          Map<String, Long> issuerCash, RealMarketData realData) {
+                          Map<String, Long> issuerCash, RealMarketData realData, boolean withFunds) {
+
+        public Options(Map<String, Long> bankCapital, SavingsProduct savings, long economySeed,
+                       Map<String, Long> issuerCash, RealMarketData realData) {
+            this(bankCapital, savings, economySeed, issuerCash, realData, true);
+        }
 
         /** GBND's issuer has cash for about three and a half coupons on the bots' float: it defaults on the fourth. */
         public static final Map<String, Long> ISSUER_CASH = Map.of("issuer-silk", 5_000_000_000L,
@@ -70,7 +77,7 @@ public final class ExchangeService implements TradingService, AutoCloseable {
 
         /** M2a shape: no issuers (no dividends or coupons), no real data. */
         public Options(Map<String, Long> bankCapital, SavingsProduct savings) {
-            this(bankCapital, savings, 42, Map.of(), RealMarketData.NONE);
+            this(bankCapital, savings, 42, Map.of(), RealMarketData.NONE, false);
         }
     }
 
@@ -93,6 +100,8 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         this.paper.onEvents(history);
         this.candles = new CandleProjection(options.savings().dayMillis());
         candles.onEvents(history);
+        reviews.onEvents(history);
+        funds.onEvents(history);
         this.realData = options.realData();
         this.schedule = new EconomySchedule(options.economySeed(), economy.epoch().orElse(clock.now()),
                 options.savings().dayMillis());
@@ -115,6 +124,16 @@ public final class ExchangeService implements TradingService, AutoCloseable {
                     run(ex, new Command.Deposit(c.getKey(), "SPARK", c.getValue()));
                 }
             });
+            if (options.withFunds()) {
+                for (application.economy.Funds.Fund f : application.economy.Funds.FUNDS) {
+                    if (!ex.hasAccount(f.custody())) {
+                        run(ex, new Command.OpenAccount(f.custody(), f.custody()));
+                        run(ex, new Command.Deposit(f.custody(), "SPARK", f.cash()));
+                        new java.util.TreeMap<>(f.holdings()).forEach((asset, qty) ->
+                                run(ex, new Command.Deposit(f.custody(), asset, qty)));
+                    }
+                }
+            }
             return null;
         });
     }
@@ -157,6 +176,118 @@ public final class ExchangeService implements TradingService, AutoCloseable {
             Outcome o = run(ex, new Command.PlaceOrder(accountId, instrument, side, type, price, qty, idempotencyKey));
             return ex.order(o.orderId()).orElseThrow();
         });
+    }
+
+    @Override
+    public OrderView place(String accountId, String instrument, Order.Side side, Order.Type type, long price, long qty,
+                           String idempotencyKey, SessionReviewProjection.Note note) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.PlaceOrder(accountId, instrument, side, type, price, qty, idempotencyKey));
+            if (note != null) {
+                // A retried key returns the first order, which already has its note: ALREADY_ANNOTATED is fine then.
+                Outcome a = ex.execute(new Command.AnnotateOrder(accountId, o.orderId(), note.why(), note.marketState(),
+                        note.mood(), note.plannedRisk() == null ? 0 : note.plannedRisk()), clock.now());
+                if (a.accepted()) {
+                    publish(a.events());
+                }
+            }
+            return ex.order(o.orderId()).orElseThrow();
+        });
+    }
+
+    // ---- M2c: ATR, session review, funds (ADR-0022) ----
+
+    @Override
+    public Atr.Result atr(String instrument, int period) {
+        return sequencer.call(ex -> {
+            requireInstrument(ex, instrument);
+            return Atr.wilder(candles.candles(instrument, period * 3 + 1), period);
+        });
+    }
+
+    @Override
+    public Optional<Long> lastPrice(String instrument) {
+        return sequencer.call(ex -> {
+            requireInstrument(ex, instrument);
+            return ex.lastPrice(instrument);
+        });
+    }
+
+    @Override
+    public SessionReviewProjection.Review sessionReview(String accountId, long from, long to) {
+        return sequencer.call(ex -> reviews.review(accountId, from, to,
+                i -> ex.instrument(i).isPresent() ? ex.lastPrice(i).orElse(null) : null));
+    }
+
+    @Override
+    public List<application.economy.EconomyViews.Fund> funds() {
+        return sequencer.call(ex -> application.economy.Funds.FUNDS.stream().map(f -> fundView(ex, f)).toList());
+    }
+
+    private application.economy.EconomyViews.Fund fundView(Exchange ex, application.economy.Funds.Fund f) {
+        List<application.economy.EconomyViews.FundHolding> rows = new java.util.ArrayList<>();
+        long shares = 0;
+        for (String asset : new java.util.TreeSet<>(f.holdings().keySet())) {
+            String market = application.economy.Funds.MARKET_OF.get(asset);
+            long qty = ex.ledger().available(f.custody(), asset) + ex.ledger().reserved(f.custody(), asset);
+            Long price = ex.lastPrice(market).orElse(null);
+            long value = price == null ? 0 : qty * price;
+            shares += value;
+            rows.add(new application.economy.EconomyViews.FundHolding(market, qty, price, value, 0));
+        }
+        long cash = ex.ledger().exists(f.custody()) ? ex.ledger().available(f.custody(), "SPARK") : 0;
+        long nav = shares + cash;
+        long sharesValue = shares;
+        rows = rows.stream().map(r -> new application.economy.EconomyViews.FundHolding(r.instrument(), r.qty(), r.price(),
+                r.value(), nav == 0 ? 0 : r.value() * 10_000 / nav)).toList();
+        long units = 0;
+        for (String a : ex.ledger().accountIds()) {
+            if (!a.equals(f.custody())) {
+                units += ex.ledger().available(a, f.unit()) + ex.ledger().reserved(a, f.unit());
+            }
+        }
+        Long perUnit = units == 0 ? null : nav / units;
+        Long last = ex.lastPrice(f.instrument()).orElse(null);
+        Long premium = perUnit == null || perUnit == 0 || last == null ? null : (last - perUnit) * 10_000 / perUnit;
+        long basket = sharesValue + f.cash();
+        var st = funds.state(f.instrument());
+        Long fundRet = st.flatMap(x -> java.util.Optional.ofNullable(x.firstNav())).filter(x -> x > 0)
+                .map(x -> (nav - x) * 10_000 / x).orElse(null);
+        Long basketRet = st.flatMap(x -> java.util.Optional.ofNullable(x.firstBasket())).filter(x -> x > 0)
+                .map(x -> (basket - x) * 10_000 / x).orElse(null);
+        return new application.economy.EconomyViews.Fund(f.instrument(), f.kind().name(), f.terBps(), units, rows, cash, nav,
+                perUnit, last, premium, st.map(application.economy.FundProjection.State::feesPaid).orElse(0L), basket,
+                fundRet, basketRet, application.economy.Funds.costOverYearsBps(f.terBps(), 10));
+    }
+
+    /**
+     * Charges each fund's TER for the whole bank days since its last charge: NAV × TER × days / 365, rounded down,
+     * from custody cash to the manager. The amount is decided here from prices and journalled (replay re-applies it).
+     */
+    private void chargeFundFees(Exchange ex) {
+        long now = clock.now();
+        for (application.economy.Funds.Fund f : application.economy.Funds.FUNDS) {
+            var st = funds.state(f.instrument());
+            if (st.isEmpty()) {
+                continue;
+            }
+            int days = (int) Math.min(36_500, (now - st.get().lastChargeAt()) / savingsProduct.dayMillis());
+            if (days <= 0) {
+                continue;
+            }
+            var view = fundView(ex, f);
+            boolean priced = view.holdings().stream().allMatch(h -> h.price() != null);
+            if (!priced) {
+                continue;
+            }
+            long fee = Math.min(view.cash(), Math.multiplyExact(view.nav(), f.terBps()) * days / 10_000 / 365);
+            long at = st.get().lastChargeAt() + days * savingsProduct.dayMillis();
+            Outcome o = ex.execute(new Command.ChargeFundFee(f.instrument(), f.custody(), f.manager(), "SPARK", fee, days,
+                    view.nav(), view.basketValue()), at);
+            if (o.accepted()) {
+                publish(o.events());
+            }
+        }
     }
 
     @Override
@@ -295,7 +426,11 @@ public final class ExchangeService implements TradingService, AutoCloseable {
 
     @Override
     public void accrueInterest() {
-        sequencer.call(ex -> run(ex, new Command.AccrueInterest()));
+        sequencer.call(ex -> {
+            run(ex, new Command.AccrueInterest());
+            chargeFundFees(ex);
+            return null;
+        });
     }
 
     // ---- M2b: economy (ADR-0021) ----
@@ -318,7 +453,11 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         switch (item) {
             case EconomySchedule.Publish p -> runAt(ex, new Command.Publish(p.disclosure()), at);
             case EconomySchedule.TradingStatus t -> runAt(ex, new Command.SetTradingStatus(t.instrument(), t.open(), t.reason()), at);
-            case EconomySchedule.Dividend d -> runAt(ex, new Command.Payout(d.instrument(), Event.PayoutKind.DIVIDEND, d.issuer(), d.perShare()), at);
+            case EconomySchedule.Dividend d -> runAt(ex, new Command.DividendExDate(d.instrument(), d.issuer(), d.perShare(),
+                    d.recordDate(), d.payDate()), at);
+            case EconomySchedule.DividendRecord d -> { }
+            case EconomySchedule.DividendPay d -> runAt(ex, new Command.PayDividend(d.instrument(),
+                    StatementProjection.TAX_RATE_BPS), at);
             case EconomySchedule.Insider i -> ex.lastPrice(i.instrument()).ifPresent(price -> runAt(ex, new Command.Publish(
                     new Event.InsiderTradeDisclosed(at, i.instrument(), i.insider(), i.role(), i.side(), i.qty(), price)), at));
             case EconomySchedule.Coupon c -> {
@@ -496,6 +635,8 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         economy.onEvents(events);
         paper.onEvents(events);
         candles.onEvents(events);
+        reviews.onEvents(events);
+        funds.onEvents(events);
         for (MarketListener l : listeners) {
             l.onEvents(events);
         }

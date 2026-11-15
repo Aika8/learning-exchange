@@ -19,7 +19,7 @@ public final class EconomyViews {
     public record Macro(long policyRateBps, long inflationBps, long realRateBps, long savingsRateBps, String regime,
                         int volatilityPct, Long nextDecisionAt, Long nextConsensusBps, List<Event.RateDecided> decisions) {}
 
-    public record Dividend(long perShare, long exDate, boolean paid) {}
+    public record Dividend(long perShare, long exDate, Long recordDate, Long payDate, boolean paid) {}
 
     /**
      * A company card. Ratios are ×100 (P/E 12.5 → 1250); {@code dividendYieldBps} is a year of dividends over the
@@ -36,4 +36,13 @@ public final class EconomyViews {
                        long couponPerUnit, long maturityAt, String rating, String status, Long lastPrice, long price,
                        long ytmBps, long durationX100, Long nextCouponAt, int couponsPaid, int couponsLeft,
                        long fairYieldBps, long policyRateBps) {}
+
+    // ---- M2c ----
+
+    public record FundHolding(String instrument, long qty, Long price, long value, long weightBps) {}
+
+    /** A fund card: TER, NAV, holdings and the fund against the same basket held without the fee. */
+    public record Fund(String instrument, String kind, long terBps, long unitsOutstanding, List<FundHolding> holdings,
+                       long cash, long nav, Long navPerUnit, Long lastPrice, Long premiumBps, long feesPaid,
+                       long basketValue, Long fundReturnBps, Long basketReturnBps, long tenYearCostBps) {}
 }

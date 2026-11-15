@@ -762,7 +762,7 @@ components:
       required: [id, base, quote, feeBps, priceScale, qtyScale, maxLeverage, kind, tradingOpen]
       properties:
         id: { type: string, examples: [SILK-SPARK, AMBER-SPARK] }
-        kind: { type: string, enum: [STOCK, FX, BOND] }
+        kind: { type: string, enum: [STOCK, FX, BOND, FUND] }
         tradingOpen: { type: boolean, description: 'false while halted (report night) or after a bond is repaid' }
         base: { type: string, examples: [SILK] }
         quote: { type: string, examples: [SPARK] }
@@ -1425,7 +1425,7 @@ components:
       required: [instrument, kind, real]
       properties:
         instrument: { type: string }
-        kind: { type: string, enum: [STOCK, FX, BOND] }
+        kind: { type: string, enum: [STOCK, FX, BOND, FUND] }
         real: { $ref: '#/components/schemas/LocalisedName' }
         lore:
           description: Only from the game BFF

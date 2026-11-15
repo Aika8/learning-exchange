@@ -47,9 +47,16 @@ public record Instrument(String id, String base, String quote, long feeBps, int 
     public static final Instrument HBND_SPARK = new Instrument("HBND-SPARK", "HBND", "SPARK", 5);
     public static final Instrument GBND_SPARK = new Instrument("GBND-SPARK", "GBND", "SPARK", 5);
 
+    /**
+     * M2c funds: one unit is a share of a fund's basket (index: both companies by capitalisation; active: the manager's
+     * picks). The fund's custody holds the basket; its terms and TER live in the application (ADR-0022).
+     */
+    public static final Instrument IDX_SPARK = new Instrument("IDX-SPARK", "IDX", "SPARK", 5);
+    public static final Instrument ACT_SPARK = new Instrument("ACT-SPARK", "ACT", "SPARK", 5);
+
     /** Every instrument, in catalogue order. */
     public static final java.util.List<Instrument> ALL = java.util.List.of(SILK_SPARK, AMBER_SPARK, FORGE_SPARK,
-            HBND_SPARK, GBND_SPARK);
+            HBND_SPARK, GBND_SPARK, IDX_SPARK, ACT_SPARK);
 
     /**
      * Fee on a notional, rounded down. Rounding down means the sum of fees on the parts of an order never

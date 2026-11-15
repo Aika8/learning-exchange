@@ -46,9 +46,24 @@ public final class EconomySchedule {
         }
     }
 
-    public record Dividend(long at, String instrument, String issuer, long perShare) implements Item {
+    /** The open of the ex-date: entitlement fixed, reference price adjusted (M2c, ADR-0022). */
+    public record Dividend(long at, String instrument, String issuer, long perShare, long recordDate, long payDate)
+            implements Item {
         public String kind() {
             return "DIVIDEND_EX";
+        }
+    }
+
+    /** Calendar marker only: the register is read on this day (settlement T+1 after the ex-date). */
+    public record DividendRecord(long at, String instrument, long perShare) implements Item {
+        public String kind() {
+            return "DIVIDEND_RECORD";
+        }
+    }
+
+    public record DividendPay(long at, String instrument, long perShare) implements Item {
+        public String kind() {
+            return "DIVIDEND_PAY";
         }
     }
 
@@ -211,10 +226,15 @@ public final class EconomySchedule {
                     at(reportDay, 0.75 + c * 0.01), id, s + 1, revenue, profit, eps, debt, cashFlow, dividend, guidance,
                     co.sharesOutstanding(), consensusEps)));
             if (dividend > 0) {
+                // M2c: ex-date at the open of day +10, record date the next day (T+1), paid 4 days later.
                 long ex = at(reportDay + 10, 0.01 + c * 0.001);
+                long record = at(reportDay + 11, 0.02 + c * 0.001);
+                long pay = at(reportDay + 15, 0.3 + c * 0.001);
                 out.add(new Publish(at(reportDay, 0.76 + c * 0.01), "DIVIDEND", id,
-                        new Event.DividendAnnounced(at(reportDay, 0.76 + c * 0.01), id, dividend, ex)));
-                out.add(new Dividend(ex, id, co.issuer(), dividend));
+                        new Event.DividendDeclared(at(reportDay, 0.76 + c * 0.01), id, dividend, ex, record, pay)));
+                out.add(new Dividend(ex, id, co.issuer(), dividend, record, pay));
+                out.add(new DividendRecord(record, id, dividend));
+                out.add(new DividendPay(pay, id, dividend));
             }
             out.add(new TradingStatus(at(reportDay + 1, 0.0 + c * 0.001), id, true, "OPEN"));
 

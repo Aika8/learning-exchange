@@ -126,6 +126,20 @@ public interface TradingService {
     /** My statement for simulation time {@code [from, to)}. */
     StatementProjection.Statement statement(String accountId, long from, long to);
 
+    // ---- M2c (ADR-0022) ----
+
+    /** Places an order and journals its trade-journal note (if any) right after it. */
+    OrderView place(String accountId, String instrument, Order.Side side, Order.Type type, long price, long qty,
+                    String idempotencyKey, SessionReviewProjection.Note note);
+
+    Atr.Result atr(String instrument, int period);
+
+    Optional<Long> lastPrice(String instrument);
+
+    SessionReviewProjection.Review sessionReview(String accountId, long from, long to);
+
+    List<application.economy.EconomyViews.Fund> funds();
+
     /** The savings deposit on offer: annual rate, and how long a bank day is in simulation time. */
     record SavingsProduct(String asset, long rateBps, long dayMillis) {}
 

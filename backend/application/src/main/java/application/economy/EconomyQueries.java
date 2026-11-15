@@ -10,8 +10,8 @@ public final class EconomyQueries {
 
     /** Kinds shown ahead of time: their dates are public. Storms, insider trades and halts are not. */
     private static final Set<String> PUBLIC_AHEAD = Set.of("RATE_DECISION", "EARNINGS", "COUPON", "MATURITY");
-    private static final Set<String> SHOWN = Set.of("RATE_DECISION", "EARNINGS", "CONSENSUS", "DIVIDEND_EX", "COUPON",
-            "MATURITY", "STORM");
+    private static final Set<String> SHOWN = Set.of("RATE_DECISION", "EARNINGS", "CONSENSUS", "DIVIDEND_EX",
+            "DIVIDEND_RECORD", "DIVIDEND_PAY", "COUPON", "MATURITY", "STORM");
 
     private EconomyQueries() {
     }
@@ -31,8 +31,14 @@ public final class EconomyQueries {
     }
 
     private static boolean announcedDividend(EconomySchedule.Item item, EconomyProjection economy) {
-        return item instanceof EconomySchedule.Dividend d
-                && economy.dividends(d.instrument()).stream().anyMatch(x -> x.announced().exDate() == d.at());
+        return switch (item) {
+            case EconomySchedule.Dividend d -> economy.dividends(d.instrument()).stream().anyMatch(x -> x.exDate() == d.at());
+            case EconomySchedule.DividendRecord d -> economy.dividends(d.instrument()).stream()
+                    .anyMatch(x -> x.recordDate() != null && x.recordDate() == d.at());
+            case EconomySchedule.DividendPay d -> economy.dividends(d.instrument()).stream()
+                    .anyMatch(x -> x.payDate() != null && x.payDate() == d.at());
+            default -> false;
+        };
     }
 
     private static EconomyViews.CalendarEntry entry(EconomySchedule.Item item, boolean done, EconomyProjection economy) {
@@ -61,6 +67,10 @@ public final class EconomyQueries {
                 default -> new EconomyViews.CalendarEntry(p.at(), p.kind(), p.instrument(), done, null, null, null, null);
             };
             case EconomySchedule.Dividend d -> new EconomyViews.CalendarEntry(d.at(), "DIVIDEND_EX", d.instrument(), done,
+                    null, d.perShare(), null, null);
+            case EconomySchedule.DividendRecord d -> new EconomyViews.CalendarEntry(d.at(), "DIVIDEND_RECORD", d.instrument(),
+                    done, null, d.perShare(), null, null);
+            case EconomySchedule.DividendPay d -> new EconomyViews.CalendarEntry(d.at(), "DIVIDEND_PAY", d.instrument(), done,
                     null, d.perShare(), null, null);
             case EconomySchedule.Coupon c -> new EconomyViews.CalendarEntry(c.at(), "COUPON", c.instrument(), done, null,
                     c.bond().couponPerUnit(), null, null);
@@ -112,7 +122,7 @@ public final class EconomyQueries {
                 .filter(i -> i.kind().equals("EARNINGS") && c.instrument().equals(i.instrument()))
                 .map(EconomySchedule.Item::at).findFirst().orElse(null);
         List<EconomyViews.Dividend> dividends = economy.dividends(c.instrument()).stream()
-                .map(d -> new EconomyViews.Dividend(d.announced().perShare(), d.announced().exDate(), d.paid())).toList();
+                .map(d -> new EconomyViews.Dividend(d.perShare(), d.exDate(), d.recordDate(), d.payDate(), d.paid())).toList();
         return new EconomyViews.Company(c.instrument(), c.issuer(), c.sharesOutstanding(), lastPrice, epsTtm, pe,
                 debtToProfit, yield, last, surprise, economy.pendingConsensus(c.instrument()).orElse(null), nextReport, open,
                 economy.insiderTrades(c.instrument()), dividends, reports);
