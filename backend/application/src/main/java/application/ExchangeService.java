@@ -177,10 +177,10 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     @Override
     public ConditionalView placeConditional(String accountId, String instrument, Conditional.Kind kind, Order.Side side,
                                             long qty, long triggerPrice, long limitPrice, long activationPrice,
-                                            long offset, long protectiveSpread) {
+                                            long offset, long protectiveSpread, String idempotencyKey) {
         return sequencer.call(ex -> {
             Outcome o = run(ex, new Command.PlaceConditional(accountId, instrument, kind, side, qty, triggerPrice,
-                    limitPrice, activationPrice, offset, protectiveSpread));
+                    limitPrice, activationPrice, offset, protectiveSpread, idempotencyKey));
             return ex.conditional(o.orderId()).orElseThrow();
         });
     }
@@ -199,9 +199,10 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     }
 
     @Override
-    public MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage) {
+    public MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage,
+                                 String idempotencyKey) {
         return sequencer.call(ex -> {
-            Outcome o = run(ex, new Command.OpenMargin(accountId, instrument, side, qty, leverage));
+            Outcome o = run(ex, new Command.OpenMargin(accountId, instrument, side, qty, leverage, idempotencyKey));
             return ex.position(o.orderId()).orElseThrow();
         });
     }
@@ -225,10 +226,10 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     }
 
     @Override
-    public SavingsView openSavings(String accountId, long amount) {
+    public SavingsView openSavings(String accountId, long amount, String idempotencyKey) {
         return sequencer.call(ex -> {
             Outcome o = run(ex, new Command.OpenSavings(accountId, savingsProduct.asset(), amount, savingsProduct.rateBps(),
-                    savingsProduct.dayMillis()));
+                    savingsProduct.dayMillis(), idempotencyKey));
             return ex.deposit(o.orderId()).orElseThrow();
         });
     }

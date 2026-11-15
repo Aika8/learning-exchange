@@ -53,13 +53,25 @@ public interface TradingService {
     /** A stop or take-profit kept outside the book (ADR-0008). Unused prices are 0. */
     ConditionalView placeConditional(String accountId, String instrument, Conditional.Kind kind, Order.Side side,
                                      long qty, long triggerPrice, long limitPrice, long activationPrice, long offset,
-                                     long protectiveSpread);
+                                     long protectiveSpread, String idempotencyKey);
+
+    default ConditionalView placeConditional(String accountId, String instrument, Conditional.Kind kind, Order.Side side,
+                                             long qty, long triggerPrice, long limitPrice, long activationPrice,
+                                             long offset, long protectiveSpread) {
+        return placeConditional(accountId, instrument, kind, side, qty, triggerPrice, limitPrice, activationPrice, offset,
+                protectiveSpread, null);
+    }
 
     ConditionalView cancelConditional(String accountId, long conditionalId);
 
     List<ConditionalView> conditionals(String accountId, int limit);
 
-    MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage);
+    MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage,
+                          String idempotencyKey);
+
+    default MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage) {
+        return openMargin(accountId, instrument, side, qty, leverage, null);
+    }
 
     MarginView closeMargin(String accountId, long positionId);
 
@@ -67,7 +79,11 @@ public interface TradingService {
 
     SavingsProduct savingsProduct();
 
-    SavingsView openSavings(String accountId, long amount);
+    SavingsView openSavings(String accountId, long amount, String idempotencyKey);
+
+    default SavingsView openSavings(String accountId, long amount) {
+        return openSavings(accountId, amount, null);
+    }
 
     SavingsView closeSavings(String accountId, long depositId);
 

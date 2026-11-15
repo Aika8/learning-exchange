@@ -18,7 +18,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Journal adapter: one JSON object per line, appended and flushed per batch, read back in full on start.
- * Example line: {@code {"type":"OrderAccepted","ts":1763100000000,"orderId":7,...}}.
+ * Example line: {@code {"type":"OrderAccepted","ts":1763100000000,"orderId":7,...,"v":2}}; {@code v} is the
+ * format version, and older lines are lifted by {@link Upcasters} on read.
  *
  * <p>Pattern: Adapter (driven side of Ports &amp; Adapters) for the {@link Journal} port; the engine's events stay free
  * of Jackson thanks to a mix-in. See docs/adr/0005-event-sourcing-journal.md.
@@ -43,7 +44,7 @@ public final class FileJournal implements Journal {
                 out = Files.newBufferedWriter(file, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.APPEND);
             }
             for (Event e : events) {
-                out.write(json.writerFor(Event.class).writeValueAsString(e));
+                out.write(Upcasters.stamp(json.writerFor(Event.class).writeValueAsString(e)));
                 out.newLine();
             }
             out.flush();
@@ -61,7 +62,7 @@ public final class FileJournal implements Journal {
             List<Event> events = new ArrayList<>();
             for (String line : Files.readAllLines(file, StandardCharsets.UTF_8)) {
                 if (!line.isBlank()) {
-                    events.add(json.readValue(line, Event.class));
+                    events.add(json.readValue(Upcasters.upcast(line), Event.class));
                 }
             }
             return events;
@@ -89,7 +90,20 @@ public final class FileJournal implements Journal {
             @JsonSubTypes.Type(Event.MarginPositionClosed.class),
             @JsonSubTypes.Type(Event.SavingsOpened.class),
             @JsonSubTypes.Type(Event.InterestAccrued.class),
-            @JsonSubTypes.Type(Event.SavingsClosed.class)
+            @JsonSubTypes.Type(Event.SavingsClosed.class),
+            @JsonSubTypes.Type(Event.ConsensusPublished.class),
+            @JsonSubTypes.Type(Event.EarningsReported.class),
+            @JsonSubTypes.Type(Event.DividendAnnounced.class),
+            @JsonSubTypes.Type(Event.InsiderTradeDisclosed.class),
+            @JsonSubTypes.Type(Event.RateDecisionScheduled.class),
+            @JsonSubTypes.Type(Event.RateDecided.class),
+            @JsonSubTypes.Type(Event.MarketRegimeChanged.class),
+            @JsonSubTypes.Type(Event.PaperPositionOpened.class),
+            @JsonSubTypes.Type(Event.PaperPositionClosed.class),
+            @JsonSubTypes.Type(Event.TradingStatusChanged.class),
+            @JsonSubTypes.Type(Event.PayoutStarted.class),
+            @JsonSubTypes.Type(Event.PayoutPaid.class),
+            @JsonSubTypes.Type(Event.BondDefaulted.class)
     })
     @JsonIgnoreProperties(ignoreUnknown = true)
     abstract static class EventMixin {

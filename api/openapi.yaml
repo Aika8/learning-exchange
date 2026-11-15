@@ -138,9 +138,7 @@ paths:
         Funds are reserved before the order reaches the book: a buy reserves `price × qty + fee` (market buy: the cost
         of walking the book now + fee), a sell reserves `qty`. A repeated `Idempotency-Key` returns the first order.
       parameters:
-        - name: Idempotency-Key
-          in: header
-          schema: { type: string, maxLength: 64 }
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -195,6 +193,8 @@ paths:
         Kept by the exchange outside the book (ADR-0008). It watches the **last trade price**, never book quotes.
         When it fires it submits an ordinary order, which may still not fill. Nothing is reserved until then;
         the generated order is checked for funds like any other and may be rejected.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -248,6 +248,8 @@ paths:
         Collateral `ceil(notional / leverage)` (+ the fee for a long) is taken from my quote balance; the exchange's
         bank lends the rest (quote for a long, base for a short). The position is force-closed at market (stop-out)
         when equity falls to 50% of the collateral, priced at the last trade.
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -296,6 +298,8 @@ paths:
     post:
       operationId: openSavings
       summary: Put SPARK on a savings deposit; interest compounds every bank day of simulation time
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
       requestBody:
         required: true
         content:
@@ -387,6 +391,13 @@ components:
       scheme: bearer
       description: Token from dev-login.
   parameters:
+    IdempotencyKey:
+      name: Idempotency-Key
+      in: header
+      description: |
+        Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+        request created instead of creating it again, so a retry after a timeout is safe.
+      schema: { type: string, maxLength: 64 }
     InstrumentId:
       name: instrumentId
       in: path
@@ -734,7 +745,7 @@ components:
       properties:
         reasons:
           type: array
-          items: { type: string, enum: [ORDER, TRADE, DEPOSIT, CONDITIONAL, MARGIN, SAVINGS] }
+          items: { type: string, enum: [ORDER, TRADE, DEPOSIT, CONDITIONAL, MARGIN, SAVINGS, PAYOUT, PAPER] }
     WsAccountMessage:
       type: object
       required: [channel, data]
