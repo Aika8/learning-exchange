@@ -191,8 +191,8 @@ public sealed interface Event {
 
     /**
      * A fund's TER for {@code days} bank days: {@code amount} of {@code asset} moves from the fund's custody to its
-     * manager. {@code nav} is the fund's value before the fee and {@code basketValue} the same holdings with the
-     * starting cash (no fees), both at last prices: the fund card compares them.
+     * manager. {@code nav} is the fund's value before the fee and {@code basketValue} the same basket without
+     * the fees (NAV + fees paid so far), both at last prices: the fund card compares them.
      */
     record FundFeeCharged(long ts, String fund, String custody, String manager, String asset, long amount, int days,
                           long nav, long basketValue) implements Event {}
