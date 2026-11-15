@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Pressable, ScrollView, Text, View } from 'react-native';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -29,6 +29,8 @@ export default function InstrumentScreen() {
   const orders = (useOpenOrders().data ?? []).filter((o) => o.instrument === instrumentId);
   const spark = useMe().data?.balances.find((b) => b.asset === 'SPARK');
   const [ticket, setTicket] = useState<'BUY' | 'SELL' | null>(null);
+  const [plannedRisk, setPlannedRisk] = useState<number | null>(null);
+  const onRisk = useCallback((m: number | null) => setPlannedRisk(m), []);
   const [stopTicket, setStopTicket] = useState<{ qty?: string; trigger?: string; side?: 'BUY' | 'SELL' } | null>(null);
   const qc = useQueryClient();
   const cancel = useMutation({
@@ -80,6 +82,11 @@ export default function InstrumentScreen() {
           <Text style={{ color: c.primary, fontWeight: '600' }}>{t('instrument.companyCard')} ›</Text>
         </Pressable>
       )}
+      {instrument.kind === 'FUND' && (
+        <Pressable testID="open-fund" onPress={() => router.push({ pathname: '/funds', params: { id: instrumentId } })} hitSlop={8}>
+          <Text style={{ color: c.primary, fontWeight: '600' }}>{t('instrument.fundCard')} ›</Text>
+        </Pressable>
+      )}
       {instrument.kind === 'BOND' && (
         <Pressable testID="open-bond" onPress={() => router.push({ pathname: '/bonds', params: { id: instrumentId } })} hitSlop={8}>
           <Text style={{ color: c.primary, fontWeight: '600' }}>{t('instrument.bondCard')} ›</Text>
@@ -112,7 +119,7 @@ export default function InstrumentScreen() {
         </Pressable>
       </View>
       <StopsList instrument={instrument} />
-      <PositionSize instrument={instrument} capital={spark?.available} lastPrice={book?.lastPrice} onUse={(qty, trigger, side) => setStopTicket({ qty, trigger, side })} />
+      <PositionSize instrument={instrument} capital={spark?.available} lastPrice={book?.lastPrice} onUse={(qty, trigger, side) => setStopTicket({ qty, trigger, side })} onRisk={onRisk} />
       <Title>{t('instrument.tape')}</Title>
       <Card style={{ gap: 4 }}>
         {trades.length === 0 && <Caption>{t('instrument.noTrades')}</Caption>}
@@ -127,7 +134,7 @@ export default function InstrumentScreen() {
         ))}
       </Card>
       {stopTicket && <StopTicket key={instrumentId} instrument={instrument} initial={stopTicket} onClose={() => setStopTicket(null)} />}
-      {ticket && <OrderTicket key={instrumentId} side={ticket} instrument={instrument} book={book} onClose={() => setTicket(null)} />}
+      {ticket && <OrderTicket key={instrumentId} side={ticket} instrument={instrument} book={book} plannedRisk={plannedRisk} onClose={() => setTicket(null)} />}
     </Screen>
   );
 }

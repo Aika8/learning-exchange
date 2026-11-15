@@ -29,7 +29,9 @@
     "pcs": "{{count}} pcs",
     "fx": "Currency exchange",
     "statement": "Statement",
-    "fxAccount": "Currency account"
+    "fxAccount": "Currency account",
+    "funds": "Funds",
+    "review": "Session review"
   },
   "instrument": {
     "kind": "Practice instrument",
@@ -50,7 +52,8 @@
     "halted": "Trading halted",
     "haltedHint": "A report comes out while the market is closed; trading resumes at the next open.",
     "companyCard": "Company card",
-    "bondCard": "Bond details"
+    "bondCard": "Bond details",
+    "fundCard": "Fund card"
   },
   "ticket": {
     "titleBuy": "Buy {{base}}",
@@ -161,7 +164,20 @@
     "qty": "Quantity",
     "atRisk": "Money at risk",
     "fill": "Enter capital, risk, entry and stop",
-    "use": "Use in stop order"
+    "use": "Use in stop order",
+    "modePrice": "Stop at a price",
+    "modeAtr": "Stop = k × ATR",
+    "formulaAtr": "Stop distance = k × ATR; quantity = risk budget ÷ distance. ATR is the average daily swing of the price.",
+    "atr": "ATR ({{period}} days)",
+    "atrPct": "ATR of the price",
+    "atrHint": "ATR measures how much the price swings, not where it goes.",
+    "atrNotReady": "Not enough data for ATR: {{have}} of {{need}} daily candles",
+    "long": "Long (buy)",
+    "short": "Short (sell)",
+    "k": "k (× ATR)",
+    "stopAt": "Stop price",
+    "oneR": "The risk budget is 1 R; results are measured in R.",
+    "fillAtr": "Enter capital, risk, entry and k; ATR must be ready"
   },
   "deposits": {
     "title": "Deposits",
@@ -210,7 +226,11 @@
     "spreadEarned": "spread earned",
     "pnl": "Profit:",
     "buy": "Buy",
-    "sell": "Sell"
+    "sell": "Sell",
+    "payouts": "Dividends and coupons (gross)",
+    "taxWithheld": "Tax withheld on dividends",
+    "taxNote": "Dividend tax is withheld at payment and counted against the tax to pay.",
+    "withheldHint": "Withheld at source on the dividend {{instrument}}"
   },
   "skind": {
     "DEPOSIT": "Deposit",
@@ -220,7 +240,11 @@
     "STOP_OUT": "Stop-out",
     "SAVINGS_OPEN": "Deposit opened",
     "SAVINGS_CLOSE": "Deposit closed",
-    "INTEREST": "Deposit interest"
+    "INTEREST": "Deposit interest",
+    "DIVIDEND": "Dividend",
+    "COUPON": "Coupon",
+    "REDEMPTION": "Bond redemption",
+    "DIVIDEND_TAX": "Dividend tax withheld"
   },
   "fx": {
     "title": "Currency exchange",
@@ -249,13 +273,18 @@
   "kind": {
     "STOCK": "Stock",
     "FX": "Currency",
-    "BOND": "Bond"
+    "BOND": "Bond",
+    "FUND": "Fund"
   },
   "chart": {
     "empty": "No candles yet",
     "days": "{{count}} bank days",
     "exShort": "ex",
-    "exDate": "Dividend ex-date {{date}}: {{amount}} per share — the price drops by about the dividend"
+    "exDate": "Dividend ex-date {{date}}: {{amount}} per share — the price drops by about the dividend",
+    "recordShort": "rec",
+    "payShort": "pay",
+    "recordDate": "Record date {{date}}: holders in the register get {{amount}} per share",
+    "payDate": "Payment {{date}}: {{amount}} per share"
   },
   "company": {
     "title": "Company",
@@ -301,7 +330,11 @@
     "insiders": "Insider trades",
     "noInsiders": "No insider trades",
     "insiderBuy": "bought",
-    "insiderSell": "sold"
+    "insiderSell": "sold",
+    "recordDate": "Record date",
+    "payDate": "Payment date",
+    "payAtEx": "at the ex-date",
+    "recordHint": "Buy before the ex-date to be in the register (settlement T+1); 10% tax is withheld at payment."
   },
   "role": {
     "CEO": "CEO",
@@ -341,7 +374,9 @@
     "DIVIDEND_EX": "Dividend ex-date",
     "COUPON": "Coupon",
     "MATURITY": "Maturity",
-    "STORM": "Market storm"
+    "STORM": "Market storm",
+    "DIVIDEND_RECORD": "Dividend record date",
+    "DIVIDEND_PAY": "Dividend payment"
   },
   "bonds": {
     "title": "Bonds",
@@ -397,5 +432,85 @@
     "qty": "Quantity",
     "openButton": "Open",
     "opened": "Practice position #{{id}} opened"
+  },
+  "journal": {
+    "title": "Trade journal (optional)",
+    "hint": "A short note helps the session review later.",
+    "why": "Why I enter",
+    "whyPlaceholder": "e.g. breakout above the range",
+    "marketState": "Market state",
+    "mood": "My mood",
+    "plannedRisk": "Planned risk (1 R), {{quote}}",
+    "riskFromHelper": "Filled from the position-size helper.",
+    "riskHint": "Use the position-size helper to fill it.",
+    "errRisk": "Planned risk must be above zero"
+  },
+  "marketState": {
+    "TREND_UP": "Uptrend",
+    "TREND_DOWN": "Downtrend",
+    "RANGE": "Range",
+    "VOLATILE": "Volatile",
+    "NEWS": "News"
+  },
+  "mood": {
+    "CALM": "Calm",
+    "CONFIDENT": "Confident",
+    "ANXIOUS": "Anxious",
+    "FOMO": "FOMO",
+    "REVENGE": "Revenge",
+    "BORED": "Bored"
+  },
+  "fundKind": {
+    "INDEX": "Index fund",
+    "ACTIVE": "Active fund"
+  },
+  "fundKindHint": {
+    "INDEX": "holds a fixed basket",
+    "ACTIVE": "a manager picks the holdings"
+  },
+  "funds": {
+    "title": "Funds",
+    "intro": "A fund unit is a share in a basket of securities; the fund charges a yearly fee (TER).",
+    "none": "No funds yet",
+    "all": "All funds",
+    "ter": "TER a year",
+    "feesPaid": "Fees charged so far",
+    "tenYear": "{{ter}} a year takes {{cost}} of the money over 10 years even with zero growth.",
+    "priceVsNav": "Unit price vs NAV",
+    "navPerUnit": "NAV per unit",
+    "unitPrice": "Unit price on the exchange",
+    "premium": "Premium to NAV",
+    "premiumAbove": "The unit costs more than its holdings are worth.",
+    "premiumBelow": "The unit costs less than its holdings are worth (discount).",
+    "premiumZero": "The unit trades at its NAV.",
+    "premiumNone": "No unit price yet.",
+    "nav": "Net asset value",
+    "units": "Units outstanding",
+    "holdings": "Holdings",
+    "noHoldings": "No holdings",
+    "cash": "Cash",
+    "vsBasket": "Fund vs its basket",
+    "fundReturn": "Fund (NAV)",
+    "basketReturn": "Same basket without the fund",
+    "difference": "Difference",
+    "basketValue": "Basket value",
+    "vsBasketHint": "The difference is mostly the fee: the same securities held directly pay no TER.",
+    "vsBasketLater": "Comparison appears after the first fee day."
+  },
+  "review": {
+    "title": "Session review",
+    "intro": "My orders grouped by the notes in the trade journal. It describes what happened; it is not advice.",
+    "total": "Orders",
+    "annotated": "With a journal note",
+    "winsLabel": "Profitable",
+    "result": "Result, fees included",
+    "expectancy": "Average R",
+    "rHint": "R = result ÷ planned risk; −1 R means the stop was hit as planned.",
+    "byMood": "By mood",
+    "byMarketState": "By market state",
+    "empty": "No orders in this period",
+    "none": "Not noted",
+    "orders": "orders: {{count}}",
+    "wins": "in profit: {{count}}"
   }
 }
