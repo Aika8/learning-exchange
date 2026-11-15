@@ -18,7 +18,7 @@ MODELS = ["dutch_ship_medium", "ship_pinnace", "wine_barrel_01", "wooden_barrels
           "rock_moss_set_01", "boulder_01", "fern_02", "shrub_01", "grass_medium_01",
           "wooden_bucket_01", "lifebuoy", "treasure_chest", "WoodenTable_01",
           "WoodenChair_01", "lantern_chandelier_01", "wooden_display_shelves_01",
-          "vintage_grandfather_clock_01", "book_encyclopedia_set_01", "seadogs_compass", "island_tree_02", "fishermans_hat"]
+          "vintage_grandfather_clock_01", "book_encyclopedia_set_01", "seadogs_compass", "island_tree_02", "fishermans_hat", "rock_face_01", "rock_face_02", "namaqualand_cliff_01", "root_cluster_01", "single_root", "rock_07", "rock_09"]
 
 def api(asset):
     req = urllib.request.Request(f"https://api.polyhaven.com/files/{asset}",

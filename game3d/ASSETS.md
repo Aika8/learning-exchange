@@ -3,7 +3,7 @@
 ## Downloaded CC0 art (ADR-0019)
 
 Not in git. `make assets` downloads every file listed in `game3d/assets.lock` (source URL, size, MD5 published by
-Poly Haven) into `game3d/assets/` and checks each MD5. Total 169 MB, 213 files.
+Poly Haven) into `game3d/assets/` and checks each MD5. Total 198 MB, 248 files.
 To change the list: edit `game3d/tools/assets_resolve.py`, run it to regenerate the lock, run `make assets`.
 
 All Poly Haven assets are CC0 1.0 — public domain, no attribution required (https://polyhaven.com/license).
@@ -52,6 +52,13 @@ clash with PBR).
 | `quatrefoil_jacquard_fabric` | PBR texture set (diff, nor_gl, arm, 1k) | [polyhaven.com/a/quatrefoil_jacquard_fabric](https://polyhaven.com/a/quatrefoil_jacquard_fabric) | CC0 | 2.6 MB |
 | `rock_face_03` | PBR texture set (diff, nor_gl, arm, 1k) | [polyhaven.com/a/rock_face_03](https://polyhaven.com/a/rock_face_03) | CC0 | 2.9 MB |
 | `weathered_planks` | PBR texture set (diff, nor_gl, arm, 1k) | [polyhaven.com/a/weathered_planks](https://polyhaven.com/a/weathered_planks) | CC0 | 1.8 MB |
+| `namaqualand_cliff_01` | glTF model (1k textures) | [polyhaven.com/a/namaqualand_cliff_01](https://polyhaven.com/a/namaqualand_cliff_01) | CC0 | 4.5 MB |
+| `rock_07` | glTF model (1k textures) | [polyhaven.com/a/rock_07](https://polyhaven.com/a/rock_07) | CC0 | 2.2 MB |
+| `rock_09` | glTF model (1k textures) | [polyhaven.com/a/rock_09](https://polyhaven.com/a/rock_09) | CC0 | 2.0 MB |
+| `rock_face_01` | glTF model (1k textures) | [polyhaven.com/a/rock_face_01](https://polyhaven.com/a/rock_face_01) | CC0 | 3.0 MB |
+| `rock_face_02` | glTF model (1k textures) | [polyhaven.com/a/rock_face_02](https://polyhaven.com/a/rock_face_02) | CC0 | 3.5 MB |
+| `root_cluster_01` | glTF model (1k textures) | [polyhaven.com/a/root_cluster_01](https://polyhaven.com/a/root_cluster_01) | CC0 | 9.5 MB |
+| `single_root` | glTF model (1k textures) | [polyhaven.com/a/single_root](https://polyhaven.com/a/single_root) | CC0 | 3.8 MB |
 
 How they are used: `scripts/assets.gd` (paths, fallbacks), `scripts/proc.gd` (`_pbr_for` palette → texture set,
 `_real_ship`, `_person`), `scripts/archipelago.gd` (sky, harbour props, trees), `scripts/hall.gd` (interior).

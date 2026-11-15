@@ -12,7 +12,7 @@ make game3d         # opens the 3D client
 ```
 Another port: `cd game3d && godot --path . -- --server=http://localhost:8090`. `F3` shows fps.
 
-Self-run demo that produced the screenshots below (Apple M5, 1920×1080, Forward+/Metal, FSR 2 at 0.8; fps is in the top-left corner of each shot: menu, hall and voyage 90–120, harbour 71–81; the worst harbour view measured steady at 65 fps):
+Self-run demo that produced the screenshots below (Apple M5, 1920×1080, Forward+/Metal, FSR 2 at 0.8; fps is in the top-left corner of each shot: menu, hall and voyage 90–120, harbour 64–111; islands are dense noise-carved cliffs dressed with real rock faces and roots):
 ```
 cd game3d && godot --path . --resolution 1920x1080 --always-on-top -- --server=http://localhost:8090 --demo=../docs/demo/g3d
 ```

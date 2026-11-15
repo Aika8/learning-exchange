@@ -78,6 +78,7 @@ static func thinned(name: String, keep: int = 3) -> Node3D:
 		if not _thinned.has(key):
 			_thinned[key] = _thin_mesh(mi.mesh as ArrayMesh, keep)
 		mi.mesh = _thinned[key]
+		mi.lod_bias = 2.5  # generated LODs drop whole leaf cards; keep the crown full at distance
 	return n
 
 
