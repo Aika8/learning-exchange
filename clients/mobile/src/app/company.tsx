@@ -77,7 +77,11 @@ export default function CompanyScreen() {
 
       <Title>{t('company.chart')}</Title>
       <Card>
-        <PriceChart candles={candles} priceScale={ps} exDates={co.dividends.map((d) => ({ at: d.exDate, perShare: d.perShare }))} />
+        <PriceChart candles={candles} priceScale={ps} exDates={co.dividends.flatMap((d) => [
+            { at: d.exDate, perShare: d.perShare, kind: 'ex' as const },
+            ...(d.recordDate != null ? [{ at: d.recordDate, perShare: d.perShare, kind: 'record' as const }] : []),
+            ...(d.payDate != null ? [{ at: d.payDate, perShare: d.perShare, kind: 'pay' as const }] : []),
+          ])} />
       </Card>
 
       <Title>{t('company.lastReport')}</Title>
@@ -127,9 +131,18 @@ export default function CompanyScreen() {
       <Card style={{ gap: 6 }}>
         {co.dividends.length === 0 && <Caption>{t('company.noDividends')}</Caption>}
         {co.dividends.map((d) => (
-          <Line key={d.exDate} label={`${t('company.exDate')} ${f.when(d.exDate)}`} value={`${m(d.perShare)} · ${t(d.paid ? 'company.paid' : 'company.planned')}`} />
+          <View key={d.exDate} testID="dividend-row" style={{ gap: 2, borderBottomWidth: 1, borderBottomColor: c.border, paddingBottom: 6 }}>
+            <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
+              <Body bold num>{m(d.perShare)}</Body>
+              <Caption color={d.paid ? c.positive : c.warning}>{t(d.paid ? 'company.paid' : 'company.planned')}</Caption>
+            </View>
+            <Line label={t('company.exDate')} value={f.when(d.exDate)} color={c.info} />
+            <Line label={t('company.recordDate')} value={d.recordDate == null ? '—' : f.when(d.recordDate)} />
+            <Line label={t('company.payDate')} value={d.payDate == null ? t('company.payAtEx') : f.when(d.payDate)} />
+          </View>
         ))}
         <Caption>{t('company.exHint')}</Caption>
+        <Caption>{t('company.recordHint')}</Caption>
       </Card>
 
       <Title>{t('company.insiders')}</Title>

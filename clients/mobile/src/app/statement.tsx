@@ -44,8 +44,11 @@ export default function StatementScreen() {
           <Line label={t('statement.spreadPaid')} value={money(data.totals.spreadPaid)} />
           <Line label={t('statement.realised')} value={money(data.totals.realisedPnl)} color={data.totals.realisedPnl >= 0 ? c.positive : c.negative} testID="total-pnl" />
           <Line label={t('statement.tax', { rate: data.totals.taxRateBps / 100 })} value={money(data.totals.tax)} testID="total-tax" />
+          <Line label={t('statement.payouts')} value={money(data.totals.payouts)} color={c.positive} testID="total-payouts" />
+          <Line label={t('statement.taxWithheld')} value={money(data.totals.taxWithheld)} testID="total-tax-withheld" />
           <Line label={t('statement.interest')} value={money(data.totals.interest)} color={c.positive} />
           <Caption>{t('statement.spreadNote')}</Caption>
+          <Caption>{t('statement.taxNote')}</Caption>
         </Card>
       )}
       <Title>{t('statement.operations')}</Title>
@@ -69,7 +72,7 @@ function StatementRow({ l, money, time }: { l: Schemas['StatementLine']; money: 
     <View style={{ gap: 2, borderBottomWidth: 1, borderBottomColor: c.border, paddingBottom: 8 }}>
       <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
         <Body>{title}</Body>
-        <Body bold num color={l.amount >= 0 ? c.positive : c.textPrimary}>
+        <Body bold num color={l.kind === 'DIVIDEND_TAX' ? c.negative : l.amount >= 0 ? c.positive : c.textPrimary}>
           {l.amount > 0 ? '+' : ''}
           {money(l.amount, l.asset)}
         </Body>
@@ -84,6 +87,7 @@ function StatementRow({ l, money, time }: { l: Schemas['StatementLine']; money: 
           {t('statement.fee')} {money(l.fee)} · {t(l.spreadPaid < 0 ? 'statement.spreadEarned' : 'statement.spread')} {money(Math.abs(l.spreadPaid))}
         </Caption>
       )}
+      {l.kind === 'DIVIDEND_TAX' && <Caption>{t('statement.withheldHint', { instrument: l.instrument ?? '' })}</Caption>}
       {l.realisedPnl !== 0 && <Caption color={l.realisedPnl > 0 ? c.positive : c.negative}>{t('statement.pnl')} {money(l.realisedPnl)}</Caption>}
     </View>
   );
