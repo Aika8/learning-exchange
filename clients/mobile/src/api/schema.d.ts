@@ -1665,7 +1665,7 @@ export interface components {
             feesPaid: number;
             /**
              * Format: int64
-             * @description The same basket held without the fund: holdings + the starting cash, no fee
+             * @description The same basket held without the fund: NAV + fees paid (same shares and dividends, no fee)
              */
             basketValue: number;
             /**

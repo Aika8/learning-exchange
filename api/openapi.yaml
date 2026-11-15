@@ -1410,7 +1410,7 @@ components:
         lastPrice: { type: [integer, 'null'], format: int64, description: 'Price of a unit on the exchange' }
         premiumBps: { type: [integer, 'null'], format: int64, description: '(price − NAV per unit) / NAV per unit' }
         feesPaid: { type: integer, format: int64, description: 'TER charged so far' }
-        basketValue: { type: integer, format: int64, description: 'The same basket held without the fund: holdings + the starting cash, no fee' }
+        basketValue: { type: integer, format: int64, description: 'The same basket held without the fund: NAV + fees paid (same shares and dividends, no fee)' }
         fundReturnBps: { type: [integer, 'null'], format: int64, description: 'NAV change since the first fee day' }
         basketReturnBps: { type: [integer, 'null'], format: int64, description: 'Basket value change over the same time' }
         tenYearCostBps: { type: integer, format: int64, description: 'Share of the money TER takes over 10 years at zero growth: 1 − (1 − TER)^10' }

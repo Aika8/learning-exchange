@@ -227,8 +227,8 @@ Build and CI
 - Funds: IDX (2 000 SILK + 2 000 FORGE + 35 000.00 SPARK, TER 0.20%), ACT (600 SILK + 1 600 FORGE + 30 000.00 SPARK,
   TER 2%); 20 000 units each, held by bots (dealer 18 000). Fee = floor(NAV × TER × days / 365) from custody cash,
   charged by the interest timer for whole bank days; not charged while a holding has no price yet. Fund return =
-  NAV change since the first fee day; basket return = (holdings at last prices + starting cash) change over the same
-  time. No rebalancing and no unit creation/redemption yet.
+  NAV change since the first fee day; basket return = (NAV + fees paid) change over the same time: the
+  same shares and dividends without the fee (the custody receives SILK dividends). No rebalancing and no unit creation/redemption yet.
 - WebSocketTest flake: `sendText().get()` only means the frame left the client; the orders could trade before the
   server registered `account.acc-ws-b`, so the account nudge went to nobody. The test now waits until every subscribe
   is answered (snapshot or error) before placing orders.

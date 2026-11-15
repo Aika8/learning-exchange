@@ -237,7 +237,6 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         }
         long cash = ex.ledger().exists(f.custody()) ? ex.ledger().available(f.custody(), "SPARK") : 0;
         long nav = shares + cash;
-        long sharesValue = shares;
         rows = rows.stream().map(r -> new application.economy.EconomyViews.FundHolding(r.instrument(), r.qty(), r.price(),
                 r.value(), nav == 0 ? 0 : r.value() * 10_000 / nav)).toList();
         long units = 0;
@@ -249,8 +248,9 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         Long perUnit = units == 0 ? null : nav / units;
         Long last = ex.lastPrice(f.instrument()).orElse(null);
         Long premium = perUnit == null || perUnit == 0 || last == null ? null : (last - perUnit) * 10_000 / perUnit;
-        long basket = sharesValue + f.cash();
         var st = funds.state(f.instrument());
+        // The same basket held without the fund: same shares, same dividends, only the fee not taken.
+        long basket = nav + st.map(application.economy.FundProjection.State::feesPaid).orElse(0L);
         Long fundRet = st.flatMap(x -> java.util.Optional.ofNullable(x.firstNav())).filter(x -> x > 0)
                 .map(x -> (nav - x) * 10_000 / x).orElse(null);
         Long basketRet = st.flatMap(x -> java.util.Optional.ofNullable(x.firstBasket())).filter(x -> x > 0)
