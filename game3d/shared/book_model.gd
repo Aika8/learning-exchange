@@ -1,0 +1,1 @@
+../../game/scripts/book_model.gd

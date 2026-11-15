@@ -15,6 +15,7 @@ Never connected to a real market. Built as a one-year learning project.
 | `clients/web/` | React debug client | M1 |
 | `clients/mobile/` | Expo app «Ветрило» | M1 |
 | `game/` | Godot 4 game «Летопись Ветров» | M1 slice: menu → harbour → Ladder (`make game`) |
+| `game3d/` | Godot 4 game «Летопись Ветров» in 3D (ADR-0017) | Slice: menu → harbour → hall with the live book → voyage (`make game3d`) |
 | `docs/`, `intent/` | ADRs, lore, design, prompts, intents | — |
 
 ## How to run each part
