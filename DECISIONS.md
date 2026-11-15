@@ -177,3 +177,32 @@ Build and CI
   with ledges, welded smooth normals; the cap stays flat inside 0.9 r so walking and props are unchanged), dressed with
   Poly Haven rock faces, cliffs, roots and pebbles; far islands get a light set. Thinned trees use `lod_bias` 2.5 so
   generated LODs don't strip the crown. Harbour stays ≥ 60 fps (worst view 64).
+
+## M2b
+- Journal versioning (ADR-0020): every line ends with `,"v":2`; lines without it are v1 and are lifted by text-level
+  upcaster steps (a JSON tree can't hold `OrderAccepted`, whose own `type` field repeats the event-type key).
+  `JournalVersionsTest` replays a journal recorded by the M2a build. No more `make reset` after format changes.
+- `Idempotency-Key` on `POST /conditional-orders`, `/margin/positions`, `/savings`, `/real-world/paper-positions`
+  (one header component in the contract). Keys are scoped by account and by kind of command; journalled with the
+  command so they survive replay. Paper keys live in the `PaperBook` projection (paper never touches the engine).
+- Market "night" is per instrument: a stock is halted only on its report night (`TradingStatusChanged`), other
+  markets keep trading. New orders, stops and margin opens are refused with `MARKET_CLOSED`; cancels are allowed.
+- Gap model: a report moves the bots' fair value by surprise × 0.5 (10% EPS miss → −5%), clamped to ±30%; no
+  post-earnings drift yet. The gap appears because market makers can't quote during the halt and quote around the new
+  fair value at the open; noise traders' old limit orders can still fill at the old price.
+- Dividends: record date = ex-date (T+0); holders at the ex-date morning are paid from the issuer's cash; fair value
+  drops by the dividend. Coupons: one per season (91 bank days), paid from the issuer's cash, all or nothing.
+- Default: when an issuer cannot pay the whole coupon, the service declares default; at maturity a defaulted bond is
+  repaid with `floor(issuer cash / bonds held)`. GBND's issuer is funded for ~3.5 coupons on the bots' float, so it
+  defaults on the 4th with almost nothing left — the "Щедрая гильдия" lesson.
+- Tax: 10% on (realised profit + dividends + coupons) in the period, computed in the statement, not withheld.
+- Deposit rate follows the policy rate: new deposits get policy − 200 bps (14% at the start rate of 16%); open
+  deposits keep their rate.
+- Yields and durations are computed in `double` (they are ratios, not money) and returned as integer bps / ×100;
+  bond prices and every payment stay `long`.
+- The calendar shows future rate decisions, reports, coupons and maturities (dates are public), never results,
+  insider trades or storms ahead of time. A coupon's amount is a term of the bond, so it is shown in advance.
+- Real-world data: `StaticSampleData` only (terms of live sources not checked); illustrative values, labelled
+  "sample" on every screen. History endpoint takes `?symbol=` (a symbol like `USD/KZT` contains a slash).
+- Catalogue and glossary are YAML files in `docs/lore/` read at start (repo-relative paths, like `bots.yaml`); the
+  mobile BFF drops lore names, the game BFF keeps them. Tests run with the repo root as working directory.

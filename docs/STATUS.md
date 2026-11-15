@@ -1,6 +1,10 @@
 # Status
 
-Updated: 2026-11-15, end of M2a (stops, leverage ×4 on FX, statement, deposits; web + mobile). Demo: `docs/demo/M2a.md`.
+Updated: 2026-11-15, end of M2b (companies and quarterly reports, central bank and economic calendar, bonds with
+YTM/duration/default, four new bot strategies and storms, catalogue + glossary via BFFs, «Реальный мир» with paper
+positions; journal versioning and idempotency keys). Demo: `docs/demo/M2b.md`.
+
+Earlier: end of M2a (stops, leverage ×4 on FX, statement, deposits). Demo: `docs/demo/M2a.md`.
 
 Earlier: end of M1 (walking skeleton) with all three clients.
 
@@ -28,8 +32,14 @@ Demo: `docs/demo/M1.md`.
 ## ADRs
 Accepted: 0001, 0002, 0003 (server part amended by 0016), 0005, 0006, 0008, 0018, 0007, 0009, 0010, 0011, 0014, 0016.
 M2a: 0008 Accepted, 0018 Accepted (amends 0006).
-Proposed: 0004 (BFF — no screen-shaped endpoints needed yet), 0012 (catalogue, M2),
-0013 (assistant, M4), 0015 (real market data, M2).
+M2b: 0004, 0012, 0015 Accepted; 0020 (journal versioning) and 0021 (scheduled economy) Accepted; 0017 Superseded by 0019.
+Proposed: 0013 (assistant, M4).
+
+## Real-world data (ADR-0015)
+Only `StaticSampleData` is shipped: the terms of use of the National Bank of Kazakhstan rates/base-rate pages and of KASE
+data were not verified in M2b, so no live adapter was written. The sample's numbers (USD/KZT, EUR/KZT, base rate and
+decision dates) are **illustrative, not official**, and every screen shows the source and a "sample" badge.
+Next step: read the sources' terms, then add a live adapter with cache and circuit breaker.
 
 ## Not verified / known gaps
 - iOS simulator: Xcode is not installed on this Mac (only Command Line Tools), so the mobile app was checked in the browser
