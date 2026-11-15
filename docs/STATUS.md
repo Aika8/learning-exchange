@@ -1,6 +1,10 @@
 # Status
 
-Updated: 2026-11-15, end of M2b (companies and quarterly reports, central bank and economic calendar, bonds with
+Updated: 2026-11-15, end of M2c (ATR and position size by volatility, trade journal and session review, dividends
+with ex/record/pay dates and tax withheld at source, index and active funds with TER; WebSocketTest flake fixed).
+Demo: `docs/demo/M2c.md`. M2 is complete; next is M3.
+
+Earlier: end of M2b (companies and quarterly reports, central bank and economic calendar, bonds with
 YTM/duration/default, four new bot strategies and storms, catalogue + glossary via BFFs, «Реальный мир» with paper
 positions; journal versioning and idempotency keys). Demo: `docs/demo/M2b.md`.
 
@@ -33,6 +37,7 @@ Demo: `docs/demo/M1.md`.
 Accepted: 0001, 0002, 0003 (server part amended by 0016), 0005, 0006, 0008, 0018, 0007, 0009, 0010, 0011, 0014, 0016.
 M2a: 0008 Accepted, 0018 Accepted (amends 0006).
 M2b: 0004, 0012, 0015 Accepted; 0020 (journal versioning) and 0021 (scheduled economy) Accepted; 0017 Superseded by 0019.
+M2c: 0022 (dividend dates, funds, trade journal) Accepted.
 Proposed: 0013 (assistant, M4).
 
 ## Real-world data (ADR-0015)
@@ -51,6 +56,8 @@ Next step: read the sources' terms, then add a live adapter with cache and circu
   Desktop exports (macOS/Windows) are not configured yet. `make test` now needs Godot on PATH.
 
 ## Risks
+- M2c: funds have no unit creation/redemption and no rebalancing; resting orders are not adjusted at the ex-date
+  (only the reference price). An M2b journal with a dividend announced but unpaid at upgrade gets the new dates.
 - Journal growth: ~30 MB/hour with bots (market maker re-quotes every step). Replay is still sub-second at 32 k events;
   add snapshots or requote-on-change when start-up slows down. `make reset` clears it.
 - Dev auth is name-only by design; never expose the backend beyond localhost.
