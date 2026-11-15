@@ -197,7 +197,7 @@ func _demo() -> void:
 	_captain.pitch = -0.2
 	await Session.wait(0.6)
 	interact()
-	await Session.wait(0.4)
+	await Session.wait(1.6)  # let the 1-second fps average settle after the teleport
 	await Session.shot(self, "4-harbour-mara")
 	set_flying(true)
 	_fly.position = Vector3(70, 26, 48)
