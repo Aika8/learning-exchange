@@ -145,6 +145,143 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/conditional-orders": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My conditional orders (stops and take-profits), newest first */
+        get: operations["listMyConditionalOrders"];
+        put?: never;
+        /**
+         * Place a stop-limit, stop-market, trailing take-profit or TP+SL (OCO)
+         * @description Kept by the exchange outside the book (ADR-0008). It watches the **last trade price**, never book quotes.
+         *     When it fires it submits an ordinary order, which may still not fill. Nothing is reserved until then;
+         *     the generated order is checked for funds like any other and may be rejected.
+         */
+        post: operations["placeConditionalOrder"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/conditional-orders/{conditionalId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Cancel a conditional order that has not fired yet */
+        delete: operations["cancelConditionalOrder"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/margin/positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My leveraged positions with equity and distance to stop-out, newest first */
+        get: operations["listMyMarginPositions"];
+        put?: never;
+        /**
+         * Open a leveraged position at market (FX only, up to the instrument's maxLeverage)
+         * @description Collateral `ceil(notional / leverage)` (+ the fee for a long) is taken from my quote balance; the exchange's
+         *     bank lends the rest (quote for a long, base for a short). The position is force-closed at market (stop-out)
+         *     when equity falls to 50% of the collateral, priced at the last trade.
+         */
+        post: operations["openMarginPosition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/margin/positions/{positionId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close my leveraged position at market and repay the loan */
+        post: operations["closeMarginPosition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/savings": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My savings deposits and the product on offer */
+        get: operations["listMySavings"];
+        put?: never;
+        /** Put SPARK on a savings deposit; interest compounds every bank day of simulation time */
+        post: operations["openSavings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/savings/{depositId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close a deposit; principal and accrued interest return to my balance */
+        post: operations["closeSavings"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/statement": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * My statement for a period — every operation with its fee and spread, realised profit and 10% tax
+         * @description A projection of the journal (ADR-0005). Spread paid = how far the trade price was from the mid of the book
+         *     just before the order arrived, times quantity (negative = earned, for the resting side). Realised profit uses
+         *     the average-cost method; tax is 10% of the period's realised profit, never below zero.
+         */
+        get: operations["getStatement"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clock": {
         parameters: {
             query?: never;
@@ -205,7 +342,10 @@ export interface components {
             amount: number;
         };
         Instrument: {
-            /** @example SILK-SPARK */
+            /**
+             * @example SILK-SPARK
+             * @example AMBER-SPARK
+             */
             id: string;
             /** @example SILK */
             base: string;
@@ -217,6 +357,8 @@ export interface components {
             priceScale: number;
             /** @description Decimals of the base asset on screen */
             qtyScale: number;
+            /** @description 1 = no leverage; AMBER-SPARK (FX) allows 4 */
+            maxLeverage: number;
         };
         /** @enum {string} */
         Side: "BUY" | "SELL";
@@ -299,6 +441,300 @@ export interface components {
             /** Format: int64 */
             ts: number;
         };
+        /**
+         * @description STOP_LIMIT / STOP_MARKET fire when the last trade reaches `triggerPrice` (SELL: at or below, BUY: at or above).
+         *     TRAILING_TP arms at `activationPrice`, then follows the best price and fires on a pull-back of more than `offset`;
+         *     its limit price is the break price ∓ `protectiveSpread`. TP_SL is both on one order: whichever comes first;
+         *     once the take-profit is armed the stop is no longer checked.
+         * @enum {string}
+         */
+        ConditionalKind: "STOP_LIMIT" | "STOP_MARKET" | "TRAILING_TP" | "TP_SL";
+        /**
+         * @description TRIGGERED = the rule fired; SUBMITTED = its order rests in the book, not filled. A fired stop is closed only
+         *     when FILLED. UNFILLED = the generated order ended with nothing filled; REJECTED = the order was refused (`rejection`).
+         * @enum {string}
+         */
+        ConditionalState: "WAITING" | "ARMED" | "TRIGGERED" | "SUBMITTED" | "PARTIALLY_FILLED" | "FILLED" | "UNFILLED" | "REJECTED" | "CANCELLED";
+        PlaceConditionalRequest: {
+            instrument: string;
+            kind: components["schemas"]["ConditionalKind"];
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            qty: number;
+            /**
+             * Format: int64
+             * @description Stop price (STOP_LIMIT, STOP_MARKET, TP_SL)
+             */
+            triggerPrice?: number;
+            /**
+             * Format: int64
+             * @description Price of the generated limit order (STOP_LIMIT; TP_SL stop leg, 0 = market)
+             */
+            limitPrice?: number;
+            /**
+             * Format: int64
+             * @description Take-profit level (TRAILING_TP, TP_SL)
+             */
+            activationPrice?: number;
+            /**
+             * Format: int64
+             * @description Pull-back from the best price that fires the take-profit
+             */
+            offset?: number;
+            /**
+             * Format: int64
+             * @description Distance of the take-profit limit price from the break price
+             */
+            protectiveSpread?: number;
+        };
+        ConditionalOrder: {
+            /** Format: int64 */
+            conditionalId: number;
+            instrument: string;
+            kind: components["schemas"]["ConditionalKind"];
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            qty: number;
+            /** Format: int64 */
+            triggerPrice: number;
+            /** Format: int64 */
+            limitPrice: number;
+            /** Format: int64 */
+            activationPrice: number;
+            /** Format: int64 */
+            offset: number;
+            /** Format: int64 */
+            protectiveSpread: number;
+            state: components["schemas"]["ConditionalState"];
+            /**
+             * Format: int64
+             * @description Best price seen since the take-profit armed
+             */
+            bestPrice?: number | null;
+            /** Format: int64 */
+            triggeredAt?: number | null;
+            /**
+             * Format: int64
+             * @description Last trade price that fired it
+             */
+            triggerTradePrice?: number | null;
+            /**
+             * Format: int64
+             * @description The generated order
+             */
+            orderId?: number | null;
+            /**
+             * Format: int64
+             * @description Filled quantity of the generated order
+             */
+            filledQty?: number;
+            /** @description Problem code if the generated order was refused */
+            rejection?: string | null;
+            /** Format: int64 */
+            createdAt: number;
+        };
+        OpenMarginRequest: {
+            /** @example AMBER-SPARK */
+            instrument: string;
+            side: components["schemas"]["Side"];
+            /**
+             * Format: int64
+             * @description Base units to buy (long) or sell short
+             */
+            qty: number;
+            leverage: number;
+        };
+        /** @enum {string} */
+        MarginStatus: "OPEN" | "CLOSING" | "CLOSED";
+        MarginPosition: {
+            /** Format: int64 */
+            positionId: number;
+            instrument: string;
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            qty: number;
+            leverage: number;
+            /**
+             * Format: int64
+             * @description My quote money put in
+             */
+            collateral: number;
+            /**
+             * Format: int64
+             * @description Quote lent by the bank (long)
+             */
+            loanQuote: number;
+            /**
+             * Format: int64
+             * @description Base lent by the bank (short)
+             */
+            loanBase: number;
+            /**
+             * Format: int64
+             * @description Average fill price of the opening order
+             */
+            entryPrice: number;
+            /** Format: int64 */
+            lastPrice?: number | null;
+            /**
+             * Format: int64
+             * @description Quote held − quote loan + (base held − base loan) × last price
+             */
+            equity: number;
+            /**
+             * Format: int64
+             * @description Equity at which stop-out fires: 50% of collateral
+             */
+            stopOutEquity: number;
+            /**
+             * Format: int64
+             * @description Last price at which equity reaches stopOutEquity
+             */
+            stopOutPrice?: number | null;
+            status: components["schemas"]["MarginStatus"];
+            /** @enum {string|null} */
+            closeReason?: "CLOSED" | "STOP_OUT" | null;
+            /**
+             * Format: int64
+             * @description Quote returned to me on close
+             */
+            returned?: number | null;
+            /**
+             * Format: int64
+             * @description returned − collateral
+             */
+            realisedPnl?: number | null;
+            /**
+             * Format: int64
+             * @description Loan the position could not repay (gap through stop-out)
+             */
+            badDebt?: number | null;
+            /** Format: int64 */
+            openedAt: number;
+            /** Format: int64 */
+            closedAt?: number | null;
+        };
+        SavingsProduct: {
+            /** @example SPARK */
+            asset: string;
+            /** @description Annual rate in basis points (1400 = 14%) */
+            rateBps: number;
+            /**
+             * Format: int64
+             * @description Length of one bank day in simulation ms; interest compounds daily, 365 days a year
+             */
+            dayMillis: number;
+        };
+        OpenSavingsRequest: {
+            /** Format: int64 */
+            amount: number;
+        };
+        SavingsDeposit: {
+            /** Format: int64 */
+            depositId: number;
+            asset: string;
+            /** Format: int64 */
+            principal: number;
+            /**
+             * Format: int64
+             * @description Principal plus interest so far
+             */
+            balance: number;
+            /** Format: int64 */
+            interest?: number;
+            rateBps: number;
+            /** @enum {string} */
+            status: "OPEN" | "CLOSED";
+            /** Format: int64 */
+            openedAt: number;
+            /** Format: int64 */
+            closedAt?: number | null;
+        };
+        SavingsOverview: {
+            product: components["schemas"]["SavingsProduct"];
+            deposits: components["schemas"]["SavingsDeposit"][];
+        };
+        /** @enum {string} */
+        StatementKind: "DEPOSIT" | "TRADE" | "MARGIN_OPEN" | "MARGIN_CLOSE" | "STOP_OUT" | "SAVINGS_OPEN" | "SAVINGS_CLOSE" | "INTEREST";
+        StatementLine: {
+            /** Format: int64 */
+            ts: number;
+            kind: components["schemas"]["StatementKind"];
+            instrument?: string | null;
+            side?: components["schemas"]["Side"] | null;
+            /** Format: int64 */
+            price?: number | null;
+            /** Format: int64 */
+            qty?: number | null;
+            /**
+             * Format: int64
+             * @description Mid of the book before the order (trades)
+             */
+            mid?: number | null;
+            /** @description Asset of `amount` */
+            asset: string;
+            /**
+             * Format: int64
+             * @description Change of my money in `asset` (signed)
+             */
+            amount: number;
+            /**
+             * Format: int64
+             * @description Fee I paid
+             */
+            fee: number;
+            /**
+             * Format: int64
+             * @description (price − mid) × qty for a buy, (mid − price) × qty for a sell
+             */
+            spreadPaid: number;
+            /**
+             * Format: int64
+             * @description Profit realised by this line (sells
+             */
+            realisedPnl: number;
+            /** @description Trade of a leveraged position */
+            margin?: boolean;
+            /**
+             * Format: int64
+             * @description Order, position or deposit id
+             */
+            refId?: number | null;
+        };
+        StatementTotals: {
+            /** Format: int64 */
+            fees: number;
+            /** Format: int64 */
+            spreadPaid: number;
+            /** Format: int64 */
+            realisedPnl: number;
+            /** @description 1000 = 10% */
+            taxRateBps: number;
+            /**
+             * Format: int64
+             * @description max(0, realisedPnl) × 10%, rounded down
+             */
+            tax: number;
+            /**
+             * Format: int64
+             * @description Deposit interest earned (not taxed here)
+             */
+            interest: number;
+        };
+        Statement: {
+            /** Format: int64 */
+            from: number;
+            /** Format: int64 */
+            to: number;
+            /**
+             * @description Asset of fees, spread, profit and tax
+             * @example SPARK
+             */
+            currency: string;
+            /** @description Oldest first */
+            lines: components["schemas"]["StatementLine"][];
+            totals: components["schemas"]["StatementTotals"];
+        };
         Clock: {
             /**
              * Format: int64
@@ -317,7 +753,7 @@ export interface components {
              * @description Machine code for clients to translate (never shown raw)
              * @enum {string}
              */
-            code: "UNAUTHORIZED" | "BAD_REQUEST" | "INVALID_NAME" | "INVALID_ORDER" | "INVALID_AMOUNT" | "INSUFFICIENT_FUNDS" | "NO_LIQUIDITY" | "UNKNOWN_INSTRUMENT" | "UNKNOWN_ORDER" | "UNKNOWN_ACCOUNT" | "NOT_OWNER" | "NOT_OPEN" | "ACCOUNT_EXISTS";
+            code: "UNAUTHORIZED" | "BAD_REQUEST" | "INVALID_NAME" | "INVALID_ORDER" | "INVALID_AMOUNT" | "INSUFFICIENT_FUNDS" | "NO_LIQUIDITY" | "UNKNOWN_INSTRUMENT" | "UNKNOWN_ORDER" | "UNKNOWN_ACCOUNT" | "NOT_OWNER" | "NOT_OPEN" | "ACCOUNT_EXISTS" | "LEVERAGE_NOT_ALLOWED" | "UNKNOWN_POSITION" | "UNKNOWN_DEPOSIT";
             /** @description English text for developers */
             message: string;
         };
@@ -347,7 +783,7 @@ export interface components {
             data: components["schemas"]["Clock"];
         };
         AccountChanged: {
-            reasons: ("ORDER" | "TRADE" | "DEPOSIT")[];
+            reasons: ("ORDER" | "TRADE" | "DEPOSIT" | "CONDITIONAL" | "MARGIN" | "SAVINGS")[];
         };
         /** @description Something changed in the account; refetch `/me` and `/orders`. */
         WsAccountMessage: {
@@ -600,6 +1036,255 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             409: components["responses"]["Problem"];
+        };
+    };
+    listMyConditionalOrders: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Conditional orders */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConditionalOrder"][];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    placeConditionalOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["PlaceConditionalRequest"];
+            };
+        };
+        responses: {
+            /** @description Waiting for its trigger */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConditionalOrder"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    cancelConditionalOrder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                conditionalId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Cancelled */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ConditionalOrder"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+        };
+    };
+    listMyMarginPositions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Positions */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarginPosition"][];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    openMarginPosition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenMarginRequest"];
+            };
+        };
+        responses: {
+            /** @description Opened */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarginPosition"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+        };
+    };
+    closeMarginPosition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                positionId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Closed, or closing if the book was too thin */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MarginPosition"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+        };
+    };
+    listMySavings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deposits */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavingsOverview"];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    openSavings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenSavingsRequest"];
+            };
+        };
+        responses: {
+            /** @description Opened */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavingsDeposit"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            422: components["responses"]["Problem"];
+        };
+    };
+    closeSavings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                depositId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Closed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SavingsDeposit"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+        };
+    };
+    getStatement: {
+        parameters: {
+            query?: {
+                /** @description Simulation time (ms), inclusive; default the beginning */
+                from?: number;
+                /** @description Simulation time (ms), exclusive; default now */
+                to?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Statement */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Statement"];
+                };
+            };
+            401: components["responses"]["Problem"];
         };
     };
     getClock: {
