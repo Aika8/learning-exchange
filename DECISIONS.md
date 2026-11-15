@@ -97,3 +97,76 @@ Game (Godot)
 - M1 talks to the core API directly; `bff-game` (ADR-0004) and the catalogue of real/lore names (ADR-0012) are not there yet, so lore captions come from the game's own catalogue.
 - The game logs in by captain's name with the same dev-login as the other clients; the same name = the same account in web and mobile.
 - `-- --demo=<dir>` makes the game walk menu → harbour → Ladder, place a limit and a market order and save screenshots; it is the manual E2E for M1 (GUT covers logic, not the live socket).
+
+# Decisions — M2a (stops, leverage, statement, deposits)
+
+Scope: the first part of M2 — second instrument, conditional orders, leverage ×4 with stop-out, statement, deposits,
+the matching client screens, CI. The catalogue/glossary, real market data, more bots, stocks with reports, bonds, ATR
+and dividends are M2b/M2c.
+
+Instruments
+- `AMBER-SPARK` is the FX pair: AMBER is a foreign currency in whole units, priced in SPARK minor units (500.00 SPARK
+  per AMBER at start), fee 5 bps (half the stock's: FX is more liquid). `Instrument.maxLeverage`: SILK 1, AMBER 4.
+- `bots.yaml` now has a `markets:` list (the M1 single-market shape still parses). The FX dealer quotes ±0.30 SPARK
+  around fair value — the spread a bank earns on an exchange office (vault: `finance/fx-market-kz.md`).
+
+Engine, one writer (ADR-0008 accepted, ADR-0018 amends ADR-0006)
+- Conditional orders, the margin monitor and deposits live in the engine, on the single writer, outside the books.
+  After every command the queue of new trade prices is drained: each price, in order, goes to the conditional orders
+  (by id) and then to the margin monitor (by position id). Generated orders use the same `placeInto` as a person's.
+- Each print of a sweep is a "last trade price" in turn, so a stop can fire on the 2nd price of a 5-level sweep.
+- A new conditional order waits for the next trade; it is not checked against the current last price.
+- Nothing is reserved for a conditional order until it fires; the generated order may then be refused
+  (`REJECTED` with the code, e.g. `INSUFFICIENT_FUNDS`). That is how QUIK behaves too.
+- A fired limit order with a price ≤ 0 (trailing TP with a big protective spread) is `REJECTED` / `INVALID_ORDER`.
+- Conditional orders are on the person's own account only, not on a leveraged position's sub-account.
+- Replay rule changed: after a decision, the journal must contain exactly the events the engine produces again, of any
+  type; only an event that arrives when nothing is expected is a decision. Old M1 journals do not replay (new field `mid`
+  on `TradeExecuted`): run `make reset`. No upcaster for a learning journal.
+
+Leverage and stop-out
+- A leveraged position gets a sub-account `owner~m<id>` (deposits: `owner~s<id>`; `~` is not allowed in names).
+  The ledger shows exactly what it holds; reservation and fees work as for anyone.
+- The bank (`exchange-bank`) is an ordinary account funded once at start by journalled deposits
+  (`exchange.bank-capital.*`). It lends and pays interest, so invariant 1 holds without exceptions.
+- Opening is at market only and only if the book is deep enough for the whole quantity (`NO_LIQUIDITY` otherwise).
+  Long: collateral = ceil(notional / leverage) + fee, the bank lends the rest in SPARK. Short: collateral =
+  ceil(proceeds / leverage), the bank lends the AMBER.
+- Equity = quote held − quote loan + (base held − base loan) × last trade price. Stop-out when `2 × equity ≤ collateral`,
+  checked on every trade price of that instrument — the same price stops use, never book quotes.
+- Stop-out and close sell/buy at market. If the book is too thin to close, the position stays CLOSING and is retried
+  on every following trade. If a short cannot afford to buy back all the AMBER, it buys what it can and the rest is
+  bad debt. A gap through the stop-out can leave bad debt; the bank carries it (shown as `badDebt`).
+- No interest on margin loans and no TOM/SPOT value dates in M2a.
+
+Deposits
+- One product: SPARK, 14% a year (`exchange.savings.rate-bps`), compounded daily, 365-day year. Each day adds
+  `floor(balance × rate / 365)`. A bank day is `exchange.savings.day-millis` of simulation time — 60 000 (one sim minute)
+  so compounding is visible in a demo (at ×60 a year passes in about 6 real minutes). The rate and day length are stored
+  in `SavingsOpened`, so changing the config never changes an old deposit.
+- A timer asks for accrual once a second (`AccrueInterest`, journalled only if interest was paid). A deposit whose
+  interest rounds to zero keeps its last accrual time, so batching days gives the same money (tested).
+- Closing pays out principal + interest accrued so far; the current partial day is lost.
+
+Statement (projection, ADR-0005)
+- Built from events only (`application.StatementProjection`), rebuilt from the journal on start, never read by the
+  write side. Lines: deposits, trades, margin open/close, stop-out, deposit open/close, interest.
+- Spread paid = (price − mid) × qty for a buy, (mid − price) × qty for a sell; mid = floor((best bid + best ask) / 2)
+  just before the aggressive order arrived, stored on `TradeExecuted`. The resting side usually "pays" a negative spread
+  (it earns it). No mid (one side empty) → 0.
+- Realised profit: average-cost method per instrument, fees included in the cost and deducted from proceeds. A deposited
+  base asset enters the cost basis at the last trade price, or at the first trade price if there was none yet.
+  A leveraged position realises `returned − collateral` at close; its trades show with a `margin` flag and no profit.
+- Tax: 10% of the period's realised profit (ИПН), never below zero, rounded down; losses in the period offset gains.
+  Deposit interest is shown separately and not taxed (simplification).
+- At most 20 000 lines are kept per person (bots trade all day); older lines drop out of the statement.
+
+Build and CI
+- `make test` installs client dependencies with `npm ci` (when `node_modules` is missing or older than the lock file),
+  so it works in a clean clone. Without Godot on PATH the game tests are skipped with a message instead of failing.
+- GitHub Actions (`.github/workflows/ci.yml`): `make test` on Ubuntu with Java 25 and Node 24, on pushes to main and on
+  pull requests. No Godot (no official headless image worth the setup yet) and no E2E (needs a running backend and
+  browsers); both stay manual: `make test-game` / `make e2e` locally.
+- `Idempotency-Key` stays on `POST /orders` only; the new POSTs (stops, positions, deposits) have none yet.
+- Mobile has no leverage screen in M2a (web has it); mobile helpers in `src/finance.ts` are imported by `node --test`
+  directly from TypeScript (Node ≥ 23.6 strips types).

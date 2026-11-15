@@ -4,10 +4,12 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useTranslation } from 'react-i18next';
 import { touchMin, useColors } from '../theme/theme';
 
-// The design's tab bar (Главная · Инвестиции · Ещё), drawn here because the router ships stacks only.
+// The design's tab bar (Главная · Инвестиции · Обмен · Вклады · Ещё), drawn here because the router ships stacks only.
 const TABS = [
   { href: '/home', icon: '⌂', key: 'tabs.home' },
   { href: '/instrument', icon: '▲', key: 'tabs.invest' },
+  { href: '/fx', icon: '⇄', key: 'tabs.fx' },
+  { href: '/deposits', icon: '%', key: 'tabs.deposits' },
   { href: '/settings', icon: '⋯', key: 'tabs.more' },
 ] as const;
 

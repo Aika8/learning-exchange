@@ -67,6 +67,48 @@ class ContractTest {
     }
 
     @Test
+    void m2aEndpointsAnswerAsTheContractSays() throws Exception {
+        String me = call("POST", "/auth/dev-login", null, "{\"name\":\"m2a\"}", 200, "LoginResponse").get("token").asString();
+        String dealer = call("POST", "/auth/dev-login", null, "{\"name\":\"m2a dealer\"}", 200, "LoginResponse").get("token").asString();
+        call("POST", "/me/deposits", dealer, "{\"asset\":\"AMBER\",\"amount\":1000}", 200, "AccountDetails");
+        call("POST", "/orders", dealer, "{\"instrument\":\"AMBER-SPARK\",\"side\":\"SELL\",\"type\":\"LIMIT\",\"price\":50000,\"qty\":100}", 201, "Order");
+        call("POST", "/orders", dealer, "{\"instrument\":\"AMBER-SPARK\",\"side\":\"BUY\",\"type\":\"LIMIT\",\"price\":49000,\"qty\":100}", 201, "Order");
+
+        // Conditional orders
+        JsonNode stop = call("POST", "/conditional-orders", me, "{\"instrument\":\"SILK-SPARK\",\"kind\":\"STOP_LIMIT\",\"side\":\"SELL\",\"qty\":2,\"triggerPrice\":9000,\"limitPrice\":8900}", 201, "ConditionalOrder");
+        assertEquals("WAITING", stop.get("state").asString());
+        call("POST", "/conditional-orders", me, "{\"instrument\":\"SILK-SPARK\",\"kind\":\"TP_SL\",\"side\":\"SELL\",\"qty\":2,\"triggerPrice\":9000,\"activationPrice\":11000,\"offset\":50,\"protectiveSpread\":10}", 201, "ConditionalOrder");
+        callArray("GET", "/conditional-orders", me, 200, "ConditionalOrder");
+        assertEquals("CANCELLED", call("DELETE", "/conditional-orders/" + stop.get("conditionalId").asLong(), me, null, 200, "ConditionalOrder").get("state").asString());
+        call("DELETE", "/conditional-orders/" + stop.get("conditionalId").asLong(), me, null, 409, "Problem");
+        call("POST", "/conditional-orders", me, "{\"instrument\":\"SILK-SPARK\",\"kind\":\"SOMETIMES\",\"side\":\"SELL\",\"qty\":2}", 400, "Problem");
+
+        // Leverage
+        JsonNode instruments = json.readTree(http.send(request("GET", "/instruments", null, null).build(), HttpResponse.BodyHandlers.ofString()).body());
+        assertEquals(4, instruments.get(1).get("maxLeverage").asInt());
+        JsonNode pos = call("POST", "/margin/positions", me, "{\"instrument\":\"AMBER-SPARK\",\"side\":\"BUY\",\"qty\":10,\"leverage\":4}", 201, "MarginPosition");
+        assertEquals(125_000 + 250, pos.get("collateral").asLong());
+        callArray("GET", "/margin/positions", me, 200, "MarginPosition");
+        JsonNode closed = call("POST", "/margin/positions/" + pos.get("positionId").asLong() + "/close", me, null, 200, "MarginPosition");
+        assertEquals("CLOSED", closed.get("status").asString());
+        call("POST", "/margin/positions", me, "{\"instrument\":\"SILK-SPARK\",\"side\":\"BUY\",\"qty\":1,\"leverage\":2}", 422, "Problem");
+        call("POST", "/margin/positions/999/close", me, null, 404, "Problem");
+
+        // Savings
+        JsonNode overview = call("GET", "/savings", me, null, 200, "SavingsOverview");
+        assertEquals(1400, overview.get("product").get("rateBps").asInt());
+        JsonNode dep = call("POST", "/savings", me, "{\"amount\":100000}", 201, "SavingsDeposit");
+        call("GET", "/savings", me, null, 200, "SavingsOverview");
+        assertEquals("CLOSED", call("POST", "/savings/" + dep.get("depositId").asLong() + "/close", me, null, 200, "SavingsDeposit").get("status").asString());
+        call("POST", "/savings", me, "{\"amount\":999999999999}", 422, "Problem");
+
+        // Statement
+        JsonNode st = call("GET", "/statement", me, null, 200, "Statement");
+        assertTrue(st.get("lines").size() >= 5, st.toString());
+        call("GET", "/statement?from=0&to=1", me, null, 200, "Statement");
+    }
+
+    @Test
     void errorsAreProblemsWithTheContractedStatus() throws Exception {
         String token = call("POST", "/auth/dev-login", null, "{\"name\":\"errors\"}", 200, "LoginResponse").get("token").asString();
 

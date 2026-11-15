@@ -63,7 +63,8 @@ class ExchangeServiceTest {
             before = s.balances(a) + "|" + s.balances(b) + "|" + s.book("SILK-SPARK", 10);
         }
         assertTrue(seen.stream().anyMatch(e -> e instanceof Event.TradeExecuted));
-        assertEquals(journal.readAll(), seen);
+        // The bank's capital is journalled at start, before anyone could subscribe.
+        assertEquals(journal.readAll().stream().filter(e -> !(e instanceof Event.FundsDeposited d && d.account().equals("exchange-bank"))).toList(), seen);
 
         try (ExchangeService s = new ExchangeService(I, journal, clock, START)) {
             String after = s.balances("acc-a") + "|" + s.balances("acc-b") + "|" + s.book("SILK-SPARK", 10);

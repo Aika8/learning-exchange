@@ -12,5 +12,8 @@ public enum Rejection {
     NO_LIQUIDITY,
     UNKNOWN_ORDER,
     NOT_OWNER,
-    NOT_OPEN
+    NOT_OPEN,
+    LEVERAGE_NOT_ALLOWED,
+    UNKNOWN_POSITION,
+    UNKNOWN_DEPOSIT
 }

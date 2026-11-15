@@ -10,6 +10,7 @@ import app.web.Dto.LoginResponse;
 import app.web.Dto.OrderDto;
 import app.web.Dto.TradeDto;
 import application.TradingService;
+import engine.Conditional;
 import engine.Order;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -122,6 +123,92 @@ public class ApiController {
             throw new BadRequest("paused and speed are required");
         }
         return ClockDto.of(market.setClock(body.paused(), body.speed()));
+    }
+
+    // ---- M2a: conditional orders, leverage, savings, statement ----
+
+    @GetMapping("/conditional-orders")
+    public List<Dto.ConditionalDto> conditionals(@RequestHeader(value = "Authorization", required = false) String authz) {
+        return market.conditionals(auth.accountId(authz), 200).stream().map(Dto.ConditionalDto::of).toList();
+    }
+
+    @PostMapping("/conditional-orders")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Dto.ConditionalDto placeConditional(@RequestHeader(value = "Authorization", required = false) String authz,
+                                               @RequestBody Dto.PlaceConditionalRequest b) {
+        String id = auth.accountId(authz);
+        if (b == null || b.instrument() == null || b.kind() == null || b.side() == null || b.qty() == null) {
+            throw new BadRequest("instrument, kind, side and qty are required");
+        }
+        return Dto.ConditionalDto.of(market.placeConditional(id, b.instrument(), parse(Conditional.Kind.class, b.kind()),
+                parse(Order.Side.class, b.side()), b.qty(), or0(b.triggerPrice()), or0(b.limitPrice()),
+                or0(b.activationPrice()), or0(b.offset()), or0(b.protectiveSpread())));
+    }
+
+    @DeleteMapping("/conditional-orders/{conditionalId}")
+    public Dto.ConditionalDto cancelConditional(@RequestHeader(value = "Authorization", required = false) String authz,
+                                                @PathVariable long conditionalId) {
+        return Dto.ConditionalDto.of(market.cancelConditional(auth.accountId(authz), conditionalId));
+    }
+
+    @GetMapping("/margin/positions")
+    public List<Dto.MarginPositionDto> positions(@RequestHeader(value = "Authorization", required = false) String authz) {
+        return market.positions(auth.accountId(authz), 200).stream().map(Dto.MarginPositionDto::of).toList();
+    }
+
+    @PostMapping("/margin/positions")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Dto.MarginPositionDto openMargin(@RequestHeader(value = "Authorization", required = false) String authz,
+                                            @RequestBody Dto.OpenMarginRequest b) {
+        String id = auth.accountId(authz);
+        if (b == null || b.instrument() == null || b.side() == null || b.qty() == null || b.leverage() == null) {
+            throw new BadRequest("instrument, side, qty and leverage are required");
+        }
+        return Dto.MarginPositionDto.of(market.openMargin(id, b.instrument(), parse(Order.Side.class, b.side()), b.qty(), b.leverage()));
+    }
+
+    @PostMapping("/margin/positions/{positionId}/close")
+    public Dto.MarginPositionDto closeMargin(@RequestHeader(value = "Authorization", required = false) String authz,
+                                             @PathVariable long positionId) {
+        return Dto.MarginPositionDto.of(market.closeMargin(auth.accountId(authz), positionId));
+    }
+
+    @GetMapping("/savings")
+    public Dto.SavingsOverviewDto savings(@RequestHeader(value = "Authorization", required = false) String authz) {
+        String id = auth.accountId(authz);
+        TradingService.SavingsProduct p = market.savingsProduct();
+        return new Dto.SavingsOverviewDto(new Dto.SavingsProductDto(p.asset(), p.rateBps(), p.dayMillis()),
+                market.savings(id).stream().map(Dto.SavingsDepositDto::of).toList());
+    }
+
+    @PostMapping("/savings")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Dto.SavingsDepositDto openSavings(@RequestHeader(value = "Authorization", required = false) String authz,
+                                             @RequestBody Dto.OpenSavingsRequest b) {
+        String id = auth.accountId(authz);
+        if (b == null || b.amount() == null) {
+            throw new BadRequest("amount is required");
+        }
+        return Dto.SavingsDepositDto.of(market.openSavings(id, b.amount()));
+    }
+
+    @PostMapping("/savings/{depositId}/close")
+    public Dto.SavingsDepositDto closeSavings(@RequestHeader(value = "Authorization", required = false) String authz,
+                                              @PathVariable long depositId) {
+        return Dto.SavingsDepositDto.of(market.closeSavings(auth.accountId(authz), depositId));
+    }
+
+    @GetMapping("/statement")
+    public Dto.StatementDto statement(@RequestHeader(value = "Authorization", required = false) String authz,
+                                      @RequestParam(required = false) Long from, @RequestParam(required = false) Long to) {
+        String id = auth.accountId(authz);
+        long f = from == null ? 0 : from;
+        long t = to == null ? market.clock().now() + 1 : to;
+        return Dto.StatementDto.of(market.statement(id, f, t));
+    }
+
+    private static long or0(Long v) {
+        return v == null ? 0 : v;
     }
 
     private AccountDetails details(String accountId) {

@@ -1,6 +1,10 @@
 package app.web;
 
+import application.StatementProjection;
 import application.TradingService;
+import engine.ConditionalView;
+import engine.MarginView;
+import engine.SavingsView;
 import engine.Balance;
 import engine.Event;
 import engine.Instrument;
@@ -19,7 +23,7 @@ public final class Dto {
     }
 
     /** Decimals shown for each asset; the catalogue (ADR-0012) will own this in M2. */
-    static final Map<String, Integer> SCALE = Map.of("SPARK", 2, "SILK", 0);
+    static final Map<String, Integer> SCALE = Map.of("SPARK", 2, "SILK", 0, "AMBER", 0);
 
     public record LoginRequest(String name) {}
 
@@ -37,10 +41,11 @@ public final class Dto {
 
     public record DepositRequest(String asset, Long amount) {}
 
-    public record InstrumentDto(String id, String base, String quote, long feeBps, int priceScale, int qtyScale) {
+    public record InstrumentDto(String id, String base, String quote, long feeBps, int priceScale, int qtyScale,
+                                int maxLeverage) {
         static InstrumentDto of(Instrument i) {
             return new InstrumentDto(i.id(), i.base(), i.quote(), i.feeBps(), SCALE.getOrDefault(i.quote(), 0),
-                    SCALE.getOrDefault(i.base(), 0));
+                    SCALE.getOrDefault(i.base(), 0), i.maxLeverage());
         }
     }
 
@@ -82,4 +87,70 @@ public final class Dto {
     public record ClockUpdate(Boolean paused, Integer speed) {}
 
     public record Problem(String code, String message) {}
+
+    // ---- M2a ----
+
+    public record PlaceConditionalRequest(String instrument, String kind, String side, Long qty, Long triggerPrice,
+                                          Long limitPrice, Long activationPrice, Long offset, Long protectiveSpread) {}
+
+    public record ConditionalDto(long conditionalId, String instrument, String kind, String side, long qty,
+                                 long triggerPrice, long limitPrice, long activationPrice, long offset,
+                                 long protectiveSpread, String state, Long bestPrice, Long triggeredAt,
+                                 Long triggerTradePrice, Long orderId, long filledQty, String rejection, long createdAt) {
+        static ConditionalDto of(ConditionalView v) {
+            return new ConditionalDto(v.conditionalId(), v.instrument(), v.kind().name(), v.side().name(), v.qty(),
+                    v.triggerPrice(), v.limitPrice(), v.activationPrice(), v.offset(), v.protectiveSpread(),
+                    v.state().name(), v.bestPrice(), v.triggeredTs(), v.triggerTradePrice(), v.orderId(), v.filledQty(),
+                    v.rejection(), v.createdTs());
+        }
+    }
+
+    public record OpenMarginRequest(String instrument, String side, Long qty, Integer leverage) {}
+
+    public record MarginPositionDto(long positionId, String instrument, String side, long qty, int leverage,
+                                    long collateral, long loanQuote, long loanBase, long entryPrice, Long lastPrice,
+                                    long equity, long stopOutEquity, Long stopOutPrice, String status,
+                                    String closeReason, Long returned, Long realisedPnl, Long badDebt, long openedAt,
+                                    Long closedAt) {
+        static MarginPositionDto of(MarginView v) {
+            return new MarginPositionDto(v.positionId(), v.instrument(), v.side().name(), v.qty(), v.leverage(),
+                    v.collateral(), v.loanQuote(), v.loanBase(), v.entryPrice(), v.lastPrice(), v.equity(),
+                    v.stopOutEquity(), v.stopOutPrice(), v.status().name(), v.closeReason(), v.returned(),
+                    v.returned() == null ? null : v.returned() - v.collateral(), v.badDebt(), v.openedTs(), v.closedTs());
+        }
+    }
+
+    public record SavingsProductDto(String asset, long rateBps, long dayMillis) {}
+
+    public record OpenSavingsRequest(Long amount) {}
+
+    public record SavingsDepositDto(long depositId, String asset, long principal, long balance, long interest,
+                                    long rateBps, String status, long openedAt, Long closedAt) {
+        static SavingsDepositDto of(SavingsView v) {
+            return new SavingsDepositDto(v.depositId(), v.asset(), v.principal(), v.balance(), v.interest(), v.rateBps(),
+                    v.open() ? "OPEN" : "CLOSED", v.openedTs(), v.closedTs());
+        }
+    }
+
+    public record SavingsOverviewDto(SavingsProductDto product, List<SavingsDepositDto> deposits) {}
+
+    public record StatementLineDto(long ts, String kind, String instrument, String side, Long price, Long qty, Long mid,
+                                   String asset, long amount, long fee, long spreadPaid, long realisedPnl,
+                                   boolean margin, Long refId) {
+        static StatementLineDto of(StatementProjection.Line l) {
+            return new StatementLineDto(l.ts(), l.kind().name(), l.instrument(), l.side() == null ? null : l.side().name(),
+                    l.price(), l.qty(), l.mid(), l.asset(), l.amount(), l.fee(), l.spreadPaid(), l.realisedPnl(),
+                    l.margin(), l.refId());
+        }
+    }
+
+    public record StatementTotalsDto(long fees, long spreadPaid, long realisedPnl, long taxRateBps, long tax, long interest) {}
+
+    public record StatementDto(long from, long to, String currency, List<StatementLineDto> lines, StatementTotalsDto totals) {
+        static StatementDto of(StatementProjection.Statement s) {
+            StatementProjection.Totals t = s.totals();
+            return new StatementDto(s.from(), s.to(), s.currency(), s.lines().stream().map(StatementLineDto::of).toList(),
+                    new StatementTotalsDto(t.fees(), t.spreadPaid(), t.realisedPnl(), t.taxRateBps(), t.tax(), t.interest()));
+        }
+    }
 }

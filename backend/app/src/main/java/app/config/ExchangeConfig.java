@@ -7,7 +7,11 @@ import application.Journal;
 import application.SimulationClock;
 import engine.Instrument;
 import java.nio.file.Path;
-import java.util.List;
+import application.TradingService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -31,7 +35,24 @@ public class ExchangeConfig {
 
     @Bean(destroyMethod = "close")
     ExchangeService exchangeService(Journal journal, SimulationClock clock, ExchangeProperties props) {
-        return new ExchangeService(List.of(Instrument.SILK_SPARK), journal, clock, props.startingBalance());
+        ExchangeService.Options options = new ExchangeService.Options(props.bankCapital(),
+                new TradingService.SavingsProduct("SPARK", props.savings().rateBps(), props.savings().dayMillis()));
+        return new ExchangeService(Instrument.ALL, journal, clock, props.startingBalance(), options);
+    }
+
+    /** Deposit interest is paid by a timer: once a second it asks the exchange to pay the bank days that passed. */
+    @Bean(destroyMethod = "shutdownNow")
+    ScheduledExecutorService interestTimer(TradingService market) {
+        ScheduledExecutorService timer = Executors.newSingleThreadScheduledExecutor(
+                Thread.ofPlatform().name("interest").daemon().factory());
+        timer.scheduleWithFixedDelay(() -> {
+            try {
+                market.accrueInterest();
+            } catch (RuntimeException e) {
+                LoggerFactory.getLogger(ExchangeConfig.class).warn("interest accrual failed", e);
+            }
+        }, 1, 1, TimeUnit.SECONDS);
+        return timer;
     }
 
     /** Dev CORS: the web client (Vite) and Expo web run on other localhost ports. */

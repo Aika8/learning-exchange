@@ -11,6 +11,13 @@ export type Instrument = Schemas['Instrument'];
 export type AccountDetails = Schemas['AccountDetails'];
 export type Clock = Schemas['Clock'];
 export type Problem = Schemas['Problem'];
+export type ConditionalOrder = Schemas['ConditionalOrder'];
+export type ConditionalKind = Schemas['ConditionalKind'];
+export type ConditionalState = Schemas['ConditionalState'];
+export type MarginPosition = Schemas['MarginPosition'];
+export type SavingsOverview = Schemas['SavingsOverview'];
+export type Statement = Schemas['Statement'];
+export type AccountChanged = Schemas['AccountChanged'];
 
 let token: string | null = sessionStorage.getItem('token');
 

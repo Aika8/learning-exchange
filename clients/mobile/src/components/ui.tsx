@@ -28,9 +28,9 @@ export function Title({ children }: { children: ReactNode }) {
   return <Text style={{ fontSize: typo.title.size, lineHeight: typo.title.lineHeight, fontWeight: '600', color: c.textPrimary }}>{children}</Text>;
 }
 
-export function Caption({ children, color }: { children: ReactNode; color?: string }) {
+export function Caption({ children, color, testID }: { children: ReactNode; color?: string; testID?: string }) {
   const c = useColors();
-  return <Text style={{ fontSize: typo.caption.size, lineHeight: typo.caption.lineHeight, fontWeight: '500', color: color ?? c.textSecondary }}>{children}</Text>;
+  return <Text testID={testID} style={{ fontSize: typo.caption.size, lineHeight: typo.caption.lineHeight, fontWeight: '500', color: color ?? c.textSecondary }}>{children}</Text>;
 }
 
 export function Body({ children, color, bold, num }: { children: ReactNode; color?: string; bold?: boolean; num?: boolean }) {

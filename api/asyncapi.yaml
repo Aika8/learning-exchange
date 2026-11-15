@@ -20,13 +20,13 @@ channels:
   book:
     address: market.{instrumentId}.book
     parameters:
-      instrumentId: { description: e.g. SILK-SPARK }
+      instrumentId: { description: "SILK-SPARK or AMBER-SPARK" }
     messages:
       book: { $ref: '#/components/messages/Book' }
   trades:
     address: market.{instrumentId}.trades
     parameters:
-      instrumentId: { description: e.g. SILK-SPARK }
+      instrumentId: { description: "SILK-SPARK or AMBER-SPARK" }
     messages:
       trades: { $ref: '#/components/messages/Trades' }
   clock:

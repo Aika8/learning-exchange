@@ -26,6 +26,9 @@ export default function Settings() {
         <Caption>{me?.accountId}</Caption>
       </Card>
       <View style={{ flexDirection: 'row' }}>
+        <Button testID="open-statement" title={t('home.statement')} onPress={() => router.push('/statement')} />
+      </View>
+      <View style={{ flexDirection: 'row' }}>
         <Button
           testID="logout"
           title={t('settings.logout')}

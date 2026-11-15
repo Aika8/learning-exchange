@@ -17,7 +17,8 @@ public class ApiErrors {
     ResponseEntity<Problem> rejected(CommandRejected e) {
         HttpStatus status = switch (e.reason()) {
             case INSUFFICIENT_FUNDS, NO_LIQUIDITY -> HttpStatus.UNPROCESSABLE_CONTENT;
-            case UNKNOWN_INSTRUMENT, UNKNOWN_ORDER -> HttpStatus.NOT_FOUND;
+            case UNKNOWN_INSTRUMENT, UNKNOWN_ORDER, UNKNOWN_POSITION, UNKNOWN_DEPOSIT -> HttpStatus.NOT_FOUND;
+            case LEVERAGE_NOT_ALLOWED -> HttpStatus.UNPROCESSABLE_CONTENT;
             case NOT_OWNER -> HttpStatus.FORBIDDEN;
             case NOT_OPEN, ACCOUNT_EXISTS -> HttpStatus.CONFLICT;
             case UNKNOWN_ACCOUNT -> HttpStatus.UNAUTHORIZED;

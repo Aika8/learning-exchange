@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: learning-exchange core API
-  version: 0.1.0
+  version: 0.2.0
   description: |
     Commands and queries of the exchange (ADR-0003). Streams are in `asyncapi.yaml`.
 
@@ -175,6 +175,184 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '409': { $ref: '#/components/responses/Problem' }
+  /conditional-orders:
+    get:
+      operationId: listMyConditionalOrders
+      summary: My conditional orders (stops and take-profits), newest first
+      responses:
+        '200':
+          description: Conditional orders
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/ConditionalOrder' }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: placeConditionalOrder
+      summary: Place a stop-limit, stop-market, trailing take-profit or TP+SL (OCO)
+      description: |
+        Kept by the exchange outside the book (ADR-0008). It watches the **last trade price**, never book quotes.
+        When it fires it submits an ordinary order, which may still not fill. Nothing is reserved until then;
+        the generated order is checked for funds like any other and may be rejected.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PlaceConditionalRequest' }
+      responses:
+        '201':
+          description: Waiting for its trigger
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConditionalOrder' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /conditional-orders/{conditionalId}:
+    delete:
+      operationId: cancelConditionalOrder
+      summary: Cancel a conditional order that has not fired yet
+      parameters:
+        - name: conditionalId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Cancelled
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ConditionalOrder' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /margin/positions:
+    get:
+      operationId: listMyMarginPositions
+      summary: My leveraged positions with equity and distance to stop-out, newest first
+      responses:
+        '200':
+          description: Positions
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/MarginPosition' }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: openMarginPosition
+      summary: Open a leveraged position at market (FX only, up to the instrument's maxLeverage)
+      description: |
+        Collateral `ceil(notional / leverage)` (+ the fee for a long) is taken from my quote balance; the exchange's
+        bank lends the rest (quote for a long, base for a short). The position is force-closed at market (stop-out)
+        when equity falls to 50% of the collateral, priced at the last trade.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OpenMarginRequest' }
+      responses:
+        '201':
+          description: Opened
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarginPosition' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  /margin/positions/{positionId}/close:
+    post:
+      operationId: closeMarginPosition
+      summary: Close my leveraged position at market and repay the loan
+      parameters:
+        - name: positionId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Closed, or closing if the book was too thin
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MarginPosition' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /savings:
+    get:
+      operationId: listMySavings
+      summary: My savings deposits and the product on offer
+      responses:
+        '200':
+          description: Deposits
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavingsOverview' }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: openSavings
+      summary: Put SPARK on a savings deposit; interest compounds every bank day of simulation time
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OpenSavingsRequest' }
+      responses:
+        '201':
+          description: Opened
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavingsDeposit' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/Problem' }
+  /savings/{depositId}/close:
+    post:
+      operationId: closeSavings
+      summary: Close a deposit; principal and accrued interest return to my balance
+      parameters:
+        - name: depositId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SavingsDeposit' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /statement:
+    get:
+      operationId: getStatement
+      summary: My statement for a period — every operation with its fee and spread, realised profit and 10% tax
+      description: |
+        A projection of the journal (ADR-0005). Spread paid = how far the trade price was from the mid of the book
+        just before the order arrived, times quantity (negative = earned, for the resting side). Realised profit uses
+        the average-cost method; tax is 10% of the period's realised profit, never below zero.
+      parameters:
+        - name: from
+          in: query
+          description: Simulation time (ms), inclusive; default the beginning
+          schema: { type: integer, format: int64 }
+        - name: to
+          in: query
+          description: Simulation time (ms), exclusive; default now
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Statement
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Statement' }
+        '401': { $ref: '#/components/responses/Problem' }
   /clock:
     get:
       operationId: getClock
@@ -262,14 +440,15 @@ components:
         amount: { type: integer, format: int64, minimum: 1, maximum: 100000000000 }
     Instrument:
       type: object
-      required: [id, base, quote, feeBps, priceScale, qtyScale]
+      required: [id, base, quote, feeBps, priceScale, qtyScale, maxLeverage]
       properties:
-        id: { type: string, examples: [SILK-SPARK] }
+        id: { type: string, examples: [SILK-SPARK, AMBER-SPARK] }
         base: { type: string, examples: [SILK] }
         quote: { type: string, examples: [SPARK] }
         feeBps: { type: integer, description: 'Fee on each side of a trade, basis points of notional (10 = 0.1%)' }
         priceScale: { type: integer, description: Decimals of the quote asset on screen }
         qtyScale: { type: integer, description: Decimals of the base asset on screen }
+        maxLeverage: { type: integer, minimum: 1, description: '1 = no leverage; AMBER-SPARK (FX) allows 4' }
     Side:
       type: string
       enum: [BUY, SELL]
@@ -335,6 +514,168 @@ components:
         qty: { type: integer, format: int64 }
         aggressorSide: { $ref: '#/components/schemas/Side' }
         ts: { type: integer, format: int64 }
+    ConditionalKind:
+      type: string
+      enum: [STOP_LIMIT, STOP_MARKET, TRAILING_TP, TP_SL]
+      description: |
+        STOP_LIMIT / STOP_MARKET fire when the last trade reaches `triggerPrice` (SELL: at or below, BUY: at or above).
+        TRAILING_TP arms at `activationPrice`, then follows the best price and fires on a pull-back of more than `offset`;
+        its limit price is the break price ∓ `protectiveSpread`. TP_SL is both on one order: whichever comes first;
+        once the take-profit is armed the stop is no longer checked.
+    ConditionalState:
+      type: string
+      enum: [WAITING, ARMED, TRIGGERED, SUBMITTED, PARTIALLY_FILLED, FILLED, UNFILLED, REJECTED, CANCELLED]
+      description: |
+        TRIGGERED = the rule fired; SUBMITTED = its order rests in the book, not filled. A fired stop is closed only
+        when FILLED. UNFILLED = the generated order ended with nothing filled; REJECTED = the order was refused (`rejection`).
+    PlaceConditionalRequest:
+      type: object
+      required: [instrument, kind, side, qty]
+      properties:
+        instrument: { type: string }
+        kind: { $ref: '#/components/schemas/ConditionalKind' }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64, minimum: 1 }
+        triggerPrice: { type: integer, format: int64, minimum: 1, description: 'Stop price (STOP_LIMIT, STOP_MARKET, TP_SL)' }
+        limitPrice: { type: integer, format: int64, minimum: 0, description: 'Price of the generated limit order (STOP_LIMIT; TP_SL stop leg, 0 = market)' }
+        activationPrice: { type: integer, format: int64, minimum: 1, description: 'Take-profit level (TRAILING_TP, TP_SL)' }
+        offset: { type: integer, format: int64, minimum: 0, description: 'Pull-back from the best price that fires the take-profit' }
+        protectiveSpread: { type: integer, format: int64, description: 'Distance of the take-profit limit price from the break price' }
+    ConditionalOrder:
+      type: object
+      required: [conditionalId, instrument, kind, side, qty, triggerPrice, limitPrice, activationPrice, offset,
+                 protectiveSpread, state, createdAt]
+      properties:
+        conditionalId: { type: integer, format: int64 }
+        instrument: { type: string }
+        kind: { $ref: '#/components/schemas/ConditionalKind' }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64 }
+        triggerPrice: { type: integer, format: int64 }
+        limitPrice: { type: integer, format: int64 }
+        activationPrice: { type: integer, format: int64 }
+        offset: { type: integer, format: int64 }
+        protectiveSpread: { type: integer, format: int64 }
+        state: { $ref: '#/components/schemas/ConditionalState' }
+        bestPrice: { type: [integer, 'null'], format: int64, description: 'Best price seen since the take-profit armed' }
+        triggeredAt: { type: [integer, 'null'], format: int64 }
+        triggerTradePrice: { type: [integer, 'null'], format: int64, description: 'Last trade price that fired it' }
+        orderId: { type: [integer, 'null'], format: int64, description: 'The generated order' }
+        filledQty: { type: integer, format: int64, description: 'Filled quantity of the generated order' }
+        rejection: { type: [string, 'null'], description: 'Problem code if the generated order was refused' }
+        createdAt: { type: integer, format: int64 }
+    OpenMarginRequest:
+      type: object
+      required: [instrument, side, qty, leverage]
+      properties:
+        instrument: { type: string, examples: [AMBER-SPARK] }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64, minimum: 1, description: Base units to buy (long) or sell short }
+        leverage: { type: integer, minimum: 1, maximum: 4 }
+    MarginStatus:
+      type: string
+      enum: [OPEN, CLOSING, CLOSED]
+    MarginPosition:
+      type: object
+      required: [positionId, instrument, side, qty, leverage, collateral, loanQuote, loanBase, entryPrice, equity,
+                 stopOutEquity, status, openedAt]
+      properties:
+        positionId: { type: integer, format: int64 }
+        instrument: { type: string }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64 }
+        leverage: { type: integer }
+        collateral: { type: integer, format: int64, description: My quote money put in }
+        loanQuote: { type: integer, format: int64, description: Quote lent by the bank (long) }
+        loanBase: { type: integer, format: int64, description: Base lent by the bank (short) }
+        entryPrice: { type: integer, format: int64, description: Average fill price of the opening order }
+        lastPrice: { type: [integer, 'null'], format: int64 }
+        equity: { type: integer, format: int64, description: 'Quote held − quote loan + (base held − base loan) × last price' }
+        stopOutEquity: { type: integer, format: int64, description: 'Equity at which stop-out fires: 50% of collateral' }
+        stopOutPrice: { type: [integer, 'null'], format: int64, description: 'Last price at which equity reaches stopOutEquity' }
+        status: { $ref: '#/components/schemas/MarginStatus' }
+        closeReason: { type: [string, 'null'], enum: [CLOSED, STOP_OUT, null] }
+        returned: { type: [integer, 'null'], format: int64, description: Quote returned to me on close }
+        realisedPnl: { type: [integer, 'null'], format: int64, description: 'returned − collateral' }
+        badDebt: { type: [integer, 'null'], format: int64, description: 'Loan the position could not repay (gap through stop-out)' }
+        openedAt: { type: integer, format: int64 }
+        closedAt: { type: [integer, 'null'], format: int64 }
+    SavingsProduct:
+      type: object
+      required: [asset, rateBps, dayMillis]
+      properties:
+        asset: { type: string, examples: [SPARK] }
+        rateBps: { type: integer, description: 'Annual rate in basis points (1400 = 14%)' }
+        dayMillis: { type: integer, format: int64, description: 'Length of one bank day in simulation ms; interest compounds daily, 365 days a year' }
+    OpenSavingsRequest:
+      type: object
+      required: [amount]
+      properties:
+        amount: { type: integer, format: int64, minimum: 1 }
+    SavingsDeposit:
+      type: object
+      required: [depositId, asset, principal, balance, rateBps, status, openedAt]
+      properties:
+        depositId: { type: integer, format: int64 }
+        asset: { type: string }
+        principal: { type: integer, format: int64 }
+        balance: { type: integer, format: int64, description: Principal plus interest so far }
+        interest: { type: integer, format: int64 }
+        rateBps: { type: integer }
+        status: { type: string, enum: [OPEN, CLOSED] }
+        openedAt: { type: integer, format: int64 }
+        closedAt: { type: [integer, 'null'], format: int64 }
+    SavingsOverview:
+      type: object
+      required: [product, deposits]
+      properties:
+        product: { $ref: '#/components/schemas/SavingsProduct' }
+        deposits:
+          type: array
+          items: { $ref: '#/components/schemas/SavingsDeposit' }
+    StatementKind:
+      type: string
+      enum: [DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST]
+    StatementLine:
+      type: object
+      required: [ts, kind, asset, amount, fee, spreadPaid, realisedPnl]
+      properties:
+        ts: { type: integer, format: int64 }
+        kind: { $ref: '#/components/schemas/StatementKind' }
+        instrument: { type: [string, 'null'] }
+        side: { oneOf: [{ $ref: '#/components/schemas/Side' }, { type: 'null' }] }
+        price: { type: [integer, 'null'], format: int64 }
+        qty: { type: [integer, 'null'], format: int64 }
+        mid: { type: [integer, 'null'], format: int64, description: 'Mid of the book before the order (trades)' }
+        asset: { type: string, description: Asset of `amount` }
+        amount: { type: integer, format: int64, description: 'Change of my money in `asset` (signed)' }
+        fee: { type: integer, format: int64, description: Fee I paid, quote minor units }
+        spreadPaid: { type: integer, format: int64, description: '(price − mid) × qty for a buy, (mid − price) × qty for a sell' }
+        realisedPnl: { type: integer, format: int64, description: Profit realised by this line (sells, margin close) }
+        margin: { type: boolean, description: Trade of a leveraged position }
+        refId: { type: [integer, 'null'], format: int64, description: 'Order, position or deposit id' }
+    StatementTotals:
+      type: object
+      required: [fees, spreadPaid, realisedPnl, taxRateBps, tax, interest]
+      properties:
+        fees: { type: integer, format: int64 }
+        spreadPaid: { type: integer, format: int64 }
+        realisedPnl: { type: integer, format: int64 }
+        taxRateBps: { type: integer, description: '1000 = 10%' }
+        tax: { type: integer, format: int64, description: 'max(0, realisedPnl) × 10%, rounded down' }
+        interest: { type: integer, format: int64, description: Deposit interest earned (not taxed here) }
+    Statement:
+      type: object
+      required: [from, to, currency, lines, totals]
+      properties:
+        from: { type: integer, format: int64 }
+        to: { type: integer, format: int64 }
+        currency: { type: string, description: 'Asset of fees, spread, profit and tax', examples: [SPARK] }
+        lines:
+          type: array
+          description: Oldest first
+          items: { $ref: '#/components/schemas/StatementLine' }
+        totals: { $ref: '#/components/schemas/StatementTotals' }
     Clock:
       type: object
       required: [now, paused, speed]
@@ -356,7 +697,8 @@ components:
           type: string
           description: Machine code for clients to translate (never shown raw)
           enum: [UNAUTHORIZED, BAD_REQUEST, INVALID_NAME, INVALID_ORDER, INVALID_AMOUNT, INSUFFICIENT_FUNDS,
-                 NO_LIQUIDITY, UNKNOWN_INSTRUMENT, UNKNOWN_ORDER, UNKNOWN_ACCOUNT, NOT_OWNER, NOT_OPEN, ACCOUNT_EXISTS]
+                 NO_LIQUIDITY, UNKNOWN_INSTRUMENT, UNKNOWN_ORDER, UNKNOWN_ACCOUNT, NOT_OWNER, NOT_OPEN, ACCOUNT_EXISTS,
+                 LEVERAGE_NOT_ALLOWED, UNKNOWN_POSITION, UNKNOWN_DEPOSIT]
         message: { type: string, description: English text for developers }
     # ---- WebSocket messages (channels in asyncapi.yaml) ----
     WsClientMessage:
@@ -392,7 +734,7 @@ components:
       properties:
         reasons:
           type: array
-          items: { type: string, enum: [ORDER, TRADE, DEPOSIT] }
+          items: { type: string, enum: [ORDER, TRADE, DEPOSIT, CONDITIONAL, MARGIN, SAVINGS] }
     WsAccountMessage:
       type: object
       required: [channel, data]

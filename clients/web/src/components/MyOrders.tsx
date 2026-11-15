@@ -8,7 +8,7 @@ import { formatMinor } from '../money';
 export function MyOrders({ instrument }: { instrument: Instrument }) {
   const { t, i18n } = useTranslation();
   const [openOnly, setOpenOnly] = useState(false);
-  const orders = useMyOrders(openOnly).data ?? [];
+  const orders = (useMyOrders(openOnly).data ?? []).filter((o) => o.instrument === instrument.id);
   const qc = useQueryClient();
   const cancel = useMutation({
     mutationFn: async (id: number) => unwrap(await api.DELETE('/orders/{orderId}', { params: { path: { orderId: id } } })),
@@ -21,7 +21,7 @@ export function MyOrders({ instrument }: { instrument: Instrument }) {
   return (
     <>
       <h2>
-        {t('orders.title')}
+        {t('orders.title')} · {instrument.id}
         <label className="inline">
           <input type="checkbox" checked={openOnly} onChange={(e) => setOpenOnly(e.target.checked)} /> {t('orders.openOnly')}
         </label>

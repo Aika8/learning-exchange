@@ -6,7 +6,7 @@ Never connected to a real market. Built as a one-year learning project.
 
 | Folder | What | Status |
 |---|---|---|
-| `backend/engine` | Framework-free engine: order book, accounts, reservation, fees, events | M1 |
+| `backend/engine` | Framework-free engine: order book, accounts, reservation, fees, events, stops, leverage, deposits | M2a |
 | `backend/application` | Use cases and ports: sequencer, simulation clock, journal port | M1 |
 | `backend/bots` | Market maker and noise bots from `bots.yaml` | M1 |
 | `backend/app` | Spring Boot: REST, WebSocket, JSON-lines journal | M1 |
@@ -29,4 +29,4 @@ Requires Java 25 and Node 22+. Gradle finds an installed JDK 25; if there is non
 - Order-book REPL from increment 1: `make repl`.
 - Bots: edit `bots.yaml`. Contract: `api/README.md`.
 
-Demo script for the current milestone: `docs/demo/M1.md`. State of things: `docs/STATUS.md`.
+Demo script for the current milestone: `docs/demo/M2a.md` (earlier: `M1.md`). State of things: `docs/STATUS.md`.

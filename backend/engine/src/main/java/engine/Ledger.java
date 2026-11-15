@@ -22,6 +22,12 @@ public final class Ledger {
     /** The account that collects trading fees. */
     public static final String FEES_ACCOUNT = "exchange-fees";
 
+    /**
+     * The exchange's bank: lends to leveraged positions and pays deposit interest. It is funded by journalled
+     * deposits like anyone else, so loans and interest move money and never create it.
+     */
+    public static final String BANK_ACCOUNT = "exchange-bank";
+
     private final Map<String, Map<String, long[]>> accounts = new LinkedHashMap<>();
 
     public boolean exists(String account) {

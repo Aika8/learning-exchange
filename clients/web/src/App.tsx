@@ -3,7 +3,8 @@ import { useTranslation } from 'react-i18next';
 import { useQueryClient } from '@tanstack/react-query';
 import { getToken, setToken } from './api/client';
 import { MarketSocket } from './api/socket';
-import { useInstrument, useMarket } from './hooks';
+import { useInstruments, useMarket } from './hooks';
+import { DEFAULT_INSTRUMENT } from './config';
 import { Login } from './components/Login';
 import { Ladder } from './components/Ladder';
 import { TradesTape } from './components/TradesTape';
@@ -12,6 +13,8 @@ import { MyOrders } from './components/MyOrders';
 import { Balances } from './components/Balances';
 import { ClockBar } from './components/ClockBar';
 import { LangSwitch } from './components/LangSwitch';
+import { InstrumentSwitch } from './components/InstrumentSwitch';
+import { M2aPanels } from './components/M2aPanels';
 
 export function App() {
   const { t } = useTranslation();
@@ -19,8 +22,10 @@ export function App() {
   const qc = useQueryClient();
   const socket = useMemo(() => (token ? new MarketSocket(token) : null), [token]);
   useEffect(() => () => socket?.close(), [socket]);
-  const { book, trades, clock } = useMarket(socket);
-  const instrument = useInstrument().data;
+  const [instrumentId, setInstrumentId] = useState(DEFAULT_INSTRUMENT);
+  const { book, trades, clock } = useMarket(socket, instrumentId);
+  const instruments = useInstruments().data ?? [];
+  const instrument = instruments.find((i) => i.id === instrumentId);
 
   const login = (tok: string) => {
     setToken(tok);
@@ -37,6 +42,7 @@ export function App() {
       <header>
         <h1>{t('app.title')}</h1>
         <span className="chip">{t('app.practice')}</span>
+        {token && <InstrumentSwitch list={instruments} value={instrumentId} onChange={setInstrumentId} />}
         <div className="spacer" />
         {token && <ClockBar clock={clock} />}
         <LangSwitch />
@@ -64,6 +70,9 @@ export function App() {
           </section>
           <section className="card orders">
             <MyOrders instrument={instrument} />
+          </section>
+          <section className="card extra">
+            <M2aPanels instrument={instrument} book={book} clock={clock} />
           </section>
         </main>
       )}

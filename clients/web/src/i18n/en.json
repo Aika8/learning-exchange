@@ -105,6 +105,157 @@
     "NOT_OWNER": "Not your order",
     "NOT_OPEN": "Order is no longer open",
     "ACCOUNT_EXISTS": "Account exists",
-    "NETWORK": "Server unreachable — is make dev running?"
+    "NETWORK": "Server unreachable — is make dev running?",
+    "LEVERAGE_NOT_ALLOWED": "Leverage not allowed for this instrument",
+    "UNKNOWN_POSITION": "Position not found",
+    "UNKNOWN_DEPOSIT": "Deposit not found"
+  },
+  "instrument": {
+    "label": "Instrument",
+    "leverageUpTo": "leverage up to ×{{n}}"
+  },
+  "tabs": {
+    "stops": "Stops & take-profit",
+    "margin": "Leverage & margin",
+    "statement": "Statement",
+    "savings": "Savings"
+  },
+  "stops": {
+    "formTitle": "New conditional order",
+    "title": "My conditional orders",
+    "kind": "Kind",
+    "submit": "Place conditional order",
+    "placed": "Conditional order #{{id}}: {{state}}",
+    "optional": "optional",
+    "triggerPrice": "Stop (trigger) price, {{quote}}",
+    "limitPrice": "Limit price, {{quote}}",
+    "activationPrice": "Take-profit activation price, {{quote}}",
+    "offset": "Pull-back that fires it, {{quote}}",
+    "protectiveSpread": "Protective spread, {{quote}}",
+    "lastTradeHint": "Fires on the last trade price, not on book quotes.",
+    "firedHint": "Fired ≠ filled: a fired stop sends an order; it is done only when that order is filled.",
+    "params": "Parameters",
+    "state": "State",
+    "triggerTrade": "Fired at trade price",
+    "order": "Order #",
+    "best": "best",
+    "empty": "No conditional orders",
+    "short": {
+      "triggerPrice": "stop",
+      "limitPrice": "limit",
+      "activationPrice": "TP from",
+      "offset": "pull-back",
+      "protectiveSpread": "prot. spread"
+    }
+  },
+  "ckind": {
+    "STOP_LIMIT": "Stop-limit",
+    "STOP_MARKET": "Stop-market",
+    "TRAILING_TP": "Trailing take-profit",
+    "TP_SL": "Take-profit + stop-loss (OCO)"
+  },
+  "ckindHint": {
+    "STOP_LIMIT": "When the last trade reaches the stop price, a limit order is placed at the limit price. On a gap it may stay unfilled.",
+    "STOP_MARKET": "When the last trade reaches the stop price, a market order is sent. Fills at whatever the book offers.",
+    "TRAILING_TP": "Arms at the activation price, then follows the best price and fires on a pull-back larger than the offset.",
+    "TP_SL": "Take-profit and stop-loss on one order: whichever comes first; the other is dropped. Empty limit = market stop."
+  },
+  "cstate": {
+    "WAITING": "Waiting",
+    "ARMED": "Armed",
+    "TRIGGERED": "Fired",
+    "SUBMITTED": "Fired, order not filled",
+    "PARTIALLY_FILLED": "Fired, partially filled",
+    "FILLED": "Filled",
+    "UNFILLED": "Fired, nothing filled",
+    "REJECTED": "Fired, order rejected",
+    "CANCELLED": "Cancelled"
+  },
+  "margin": {
+    "title": "Leveraged positions",
+    "long": "Long (buy)",
+    "short": "Short (sell)",
+    "leverage": "Leverage",
+    "stopOutHint": "Collateral is your money; the bank lends the rest. If equity falls to 50% of collateral, the position is closed by force (stop-out).",
+    "preview": "Collateral ≈ {{collateral}} {{quote}}, bank loan ≈ {{loan}} {{quote}} (notional ÷ leverage)",
+    "noPrice": "No price in the book yet",
+    "open": "Open position",
+    "opened": "Position #{{id}} opened",
+    "qtyLev": "Qty × leverage",
+    "collateral": "Collateral",
+    "loan": "Loan",
+    "entry": "Entry",
+    "last": "Last",
+    "equity": "Equity",
+    "stopOut": "Stop-out equity",
+    "atPrice": "at price {{price}}",
+    "result": "Result",
+    "returned": "returned {{v}}",
+    "pnl": "P&L {{v}}",
+    "badDebt": "bad debt {{v}}",
+    "close": "Close",
+    "empty": "No positions"
+  },
+  "mstatus": {
+    "OPEN": "Open",
+    "CLOSING": "Closing",
+    "CLOSED": "Closed"
+  },
+  "mreason": {
+    "CLOSED": "closed by you",
+    "STOP_OUT": "stop-out"
+  },
+  "savings": {
+    "title": "Savings deposits",
+    "product": "Rate {{rate}}% a year on {{asset}}, compound interest daily; one bank day = {{seconds}} s of simulation time.",
+    "amount": "Amount, {{asset}}",
+    "open": "Open deposit",
+    "opened": "Deposit #{{id}} opened",
+    "principal": "Principal",
+    "interest": "Interest",
+    "balance": "Balance",
+    "rate": "Rate",
+    "close": "Close",
+    "empty": "No deposits"
+  },
+  "dstatus": {
+    "OPEN": "Open",
+    "CLOSED": "Closed"
+  },
+  "statement": {
+    "title": "Statement",
+    "period": {
+      "all": "All time",
+      "hour": "Last hour",
+      "day": "Last day"
+    },
+    "range": "{{from}} — {{to}}, amounts in {{currency}}",
+    "fees": "Fees",
+    "spread": "Spread paid",
+    "pnl": "Realised P&L",
+    "tax": "Tax {{rate}}%",
+    "interest": "Deposit interest",
+    "hint": "Spread paid = distance of the trade price from the book mid × qty; negative means earned. Tax is 10% of positive realised profit.",
+    "time": "Time",
+    "kind": "Operation",
+    "instrument": "Instrument",
+    "priceQty": "Price × qty",
+    "mid": "Mid",
+    "amount": "Amount",
+    "fee": "Fee",
+    "spreadCol": "Spread",
+    "pnlCol": "P&L",
+    "marginFlag": "margin",
+    "empty": "No operations in this period"
+  },
+  "skind": {
+    "DEPOSIT": "Deposit",
+    "TRADE": "Trade",
+    "MARGIN_OPEN": "Margin: collateral in",
+    "MARGIN_CLOSE": "Margin: close",
+    "STOP_OUT": "Stop-out",
+    "SAVINGS_OPEN": "Deposit opened",
+    "SAVINGS_CLOSE": "Deposit closed",
+    "INTEREST": "Interest"
   }
 }
