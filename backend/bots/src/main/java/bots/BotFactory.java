@@ -24,17 +24,28 @@ public final class BotFactory {
 
     public static BotConfig parse(Reader yaml) {
         Map<String, Object> root = new Yaml(new SafeConstructor(new LoaderOptions())).load(yaml);
-        Map<String, Object> fv = map(root.get("fairValue"));
+        List<BotConfig.MarketConfig> markets = new ArrayList<>();
+        if (root.containsKey("markets")) {
+            for (Object m : (List<?>) root.get("markets")) {
+                markets.add(market(map(m)));
+            }
+        } else {
+            markets.add(market(root)); // M1 shape: one instrument at the top level
+        }
+        return new BotConfig(num(root, "seed", 42), num(root, "tickMillis", 500), markets);
+    }
+
+    private static BotConfig.MarketConfig market(Map<String, Object> m) {
+        Map<String, Object> fv = map(m.get("fairValue"));
         List<BotConfig.BotSpec> specs = new ArrayList<>();
-        for (Object o : (List<?>) root.get("bots")) {
+        for (Object o : (List<?>) m.get("bots")) {
             Map<String, Object> b = map(o);
             Map<String, Long> capital = new java.util.LinkedHashMap<>();
             map(b.getOrDefault("capital", Map.of())).forEach((k, v) -> capital.put(k, ((Number) v).longValue()));
             specs.add(new BotConfig.BotSpec((String) b.get("name"), (String) b.get("strategy"),
                     ((Number) b.getOrDefault("count", 1)).intValue(), capital, map(b.getOrDefault("params", Map.of()))));
         }
-        return new BotConfig(num(root, "seed", 42), (String) root.getOrDefault("instrument", "SILK-SPARK"),
-                num(root, "tickMillis", 500),
+        return new BotConfig.MarketConfig((String) m.getOrDefault("instrument", "SILK-SPARK"),
                 new BotConfig.FairValueConfig(num(fv, "start", 10_000), ((Number) fv.getOrDefault("volatilityBps", 5)).doubleValue(),
                         num(fv, "floor", 100)),
                 specs);
@@ -44,10 +55,28 @@ public final class BotFactory {
         return parse(new java.io.InputStreamReader(in, java.nio.charset.StandardCharsets.UTF_8));
     }
 
-    public static List<TradingBot> create(BotConfig config, TradingService market) {
-        List<TradingBot> out = new ArrayList<>();
+    /** Bots of all markets, each market with its own seeded fair value. */
+    public static BotRunner runner(BotConfig config, TradingService market, application.Clock clock) {
+        List<BotRunner.Group> groups = new ArrayList<>();
         long n = 0;
-        for (BotConfig.BotSpec spec : config.bots()) {
+        for (int k = 0; k < config.markets().size(); k++) {
+            BotConfig.MarketConfig mc = config.markets().get(k);
+            List<TradingBot> bots = create(config, mc, market, n);
+            n += bots.size();
+            BotConfig.FairValueConfig fv = mc.fairValue();
+            groups.add(new BotRunner.Group(new FairValue(fv.start(), fv.volatilityBps(), fv.floor(), config.seed() + 7_919L * k), bots));
+        }
+        return new BotRunner(groups, clock);
+    }
+
+    /** Bots of the first market. */
+    public static List<TradingBot> create(BotConfig config, TradingService market) {
+        return create(config, config.market(), market, 0);
+    }
+
+    private static List<TradingBot> create(BotConfig config, BotConfig.MarketConfig mc, TradingService market, long n) {
+        List<TradingBot> out = new ArrayList<>();
+        for (BotConfig.BotSpec spec : mc.bots()) {
             for (int i = 1; i <= spec.count(); i++) {
                 String name = spec.count() == 1 ? spec.name() : spec.name() + "-" + i;
                 TradingService.Account account = market.login(name);
@@ -56,7 +85,7 @@ public final class BotFactory {
                     spec.capital().forEach((asset, amount) -> market.deposit(account.accountId(), asset, amount));
                 }
                 long seed = config.seed() * 1_000_003 + (++n);
-                out.add(new TradingBot(name, account.accountId(), config.instrument(), strategy(spec), seed, market));
+                out.add(new TradingBot(name, account.accountId(), mc.instrument(), strategy(spec), seed, market));
             }
         }
         return out;

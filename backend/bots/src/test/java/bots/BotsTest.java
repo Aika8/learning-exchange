@@ -70,13 +70,48 @@ class BotsTest {
         assertFalse(replayed.ledger().balances("exchange-fees").isEmpty(), "bots pay fees");
     }
 
+    static final String TWO_MARKETS = """
+            seed: 7
+            tickMillis: 500
+            markets:
+              - instrument: SILK-SPARK
+                fairValue: { start: 10000, volatilityBps: 5, floor: 100 }
+                bots:
+                  - { name: mm, strategy: market-maker, capital: { SPARK: 100000000, SILK: 10000 },
+                      params: { halfSpread: 10, step: 5, levels: 3, qty: 10, targetBase: 10000 } }
+                  - { name: noise, strategy: noise, count: 2, capital: { SPARK: 10000000, SILK: 500 } }
+              - instrument: AMBER-SPARK
+                fairValue: { start: 50000, volatilityBps: 3, floor: 100 }
+                bots:
+                  - { name: fx-mm, strategy: market-maker, capital: { SPARK: 1000000000, AMBER: 100000 },
+                      params: { halfSpread: 25, step: 10, levels: 3, qty: 50, targetBase: 100000 } }
+                  - { name: fx-noise, strategy: noise, count: 2, capital: { SPARK: 50000000, AMBER: 1000 } }
+            """;
+
+    @Test
+    void botsTradeOnEveryMarketOfTheFile() throws Exception {
+        InMemoryJournal journal = new InMemoryJournal();
+        ManualClock clock = new ManualClock(0);
+        try (ExchangeService s = new ExchangeService(Instrument.ALL, journal, clock, Map.of("SPARK", 1_000_000L))) {
+            BotRunner runner = BotFactory.runner(BotFactory.parse(new StringReader(TWO_MARKETS)), s, clock);
+            assertEquals(6, runner.bots().size());
+            for (int i = 0; i < 100; i++) {
+                clock.advance(500);
+                runner.tick();
+            }
+        }
+        for (String instrument : List.of("SILK-SPARK", "AMBER-SPARK")) {
+            assertTrue(journal.readAll().stream().anyMatch(e -> e instanceof Event.TradeExecuted t && t.instrument().equals(instrument)), instrument);
+        }
+    }
+
     private static List<Event> run() throws Exception {
         InMemoryJournal journal = new InMemoryJournal();
         ManualClock clock = new ManualClock(0);
         try (ExchangeService s = new ExchangeService(List.of(Instrument.SILK_SPARK), journal, clock, Map.of("SPARK", 1_000_000L))) {
             BotConfig cfg = BotFactory.parse(new StringReader(YAML));
             BotRunner runner = new BotRunner(BotFactory.create(cfg, s),
-                    new FairValue(cfg.fairValue().start(), cfg.fairValue().volatilityBps(), cfg.fairValue().floor(), cfg.seed()), clock);
+                    new FairValue(cfg.market().fairValue().start(), cfg.market().fairValue().volatilityBps(), cfg.market().fairValue().floor(), cfg.seed()), clock);
             assertEquals(4, runner.bots().size());
             for (int i = 0; i < 100; i++) {
                 clock.advance(500);
