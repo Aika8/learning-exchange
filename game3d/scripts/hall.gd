@@ -107,7 +107,8 @@ func _room() -> void:
 			else:
 				Assets.put(self, "book_encyclopedia_set_01", dpos + Vector3(0.3, 0.77, 0), 0.3)
 				Assets.put(self, "seadogs_compass", dpos + Vector3(-0.4, 0.77, 0.1), 1.0, 2.0)
-			var f := Proc.figure(Hud.BID.darkened(0.3) if side < 0 else Hud.ASK.darkened(0.3), Color("2a3550"))
+			var f := Proc.figure(Hud.BID.darkened(0.3) if side < 0 else Hud.ASK.darkened(0.3), Color("2a3550"),
+				"sailor" if (k + int(side > 0)) % 2 == 0 else "trader")
 			f.position = Vector3(side * (4.5 + k * 3.5), 0, -4.2 + k * 2.5)
 			add_child(f)
 	# warm lanterns

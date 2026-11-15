@@ -451,8 +451,13 @@ static func _real_ship() -> Node3D:
 	return s
 
 
-## A villager figure: body, head, hat. `coat` and `hat` colours tell people apart.
-static func figure(coat: Color, hat: Color) -> Node3D:
+## A villager figure: body, head, hat. `coat` and `hat` colours tell people apart. `who` picks a MakeHuman
+## character (sailor, trader, oldman, child) when it is downloaded; otherwise the procedural person stands in.
+static func figure(coat: Color, hat: Color, who: String = "") -> Node3D:
+	if not who.is_empty():
+		var p := Assets.person(who)
+		if p != null:
+			return p
 	if Assets.available():
 		return _person(coat, hat)
 	var f := Node3D.new()

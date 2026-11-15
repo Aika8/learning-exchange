@@ -77,3 +77,11 @@ How they are used: `scripts/assets.gd` (paths, fallbacks), `scripts/proc.gd` (`_
 
 No sounds or music. Nothing is taken from existing games: the Poly Haven models are generic real-world objects
 (a 17th-century Dutch ship, barrels, lamps), and the world, names and layout are ours.
+
+## MakeHuman villagers (generated, not downloaded)
+
+`sailor`, `trader`, `oldman`, `child` in `assets/models/people/*.glb` are built by `game3d/tools/people/build.sh`
+(Blender 4.5 + MPFB 2 add-on + MakeHuman CC0 system assets, makehumancommunity.org). The base mesh, rig and every
+clothes, hair, eye and skin asset used are CC0; the clothes are recoloured and the pose set as rest pose by
+`restyle.py`. MPFB itself is GPL, its output is not. The files are git-ignored like the rest; without them the
+procedural person stands in.
