@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: learning-exchange core API
-  version: 0.3.0
+  version: 0.4.0
   description: |
     Commands and queries of the exchange (ADR-0003). Streams are in `asyncapi.yaml`.
 
@@ -593,6 +593,78 @@ paths:
           content:
             application/json:
               schema: { type: array, items: { $ref: '#/components/schemas/GlossaryTerm' } }
+  # ---- M2c: ATR, trade journal, funds ----
+  /instruments/{instrumentId}/atr:
+    get:
+      operationId: getAtr
+      summary: Average True Range of daily candles, Wilder smoothing (a measure of how much the price swings, not of direction)
+      description: |
+        True range of a bank day = max(high − low, |high − previous close|, |low − previous close|). The first ATR is
+        the mean of the first `period` true ranges; then ATR = (previous ATR × (period − 1) + TR) / period
+        (Wilder, 1978), rounded to the nearest minor unit. Needs `period + 1` candles; `ready` is false until then.
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+        - name: period
+          in: query
+          schema: { type: integer, minimum: 2, maximum: 100, default: 14 }
+      responses:
+        '200':
+          description: ATR
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Atr' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /session-review:
+    get:
+      operationId: getSessionReview
+      summary: Review of my orders in a period by the trade-journal notes (why, market state, mood), in money and in R
+      description: |
+        Every order I placed in the period, with its journal note when I wrote one. Result of an order = what its
+        fills earned against the last price (or against the price I later sold/bought back at), fees included; R =
+        result / planned risk when the note gives the risk. Grouped by mood and by market state, so the review can
+        show "my FOMO trades lost 1.4 R on average". Not advice: it describes what happened.
+      parameters:
+        - name: from
+          in: query
+          description: Simulation time (ms), inclusive; default the beginning
+          schema: { type: integer, format: int64 }
+        - name: to
+          in: query
+          description: Simulation time (ms), exclusive; default now
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Review
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SessionReview' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /funds:
+    get:
+      operationId: listFunds
+      summary: Funds (index and active) with TER, NAV per unit, holdings and the fund against its own basket
+      security: []
+      responses:
+        '200':
+          description: Funds
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Fund' } }
+  /funds/{instrumentId}:
+    get:
+      operationId: getFund
+      summary: One fund card
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+      responses:
+        '200':
+          description: Fund
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Fund' }
+        '404': { $ref: '#/components/responses/Problem' }
   /clock:
     get:
       operationId: getClock
@@ -717,6 +789,11 @@ components:
         type: { $ref: '#/components/schemas/OrderType' }
         price: { type: integer, format: int64, minimum: 1, description: 'Required for LIMIT; ignored for MARKET' }
         qty: { type: integer, format: int64, minimum: 1 }
+        journal:
+          description: Optional trade-journal note («почему»), journalled with the order
+          oneOf:
+            - { $ref: '#/components/schemas/TradeNote' }
+            - { type: 'null' }
     Order:
       type: object
       required: [orderId, instrument, side, type, price, qty, filledQty, remainingQty, status, createdAt]
@@ -884,7 +961,7 @@ components:
           items: { $ref: '#/components/schemas/SavingsDeposit' }
     StatementKind:
       type: string
-      enum: [DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST, DIVIDEND, COUPON, REDEMPTION]
+      enum: [DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST, DIVIDEND, COUPON, REDEMPTION, DIVIDEND_TAX]
     StatementLine:
       type: object
       required: [ts, kind, asset, amount, fee, spreadPaid, realisedPnl]
@@ -905,15 +982,16 @@ components:
         refId: { type: [integer, 'null'], format: int64, description: 'Order, position or deposit id' }
     StatementTotals:
       type: object
-      required: [fees, spreadPaid, realisedPnl, taxRateBps, tax, interest, payouts]
+      required: [fees, spreadPaid, realisedPnl, taxRateBps, tax, interest, payouts, taxWithheld]
       properties:
         fees: { type: integer, format: int64 }
         spreadPaid: { type: integer, format: int64 }
         realisedPnl: { type: integer, format: int64 }
         taxRateBps: { type: integer, description: '1000 = 10%' }
-        tax: { type: integer, format: int64, description: '(max(0, realisedPnl) + payouts) × 10%, rounded down' }
+        tax: { type: integer, format: int64, description: 'Still to pay: (max(0, realisedPnl) + payouts) × 10%, rounded down, minus taxWithheld (never below 0)' }
         interest: { type: integer, format: int64, description: 'Deposit interest earned (not taxed here)' }
-        payouts: { type: integer, format: int64, description: 'Dividends and coupons received (taxed 10%)' }
+        payouts: { type: integer, format: int64, description: 'Dividends and coupons received, gross (taxed 10%)' }
+        taxWithheld: { type: integer, format: int64, description: 'Tax withheld at source on dividends (DIVIDEND_TAX lines)' }
     Statement:
       type: object
       required: [from, to, currency, lines, totals]
@@ -1011,7 +1089,7 @@ components:
         volume: { type: integer, format: int64 }
     CalendarKind:
       type: string
-      enum: [RATE_DECISION, EARNINGS, CONSENSUS, DIVIDEND_EX, COUPON, MATURITY, STORM]
+      enum: [RATE_DECISION, EARNINGS, CONSENSUS, DIVIDEND_EX, DIVIDEND_RECORD, DIVIDEND_PAY, COUPON, MATURITY, STORM]
     CalendarEntry:
       type: object
       required: [at, kind, done]
@@ -1094,7 +1172,9 @@ components:
       required: [perShare, exDate, paid]
       properties:
         perShare: { type: integer, format: int64 }
-        exDate: { type: integer, format: int64, description: 'Holders at this time are paid; the price drops by about the dividend' }
+        exDate: { type: integer, format: int64, description: 'From the open of this day the share trades without the dividend; the price is adjusted down by it' }
+        recordDate: { type: [integer, 'null'], format: int64, description: 'Holders in the register on this day are paid (bought before the ex-date, settled T+1); null for M2b dividends' }
+        payDate: { type: [integer, 'null'], format: int64, description: 'Payment day; null for M2b dividends (paid at the ex-date)' }
         paid: { type: boolean }
     Company:
       type: object
@@ -1238,6 +1318,102 @@ components:
         closedAt: { type: [integer, 'null'], format: int64 }
         currentPrice: { type: integer, format: int64 }
         pnl: { type: integer, format: int64 }
+    # ---- M2c ----
+    Atr:
+      type: object
+      required: [instrument, period, ready, candles]
+      properties:
+        instrument: { type: string }
+        period: { type: integer }
+        ready: { type: boolean, description: 'Enough candles (period + 1)' }
+        candles: { type: integer, description: 'Daily candles used' }
+        atr: { type: [integer, 'null'], format: int64, description: 'Quote minor units' }
+        lastPrice: { type: [integer, 'null'], format: int64 }
+        atrBps: { type: [integer, 'null'], format: int64, description: 'ATR / last price in basis points' }
+    MarketState:
+      type: string
+      enum: [TREND_UP, TREND_DOWN, RANGE, VOLATILE, NEWS]
+    Mood:
+      type: string
+      enum: [CALM, CONFIDENT, ANXIOUS, FOMO, REVENGE, BORED]
+    TradeNote:
+      type: object
+      properties:
+        why: { type: [string, 'null'], maxLength: 280, description: 'Why I enter' }
+        marketState: { oneOf: [{ $ref: '#/components/schemas/MarketState' }, { type: 'null' }] }
+        mood: { oneOf: [{ $ref: '#/components/schemas/Mood' }, { type: 'null' }] }
+        plannedRisk: { type: [integer, 'null'], format: int64, minimum: 1, description: '1 R: what I accept to lose, quote minor units (from the position-size helper)' }
+    ReviewEntry:
+      type: object
+      required: [orderId, instrument, side, placedAt, qty, filledQty, fees, result]
+      properties:
+        orderId: { type: integer, format: int64 }
+        instrument: { type: string }
+        side: { $ref: '#/components/schemas/Side' }
+        placedAt: { type: integer, format: int64 }
+        qty: { type: integer, format: int64 }
+        filledQty: { type: integer, format: int64 }
+        avgPrice: { type: [integer, 'null'], format: int64 }
+        markPrice: { type: [integer, 'null'], format: int64, description: 'Last price the result is measured against' }
+        fees: { type: integer, format: int64 }
+        result: { type: integer, format: int64, description: 'Quote minor units, fees included' }
+        resultRx100: { type: [integer, 'null'], format: int64, description: 'Result in R × 100 (−150 = −1.5 R)' }
+        note: { oneOf: [{ $ref: '#/components/schemas/TradeNote' }, { type: 'null' }] }
+    ReviewGroup:
+      type: object
+      required: [key, orders, wins, result]
+      properties:
+        key: { type: string, description: 'Mood or market state; NONE when the note left it empty' }
+        orders: { type: integer }
+        wins: { type: integer }
+        result: { type: integer, format: int64 }
+        avgRx100: { type: [integer, 'null'], format: int64, description: 'Average R × 100 of the orders with a planned risk' }
+    SessionReview:
+      type: object
+      required: [from, to, currency, entries, byMood, byMarketState, orders, annotated, wins, result]
+      properties:
+        from: { type: integer, format: int64 }
+        to: { type: integer, format: int64 }
+        currency: { type: string }
+        entries: { type: array, items: { $ref: '#/components/schemas/ReviewEntry' } }
+        byMood: { type: array, items: { $ref: '#/components/schemas/ReviewGroup' } }
+        byMarketState: { type: array, items: { $ref: '#/components/schemas/ReviewGroup' } }
+        orders: { type: integer }
+        annotated: { type: integer, description: 'Orders with a journal note' }
+        wins: { type: integer }
+        result: { type: integer, format: int64 }
+        expectancyRx100: { type: [integer, 'null'], format: int64, description: 'Average R × 100 over the orders with a planned risk' }
+    FundKind:
+      type: string
+      enum: [INDEX, ACTIVE]
+    FundHolding:
+      type: object
+      required: [instrument, qty, value, weightBps]
+      properties:
+        instrument: { type: string }
+        qty: { type: integer, format: int64 }
+        price: { type: [integer, 'null'], format: int64 }
+        value: { type: integer, format: int64 }
+        weightBps: { type: integer, format: int64 }
+    Fund:
+      type: object
+      required: [instrument, kind, terBps, unitsOutstanding, holdings, cash, nav, feesPaid, basketValue]
+      properties:
+        instrument: { type: string }
+        kind: { $ref: '#/components/schemas/FundKind' }
+        terBps: { type: integer, format: int64, description: 'Total expense ratio a year (20 = 0.20%), charged daily by the simulation clock' }
+        unitsOutstanding: { type: integer, format: int64 }
+        holdings: { type: array, items: { $ref: '#/components/schemas/FundHolding' } }
+        cash: { type: integer, format: int64 }
+        nav: { type: integer, format: int64, description: 'Holdings at last prices + cash' }
+        navPerUnit: { type: [integer, 'null'], format: int64 }
+        lastPrice: { type: [integer, 'null'], format: int64, description: 'Price of a unit on the exchange' }
+        premiumBps: { type: [integer, 'null'], format: int64, description: '(price − NAV per unit) / NAV per unit' }
+        feesPaid: { type: integer, format: int64, description: 'TER charged so far' }
+        basketValue: { type: integer, format: int64, description: 'The same basket held without the fund: holdings + the starting cash, no fee' }
+        fundReturnBps: { type: [integer, 'null'], format: int64, description: 'NAV change since the first fee day' }
+        basketReturnBps: { type: [integer, 'null'], format: int64, description: 'Basket value change over the same time' }
+        tenYearCostBps: { type: integer, format: int64, description: 'Share of the money TER takes over 10 years at zero growth: 1 − (1 − TER)^10' }
     LocalisedName:
       type: object
       required: [ru, en]
