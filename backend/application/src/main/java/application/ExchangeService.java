@@ -68,8 +68,9 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         public static final Options DEFAULT = new Options(
                 Map.of("SPARK", 100_000_000_000L, "AMBER", 10_000_000L), new SavingsProduct("SPARK", 1_400, 60_000));
 
+        /** M2a shape: no issuers (no dividends or coupons), no real data. */
         public Options(Map<String, Long> bankCapital, SavingsProduct savings) {
-            this(bankCapital, savings, 42, ISSUER_CASH, RealMarketData.NONE);
+            this(bankCapital, savings, 42, Map.of(), RealMarketData.NONE);
         }
     }
 
