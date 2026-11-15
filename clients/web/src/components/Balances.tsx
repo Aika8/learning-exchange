@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useMe } from '../hooks';
 import { formatMinor } from '../money';
 
-const SCALE: Record<string, number> = { SPARK: 2, SILK: 0 };
+const SCALE: Record<string, number> = { SPARK: 2, SILK: 0, AMBER: 0 };
 
 export function Balances() {
   const { t, i18n } = useTranslation();
