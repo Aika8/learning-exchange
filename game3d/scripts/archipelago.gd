@@ -408,8 +408,19 @@ static func _silk_reach() -> Node3D:
 		s.add_child(hs)
 	for i in 12:
 		var a := rng.randf() * TAU
+		var pos := Vector3(cos(a) * 20, 0, sin(a) * 20)
+		var yaw := rng.randf() * TAU
+		var size := rng.randf_range(2.0, 2.8)
+		# ADR-0019: real thinned trees on the rim (every other slot; shrubs fill the rest), balls only without assets
+		var real := Assets.thinned("island_tree_02", 3) if i % 2 == 0 else Assets.model("shrub_01")
+		if real != null:
+			real.position = pos
+			real.rotation.y = yaw
+			real.scale = Vector3.ONE * (size if i % 2 == 0 else size * 1.4)
+			s.add_child(real)
+			continue
 		var t := Proc.round_tree(rng)
-		t.position = Vector3(cos(a) * 20, 0, sin(a) * 20)
+		t.position = pos
 		s.add_child(t)
 	for i in 6:
 		s.add_child(Proc.box(Vector3(3.6, 0.3, 4.0), Proc.TIMBER, Vector3(-24 - i * 2.2, -0.1, 14)))
