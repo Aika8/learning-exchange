@@ -16,22 +16,29 @@ const PLASTER := Color("efe2c8")
 const ROOF_RED := Color("c4643f")
 const ROOF_TEAL := Color("3f8f8a")
 
+const SHIP_SCALE := 0.46
+const SHIP_YAW := PI / 2
+const SHIP_LIFT := -0.6
+
 static var _materials: Dictionary = {}
 
 
 ## Flat toon material, cached per colour so the renderer can batch.
-static func mat(color: Color, emission: float = 0.0) -> StandardMaterial3D:
+static func mat(color: Color, emission: float = 0.0) -> BaseMaterial3D:
 	var key := "%s/%s" % [color.to_html(), emission]
 	if _materials.has(key):
 		return _materials[key]
+	if emission == 0.0 and Assets.available():
+		var p := _pbr_for(color)
+		if p != null:
+			_materials[key] = p
+			return p
 	var m := StandardMaterial3D.new()
 	m.albedo_color = color
-	m.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
-	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
-	m.roughness = 1.0
-	m.rim_enabled = true
-	m.rim = 0.25
-	m.rim_tint = 0.7
+	m.roughness = 0.75
+	if color == BRASS:
+		m.metallic = 1.0
+		m.roughness = 0.35
 	if emission > 0.0:
 		m.emission_enabled = true
 		m.emission = color
@@ -40,10 +47,46 @@ static func mat(color: Color, emission: float = 0.0) -> StandardMaterial3D:
 	return m
 
 
+## Palette colour → PBR texture set (ADR-0019). Unknown colours keep a plain material.
+static func _pbr_for(color: Color) -> BaseMaterial3D:
+	if color == TIMBER:
+		return Assets.pbr("weathered_planks", Color.WHITE, 0.6)
+	if color == TIMBER_DARK:
+		return Assets.pbr("dark_wood", Color.WHITE, 0.8)
+	if color.is_equal_approx(PLASTER) or (absf(color.h - PLASTER.h) < 0.02 and absf(color.s - PLASTER.s) < 0.05):
+		return Assets.pbr("plastered_wall_02", Color(color.v / PLASTER.v, color.v / PLASTER.v, color.v / PLASTER.v), 0.4)
+	if color == ROOF_RED or color == Color("d08a3b"):
+		return Assets.pbr("clay_roof_tiles_02", Color.WHITE, 0.6)
+	if color == ROOF_TEAL:
+		return Assets.pbr("clay_roof_tiles_02", Color("7fb0ab"), 0.6)
+	if color == ROCK or color == ROCK_DARK:
+		return Assets.pbr("mossy_rock", Color.WHITE, 0.3)
+	if color == Color("cdb898") or color == Color("d8c7a6"):
+		return Assets.pbr("cobblestone_floor_04", Color.WHITE, 0.35)
+	return null
+
+
+## Terrain material for floating islands: grass on tops, rock on the sides (shaders/terrain.gdshader).
+static func terrain_mat() -> Material:
+	if not Assets.available():
+		return vertex_mat()
+	if _materials.has("terrain"):
+		return _materials["terrain"]
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/terrain.gdshader")
+	for k in ["diff", "nor", "arm"]:
+		var map: String = "nor_gl" if k == "nor" else k
+		m.set_shader_parameter("grass_" + k, Assets.tex("leafy_grass", map))
+		m.set_shader_parameter("rock_" + k, Assets.tex("rock_face_03", map))
+	_materials["terrain"] = m
+	return m
+
+
 static func vertex_mat() -> StandardMaterial3D:
 	if _materials.has("vertex"):
 		return _materials["vertex"]
-	var m := mat(Color.WHITE).duplicate() as StandardMaterial3D
+	var m := StandardMaterial3D.new()
+	m.roughness = 0.9
 	m.vertex_color_use_as_albedo = true
 	_materials["vertex"] = m
 	return m
@@ -298,6 +341,9 @@ static func hull_mesh(length: float, width: float, height: float) -> ArrayMesh:
 
 ## The player's ship «Попутчик»: hull, mast, billowing sail (child "Sail"), side vanes, a crystal keel and a lantern.
 static func ship() -> Node3D:
+	var real := _real_ship()
+	if real != null:
+		return real
 	var s := Node3D.new()
 	var hull := mesh_node(hull_mesh(9.0, 3.2, 1.8), vertex_mat())
 	(hull.material_override as StandardMaterial3D).cull_mode = BaseMaterial3D.CULL_DISABLED
@@ -328,8 +374,38 @@ static func ship() -> Node3D:
 	return s
 
 
+## Sky ship from the Poly Haven Dutch ship model (ADR-0019) with our ether keel and wind vanes. Bow at -z, ~11 m.
+static func _real_ship() -> Node3D:
+	var m := Assets.model("dutch_ship_medium")
+	if m == null:
+		return null
+	var s := Node3D.new()
+	m.name = "Hull"
+	m.scale = Vector3.ONE * SHIP_SCALE
+	m.rotation.y = SHIP_YAW
+	m.position = Vector3(0, SHIP_LIFT, 0)
+	s.add_child(m)
+	for side in [-1.0, 1.0]:
+		var vane := box(Vector3(2.6, 0.08, 1.4), CANVAS, Vector3(side * 2.4, 0.4, 0.4))
+		vane.rotation.z = side * 0.25
+		s.add_child(vane)
+	var keel := cyl(0.0, 0.5, 1.6, 7, CRYSTAL, Vector3(0, -1.6, 0.2))
+	keel.material_override = mat(CRYSTAL, 2.5)
+	keel.rotation.x = PI
+	s.add_child(keel)
+	var glow := OmniLight3D.new()
+	glow.light_color = CRYSTAL
+	glow.light_energy = 1.5
+	glow.omni_range = 5.0
+	glow.position = Vector3(0, -1.8, 0)
+	s.add_child(glow)
+	return s
+
+
 ## A villager figure: body, head, hat. `coat` and `hat` colours tell people apart.
 static func figure(coat: Color, hat: Color) -> Node3D:
+	if Assets.available():
+		return _person(coat, hat)
 	var f := Node3D.new()
 	f.add_child(cyl(0.32, 0.5, 1.2, 8, coat, Vector3(0, 0.6, 0)))
 	f.add_child(cyl(0.38, 0.32, 0.25, 8, coat.darkened(0.25), Vector3(0, 1.25, 0)))
@@ -339,6 +415,72 @@ static func figure(coat: Color, hat: Color) -> Node3D:
 	f.add_child(box(Vector3(0.1, 0.1, 0.1), Color("2a2a2a"), Vector3(0.12, 1.66, 0.29)))
 	f.add_child(box(Vector3(0.1, 0.1, 0.1), Color("2a2a2a"), Vector3(-0.12, 1.66, 0.29)))
 	return f
+
+
+## A person with human proportions in a fabric coat and a Poly Haven hat (ADR-0019). ~1.8 m, faces +z.
+static func _person(coat: Color, hat: Color) -> Node3D:
+	var f := Node3D.new()
+	var cloth := Assets.pbr("denim_fabric", coat.lightened(0.25), 2.0)
+	var trousers := Assets.pbr("denim_fabric", Color("3a3530"), 2.0)
+	var skin := StandardMaterial3D.new()
+	skin.albedo_color = Color("d9a882")
+	skin.roughness = 0.6
+	skin.subsurf_scatter_enabled = true
+	skin.subsurf_scatter_strength = 0.3
+	var leather := Assets.pbr("dark_wood", Color("5a4030"), 2.0)
+	for x in [-0.11, 0.11]:
+		_part(f, _capsule(0.085, 0.82), trousers, Vector3(x, 0.45, 0))
+		_part(f, _capsule(0.1, 0.24), leather, Vector3(x, 0.08, 0.04), Vector3(PI / 2, 0, 0))
+	var skirt := CylinderMesh.new()
+	skirt.top_radius = 0.2
+	skirt.bottom_radius = 0.34
+	skirt.height = 0.6
+	skirt.radial_segments = 20
+	_part(f, skirt, cloth, Vector3(0, 0.72, 0))
+	_part(f, _capsule(0.2, 0.62), cloth, Vector3(0, 1.22, 0), Vector3.ZERO, Vector3(1.0, 1.0, 0.75))
+	var belt := CylinderMesh.new()
+	belt.top_radius = 0.205
+	belt.bottom_radius = 0.205
+	belt.height = 0.07
+	belt.radial_segments = 20
+	_part(f, belt, leather, Vector3(0, 1.0, 0), Vector3.ZERO, Vector3(1.0, 1.0, 0.78))
+	for x in [-0.27, 0.27]:
+		_part(f, _capsule(0.065, 0.62), cloth, Vector3(x, 1.18, 0.02), Vector3(0, 0, -0.12 * signf(x)))
+		_part(f, _sphere(0.055), skin, Vector3(x * 1.08, 0.86, 0.04))
+	_part(f, _capsule(0.06, 0.16), skin, Vector3(0, 1.55, 0))
+	_part(f, _sphere(0.12), skin, Vector3(0, 1.68, 0.01), Vector3.ZERO, Vector3(0.9, 1.1, 0.95))
+	var h := Assets.model("fishermans_hat")
+	if h != null:
+		h.position = Vector3(0, 1.74, 0)
+		f.add_child(h)
+	else:
+		_part(f, _sphere(0.13), mat(hat), Vector3(0, 1.78, 0), Vector3.ZERO, Vector3(1.1, 0.5, 1.1))
+	return f
+
+
+static func _capsule(r: float, h: float) -> CapsuleMesh:
+	var c := CapsuleMesh.new()
+	c.radius = r
+	c.height = h
+	c.radial_segments = 16
+	c.rings = 6
+	return c
+
+
+static func _sphere(r: float) -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radius = r
+	m.height = r * 2.0
+	m.radial_segments = 20
+	m.rings = 10
+	return m
+
+
+static func _part(parent: Node3D, mesh: Mesh, m: Material, pos: Vector3, rot: Vector3 = Vector3.ZERO, scl: Vector3 = Vector3.ONE) -> void:
+	var mi := mesh_node(mesh, m, pos)
+	mi.rotation = rot
+	mi.scale = scl
+	parent.add_child(mi)
 
 
 ## Silk racks of Silk Reach: poles with coloured wind-silk drying in rows.

@@ -28,13 +28,19 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 	sky_mat.sun_curve = 0.08
 	var sky_res := Sky.new()
 	sky_res.sky_material = sky_mat
-	sky_res.radiance_size = Sky.RADIANCE_SIZE_128
+	sky_res.radiance_size = Sky.RADIANCE_SIZE_256
+	if Assets.available():  # ADR-0019: HDRI sky lights the scene
+		var pano := PanoramaSkyMaterial.new()
+		pano.panorama = load(Assets.HDRI)
+		pano.energy_multiplier = 0.85
+		sky_res.sky_material = pano
+		sky_res.process_mode = Sky.PROCESS_MODE_QUALITY
 	env.background_mode = Environment.BG_SKY
 	env.sky = sky_res
 	env.ambient_light_source = Environment.AMBIENT_SOURCE_SKY
 	env.ambient_light_energy = 0.55 if not hall else 0.25
 	env.tonemap_mode = Environment.TONE_MAPPER_ACES
-	env.tonemap_exposure = 0.92
+	env.tonemap_exposure = 0.92 if not Assets.available() else 0.8
 	env.tonemap_white = 6.0
 	env.glow_enabled = true
 	env.glow_intensity = 0.7
@@ -42,18 +48,29 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 	env.glow_hdr_threshold = 1.1
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 	env.ssao_enabled = true
-	env.ssao_radius = 1.6
-	env.ssao_intensity = 1.6
+	env.ssao_radius = 1.2
+	env.ssao_intensity = 1.4
+	# indoors: screen-space GI and reflections on the floor and brass; outdoors SDFGI does the bounce light
+	# and there is nothing glossy enough for SSR, so both are off there to hold 60 fps
+	env.ssil_enabled = hall
+	env.ssil_intensity = 0.8
+	env.ssr_enabled = hall
+	env.ssr_max_steps = 64
+	env.sdfgi_enabled = not hall
+	env.sdfgi_use_occlusion = true
+	env.sdfgi_cascades = 3
+	env.sdfgi_min_cell_size = 0.2
+	env.sdfgi_energy = 0.9
 	env.adjustment_enabled = true
-	env.adjustment_saturation = 1.22
-	env.adjustment_contrast = 1.12
+	env.adjustment_saturation = 1.08
+	env.adjustment_contrast = 1.06
 	if hall:
 		env.background_mode = Environment.BG_COLOR
 		env.background_color = Color("1a1410")
 		env.ambient_light_source = Environment.AMBIENT_SOURCE_COLOR
-		env.ambient_light_color = Color("6b5240")
+		env.ambient_light_color = Color("6b5240") if not Assets.available() else Color("8a7058")
 		env.volumetric_fog_enabled = true
-		env.volumetric_fog_density = 0.02
+		env.volumetric_fog_density = 0.02 if not Assets.available() else 0.007
 		env.volumetric_fog_albedo = Color("ffe3c0")
 		env.volumetric_fog_anisotropy = 0.5
 		env.volumetric_fog_length = 40.0
@@ -61,12 +78,12 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 		env.fog_enabled = true
 		env.fog_mode = Environment.FOG_MODE_EXPONENTIAL
 		env.fog_light_color = Color("e9c9a3")
-		env.fog_density = 0.0009
+		env.fog_density = 0.0009 if not Assets.available() else 0.0004
 		env.fog_sun_scatter = 0.35
 		env.fog_aerial_perspective = 0.3
 		env.fog_sky_affect = 0.15
 		env.volumetric_fog_enabled = true
-		env.volumetric_fog_density = 0.0012
+		env.volumetric_fog_density = 0.0012 if not Assets.available() else 0.0005
 		env.volumetric_fog_albedo = Color("fff0dc")
 		env.volumetric_fog_anisotropy = 0.65
 		env.volumetric_fog_length = 160.0
@@ -82,8 +99,11 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 	sun.light_energy = 1.35 if not hall else 0.0
 	sun.rotation_degrees = Vector3(-34, -128, 0)
 	sun.shadow_enabled = not hall
-	sun.shadow_blur = 1.5
-	sun.directional_shadow_max_distance = 140.0
+	sun.shadow_blur = 1.0
+	sun.light_angular_distance = 0.8
+	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
+	sun.directional_shadow_max_distance = 160.0
+	sun.directional_shadow_blend_splits = true
 	sun.light_volumetric_fog_energy = 1.6
 	root.add_child(sun)
 	if not hall:
@@ -124,7 +144,7 @@ static func _noise(seed_value: int, freq: float) -> NoiseTexture2D:
 static func island(radius: float, depth: float, seed_value: int, bumps: float = 0.0, collide: bool = false) -> Node3D:
 	var root := Node3D.new()
 	var mesh := Proc.island_mesh(radius, depth, seed_value, bumps)
-	var mi := Proc.mesh_node(mesh, Proc.vertex_mat())
+	var mi := Proc.mesh_node(mesh, Proc.terrain_mat())
 	root.add_child(mi)
 	if collide:
 		var body := StaticBody3D.new()
@@ -187,6 +207,8 @@ static func _spark_harbour(detail: bool) -> Node3D:
 		var p := Vector3(0, 0.06, -8).lerp(Vector3(34, 0.06, 4), t)
 		var stone := Proc.box(Vector3(3.2, 0.12, 3.2), Color("d8c7a6").darkened(rng.randf() * 0.08), p)
 		stone.rotation.y = rng.randf_range(-0.2, 0.2)
+		if Assets.available():
+			stone.material_override = Assets.pbr("cobblestone_floor_04", Color.WHITE, 0.35)
 		h.add_child(stone)
 	# houses around a square
 	var spots := [Vector3(-14, 0, -2), Vector3(-17, 0, 8), Vector3(-6, 0, 14), Vector3(8, 0, 16), Vector3(14, 0, -10),
@@ -206,6 +228,10 @@ static func _spark_harbour(detail: bool) -> Node3D:
 		var pos := Vector3(cos(a) * d, 0, sin(a) * d)
 		if pos.distance_to(Vector3(40, 0, 4)) < 14.0:
 			continue
+		if Assets.available():  # ADR-0019: a few real trees instead of a ring of cones
+			if i % 4 == 0:
+				Assets.put(h, "island_tree_02", pos, rng.randf() * TAU, rng.randf_range(2.2, 2.9))
+			continue
 		var t := Proc.round_tree(rng) if rng.randf() < 0.6 else Proc.tree(rng)
 		t.position = pos
 		h.add_child(t)
@@ -217,9 +243,17 @@ static func _spark_harbour(detail: bool) -> Node3D:
 			h.add_child(Proc.cyl(0.18, 0.18, 3.0, 6, Proc.TIMBER_DARK, Vector3(30 + i * 4.4, -1.0, z)))
 	if detail:
 		for p: Vector3 in [Vector3(4, 0, -6), Vector3(-4, 0, -6), Vector3(16, 0, 1), Vector3(28, 0, 6), Vector3(46, 0, 6.5)]:
-			var lp := Proc.lantern_post()
-			lp.position = p
-			h.add_child(lp)
+			if Assets.put(h, "street_lamp_02", p, p.x * 0.3, 1.6) == null:
+				var lp := Proc.lantern_post()
+				lp.position = p
+				h.add_child(lp)
+			else:
+				var ll := OmniLight3D.new()
+				ll.position = p + Vector3(0, 2.6, 0)
+				ll.light_color = Color("ffc979")
+				ll.light_energy = 1.2
+				ll.omni_range = 7.0
+				h.add_child(ll)
 		var light := OmniLight3D.new()
 		light.position = EXCHANGE_POS + Vector3(0, 4, 6)
 		light.light_color = Color("ffc979")
@@ -231,13 +265,21 @@ static func _spark_harbour(detail: bool) -> Node3D:
 			var stall := Node3D.new()
 			stall.position = Vector3(-4 + i * 5, 0, 6)
 			stall.add_child(Proc.box(Vector3(2.6, 1.0, 1.4), Proc.TIMBER, Vector3(0, 0.5, 0)))
-			var awn := Proc.box(Vector3(3.0, 0.1, 2.0), [Color("e0705f"), Color("f3d37a"), Color("5fb98a")][i], Vector3(0, 2.4, 0.2))
+			var awn_color: Color = [Color("e0705f"), Color("f3d37a"), Color("5fb98a")][i]
+			var awn := Proc.box(Vector3(3.0, 0.04, 2.0), awn_color, Vector3(0, 2.4, 0.2))
 			awn.rotation.x = 0.25
+			if Assets.available():
+				awn.material_override = Assets.pbr("quatrefoil_jacquard_fabric", awn_color, 1.2)
 			stall.add_child(awn)
 			for x in [-1.3, 1.3]:
-				stall.add_child(Proc.cyl(0.06, 0.06, 2.4, 5, Proc.TIMBER_DARK, Vector3(x, 1.2, 0.9)))
-			for k in 3:
-				stall.add_child(Proc.box(Vector3(0.5, 0.4, 0.5), [Color("e9a6b8"), Color("f3e9d2"), Color("9fd3e6")][k], Vector3(-0.8 + k * 0.8, 1.2, 0)))
+				stall.add_child(Proc.cyl(0.06, 0.06, 2.4, 8, Proc.TIMBER_DARK, Vector3(x, 1.2, 0.9)))
+			if Assets.available():
+				Assets.put(stall, "wooden_bucket_01", Vector3(-0.8, 1.0, 0), 0.0, 1.0)
+				Assets.put(stall, "wooden_crate_01", Vector3(0.4, 1.0, 0), 0.2, 1.0)
+				Assets.put(stall, "wine_barrel_01", Vector3(1.6, 0, 0.6), 0.0, 1.0)
+			else:
+				for k in 3:
+					stall.add_child(Proc.box(Vector3(0.5, 0.4, 0.5), [Color("e9a6b8"), Color("f3e9d2"), Color("9fd3e6")][k], Vector3(-0.8 + k * 0.8, 1.2, 0)))
 			h.add_child(stall)
 		var villagers := [[Color("4e6fa8"), Color("d9a441"), Vector3(-2, 0, 2)], [Color("a8574e"), Color("3a4766"), Vector3(9, 0, 4)],
 			[Color("6a8f4e"), Color("8a5a3c"), Vector3(-9, 0, 8)]]
@@ -246,7 +288,47 @@ static func _spark_harbour(detail: bool) -> Node3D:
 			f.position = v[2]
 			f.rotation.y = rng.randf() * TAU
 			h.add_child(f)
+	if detail:
+		_harbour_props(h)
 	return h
+
+
+## Cargo, rope, nets and rocks from Poly Haven (ADR-0019): the pier and square look worked-in. Skipped without assets.
+static func _harbour_props(h: Node3D) -> void:
+	if not Assets.available():
+		return
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 41
+	# cargo stacked along the pier
+	for i in 7:
+		var x := 31.0 + i * 2.6
+		var z := 2.1 if i % 2 == 0 else 5.9
+		var kind: String = ["wine_barrel_01", "wooden_crate_01", "wooden_crate_02", "wooden_barrels_01", "wooden_bucket_01"][i % 5]
+		Assets.put(h, kind, Vector3(x, 0.05, z), rng.randf() * TAU, 1.2)
+	for i in 4:
+		Assets.put(h, "wooden_crate_01", Vector3(33.5, 0.05 + i * 0.42, 6.3), rng.randf_range(-0.2, 0.2), 1.2)
+	Assets.put(h, "lifebuoy", Vector3(38, 0.6, 6.15), 0.0, 1.0)
+	Assets.put(h, "wooden_lantern_01", Vector3(47, 0.05, 2.3), 0.0, 1.4)
+	Assets.put(h, "wooden_lantern_01", Vector3(47, 0.05, 5.7), 0.0, 1.4)
+	# market goods by the stalls and the square
+	for p: Vector3 in [Vector3(-6, 0, 7.5), Vector3(-5.2, 0, 7.8), Vector3(4.5, 0, 7.6), Vector3(9, 0, -2), Vector3(-11, 0, 3)]:
+		Assets.put(h, ["wine_barrel_01", "wooden_crate_02", "wooden_bucket_01"][rng.randi() % 3], p, rng.randf() * TAU, 1.1)
+	Assets.put(h, "treasure_chest", Vector3(2.6, 0.15, -7.5), 0.3, 0.9)
+	# rocks, ferns and shrubs on the rim
+	for i in 10:
+		var a := rng.randf() * TAU
+		var d := rng.randf_range(24.0, 31.0)
+		var pos := Vector3(cos(a) * d, -0.1, sin(a) * d)
+		if pos.distance_to(Vector3(40, 0, 4)) < 12.0:
+			continue
+		Assets.put(h, "rock_moss_set_01" if i % 3 == 0 else "boulder_01", pos, rng.randf() * TAU, rng.randf_range(0.6, 1.2))
+	for i in 26:
+		var a := rng.randf() * TAU
+		var d := rng.randf_range(8.0, 30.0)
+		var pos := Vector3(cos(a) * d, 0, sin(a) * d)
+		if pos.distance_to(Vector3(20, 0, 4)) < 6.0 or pos.distance_to(Vector3(0, 0, -15)) < 9.0:
+			continue
+		Assets.put(h, ["fern_02", "shrub_01", "grass_medium_01"][i % 3], pos, rng.randf() * TAU, rng.randf_range(1.0, 2.2))
 
 
 ## Invisible collision so the captain can't walk through a building.

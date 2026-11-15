@@ -19,7 +19,15 @@ func test_island_mesh_has_triangles_and_an_upward_cap() -> void:
 
 func test_ship_has_a_sail_and_scenes_exist() -> void:
 	var s := Proc.ship()
-	assert_not_null(s.get_node_or_null("Sail"))
+	# procedural ship has a furling "Sail"; with `make assets` it is the model "Hull" (ADR-0019)
+	var expected := "Hull" if Assets.available() else "Sail"
+	assert_not_null(s.get_node_or_null(expected), expected)
 	s.free()
 	for scene in ["main_menu", "harbour", "hall", "voyage"]:
 		assert_true(ResourceLoader.exists("res://scenes/%s.tscn" % scene), scene)
+
+
+func test_assets_degrade_without_files() -> void:
+	assert_null(Assets.model("no_such_model"))
+	assert_not_null(Assets.pbr("no_such_texture"), "plain material fallback")
+	assert_not_null(Proc.figure(Color.RED, Color.BLUE))
