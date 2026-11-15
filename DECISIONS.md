@@ -170,3 +170,6 @@ Build and CI
 - `Idempotency-Key` stays on `POST /orders` only; the new POSTs (stops, positions, deposits) have none yet.
 - Mobile has no leverage screen in M2a (web has it); mobile helpers in `src/finance.ts` are imported by `node --test`
   directly from TypeScript (Node ≥ 23.6 strips types).
+- game3d harbour fps (ADR-0019): the Poly Haven tree carries ~700k leaf triangles drawn with a depth pre-pass and no
+  LODs after load, which cost ~30 fps. `Assets.thinned()` keeps every 3rd leaf card, switches leaves to alpha scissor and
+  regenerates LODs; plus LOD threshold 6 px and half-resolution GI. Worst harbour view: 41 → 65 fps (Apple M5, 1080p).

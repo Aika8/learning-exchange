@@ -9,6 +9,7 @@ const HDRI := "res://assets/hdri/qwantani_late_afternoon_puresky_2k.hdr"
 
 static var _mats: Dictionary = {}
 static var _scenes: Dictionary = {}
+static var _thinned: Dictionary = {}
 
 
 static func available() -> bool:
@@ -64,3 +65,37 @@ static func put(parent: Node3D, name: String, pos: Vector3, yaw: float = 0.0, sc
 	n.scale = Vector3.ONE * scale
 	parent.add_child(n)
 	return n
+
+
+## Model whose foliage surfaces (material name contains "leaves") keep only every `keep`-th leaf card.
+## Poly Haven trees carry ~700k leaf triangles; thinning them holds 60 fps in the harbour (ADR-0019).
+static func thinned(name: String, keep: int = 3) -> Node3D:
+	var n := model(name)
+	if n == null:
+		return null
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		var key := "%s/%s/%d" % [name, mi.name, keep]
+		if not _thinned.has(key):
+			_thinned[key] = _thin_mesh(mi.mesh as ArrayMesh, keep)
+		mi.mesh = _thinned[key]
+	return n
+
+
+static func _thin_mesh(src: ArrayMesh, keep: int) -> ArrayMesh:
+	var out := ImporterMesh.new()  # rebuilds LODs for the thinned mesh
+	for s in src.get_surface_count():
+		var arrays := src.surface_get_arrays(s)
+		var mat := src.surface_get_material(s)
+		if mat != null and mat.resource_name.contains("leaves") and arrays[Mesh.ARRAY_INDEX] != null:
+			var idx: PackedInt32Array = arrays[Mesh.ARRAY_INDEX]
+			var kept := PackedInt32Array()
+			var cards := idx.size() / 6  # a leaf card is a quad = 2 triangles
+			for c in cards:
+				if c % keep == 0:
+					kept.append_array(idx.slice(c * 6, c * 6 + 6))
+			arrays[Mesh.ARRAY_INDEX] = kept
+			mat = mat.duplicate()
+			(mat as BaseMaterial3D).transparency = BaseMaterial3D.TRANSPARENCY_ALPHA_SCISSOR  # no depth pre-pass
+		out.add_surface(Mesh.PRIMITIVE_TRIANGLES, arrays, [], {}, mat)
+	out.generate_lods(25.0, 60.0, [])
+	return out.get_mesh()

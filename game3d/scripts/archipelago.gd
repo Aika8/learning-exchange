@@ -230,7 +230,11 @@ static func _spark_harbour(detail: bool) -> Node3D:
 			continue
 		if Assets.available():  # ADR-0019: a few real trees instead of a ring of cones
 			if i % 4 == 0:
-				Assets.put(h, "island_tree_02", pos, rng.randf() * TAU, rng.randf_range(2.2, 2.9))
+				var tree := Assets.thinned("island_tree_02", 3)
+				tree.position = pos
+				tree.rotation.y = rng.randf() * TAU
+				tree.scale = Vector3.ONE * rng.randf_range(2.2, 2.9)
+				h.add_child(tree)
 			continue
 		var t := Proc.round_tree(rng) if rng.randf() < 0.6 else Proc.tree(rng)
 		t.position = pos
