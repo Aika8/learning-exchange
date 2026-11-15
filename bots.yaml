@@ -127,3 +127,38 @@ markets:
         count: 3
         capital: { SPARK: 20000000, GBND: 50 }
         params: { activity: 0.3, maxQty: 3, marketShare: 0.5 }
+  # ---- M2c: funds (ADR-0022). A unit's fair value is anchored to the fund's NAV per unit; the dealer quotes it. ----
+  - instrument: IDX-SPARK           # index fund: both companies by capitalisation, TER 0.20%
+    fairValue:
+      start: 3675         # ≈ NAV per unit at the start: (2000 SILK × 100 + 2000 FORGE × 250 + 35 000 cash) / 20 000 units
+      volatilityBps: 1
+      floor: 10
+    bots:
+      - name: bot-idx-dealer
+        strategy: market-maker
+        capital: { SPARK: 50000000, IDX: 18000 }
+        params: { halfSpread: 3, step: 2, levels: 5, qty: 40, targetBase: 18000, skewPerUnit: 0.001 }
+      - name: bot-idx-noise
+        strategy: noise
+        count: 2
+        capital: { SPARK: 2000000, IDX: 1000 }
+        params: { activity: 0.3, maxQty: 30, marketShare: 0.5 }
+      - name: bot-idx-index
+        strategy: index-investor
+        capital: { SPARK: 5000000 }
+        params: { everySteps: 60, qty: 10 }
+  - instrument: ACT-SPARK           # active fund: the manager's picks (FORGE-heavy), TER 2%
+    fairValue:
+      start: 2450         # (600 SILK × 100 + 1600 FORGE × 250 + 30 000 cash) / 20 000 units
+      volatilityBps: 1
+      floor: 10
+    bots:
+      - name: bot-act-dealer
+        strategy: market-maker
+        capital: { SPARK: 50000000, ACT: 18000 }
+        params: { halfSpread: 3, step: 2, levels: 5, qty: 40, targetBase: 18000, skewPerUnit: 0.001 }
+      - name: bot-act-noise
+        strategy: noise
+        count: 2
+        capital: { SPARK: 2000000, ACT: 1000 }
+        params: { activity: 0.3, maxQty: 30, marketShare: 0.5 }

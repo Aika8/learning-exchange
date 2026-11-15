@@ -45,6 +45,7 @@ public final class BotRunner {
         }
         if (world != null) {
             world.refreshBonds();
+            world.refreshFunds();
         }
         for (int s = 0; s < clock.speed(); s++) {
             for (Group g : groups) {

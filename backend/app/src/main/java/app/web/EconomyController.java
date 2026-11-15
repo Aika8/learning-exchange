@@ -41,6 +41,26 @@ public class EconomyController {
         return market.candles(id, Math.clamp(limit, 1, 365));
     }
 
+    @GetMapping("/instruments/{id}/atr")
+    public Dto.AtrDto atr(@PathVariable String id, @RequestParam(defaultValue = "14") int period) {
+        int p = Math.clamp(period, 2, 100);
+        application.Atr.Result r = market.atr(id, p);
+        Long last = market.lastPrice(id).orElse(null);
+        Long bps = r.atr() == null || last == null || last == 0 ? null : r.atr() * 10_000 / last;
+        return new Dto.AtrDto(id, p, r.ready(), r.candles(), r.atr(), last, bps);
+    }
+
+    @GetMapping("/funds")
+    public List<EconomyViews.Fund> funds() {
+        return market.funds();
+    }
+
+    @GetMapping("/funds/{id}")
+    public EconomyViews.Fund fund(@PathVariable String id) {
+        return market.funds().stream().filter(f -> f.instrument().equals(id)).findFirst()
+                .orElseThrow(() -> new application.CommandRejected(engine.Rejection.UNKNOWN_INSTRUMENT));
+    }
+
     @GetMapping("/economy/calendar")
     public List<EconomyViews.CalendarEntry> calendar(@RequestParam(required = false) Long from,
                                                      @RequestParam(required = false) Long to) {
