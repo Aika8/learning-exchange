@@ -376,7 +376,7 @@ public final class ExchangeService implements TradingService, AutoCloseable {
 
     @Override
     public EconomyViews.Macro macro() {
-        return sequencer.call(ex -> EconomyQueries.macro(economy, depositMarginBps));
+        return sequencer.call(ex -> EconomyQueries.macro(economy, depositMarginBps, schedule, clock.now()));
     }
 
     @Override

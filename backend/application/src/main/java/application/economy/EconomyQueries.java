@@ -70,13 +70,15 @@ public final class EconomyQueries {
         };
     }
 
-    public static EconomyViews.Macro macro(EconomyProjection economy, long depositMarginBps) {
+    public static EconomyViews.Macro macro(EconomyProjection economy, long depositMarginBps, EconomySchedule schedule, long now) {
         long rate = economy.policyRateBps();
         long inflation = economy.inflationBps();
         var next = economy.nextDecision();
         var regime = economy.regime();
         return new EconomyViews.Macro(rate, inflation, rate - inflation, Math.max(0, rate - depositMarginBps),
-                regime.regime(), regime.volatilityPct(), next.map(Event.RateDecisionScheduled::decisionAt).orElse(null),
+                regime.regime(), regime.volatilityPct(), next.map(Event.RateDecisionScheduled::decisionAt).orElseGet(() ->
+                        schedule.between(now, now + 60L * schedule.dayMillis()).stream()
+                                .filter(i -> i.kind().equals("RATE_DECISION")).map(EconomySchedule.Item::at).findFirst().orElse(null)),
                 next.map(Event.RateDecisionScheduled::consensusBps).orElse(null), economy.decisions());
     }
 
