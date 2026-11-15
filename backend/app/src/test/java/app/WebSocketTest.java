@@ -55,6 +55,21 @@ class WebSocketTest {
             ws.sendText("{\"op\":\"subscribe\",\"channel\":\"" + ch + "\"}", true).get();
         }
         ws.sendText("{\"op\":\"subscribe\",\"channel\":\"account.acc-ws-a\"}", true).get();
+        // sendText().get() only means the frame left the client. Wait until the server answered every subscribe
+        // (a snapshot or an error) so it has registered the channels before the orders trade; otherwise the trade's
+        // tick can run before the subscription lands and the account nudge is never sent (the old CI flake).
+        java.util.Set<String> answered = new java.util.HashSet<>();
+        java.util.List<String> early = new java.util.ArrayList<>();
+        long subDeadline = System.currentTimeMillis() + 5_000;
+        while (answered.size() < 5 && System.currentTimeMillis() < subDeadline) {
+            String raw = inbox.poll(200, TimeUnit.MILLISECONDS);
+            if (raw != null) {
+                early.add(raw);
+                answered.add(json.readTree(raw).get("channel").asString());
+            }
+        }
+        assertEquals(5, answered.size(), "every subscribe is answered: " + answered);
+        inbox.addAll(early);
 
         post(http, a, "{\"instrument\":\"SILK-SPARK\",\"side\":\"SELL\",\"type\":\"LIMIT\",\"price\":10200,\"qty\":2}");
         long placed = System.currentTimeMillis();
