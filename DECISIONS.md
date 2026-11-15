@@ -210,3 +210,25 @@ Build and CI
   "sample" on every screen. History endpoint takes `?symbol=` (a symbol like `USD/KZT` contains a slash).
 - Catalogue and glossary are YAML files in `docs/lore/` read at start (repo-relative paths, like `bots.yaml`); the
   mobile BFF drops lore names, the game BFF keeps them. Tests run with the repo root as working directory.
+
+## M2c
+- ATR: Wilder, 14 daily candles (one bank day each), true range with the previous close, integer minor units rounded half
+  up; `ready` only with 15 candles. A pure function over the candle projection, not journalled. ATR / last price is
+  returned in bps for the helper. Position-size helper "stop = k × ATR": qty = floor(risk money / (k × ATR)); risk in R as before.
+- Trade journal: `journal` on `POST /orders` (why ≤ 280 chars, market state and mood from fixed lists, planned risk =
+  1 R in minor units). Journalled as `OrderAnnotated` right after the order; a retried Idempotency-Key does not
+  annotate twice. Review result of an order = its fills against the last price, fees included (BUY: (last − avg) × qty,
+  SELL: (avg − last) × qty). Not FIFO round trips: one rule for entries and exits, and a "sell" note is judged by
+  what happened after it too. R × 100 = result × 100 / planned risk, rounded down.
+- Dividends: ex-date = open of report day + 10, record = +1 day (T+1), pay = record + 4 days. Entitlement fixed at the
+  ex-date open; reference price drops by the dividend until the next trade; resting orders are not adjusted.
+  10% tax withheld at source per holder (rounded down) to `exchange-tax`; the statement shows DIVIDEND (gross) and
+  DIVIDEND_TAX lines; `totals.tax` = 10% × (profit + payouts) − withheld, never below 0.
+- Funds: IDX (2 000 SILK + 2 000 FORGE + 35 000.00 SPARK, TER 0.20%), ACT (600 SILK + 1 600 FORGE + 30 000.00 SPARK,
+  TER 2%); 20 000 units each, held by bots (dealer 18 000). Fee = floor(NAV × TER × days / 365) from custody cash,
+  charged by the interest timer for whole bank days; not charged while a holding has no price yet. Fund return =
+  NAV change since the first fee day; basket return = (holdings at last prices + starting cash) change over the same
+  time. No rebalancing and no unit creation/redemption yet.
+- WebSocketTest flake: `sendText().get()` only means the frame left the client; the orders could trade before the
+  server registered `account.acc-ws-b`, so the account nudge went to nobody. The test now waits until every subscribe
+  is answered (snapshot or error) before placing orders.

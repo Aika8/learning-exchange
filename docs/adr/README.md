@@ -32,3 +32,4 @@ superseding ADR explaining why reality differed.
 | [0019](0019-game3d-pbr-assets.md) | game3d: painterly realism with CC0 PBR assets fetched by `make assets` | Facade, Graceful degradation | Accepted |
 | [0020](0020-journal-event-versioning.md) | Journal lines carry a format version; upcasters lift old lines | Upcaster | Accepted |
 | [0021](0021-scheduled-economy.md) | Seeded economy schedule journalled as decisions; halts, payouts, default | Generator, Event Sourcing, Observer | Accepted |
+| [0022](0022-dividend-dates-funds-and-trade-journal.md) | Dividend dates with tax at source, funds with TER, trade-journal notes — new event types only | Event Sourcing, Projection | Accepted (M2c) |
