@@ -28,6 +28,9 @@ public final class Ledger {
      */
     public static final String BANK_ACCOUNT = "exchange-bank";
 
+    /** Where tax withheld at source (dividends, M2c) goes. Opened on first use. */
+    public static final String TAX_ACCOUNT = "exchange-tax";
+
     private final Map<String, Map<String, long[]>> accounts = new LinkedHashMap<>();
 
     public boolean exists(String account) {

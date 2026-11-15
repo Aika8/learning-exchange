@@ -42,6 +42,8 @@ public final class Exchange {
     private final Map<Long, Position> positions = new LinkedHashMap<>();
     private final Map<Long, Savings> savings = new LinkedHashMap<>();
     private final Deque<PriceTick> pendingPrices = new ArrayDeque<>();
+    private final java.util.Set<Long> annotated = new java.util.HashSet<>();
+    private final Deque<PendingDividend> pendingDividends = new ArrayDeque<>();
     private long nextOrderId = 1;
     private long nextTradeId = 1;
     private long nextConditionalId = 1;
@@ -74,6 +76,10 @@ public final class Exchange {
             case Command.SetTradingStatus c -> setTradingStatus(c, ts);
             case Command.Payout c -> payout(c, ts);
             case Command.DeclareDefault c -> declareDefault(c, ts);
+            case Command.AnnotateOrder c -> annotate(c, ts);
+            case Command.DividendExDate c -> dividendExDate(c, ts);
+            case Command.PayDividend c -> payDividend(c, ts);
+            case Command.ChargeFundFee c -> chargeFundFee(c, ts);
         };
     }
 
@@ -142,6 +148,9 @@ public final class Exchange {
     /** Price of the last trade, if any. */
     public Optional<Long> lastPrice(String instrument) {
         Market m = market(instrument);
+        if (m.adjustedLast != null) {
+            return Optional.of(m.adjustedLast);
+        }
         return m.trades.isEmpty() ? Optional.empty() : Optional.of(m.trades.getLast().price());
     }
 
@@ -297,6 +306,9 @@ public final class Exchange {
         conditionals.values().forEach(k -> sb.append(conditionalView(k)).append('\n'));
         positions.values().forEach(p -> sb.append(positionView(p)).append('\n'));
         savings.values().forEach(d -> sb.append(savingsView(d)).append(d.lastAccrualTs).append('\n'));
+        markets.values().forEach(m -> sb.append(m.instrument.id()).append(" ref ").append(m.adjustedLast).append('\n'));
+        sb.append("annotated ").append(new java.util.TreeSet<>(annotated)).append('\n');
+        pendingDividends.forEach(d -> sb.append(d).append('\n'));
         return sb.append(nextOrderId).append('/').append(nextTradeId).append('/').append(nextConditionalId)
                 .append('/').append(nextPositionId).append('/').append(nextDepositId).toString();
     }
@@ -510,6 +522,7 @@ public final class Exchange {
         Event.TradeExecuted e = new Event.TradeExecuted(ts, nextTradeId++, i.id(), buy.orderId, sell.orderId,
                 buy.account, sell.account, t.price(), t.qty(), t.aggressorSide(), buyerFee, sellerFee, mid);
         m.trades.add(e);
+        m.adjustedLast = null;
         pendingPrices.addLast(new PriceTick(i.id(), t.price()));
         if (m.trades.size() > TRADES_KEPT) {
             m.trades.removeFirst();
@@ -934,6 +947,142 @@ public final class Exchange {
         return Outcome.ok(List.of(new Event.BondDefaulted(ts, c.instrument(), c.issuer())), 0);
     }
 
+    // ---- M2c: trade journal, dividends, fund fees (ADR-0022) ----
+
+    private Outcome annotate(Command.AnnotateOrder c, long ts) {
+        OrderState o = orders.get(c.orderId());
+        if (o == null) {
+            return Outcome.rejected(Rejection.UNKNOWN_ORDER);
+        }
+        if (!o.account.equals(c.account())) {
+            return Outcome.rejected(Rejection.NOT_OWNER);
+        }
+        if (c.plannedRisk() < 0) {
+            return Outcome.rejected(Rejection.INVALID_AMOUNT);
+        }
+        if (!annotated.add(c.orderId())) {
+            return Outcome.rejected(Rejection.ALREADY_ANNOTATED);
+        }
+        return Outcome.ok(List.of(new Event.OrderAnnotated(ts, c.orderId(), c.account(), c.why(), c.marketState(),
+                c.mood(), c.plannedRisk())), 0);
+    }
+
+    /** Who holds the share (available + reserved) other than the issuer and the exchange's own accounts. */
+    private java.util.TreeMap<String, Long> holders(String base, String issuer) {
+        java.util.TreeMap<String, Long> holders = new java.util.TreeMap<>();
+        for (String account : ledger.accountIds()) {
+            if (account.equals(issuer) || account.equals(Ledger.FEES_ACCOUNT) || account.equals(Ledger.BANK_ACCOUNT)
+                    || account.equals(Ledger.TAX_ACCOUNT)) {
+                continue;
+            }
+            long held = ledger.available(account, base) + ledger.reserved(account, base);
+            if (held > 0) {
+                holders.put(account, held);
+            }
+        }
+        return holders;
+    }
+
+    /**
+     * The open of the ex-date. Settlement is T+1, so whoever holds the share now is in the register on the record
+     * date: the entitlement is fixed now and paid on the pay date, whatever is traded in between. The reference price
+     * drops by the dividend (stops still fire on trades only, invariant 5).
+     */
+    private Outcome dividendExDate(Command.DividendExDate c, long ts) {
+        Market m = markets.get(c.instrument());
+        if (m == null) {
+            return Outcome.rejected(Rejection.UNKNOWN_INSTRUMENT);
+        }
+        if (!ledger.exists(c.issuer()) || c.perShare() <= 0 || c.recordDate() < ts || c.payDate() < c.recordDate()) {
+            return Outcome.rejected(Rejection.INVALID_AMOUNT);
+        }
+        java.util.TreeMap<String, Long> holders = holders(m.instrument.base(), c.issuer());
+        long units = 0;
+        for (long u : holders.values()) {
+            units = Math.addExact(units, u);
+        }
+        List<Event> events = new ArrayList<>();
+        events.add(new Event.DividendExDate(ts, c.instrument(), c.issuer(), c.perShare(), c.recordDate(), c.payDate(), units));
+        for (var h : holders.entrySet()) {
+            events.add(new Event.DividendEntitled(ts, c.instrument(), h.getKey(), h.getValue()));
+        }
+        Optional<Long> last = lastPrice(c.instrument());
+        if (last.isPresent()) {
+            long after = Math.max(1, last.get() - c.perShare());
+            m.adjustedLast = after;
+            events.add(new Event.ReferencePriceAdjusted(ts, c.instrument(), last.get(), after, "EX_DIVIDEND"));
+        }
+        pendingDividends.addLast(new PendingDividend(c.instrument(), c.issuer(), c.perShare(), c.payDate(), holders));
+        return Outcome.ok(events, 0);
+    }
+
+    /**
+     * Pays the oldest fixed dividend of the instrument from the issuer's cash: each holder gets
+     * {@code units × perShare − tax}, the tax ({@code taxBps}, rounded down per holder) goes to the tax account. Money
+     * moves, it is never created: if the issuer cannot pay the whole gross amount, nothing is paid.
+     */
+    private Outcome payDividend(Command.PayDividend c, long ts) {
+        PendingDividend d = pendingDividends.stream().filter(p -> p.instrument().equals(c.instrument())).findFirst().orElse(null);
+        if (d == null) {
+            return Outcome.rejected(Rejection.NOTHING_TO_PAY);
+        }
+        if (c.taxBps() < 0 || c.taxBps() > 10_000) {
+            return Outcome.rejected(Rejection.INVALID_AMOUNT);
+        }
+        String quote = market(c.instrument()).instrument.quote();
+        long units = 0;
+        for (long u : d.holders().values()) {
+            units = Math.addExact(units, u);
+        }
+        long gross = Math.multiplyExact(units, d.perShare());
+        if (ledger.available(d.issuer(), quote) < gross) {
+            return Outcome.rejected(Rejection.INSUFFICIENT_FUNDS);
+        }
+        pendingDividends.remove(d);
+        if (!ledger.exists(Ledger.TAX_ACCOUNT)) {
+            ledger.open(Ledger.TAX_ACCOUNT);
+        }
+        List<Event> events = new ArrayList<>();
+        events.add(new Event.DividendPaymentStarted(ts, c.instrument(), d.issuer(), d.perShare(), units, gross, c.taxBps()));
+        for (var h : d.holders().entrySet()) {
+            long amount = h.getValue() * d.perShare();
+            long tax = amount * c.taxBps() / 10_000;
+            if (amount - tax > 0) {
+                ledger.transferAvailable(d.issuer(), h.getKey(), quote, amount - tax);
+            }
+            if (tax > 0) {
+                ledger.transferAvailable(d.issuer(), Ledger.TAX_ACCOUNT, quote, tax);
+            }
+            events.add(new Event.DividendPaid(ts, c.instrument(), h.getKey(), h.getValue(), amount, tax));
+        }
+        return Outcome.ok(events, 0);
+    }
+
+    /** Fixed, unpaid dividends: instrument and pay date. */
+    public List<String> pendingDividends() {
+        return pendingDividends.stream().map(d -> d.instrument() + "@" + d.payDate()).toList();
+    }
+
+    private Outcome chargeFundFee(Command.ChargeFundFee c, long ts) {
+        if (!ledger.exists(c.custody()) || c.amount() < 0 || c.days() <= 0) {
+            return Outcome.rejected(Rejection.INVALID_AMOUNT);
+        }
+        if (ledger.available(c.custody(), c.asset()) < c.amount()) {
+            return Outcome.rejected(Rejection.INSUFFICIENT_FUNDS);
+        }
+        if (!ledger.exists(c.manager())) {
+            ledger.open(c.manager());
+        }
+        if (c.amount() > 0) {
+            ledger.transferAvailable(c.custody(), c.manager(), c.asset(), c.amount());
+        }
+        return Outcome.ok(List.of(new Event.FundFeeCharged(ts, c.fund(), c.custody(), c.manager(), c.asset(), c.amount(),
+                c.days(), c.nav(), c.basketValue())), 0);
+    }
+
+    private record PendingDividend(String instrument, String issuer, long perShare, long payDate,
+                                   java.util.SortedMap<String, Long> holders) {}
+
     /** What buying {@code qty} at market costs now, walking the asks (only the available part if the book is thin). */
     private static long costToBuy(OrderBook book, long qty) {
         long cost = 0;
@@ -1011,6 +1160,16 @@ public final class Exchange {
             case Event.PayoutStarted p -> new Command.Payout(p.instrument(), p.kind(), p.issuer(), p.perUnit());
             case Event.BondDefaulted b -> new Command.DeclareDefault(b.instrument(), b.issuer());
             case Event.PayoutPaid p -> throw unexpected(p);
+            case Event.OrderAnnotated a -> new Command.AnnotateOrder(a.account(), a.orderId(), a.why(), a.marketState(),
+                    a.mood(), a.plannedRisk());
+            case Event.DividendExDate d -> new Command.DividendExDate(d.instrument(), d.issuer(), d.perShare(),
+                    d.recordDate(), d.payDate());
+            case Event.DividendPaymentStarted d -> new Command.PayDividend(d.instrument(), d.taxBps());
+            case Event.FundFeeCharged f -> new Command.ChargeFundFee(f.fund(), f.custody(), f.manager(), f.asset(),
+                    f.amount(), f.days(), f.nav(), f.basketValue());
+            case Event.DividendEntitled d -> throw unexpected(d);
+            case Event.ReferencePriceAdjusted r -> throw unexpected(r);
+            case Event.DividendPaid d -> throw unexpected(d);
             case Event.ClockChanged c -> throw new IllegalStateException("not a command: " + c);
             case Event.TradeExecuted t -> throw unexpected(t);
             case Event.OrderExpired o -> throw unexpected(o);
@@ -1116,6 +1275,8 @@ public final class Exchange {
         final Instrument instrument;
         boolean open = true;
         boolean defaulted;
+        /** Reference price set without a trade (ex-dividend); cleared by the next trade. */
+        Long adjustedLast;
         final OrderBook book = new OrderBook();
         final Map<Long, Long> byBookId = new HashMap<>();
         final List<Event.TradeExecuted> trades = new ArrayList<>();

@@ -152,4 +152,48 @@ public sealed interface Event {
 
     /** The issuer could not pay a coupon: no more coupons; a later redemption pays only what is recovered. */
     record BondDefaulted(long ts, String instrument, String issuer) implements Event {}
+
+    // ---- M2c: trade journal, dividends with record/ex/pay dates, fund fees (ADR-0022) ----
+
+    /**
+     * The owner's trade-journal note on an order: why, market state, mood, and the planned risk (1 R) in quote minor
+     * units (0 = not given). It moves no money; the session review reads it.
+     */
+    record OrderAnnotated(long ts, long orderId, String account, String why, String marketState, String mood,
+                          long plannedRisk) implements Event {}
+
+    /** A dividend declared with its dates: ex-date (price adjusts at its open), record date (T+1), pay date. */
+    record DividendDeclared(long ts, String instrument, long perShare, long exDate, long recordDate, long payDate)
+            implements Disclosure {}
+
+    /**
+     * The open of the ex-date: who holds the share now is in the register on the record date (settlement T+1), so
+     * the entitlement is fixed here; {@code units} is the total. The reference price drops by the dividend.
+     * Followed by {@link DividendEntitled} per holder and {@link ReferencePriceAdjusted}.
+     */
+    record DividendExDate(long ts, String instrument, String issuer, long perShare, long recordDate, long payDate,
+                          long units) implements Event {}
+
+    record DividendEntitled(long ts, String instrument, String holder, long units) implements Event {}
+
+    /** The last price used for valuation (not for stops) moved without a trade, e.g. down by a dividend at the ex-date. */
+    record ReferencePriceAdjusted(long ts, String instrument, long before, long after, String reason) implements Event {}
+
+    /**
+     * The pay date: the issuer pays every entitled holder {@code units × perShare}; {@code taxBps} of it is withheld
+     * at source and goes to {@link Ledger#TAX_ACCOUNT}. Followed by one {@link DividendPaid} per holder.
+     */
+    record DividendPaymentStarted(long ts, String instrument, String issuer, long perShare, long units, long gross,
+                                  long taxBps) implements Event {}
+
+    /** {@code gross − tax} reached the holder; {@code tax} went to the tax account. */
+    record DividendPaid(long ts, String instrument, String holder, long units, long gross, long tax) implements Event {}
+
+    /**
+     * A fund's TER for {@code days} bank days: {@code amount} of {@code asset} moves from the fund's custody to its
+     * manager. {@code nav} is the fund's value before the fee and {@code basketValue} the same holdings with the
+     * starting cash (no fees), both at last prices: the fund card compares them.
+     */
+    record FundFeeCharged(long ts, String fund, String custody, String manager, String asset, long amount, int days,
+                          long nav, long basketValue) implements Event {}
 }
