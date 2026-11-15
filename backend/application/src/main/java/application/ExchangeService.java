@@ -1,6 +1,11 @@
 package application;
 
 import engine.Balance;
+import engine.Conditional;
+import engine.ConditionalView;
+import engine.Ledger;
+import engine.MarginView;
+import engine.SavingsView;
 import engine.Command;
 import engine.Event;
 import engine.Exchange;
@@ -32,18 +37,43 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     private final Clock clock;
     private final Map<String, Long> startingBalance;
     private final List<MarketListener> listeners = new CopyOnWriteArrayList<>();
+    private final StatementProjection statements;
+    private final SavingsProduct savingsProduct;
+
+    /** Bank capital, savings product: the M2a settings. */
+    public record Options(Map<String, Long> bankCapital, SavingsProduct savings) {
+        public static final Options DEFAULT = new Options(
+                Map.of("SPARK", 100_000_000_000L, "AMBER", 10_000_000L), new SavingsProduct("SPARK", 1_400, 60_000));
+    }
+
+    public ExchangeService(List<Instrument> instruments, Journal journal, Clock clock, Map<String, Long> startingBalance) {
+        this(instruments, journal, clock, startingBalance, Options.DEFAULT);
+    }
 
     /**
      * @param startingBalance what a new account receives, asset → minor units; journalled as deposits
+     * @param options         bank capital (journalled as deposits the first time) and the savings product
      */
-    public ExchangeService(List<Instrument> instruments, Journal journal, Clock clock, Map<String, Long> startingBalance) {
+    public ExchangeService(List<Instrument> instruments, Journal journal, Clock clock, Map<String, Long> startingBalance,
+                           Options options) {
         List<Event> history = journal.readAll();
         Exchange exchange = Exchange.replay(instruments, history);
         restoreClock(clock, history);
+        this.statements = new StatementProjection(instruments);
+        statements.onEvents(history);
         this.sequencer = new Sequencer<>("exchange", exchange);
         this.journal = journal;
         this.clock = clock;
         this.startingBalance = Map.copyOf(startingBalance);
+        this.savingsProduct = options.savings();
+        sequencer.call(ex -> {
+            options.bankCapital().entrySet().stream().sorted(Map.Entry.comparingByKey()).forEach(c -> {
+                if (ex.ledger().available(Ledger.BANK_ACCOUNT, c.getKey()) + ex.ledger().reserved(Ledger.BANK_ACCOUNT, c.getKey()) == 0) {
+                    run(ex, new Command.Deposit(Ledger.BANK_ACCOUNT, c.getKey(), c.getValue()));
+                }
+            });
+            return null;
+        });
     }
 
     @Override
@@ -145,6 +175,88 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     }
 
     @Override
+    public ConditionalView placeConditional(String accountId, String instrument, Conditional.Kind kind, Order.Side side,
+                                            long qty, long triggerPrice, long limitPrice, long activationPrice,
+                                            long offset, long protectiveSpread) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.PlaceConditional(accountId, instrument, kind, side, qty, triggerPrice,
+                    limitPrice, activationPrice, offset, protectiveSpread));
+            return ex.conditional(o.orderId()).orElseThrow();
+        });
+    }
+
+    @Override
+    public ConditionalView cancelConditional(String accountId, long conditionalId) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.CancelConditional(accountId, conditionalId));
+            return ex.conditional(o.orderId()).orElseThrow();
+        });
+    }
+
+    @Override
+    public List<ConditionalView> conditionals(String accountId, int limit) {
+        return sequencer.call(ex -> ex.conditionalsOf(accountId, limit));
+    }
+
+    @Override
+    public MarginView openMargin(String accountId, String instrument, Order.Side side, long qty, int leverage) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.OpenMargin(accountId, instrument, side, qty, leverage));
+            return ex.position(o.orderId()).orElseThrow();
+        });
+    }
+
+    @Override
+    public MarginView closeMargin(String accountId, long positionId) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.CloseMargin(accountId, positionId));
+            return ex.position(o.orderId()).orElseThrow();
+        });
+    }
+
+    @Override
+    public List<MarginView> positions(String accountId, int limit) {
+        return sequencer.call(ex -> ex.positionsOf(accountId, limit));
+    }
+
+    @Override
+    public SavingsProduct savingsProduct() {
+        return savingsProduct;
+    }
+
+    @Override
+    public SavingsView openSavings(String accountId, long amount) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.OpenSavings(accountId, savingsProduct.asset(), amount, savingsProduct.rateBps(),
+                    savingsProduct.dayMillis()));
+            return ex.deposit(o.orderId()).orElseThrow();
+        });
+    }
+
+    @Override
+    public SavingsView closeSavings(String accountId, long depositId) {
+        return sequencer.call(ex -> {
+            Outcome o = run(ex, new Command.CloseSavings(accountId, depositId));
+            return ex.deposit(o.orderId()).orElseThrow();
+        });
+    }
+
+    @Override
+    public List<SavingsView> savings(String accountId) {
+        return sequencer.call(ex -> ex.savingsOf(accountId));
+    }
+
+    @Override
+    public void accrueInterest() {
+        sequencer.call(ex -> run(ex, new Command.AccrueInterest()));
+    }
+
+    @Override
+    public StatementProjection.Statement statement(String accountId, long from, long to) {
+        return sequencer.call(ex -> statements.statement(accountId, from, to));
+    }
+
+    @Override
     public void close() throws InterruptedException {
         sequencer.close();
     }
@@ -169,6 +281,7 @@ public final class ExchangeService implements TradingService, AutoCloseable {
             return;
         }
         journal.append(events);
+        statements.onEvents(events);
         for (MarketListener l : listeners) {
             l.onEvents(events);
         }
