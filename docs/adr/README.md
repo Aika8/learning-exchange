@@ -27,5 +27,6 @@ superseding ADR explaining why reality differed.
 | [0014](0014-i18n-runtime-switch.md) | Russian + English, switchable at runtime | Message catalogues, Observer | Accepted (M1) |
 | [0015](0015-real-market-data-feed.md) | Real market data as a read-only feed + paper trading | Adapter, Circuit breaker, Cache | Proposed |
 | [0016](0016-hand-written-server-adapter-with-contract-test.md) | Hand-written server adapter checked by a contract test (amends 0003) | Adapter, Contract test | Accepted |
-| [0017](0017-game3d-stylised-lowpoly-godot.md) | Second game client in 3D: stylised low-poly, Godot Forward+ | Shared kernel, Procedural generation | Accepted |
+| [0017](0017-game3d-stylised-lowpoly-godot.md) | Second game client in 3D: stylised low-poly, Godot Forward+ | Shared kernel, Procedural generation | Superseded by 0019 (art) |
 | [0018](0018-one-writer-for-the-whole-exchange.md) | One writer for the whole exchange (amends 0006) | Single Writer | Accepted (M2a) |
+| [0019](0019-game3d-pbr-assets.md) | game3d: painterly realism with CC0 PBR assets fetched by `make assets` | Facade, Graceful degradation | Accepted |

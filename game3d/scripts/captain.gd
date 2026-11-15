@@ -25,6 +25,11 @@ func _ready() -> void:
 	body = Proc.figure(Color("2f5d8a"), Color("8a5a3c"))
 	add_child(body)
 	var scarf := Proc.box(Vector3(0.75, 0.16, 0.75), Hud.BRASS, Vector3(0, 1.38, 0))
+	if Assets.available():  # a knitted brass scarf on the realistic figure (ADR-0019)
+		var ring := TorusMesh.new()
+		ring.inner_radius = 0.1
+		ring.outer_radius = 0.2
+		scarf = Proc.mesh_node(ring, Assets.pbr("quatrefoil_jacquard_fabric", Hud.BRASS, 3.0), Vector3(0, 1.47, 0))
 	body.add_child(scarf)
 	arm = SpringArm3D.new()
 	arm.spring_length = 9.0

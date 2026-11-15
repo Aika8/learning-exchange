@@ -1,3 +1,7 @@
+> **Update (ADR-0019):** the look moved to painterly realism — Poly Haven CC0 HDRI sky, PBR materials and models
+> (see `game3d/ASSETS.md`). Palette, light direction and the world below still hold; the procedural low-poly look
+> remains as the fallback without `make assets`.
+
 # game3d — style guide (ADR-0017)
 
 **One sentence:** a cosy late-afternoon sky archipelago — soft low-poly islands floating over a sea of clouds,

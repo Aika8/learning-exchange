@@ -31,7 +31,7 @@ func _ready() -> void:
 	_ship = Proc.ship()
 	_ship.position = a
 	add_child(_ship)
-	_sail = _ship.get_node("Sail")
+	_sail = _ship.get_node_or_null("Sail")  # the model ship (ADR-0019) has fixed sails
 	_cam = Camera3D.new()
 	_cam.fov = 60
 	_cam.far = 3000
@@ -76,8 +76,9 @@ func _process(delta: float) -> void:
 	pos.y += sin(_t * 1.3) * 0.35
 	_ship.position = pos
 	_ship.rotation = Vector3(sin(_t * 0.9) * 0.025, atan2(-h.x, -h.z), sin(_t * 1.1) * 0.05 - 0.04 * _model.wind_help(_wind))
-	_sail.scale.y = lerpf(_sail.scale.y, 1.0 if _sail_up else 0.25, 4.0 * delta)
-	_sail.position.y = 4.8 + (1.0 - _sail.scale.y) * 2.4
+	if _sail:
+		_sail.scale.y = lerpf(_sail.scale.y, 1.0 if _sail_up else 0.25, 4.0 * delta)
+		_sail.position.y = 4.8 + (1.0 - _sail.scale.y) * 2.4
 	var blades: Node3D = _parts.get("blades")
 	if blades:
 		blades.rotation.z += delta * 0.5
