@@ -1,0 +1,361 @@
+## Pattern: Factory (procedural art) — every mesh of the world is built here from primitives, so the art is code,
+## reviewable and ours (CC0, game3d/ASSETS.md). Look: docs/design/game3d-style.md. See docs/adr/0017-game3d-stylised-lowpoly-godot.md
+class_name Proc
+extends RefCounted
+
+const GRASS := Color("7fb069")
+const GRASS_DARK := Color("4f7f52")
+const ROCK := Color("b07a57")
+const ROCK_DARK := Color("6e4a3b")
+const CRYSTAL := Color("7fe3ff")
+const TIMBER := Color("8a5a3c")
+const TIMBER_DARK := Color("5e3b28")
+const CANVAS := Color("f3e9d2")
+const BRASS := Color("d9a441")
+const PLASTER := Color("efe2c8")
+const ROOF_RED := Color("c4643f")
+const ROOF_TEAL := Color("3f8f8a")
+
+static var _materials: Dictionary = {}
+
+
+## Flat toon material, cached per colour so the renderer can batch.
+static func mat(color: Color, emission: float = 0.0) -> StandardMaterial3D:
+	var key := "%s/%s" % [color.to_html(), emission]
+	if _materials.has(key):
+		return _materials[key]
+	var m := StandardMaterial3D.new()
+	m.albedo_color = color
+	m.diffuse_mode = BaseMaterial3D.DIFFUSE_TOON
+	m.specular_mode = BaseMaterial3D.SPECULAR_DISABLED
+	m.roughness = 1.0
+	m.rim_enabled = true
+	m.rim = 0.25
+	m.rim_tint = 0.7
+	if emission > 0.0:
+		m.emission_enabled = true
+		m.emission = color
+		m.emission_energy_multiplier = emission
+	_materials[key] = m
+	return m
+
+
+static func vertex_mat() -> StandardMaterial3D:
+	if _materials.has("vertex"):
+		return _materials["vertex"]
+	var m := mat(Color.WHITE).duplicate() as StandardMaterial3D
+	m.vertex_color_use_as_albedo = true
+	_materials["vertex"] = m
+	return m
+
+
+static func mesh_node(mesh: Mesh, material: Material, pos: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var mi := MeshInstance3D.new()
+	mi.mesh = mesh
+	mi.material_override = material
+	mi.position = pos
+	return mi
+
+
+static func box(size: Vector3, color: Color, pos: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var b := BoxMesh.new()
+	b.size = size
+	return mesh_node(b, mat(color), pos)
+
+
+static func cyl(top: float, bottom: float, h: float, sides: int, color: Color, pos: Vector3 = Vector3.ZERO) -> MeshInstance3D:
+	var c := CylinderMesh.new()
+	c.top_radius = top
+	c.bottom_radius = bottom
+	c.height = h
+	c.radial_segments = sides
+	c.rings = 1
+	return mesh_node(c, mat(color), pos)
+
+
+static func ball(r: float, color: Color, pos: Vector3 = Vector3.ZERO, emission: float = 0.0) -> MeshInstance3D:
+	var s := SphereMesh.new()
+	s.radius = r
+	s.height = r * 2.0
+	s.radial_segments = 10
+	s.rings = 6
+	return mesh_node(s, mat(color, emission), pos)
+
+
+## Floating island: flat grassy cap, overhanging lip, craggy underside tapering to a tip. Flat-shaded, vertex colours.
+## `bumps` > 0 makes small hills on the cap (only for islands nobody walks on).
+static func island_mesh(radius: float, depth: float, seed_value: int, bumps: float = 0.0) -> ArrayMesh:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	var sides := 30
+	# rings: [radius factor, y, colour]
+	var rings: Array = [
+		[0.0, 0.0, GRASS], [0.55, 0.0, GRASS], [0.92, 0.0, GRASS], [1.0, -0.35, GRASS_DARK],
+		[0.97, -1.6, ROCK], [0.82, -depth * 0.3, ROCK], [0.6, -depth * 0.55, ROCK.darkened(0.1)],
+		[0.34, -depth * 0.8, ROCK_DARK], [0.0, -depth, ROCK_DARK]]
+	var jitter: Array[PackedFloat32Array] = []
+	for ri in rings.size():
+		var row := PackedFloat32Array()
+		for s in sides:
+			var j := 1.0 + rng.randf_range(-0.07, 0.07) if ri >= 3 else 1.0 + rng.randf_range(-0.03, 0.03)
+			row.append(j)
+		jitter.append(row)
+	var shape := PackedFloat32Array()  # global outline wobble, same for every ring
+	for s in sides:
+		shape.append(1.0 + 0.12 * sin(s * 0.62 + seed_value) + 0.06 * sin(s * 1.7 + seed_value * 0.3))
+	var pts: Array[PackedVector3Array] = []
+	for ri in rings.size():
+		var row := PackedVector3Array()
+		for s in sides:
+			var a := TAU * s / sides
+			var r: float = radius * float(rings[ri][0]) * shape[s] * jitter[ri][s]
+			var y: float = float(rings[ri][1])
+			if ri >= 4 and ri < rings.size() - 1:
+				y += rng.randf_range(-1.0, 1.0) * depth * 0.06
+			if ri == 1 and bumps > 0.0:
+				y += maxf(0.0, sin(a * 3.0 + seed_value)) * bumps
+			row.append(Vector3(cos(a) * r, y, sin(a) * r))
+		pts.append(row)
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_smooth_group(0xFFFFFFFF)
+	for ri in rings.size() - 1:
+		var c0: Color = rings[ri][2]
+		var c1: Color = rings[ri + 1][2]
+		for s in sides:
+			var n := (s + 1) % sides
+			var a0 := pts[ri][s]
+			var a1 := pts[ri][n]
+			var b0 := pts[ri + 1][s]
+			var b1 := pts[ri + 1][n]
+			var tint := 1.0 + rng.randf_range(-0.05, 0.05)
+			var ca := Color(c0.r * tint, c0.g * tint, c0.b * tint)
+			var cb := Color(c1.r * tint, c1.g * tint, c1.b * tint)
+			# rings go outward on the cap and inward underneath; winding is fixed below by normal direction
+			_tri(st, a0, b0, a1, ca, cb, ca)
+			_tri(st, a1, b0, b1, ca, cb, cb)
+	st.generate_normals()
+	return st.commit()
+
+
+static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
+	if a.distance_squared_to(b) < 1e-6 or a.distance_squared_to(c) < 1e-6 or b.distance_squared_to(c) < 1e-6:
+		return
+	# Godot front faces are clockwise seen from outside; make the face normal point away from the island axis or up.
+	var n := (b - a).cross(c - a)
+	var centre := (a + b + c) / 3.0
+	var out := Vector3(centre.x, 0.0, centre.z)
+	if centre.y > -0.01 and absf(n.normalized().y) > 0.5:
+		out = Vector3.UP
+	if n.dot(out) > 0.0:
+		var t := b
+		b = c
+		c = t
+		var tc := cb
+		cb = cc
+		cc = tc
+	st.set_color(ca)
+	st.add_vertex(a)
+	st.set_color(cb)
+	st.add_vertex(b)
+	st.set_color(cc)
+	st.add_vertex(c)
+
+
+## Glowing ether crystals hanging under an island (lore: эфирит keeps islands afloat).
+static func crystals(parent: Node3D, radius: float, depth: float, count: int, seed_value: int) -> void:
+	var rng := RandomNumberGenerator.new()
+	rng.seed = seed_value
+	for i in count:
+		var a := rng.randf() * TAU
+		var r := rng.randf_range(0.05, 0.45) * radius
+		var h := rng.randf_range(2.0, 5.5) * radius / 20.0
+		var c := cyl(0.0, h * 0.28, h, 5, CRYSTAL, Vector3(cos(a) * r, -depth * (0.55 + 0.4 * (1.0 - r / radius)), sin(a) * r))
+		c.material_override = mat(CRYSTAL, 2.2)
+		c.rotation = Vector3(PI + rng.randf_range(-0.3, 0.3), rng.randf() * TAU, rng.randf_range(-0.3, 0.3))
+		c.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		parent.add_child(c)
+
+
+static func tree(rng: RandomNumberGenerator) -> Node3D:
+	var t := Node3D.new()
+	var h := rng.randf_range(2.2, 4.0)
+	t.add_child(cyl(0.18, 0.26, h * 0.45, 5, TIMBER, Vector3(0, h * 0.22, 0)))
+	var green := GRASS_DARK.lerp(Color("9cc46b"), rng.randf())
+	for k in 3:
+		var r := h * (0.42 - k * 0.1)
+		t.add_child(cyl(0.0, r, h * 0.42, 7, green.lightened(k * 0.06), Vector3(0, h * (0.45 + k * 0.2), 0)))
+	return t
+
+
+## Round leafy tree for the harbour (a squashed ball on a trunk).
+static func round_tree(rng: RandomNumberGenerator) -> Node3D:
+	var t := Node3D.new()
+	var h := rng.randf_range(2.0, 3.0)
+	t.add_child(cyl(0.16, 0.22, h, 5, TIMBER, Vector3(0, h * 0.5, 0)))
+	var crown := ball(rng.randf_range(1.1, 1.6), Color("8fbf5e").lerp(Color("cfa94a"), rng.randf() * 0.35), Vector3(0, h + 0.6, 0))
+	crown.scale = Vector3(1, 0.85, 1)
+	t.add_child(crown)
+	return t
+
+
+static func house(rng: RandomNumberGenerator, roof: Color) -> Node3D:
+	var hs := Node3D.new()
+	var w := rng.randf_range(3.2, 4.6)
+	var d := rng.randf_range(3.0, 4.0)
+	var h := rng.randf_range(2.4, 3.6)
+	hs.add_child(box(Vector3(w, h, d), PLASTER.darkened(rng.randf() * 0.1), Vector3(0, h * 0.5, 0)))
+	hs.add_child(box(Vector3(w + 0.1, 0.35, d + 0.1), TIMBER, Vector3(0, 0.17, 0)))
+	var pr := PrismMesh.new()
+	pr.size = Vector3(w + 0.6, h * 0.6, d + 0.5)
+	var roof_mi := mesh_node(pr, mat(roof), Vector3(0, h + h * 0.3, 0))
+	hs.add_child(roof_mi)
+	hs.add_child(box(Vector3(0.9, 1.6, 0.1), TIMBER_DARK, Vector3(0, 0.8, d * 0.5 + 0.03)))
+	for x in [-w * 0.3, w * 0.3]:
+		var win := box(Vector3(0.7, 0.7, 0.08), Color("ffd27a"), Vector3(x, h * 0.6, d * 0.5 + 0.04))
+		win.material_override = mat(Color("ffd27a"), 0.8)
+		hs.add_child(win)
+	if rng.randf() < 0.6:
+		hs.add_child(box(Vector3(0.5, 1.2, 0.5), ROCK_DARK, Vector3(w * 0.28, h + h * 0.45, 0)))
+	return hs
+
+
+## The Wind Exchange: a round-towered windmill with four canvas blades. Returns the node; blades are child "Blades".
+static func windmill() -> Node3D:
+	var w := Node3D.new()
+	w.add_child(cyl(4.2, 5.4, 2.0, 12, ROCK, Vector3(0, 1.0, 0)))
+	w.add_child(cyl(3.4, 4.6, 11.0, 12, PLASTER, Vector3(0, 7.5, 0)))
+	w.add_child(cyl(3.6, 3.6, 0.5, 12, BRASS, Vector3(0, 13.0, 0)))
+	w.add_child(cyl(0.0, 4.4, 4.5, 12, ROOF_TEAL, Vector3(0, 15.4, 0)))
+	w.add_child(ball(0.45, BRASS, Vector3(0, 17.9, 0), 0.6))
+	# door and arch facing +z
+	w.add_child(box(Vector3(2.4, 3.4, 0.5), TIMBER_DARK, Vector3(0, 3.7, 4.6)))
+	w.add_child(box(Vector3(3.0, 0.35, 0.7), BRASS, Vector3(0, 5.55, 4.6)))
+	for k in 6:
+		var a := TAU * (k + 0.5) / 6.0
+		var win := box(Vector3(0.8, 1.3, 0.2), Color("ffd27a"), Vector3(sin(a) * 4.05, 9.0, cos(a) * 4.05))
+		win.material_override = mat(Color("ffd27a"), 1.2)
+		win.rotation.y = a
+		w.add_child(win)
+	var hub := Node3D.new()
+	hub.name = "Blades"
+	hub.position = Vector3(0, 12.0, 4.3)
+	hub.add_child(cyl(0.6, 0.6, 1.2, 8, TIMBER_DARK, Vector3.ZERO))
+	(hub.get_child(0) as Node3D).rotation.x = PI / 2
+	for k in 4:
+		var arm := Node3D.new()
+		arm.rotation.z = TAU * k / 4.0 + 0.3
+		arm.add_child(box(Vector3(0.35, 9.0, 0.25), TIMBER, Vector3(0, 4.7, 0.5)))
+		var sail := box(Vector3(2.1, 6.8, 0.08), CANVAS, Vector3(1.2, 5.4, 0.6))
+		arm.add_child(sail)
+		hub.add_child(arm)
+	w.add_child(hub)
+	return w
+
+
+## Ship hull lofted from U-shaped cross-sections, bow at -z. Flat shaded, two timber tones.
+static func hull_mesh(length: float, width: float, height: float) -> ArrayMesh:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	st.set_smooth_group(0xFFFFFFFF)
+	var slices := 10
+	var profile := [Vector2(-1.0, 0.0), Vector2(-0.95, -0.45), Vector2(-0.6, -0.85), Vector2(0.0, -1.0),
+		Vector2(0.6, -0.85), Vector2(0.95, -0.45), Vector2(1.0, 0.0)]
+	var secs: Array[PackedVector3Array] = []
+	for i in slices + 1:
+		var t := float(i) / slices  # 0 = stern, 1 = bow
+		var z := lerpf(length * 0.5, -length * 0.5, t)
+		var wf := sin(clampf(t * 1.15, 0.0, 1.0) * PI * 0.5 + 0.35) if t < 0.6 else cos((t - 0.6) / 0.4 * PI * 0.5)
+		wf = maxf(wf, 0.02)
+		var lift := 0.0 if t < 0.75 else (t - 0.75) * height * 1.4
+		var row := PackedVector3Array()
+		for p: Vector2 in profile:
+			row.append(Vector3(p.x * width * 0.5 * wf, p.y * height * (0.5 + 0.5 * wf) + lift, z))
+		secs.append(row)
+	for i in slices:
+		for k in profile.size() - 1:
+			var c := TIMBER if k % 2 == 0 else TIMBER.darkened(0.12)
+			var a0 := secs[i][k]
+			var a1 := secs[i][k + 1]
+			var b0 := secs[i + 1][k]
+			var b1 := secs[i + 1][k + 1]
+			for v: Vector3 in [a0, b0, a1, a1, b0, b1]:
+				st.set_color(c)
+				st.add_vertex(v)
+	# deck
+	for i in slices:
+		var a0 := secs[i][0]
+		var a1 := secs[i][profile.size() - 1]
+		var b0 := secs[i + 1][0]
+		var b1 := secs[i + 1][profile.size() - 1]
+		for v: Vector3 in [a0, a1, b0, a1, b1, b0]:
+			st.set_color(Color("c49a6c"))
+			st.add_vertex(v)
+	st.generate_normals()
+	var m := st.commit()
+	return m
+
+
+## The player's ship «Попутчик»: hull, mast, billowing sail (child "Sail"), side vanes, a crystal keel and a lantern.
+static func ship() -> Node3D:
+	var s := Node3D.new()
+	var hull := mesh_node(hull_mesh(9.0, 3.2, 1.8), vertex_mat())
+	(hull.material_override as StandardMaterial3D).cull_mode = BaseMaterial3D.CULL_DISABLED
+	s.add_child(hull)
+	s.add_child(box(Vector3(2.4, 1.1, 2.2), TIMBER_DARK, Vector3(0, 0.55, 3.0)))
+	s.add_child(box(Vector3(2.6, 0.15, 2.4), BRASS, Vector3(0, 1.15, 3.0)))
+	s.add_child(cyl(0.14, 0.18, 8.5, 6, TIMBER_DARK, Vector3(0, 4.2, -0.4)))
+	s.add_child(box(Vector3(5.2, 0.18, 0.18), TIMBER_DARK, Vector3(0, 7.4, -0.4)))
+	var sail_mesh := PlaneMesh.new()
+	sail_mesh.size = Vector2(4.8, 5.0)
+	sail_mesh.subdivide_width = 8
+	sail_mesh.subdivide_depth = 8
+	sail_mesh.orientation = PlaneMesh.FACE_Z
+	var sail_mat := ShaderMaterial.new()
+	sail_mat.shader = load("res://shaders/sail.gdshader")
+	var sail := mesh_node(sail_mesh, sail_mat, Vector3(0, 4.8, -0.55))
+	sail.name = "Sail"
+	s.add_child(sail)
+	for side in [-1.0, 1.0]:
+		var vane := box(Vector3(2.6, 0.08, 1.4), CANVAS, Vector3(side * 2.5, 0.3, 0.4))
+		vane.rotation.z = side * 0.25
+		s.add_child(vane)
+	var keel := cyl(0.0, 0.5, 1.6, 5, CRYSTAL, Vector3(0, -2.0, 0.2))
+	keel.material_override = mat(CRYSTAL, 2.5)
+	keel.rotation.x = PI
+	s.add_child(keel)
+	s.add_child(ball(0.25, Color("ffcf6e"), Vector3(0, 2.0, 4.0), 3.0))
+	return s
+
+
+## A villager figure: body, head, hat. `coat` and `hat` colours tell people apart.
+static func figure(coat: Color, hat: Color) -> Node3D:
+	var f := Node3D.new()
+	f.add_child(cyl(0.32, 0.5, 1.2, 8, coat, Vector3(0, 0.6, 0)))
+	f.add_child(cyl(0.38, 0.32, 0.25, 8, coat.darkened(0.25), Vector3(0, 1.25, 0)))
+	f.add_child(ball(0.32, Color("f1c9a5"), Vector3(0, 1.62, 0)))
+	f.add_child(cyl(0.22, 0.26, 0.35, 8, hat, Vector3(0, 2.0, 0)))
+	f.add_child(cyl(0.48, 0.48, 0.05, 10, hat, Vector3(0, 1.84, 0)))
+	f.add_child(box(Vector3(0.1, 0.1, 0.1), Color("2a2a2a"), Vector3(0.12, 1.66, 0.29)))
+	f.add_child(box(Vector3(0.1, 0.1, 0.1), Color("2a2a2a"), Vector3(-0.12, 1.66, 0.29)))
+	return f
+
+
+## Silk racks of Silk Reach: poles with coloured wind-silk drying in rows.
+static func silk_rack(rng: RandomNumberGenerator) -> Node3D:
+	var r := Node3D.new()
+	var colors := [Color("e9a6b8"), Color("f3d37a"), Color("9fd3e6"), Color("c9b2e8"), CANVAS]
+	for x in [-2.0, 2.0]:
+		r.add_child(cyl(0.1, 0.12, 3.0, 5, TIMBER, Vector3(x, 1.5, 0)))
+	r.add_child(box(Vector3(4.2, 0.12, 0.12), TIMBER, Vector3(0, 2.95, 0)))
+	for k in 3:
+		var cloth := box(Vector3(1.1, 2.0, 0.05), colors[rng.randi() % colors.size()], Vector3(-1.3 + k * 1.3, 1.9, 0))
+		r.add_child(cloth)
+	return r
+
+
+static func lantern_post() -> Node3D:
+	var p := Node3D.new()
+	p.add_child(cyl(0.08, 0.1, 2.6, 5, TIMBER_DARK, Vector3(0, 1.3, 0)))
+	p.add_child(ball(0.22, Color("ffcf6e"), Vector3(0, 2.75, 0), 4.0))
+	return p
