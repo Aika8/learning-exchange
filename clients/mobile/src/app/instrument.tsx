@@ -3,22 +3,28 @@ import { Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, call } from '../api/client';
-import { useInstrument, useLiveMarket, useOpenOrders } from '../hooks';
+import { useInstrument, useLiveMarket, useMe, useOpenOrders } from '../hooks';
 import { formatMinor } from '../money';
 import { type as typo, useColors } from '../theme/theme';
-import { Body, Button, Caption, Card, Screen, Title } from '../components/ui';
+import { Body, Button, Caption, Card, Screen, Segmented, Title } from '../components/ui';
+import { PositionSize } from '../components/PositionSize';
+import { StopsList } from '../components/StopsList';
+import { StopTicket } from '../components/StopTicket';
 import { OrderBook } from '../components/OrderBook';
 import { OrderTicket } from '../components/OrderTicket';
 import { TabBar } from '../components/TabBar';
 
-/** Design S03 (instrument): last price, order book with spread, trades tape, Buy/Sell opening the ticket (S04). */
+/** Design S03 (instrument): instrument switch, last price, order book with spread, stops and take-profits, position-size helper, trades tape, Buy/Sell opening the ticket (S04). */
 export default function InstrumentScreen() {
   const c = useColors();
   const { t, i18n } = useTranslation();
-  const instrument = useInstrument().data;
-  const { book, trades } = useLiveMarket();
-  const orders = useOpenOrders().data ?? [];
+  const [instrumentId, setInstrumentId] = useState<'SILK-SPARK' | 'AMBER-SPARK'>('SILK-SPARK');
+  const instrument = useInstrument(instrumentId).data;
+  const { book, trades } = useLiveMarket(instrumentId);
+  const orders = (useOpenOrders().data ?? []).filter((o) => o.instrument === instrumentId);
+  const spark = useMe().data?.balances.find((b) => b.asset === 'SPARK');
   const [ticket, setTicket] = useState<'BUY' | 'SELL' | null>(null);
+  const [stopTicket, setStopTicket] = useState<{ qty?: string; trigger?: string; side?: 'BUY' | 'SELL' } | null>(null);
   const qc = useQueryClient();
   const cancel = useMutation({
     mutationFn: (id: number) => call(api.DELETE('/orders/{orderId}', { params: { path: { orderId: id } } })),
@@ -43,7 +49,18 @@ export default function InstrumentScreen() {
         </>
       }
     >
-      <Caption>{t('instrument.kind')} · {instrument.base}/{instrument.quote}</Caption>
+      <Segmented
+        testIDPrefix="instrument"
+        value={instrumentId}
+        onChange={setInstrumentId}
+        options={[
+          { value: 'SILK-SPARK', label: t('instrument.stock') },
+          { value: 'AMBER-SPARK', label: t('instrument.fx') },
+        ]}
+      />
+      <Caption>
+        {t(instrumentId === 'AMBER-SPARK' ? 'instrument.kindFx' : 'instrument.kind')} · {instrument.base}/{instrument.quote}
+      </Caption>
       <Text testID="last-price" style={{ fontSize: typo.display.size, lineHeight: typo.display.lineHeight, fontWeight: '700', color: c.textPrimary, fontVariant: ['tabular-nums'] }}>
         {book?.lastPrice != null ? `${fmt(book.lastPrice)} ${instrument.quote}` : '—'}
       </Text>
@@ -64,6 +81,14 @@ export default function InstrumentScreen() {
           </View>
         ))}
       </Card>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Title>{t('stops.title')}</Title>
+        <Pressable testID="stop-new" onPress={() => setStopTicket({})} hitSlop={8}>
+          <Text style={{ color: c.primary, fontWeight: '600' }}>{t('stops.new')}</Text>
+        </Pressable>
+      </View>
+      <StopsList instrument={instrument} />
+      <PositionSize instrument={instrument} capital={spark?.available} lastPrice={book?.lastPrice} onUse={(qty, trigger, side) => setStopTicket({ qty, trigger, side })} />
       <Title>{t('instrument.tape')}</Title>
       <Card style={{ gap: 4 }}>
         {trades.length === 0 && <Caption>{t('instrument.noTrades')}</Caption>}
@@ -77,7 +102,8 @@ export default function InstrumentScreen() {
           </View>
         ))}
       </Card>
-      {ticket && <OrderTicket side={ticket} instrument={instrument} book={book} onClose={() => setTicket(null)} />}
+      {stopTicket && <StopTicket key={instrumentId} instrument={instrument} initial={stopTicket} onClose={() => setStopTicket(null)} />}
+      {ticket && <OrderTicket key={instrumentId} side={ticket} instrument={instrument} book={book} onClose={() => setTicket(null)} />}
     </Screen>
   );
 }
