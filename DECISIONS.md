@@ -167,3 +167,6 @@ Build and CI
 - GitHub Actions (`.github/workflows/ci.yml`): `make test` on Ubuntu with Java 25 and Node 24, on pushes to main and on
   pull requests. No Godot (no official headless image worth the setup yet) and no E2E (needs a running backend and
   browsers); both stay manual: `make test-game` / `make e2e` locally.
+- `Idempotency-Key` stays on `POST /orders` only; the new POSTs (stops, positions, deposits) have none yet.
+- Mobile has no leverage screen in M2a (web has it); mobile helpers in `src/finance.ts` are imported by `node --test`
+  directly from TypeScript (Node ≥ 23.6 strips types).
