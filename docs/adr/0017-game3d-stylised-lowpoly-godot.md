@@ -1,6 +1,6 @@
 # 0017. Second game client in 3D: stylised low-poly in Godot 4 (Forward+)
 
-- Status: Accepted
+- Status: Superseded by 0019 (art direction; the shared kernel and scenes stay)
 - Date: 2026-11-15
 - Pattern(s): Shared kernel (network + i18n reused from `game/` by symlink), Template method (3D stream extends the 2D one), Procedural generation for art
 
