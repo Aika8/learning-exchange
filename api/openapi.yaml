@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: learning-exchange core API
-  version: 0.2.0
+  version: 0.3.0
   description: |
     Commands and queries of the exchange (ADR-0003). Streams are in `asyncapi.yaml`.
 
@@ -357,6 +357,242 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Statement' }
         '401': { $ref: '#/components/responses/Problem' }
+  # ---- M2b: economy, companies, bonds, real world, BFFs ----
+  /instruments/{instrumentId}/candles:
+    get:
+      operationId: getCandles
+      summary: Daily candles (one bank day each) from trades, oldest first
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 365, default: 90 }
+      responses:
+        '200':
+          description: Candles
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Candle' } }
+        '404': { $ref: '#/components/responses/Problem' }
+  /economy/calendar:
+    get:
+      operationId: getEconomicCalendar
+      summary: Economic calendar — rate decisions, company reports, consensus, dividend ex-dates, coupons, maturities, storms
+      description: |
+        Future entries show only what is public in advance: the date, the kind and — once published — the consensus.
+        Results (`actual`) appear when they happened. Storms are shown only after they start.
+      security: []
+      parameters:
+        - name: from
+          in: query
+          description: Simulation time (ms); default now minus 30 bank days
+          schema: { type: integer, format: int64 }
+        - name: to
+          in: query
+          description: Simulation time (ms); default now plus 120 bank days
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Calendar entries in time order
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/CalendarEntry' } }
+  /economy/rates:
+    get:
+      operationId: getMacro
+      summary: Central bank — policy rate, inflation, real rate, deposit rate, next decision, market regime
+      security: []
+      responses:
+        '200':
+          description: Macro state
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Macro' }
+  /companies:
+    get:
+      operationId: listCompanies
+      summary: Listed companies with key metrics and their last report against consensus
+      security: []
+      responses:
+        '200':
+          description: Companies
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Company' } }
+  /companies/{instrumentId}:
+    get:
+      operationId: getCompany
+      summary: One company card
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+      responses:
+        '200':
+          description: Company
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Company' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /bonds:
+    get:
+      operationId: listBonds
+      summary: Bonds with yield to maturity (always shown), duration, rating and status
+      security: []
+      responses:
+        '200':
+          description: Bonds
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Bond' } }
+  /bonds/{instrumentId}:
+    get:
+      operationId: getBond
+      summary: One bond
+      security: []
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+      responses:
+        '200':
+          description: Bond
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Bond' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /real-world:
+    get:
+      operationId: getRealWorld
+      summary: Real-world quotes and the central bank base rate, read-only, with source and time (ADR-0015)
+      security: []
+      responses:
+        '200':
+          description: Real-world data
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RealWorld' }
+  /real-world/quotes/{symbol}/history:
+    get:
+      operationId: getRealHistory
+      summary: Daily history of a real-world quote
+      security: []
+      parameters:
+        - name: symbol
+          in: path
+          required: true
+          schema: { type: string, examples: [USD/KZT] }
+      responses:
+        '200':
+          description: Points, oldest first
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/RealPoint' } }
+  /real-world/paper-positions:
+    get:
+      operationId: listPaperPositions
+      summary: My paper («учебные») positions on real quotes, with P&L at the current real price
+      responses:
+        '200':
+          description: Positions, newest first
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/PaperPosition' } }
+        '401': { $ref: '#/components/responses/Problem' }
+    post:
+      operationId: openPaperPosition
+      summary: Open a paper position at the current real price (no money moves)
+      parameters:
+        - $ref: '#/components/parameters/IdempotencyKey'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/OpenPaperRequest' }
+      responses:
+        '201':
+          description: Opened
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperPosition' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /real-world/paper-positions/{paperId}/close:
+    post:
+      operationId: closePaperPosition
+      summary: Close a paper position at the current real price
+      parameters:
+        - name: paperId
+          in: path
+          required: true
+          schema: { type: integer, format: int64 }
+      responses:
+        '200':
+          description: Closed
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PaperPosition' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+  /bff/mobile/catalogue:
+    get:
+      operationId: getMobileCatalogue
+      summary: Mobile BFF — instruments with real names only (ADR-0004, ADR-0012)
+      security: []
+      responses:
+        '200':
+          description: Catalogue
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/CatalogueItem' } }
+  /bff/mobile/glossary:
+    get:
+      operationId: getMobileGlossary
+      summary: Mobile BFF — finance glossary, real terms only
+      security: []
+      responses:
+        '200':
+          description: Terms
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/GlossaryTerm' } }
+  /bff/mobile/companies/{instrumentId}:
+    get:
+      operationId: getMobileCompanyCard
+      summary: Mobile BFF — company card plus a gap-risk warning for my stops before a report night
+      parameters:
+        - $ref: '#/components/parameters/InstrumentId'
+      responses:
+        '200':
+          description: Card
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MobileCompanyCard' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+  /bff/game/catalogue:
+    get:
+      operationId: getGameCatalogue
+      summary: Game BFF — instruments with real names and lore names (real first; ADR-0012)
+      security: []
+      responses:
+        '200':
+          description: Catalogue
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/CatalogueItem' } }
+  /bff/game/glossary:
+    get:
+      operationId: getGameGlossary
+      summary: Game BFF — glossary with real and lore names
+      security: []
+      responses:
+        '200':
+          description: Terms
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/GlossaryTerm' } }
   /clock:
     get:
       operationId: getClock
@@ -451,9 +687,11 @@ components:
         amount: { type: integer, format: int64, minimum: 1, maximum: 100000000000 }
     Instrument:
       type: object
-      required: [id, base, quote, feeBps, priceScale, qtyScale, maxLeverage]
+      required: [id, base, quote, feeBps, priceScale, qtyScale, maxLeverage, kind, tradingOpen]
       properties:
         id: { type: string, examples: [SILK-SPARK, AMBER-SPARK] }
+        kind: { type: string, enum: [STOCK, FX, BOND] }
+        tradingOpen: { type: boolean, description: 'false while halted (report night) or after a bond is repaid' }
         base: { type: string, examples: [SILK] }
         quote: { type: string, examples: [SPARK] }
         feeBps: { type: integer, description: 'Fee on each side of a trade, basis points of notional (10 = 0.1%)' }
@@ -646,7 +884,7 @@ components:
           items: { $ref: '#/components/schemas/SavingsDeposit' }
     StatementKind:
       type: string
-      enum: [DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST]
+      enum: [DEPOSIT, TRADE, MARGIN_OPEN, MARGIN_CLOSE, STOP_OUT, SAVINGS_OPEN, SAVINGS_CLOSE, INTEREST, DIVIDEND, COUPON, REDEMPTION]
     StatementLine:
       type: object
       required: [ts, kind, asset, amount, fee, spreadPaid, realisedPnl]
@@ -667,14 +905,15 @@ components:
         refId: { type: [integer, 'null'], format: int64, description: 'Order, position or deposit id' }
     StatementTotals:
       type: object
-      required: [fees, spreadPaid, realisedPnl, taxRateBps, tax, interest]
+      required: [fees, spreadPaid, realisedPnl, taxRateBps, tax, interest, payouts]
       properties:
         fees: { type: integer, format: int64 }
         spreadPaid: { type: integer, format: int64 }
         realisedPnl: { type: integer, format: int64 }
         taxRateBps: { type: integer, description: '1000 = 10%' }
-        tax: { type: integer, format: int64, description: 'max(0, realisedPnl) × 10%, rounded down' }
+        tax: { type: integer, format: int64, description: '(max(0, realisedPnl) + payouts) × 10%, rounded down' }
         interest: { type: integer, format: int64, description: Deposit interest earned (not taxed here) }
+        payouts: { type: integer, format: int64, description: Dividends and coupons received (taxed 10%) }
     Statement:
       type: object
       required: [from, to, currency, lines, totals]
@@ -759,3 +998,273 @@ components:
       properties:
         channel: { type: string }
         error: { $ref: '#/components/schemas/Problem' }
+    # ---- M2b ----
+    Candle:
+      type: object
+      required: [start, open, high, low, close, volume]
+      properties:
+        start: { type: integer, format: int64, description: Start of the bank day (simulation ms) }
+        open: { type: integer, format: int64 }
+        high: { type: integer, format: int64 }
+        low: { type: integer, format: int64 }
+        close: { type: integer, format: int64 }
+        volume: { type: integer, format: int64 }
+    CalendarKind:
+      type: string
+      enum: [RATE_DECISION, EARNINGS, CONSENSUS, DIVIDEND_EX, COUPON, MATURITY, STORM]
+    CalendarEntry:
+      type: object
+      required: [at, kind, done]
+      properties:
+        at: { type: integer, format: int64 }
+        kind: { $ref: '#/components/schemas/CalendarKind' }
+        instrument: { type: [string, 'null'] }
+        done: { type: boolean, description: It already happened }
+        consensus:
+          type: [integer, 'null']
+          format: int64
+          description: 'RATE_DECISION: expected rate (bps); EARNINGS/CONSENSUS: expected EPS (minor units)'
+        actual:
+          type: [integer, 'null']
+          format: int64
+          description: 'Result once done: rate (bps), EPS, dividend per share, coupon per bond, face value, storm volatility %'
+        previous: { type: [integer, 'null'], format: int64, description: 'RATE_DECISION: rate before (bps)' }
+        inflationBps: { type: [integer, 'null'], format: int64 }
+    RateDecision:
+      type: object
+      required: [ts, number, rateBps, previousBps, consensusBps, inflationBps]
+      properties:
+        ts: { type: integer, format: int64 }
+        number: { type: integer }
+        rateBps: { type: integer, format: int64 }
+        previousBps: { type: integer, format: int64 }
+        consensusBps: { type: integer, format: int64 }
+        inflationBps: { type: integer, format: int64 }
+    Macro:
+      type: object
+      required: [policyRateBps, inflationBps, realRateBps, savingsRateBps, regime, volatilityPct, decisions]
+      properties:
+        policyRateBps: { type: integer, format: int64, description: Central bank rate, 1600 = 16% }
+        inflationBps: { type: integer, format: int64 }
+        realRateBps: { type: integer, format: int64, description: Policy rate minus inflation }
+        savingsRateBps: { type: integer, format: int64, description: Rate offered on new deposits }
+        regime: { type: string, enum: [CALM, STORM] }
+        volatilityPct: { type: integer, description: '100 = normal; a storm is 200–400' }
+        nextDecisionAt: { type: [integer, 'null'], format: int64 }
+        nextConsensusBps: { type: [integer, 'null'], format: int64 }
+        decisions: { type: array, items: { $ref: '#/components/schemas/RateDecision' } }
+    EarningsReport:
+      type: object
+      required: [ts, season, revenue, netProfit, eps, debt, operatingCashFlow, dividendPerShare, guidanceEps, sharesOutstanding, consensusEps]
+      description: Quarterly report; money in SPARK minor units, EPS per share
+      properties:
+        ts: { type: integer, format: int64 }
+        season: { type: integer }
+        revenue: { type: integer, format: int64 }
+        netProfit: { type: integer, format: int64 }
+        eps: { type: integer, format: int64 }
+        debt: { type: integer, format: int64 }
+        operatingCashFlow: { type: integer, format: int64 }
+        dividendPerShare: { type: integer, format: int64 }
+        guidanceEps: { type: integer, format: int64, description: Management's EPS forecast for the next season }
+        sharesOutstanding: { type: integer, format: int64 }
+        consensusEps: { type: integer, format: int64 }
+    Consensus:
+      type: object
+      required: [ts, season, reportAt, revenue, netProfit, eps]
+      properties:
+        ts: { type: integer, format: int64 }
+        season: { type: integer }
+        reportAt: { type: integer, format: int64 }
+        revenue: { type: integer, format: int64 }
+        netProfit: { type: integer, format: int64 }
+        eps: { type: integer, format: int64 }
+    InsiderTrade:
+      type: object
+      required: [ts, insider, role, side, qty, price]
+      properties:
+        ts: { type: integer, format: int64 }
+        insider: { type: string }
+        role: { type: string, enum: [CEO, CFO, DIRECTOR] }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64 }
+        price: { type: integer, format: int64 }
+    Dividend:
+      type: object
+      required: [perShare, exDate, paid]
+      properties:
+        perShare: { type: integer, format: int64 }
+        exDate: { type: integer, format: int64, description: Holders at this time are paid; the price drops by about the dividend }
+        paid: { type: boolean }
+    Company:
+      type: object
+      required: [instrument, sharesOutstanding, tradingOpen, insiderTrades, dividends, reports]
+      properties:
+        instrument: { type: string }
+        sharesOutstanding: { type: integer, format: int64 }
+        lastPrice: { type: [integer, 'null'], format: int64 }
+        epsTtm: { type: [integer, 'null'], format: int64, description: EPS of the last four seasons (annualised if fewer) }
+        peX100: { type: [integer, 'null'], format: int64, description: 'P/E × 100 (1250 = 12.5); null if EPS ≤ 0' }
+        debtToProfitX100: { type: [integer, 'null'], format: int64, description: Debt / yearly net profit × 100 }
+        dividendYieldBps: { type: [integer, 'null'], format: int64 }
+        lastReport:
+          oneOf:
+            - { $ref: '#/components/schemas/EarningsReport' }
+            - { type: 'null' }
+        surpriseBps: { type: [integer, 'null'], format: int64, description: '(EPS − consensus) / |consensus|' }
+        consensus:
+          description: Consensus for the coming report, once published
+          oneOf:
+            - { $ref: '#/components/schemas/Consensus' }
+            - { type: 'null' }
+        nextReportAt: { type: [integer, 'null'], format: int64 }
+        tradingOpen: { type: boolean, description: false on a report night }
+        insiderTrades: { type: array, items: { $ref: '#/components/schemas/InsiderTrade' } }
+        dividends: { type: array, items: { $ref: '#/components/schemas/Dividend' } }
+        reports: { type: array, items: { $ref: '#/components/schemas/EarningsReport' } }
+    GapWarning:
+      type: object
+      required: [reportAt, conditionalIds]
+      description: A report comes out tonight while the market is closed; the open may gap through these stops
+      properties:
+        reportAt: { type: integer, format: int64 }
+        conditionalIds: { type: array, items: { type: integer, format: int64 } }
+    MobileCompanyCard:
+      type: object
+      required: [company, name]
+      properties:
+        company: { $ref: '#/components/schemas/Company' }
+        name: { $ref: '#/components/schemas/LocalisedName' }
+        gapWarning:
+          oneOf:
+            - { $ref: '#/components/schemas/GapWarning' }
+            - { type: 'null' }
+    Bond:
+      type: object
+      required: [instrument, faceValue, couponBps, couponsPerYear, couponPerUnit, maturityAt, rating, status, price, ytmBps,
+                 durationX100, couponsPaid, couponsLeft, fairYieldBps, policyRateBps]
+      properties:
+        instrument: { type: string }
+        faceValue: { type: integer, format: int64, description: Repaid at maturity, SPARK minor units per bond }
+        couponBps: { type: integer, format: int64, description: Coupon a year, % of face }
+        couponsPerYear: { type: integer }
+        couponPerUnit: { type: integer, format: int64 }
+        maturityAt: { type: integer, format: int64 }
+        rating: { type: string, enum: [AAA, AA, A, BBB, BB, B, CCC] }
+        status: { type: string, enum: [ACTIVE, DEFAULTED, REDEEMED] }
+        lastPrice: { type: [integer, 'null'], format: int64 }
+        price: { type: integer, format: int64, description: Last trade price, or the fair price if none yet }
+        ytmBps: { type: integer, format: int64, description: Yield to maturity at `price`; always shown }
+        durationX100: { type: integer, format: int64, description: 'Modified duration, years × 100' }
+        nextCouponAt: { type: [integer, 'null'], format: int64 }
+        couponsPaid: { type: integer }
+        couponsLeft: { type: integer }
+        fairYieldBps: { type: integer, format: int64, description: Policy rate + credit spread for the rating }
+        policyRateBps: { type: integer, format: int64 }
+    RealSource:
+      type: object
+      required: [id, name, terms, sample, delayed]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        url: { type: [string, 'null'] }
+        terms: { type: string, description: What the terms of use allow, as checked }
+        sample: { type: boolean, description: Recorded sample data, not a live feed }
+        delayed: { type: boolean }
+    RealQuote:
+      type: object
+      required: [symbol, base, quoteCurrency, price, scale, asOf, source]
+      properties:
+        symbol: { type: string, examples: [USD/KZT] }
+        base: { type: string }
+        quoteCurrency: { type: string }
+        price: { type: integer, format: int64, description: 'Minor units of quoteCurrency; 52431 with scale 2 = 524.31' }
+        scale: { type: integer }
+        asOf: { type: integer, format: int64, description: Real time (epoch ms) of the quote }
+        source: { $ref: '#/components/schemas/RealSource' }
+    RealPoint:
+      type: object
+      required: [date, price]
+      properties:
+        date: { type: integer, format: int64 }
+        price: { type: integer, format: int64 }
+    RealRateDecision:
+      type: object
+      required: [date, rateBps]
+      properties:
+        date: { type: integer, format: int64 }
+        rateBps: { type: integer, format: int64 }
+    RealBaseRate:
+      type: object
+      required: [bank, rateBps, asOf, history, upcoming, source]
+      properties:
+        bank: { type: string }
+        rateBps: { type: integer, format: int64 }
+        asOf: { type: integer, format: int64 }
+        history: { type: array, items: { $ref: '#/components/schemas/RealRateDecision' } }
+        upcoming: { type: array, items: { type: integer, format: int64 } }
+        source: { $ref: '#/components/schemas/RealSource' }
+    RealWorld:
+      type: object
+      required: [quotes]
+      properties:
+        quotes: { type: array, items: { $ref: '#/components/schemas/RealQuote' } }
+        baseRate:
+          oneOf:
+            - { $ref: '#/components/schemas/RealBaseRate' }
+            - { type: 'null' }
+    OpenPaperRequest:
+      type: object
+      required: [symbol, side, qty]
+      properties:
+        symbol: { type: string }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64, minimum: 1 }
+    PaperPosition:
+      type: object
+      required: [paperId, symbol, side, qty, entryPrice, openedAt, quotedAt, source, open, currentPrice, pnl]
+      description: A paper («учебная») position; no money moves. P&L in minor units of the quote currency.
+      properties:
+        paperId: { type: integer, format: int64 }
+        symbol: { type: string }
+        side: { $ref: '#/components/schemas/Side' }
+        qty: { type: integer, format: int64 }
+        entryPrice: { type: integer, format: int64 }
+        openedAt: { type: integer, format: int64, description: Simulation time it was opened }
+        quotedAt: { type: integer, format: int64, description: Real time of the quote used }
+        source: { type: string }
+        open: { type: boolean }
+        exitPrice: { type: [integer, 'null'], format: int64 }
+        closedAt: { type: [integer, 'null'], format: int64 }
+        currentPrice: { type: integer, format: int64 }
+        pnl: { type: integer, format: int64 }
+    LocalisedName:
+      type: object
+      required: [ru, en]
+      properties:
+        ru: { type: string }
+        en: { type: string }
+    CatalogueItem:
+      type: object
+      required: [instrument, kind, real]
+      properties:
+        instrument: { type: string }
+        kind: { type: string, enum: [STOCK, FX, BOND] }
+        real: { $ref: '#/components/schemas/LocalisedName' }
+        lore:
+          description: Only from the game BFF
+          oneOf:
+            - { $ref: '#/components/schemas/LocalisedName' }
+            - { type: 'null' }
+    GlossaryTerm:
+      type: object
+      required: [id, real, definition]
+      properties:
+        id: { type: string }
+        real: { $ref: '#/components/schemas/LocalisedName' }
+        definition: { $ref: '#/components/schemas/LocalisedName' }
+        lore:
+          description: Only from the game BFF
+          oneOf:
+            - { $ref: '#/components/schemas/LocalisedName' }
+            - { type: 'null' }
