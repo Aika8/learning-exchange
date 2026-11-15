@@ -23,7 +23,7 @@ func _ready() -> void:
 	ship.position = Archipelago.PIER_END + Vector3(0, 1.2, 4.5)
 	ship.rotation.y = PI / 2
 	add_child(ship)
-	var mara := Proc.figure(Color("7a4e8a"), Color("2a3550"))
+	var mara := Proc.figure(Color("7a4e8a"), Color("2a3550"), "trader")
 	mara.position = Archipelago.MARA_POS
 	mara.rotation.y = -PI / 2
 	add_child(mara)

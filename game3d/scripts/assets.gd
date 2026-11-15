@@ -55,6 +55,16 @@ static func model(name: String) -> Node3D:
 	return s.instantiate() if s != null else null
 
 
+## A MakeHuman character (CC0, posed, game-engine skeleton) from assets/models/people, or null.
+static func person(name: String) -> Node3D:
+	var key := "people/" + name
+	if not _scenes.has(key):
+		var p := "%s/models/people/%s.glb" % [ROOT, name]
+		_scenes[key] = load(p) if ResourceLoader.exists(p) else null
+	var s: PackedScene = _scenes[key]
+	return s.instantiate() if s != null else null
+
+
 ## Places a model; returns it (or null) so callers can tweak it.
 static func put(parent: Node3D, name: String, pos: Vector3, yaw: float = 0.0, scale: float = 1.0) -> Node3D:
 	var n := model(name)
