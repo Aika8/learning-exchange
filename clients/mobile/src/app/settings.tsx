@@ -28,6 +28,10 @@ export default function Settings() {
       <View style={{ flexDirection: 'row' }}>
         <Button testID="open-statement" title={t('home.statement')} onPress={() => router.push('/statement')} />
       </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button testID="open-calendar" title={t('calendar.title')} color={c.accent} onPress={() => router.push('/calendar')} />
+        <Button testID="open-bonds" title={t('bonds.title')} color={c.accent} onPress={() => router.push('/bonds')} />
+      </View>
       <View style={{ flexDirection: 'row' }}>
         <Button
           testID="logout"

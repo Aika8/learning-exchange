@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Pressable, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { newIdempotencyKey } from '../m2b';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError, call, type Instrument, type Schemas } from '../api/client';
 import { refetchAccount } from '../hooks';
@@ -45,7 +46,7 @@ export function StopTicket({ instrument, initial, onClose }: { instrument: Instr
   };
 
   const place = useMutation({
-    mutationFn: (b: Schemas['PlaceConditionalRequest']) => call(api.POST('/conditional-orders', { body: b })),
+    mutationFn: (b: Schemas['PlaceConditionalRequest']) => call(api.POST('/conditional-orders', { params: { header: { 'Idempotency-Key': newIdempotencyKey() } }, body: b })),
     onSuccess: (o) => {
       setResult({ ok: true, text: t('stops.placed', { id: o.conditionalId, state: t(`cstate.${o.state}`) }) });
       refetchAccount(qc);

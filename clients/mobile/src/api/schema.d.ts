@@ -282,6 +282,283 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/instruments/{instrumentId}/candles": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily candles (one bank day each) from trades, oldest first */
+        get: operations["getCandles"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/economy/calendar": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Economic calendar — rate decisions, company reports, consensus, dividend ex-dates, coupons, maturities, storms
+         * @description Future entries show only what is public in advance: the date, the kind and — once published — the consensus.
+         *     Results (`actual`) appear when they happened. Storms are shown only after they start.
+         */
+        get: operations["getEconomicCalendar"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/economy/rates": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Central bank — policy rate, inflation, real rate, deposit rate, next decision, market regime */
+        get: operations["getMacro"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Listed companies with key metrics and their last report against consensus */
+        get: operations["listCompanies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/companies/{instrumentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One company card */
+        get: operations["getCompany"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bonds": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Bonds with yield to maturity (always shown), duration, rating and status */
+        get: operations["listBonds"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bonds/{instrumentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** One bond */
+        get: operations["getBond"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/real-world": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Real-world quotes and the central bank base rate, read-only, with source and time (ADR-0015) */
+        get: operations["getRealWorld"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/real-world/history": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Daily history of a real-world quote */
+        get: operations["getRealHistory"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/real-world/paper-positions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My paper («учебные») positions on real quotes, with P&L at the current real price */
+        get: operations["listPaperPositions"];
+        put?: never;
+        /** Open a paper position at the current real price (no money moves) */
+        post: operations["openPaperPosition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/real-world/paper-positions/{paperId}/close": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /** Close a paper position at the current real price */
+        post: operations["closePaperPosition"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bff/mobile/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mobile BFF — instruments with real names only (ADR-0004, ADR-0012) */
+        get: operations["getMobileCatalogue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bff/mobile/glossary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mobile BFF — finance glossary, real terms only */
+        get: operations["getMobileGlossary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bff/mobile/companies/{instrumentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Mobile BFF — company card plus a gap-risk warning for my stops before a report night */
+        get: operations["getMobileCompanyCard"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bff/game/catalogue": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Game BFF — instruments with real names and lore names (real first; ADR-0012) */
+        get: operations["getGameCatalogue"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/bff/game/glossary": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Game BFF — glossary with real and lore names */
+        get: operations["getGameGlossary"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clock": {
         parameters: {
             query?: never;
@@ -347,6 +624,10 @@ export interface components {
              * @example AMBER-SPARK
              */
             id: string;
+            /** @enum {string} */
+            kind: "STOCK" | "FX" | "BOND";
+            /** @description false while halted (report night) or after a bond is repaid */
+            tradingOpen: boolean;
             /** @example SILK */
             base: string;
             /** @example SPARK */
@@ -655,7 +936,7 @@ export interface components {
             deposits: components["schemas"]["SavingsDeposit"][];
         };
         /** @enum {string} */
-        StatementKind: "DEPOSIT" | "TRADE" | "MARGIN_OPEN" | "MARGIN_CLOSE" | "STOP_OUT" | "SAVINGS_OPEN" | "SAVINGS_CLOSE" | "INTEREST";
+        StatementKind: "DEPOSIT" | "TRADE" | "MARGIN_OPEN" | "MARGIN_CLOSE" | "STOP_OUT" | "SAVINGS_OPEN" | "SAVINGS_CLOSE" | "INTEREST" | "DIVIDEND" | "COUPON" | "REDEMPTION";
         StatementLine: {
             /** Format: int64 */
             ts: number;
@@ -680,7 +961,7 @@ export interface components {
             amount: number;
             /**
              * Format: int64
-             * @description Fee I paid
+             * @description Fee I paid, quote minor units
              */
             fee: number;
             /**
@@ -690,7 +971,7 @@ export interface components {
             spreadPaid: number;
             /**
              * Format: int64
-             * @description Profit realised by this line (sells
+             * @description Profit realised by this line (sells, margin close)
              */
             realisedPnl: number;
             /** @description Trade of a leveraged position */
@@ -712,7 +993,7 @@ export interface components {
             taxRateBps: number;
             /**
              * Format: int64
-             * @description max(0, realisedPnl) × 10%, rounded down
+             * @description (max(0, realisedPnl) + payouts) × 10%, rounded down
              */
             tax: number;
             /**
@@ -720,6 +1001,11 @@ export interface components {
              * @description Deposit interest earned (not taxed here)
              */
             interest: number;
+            /**
+             * Format: int64
+             * @description Dividends and coupons received (taxed 10%)
+             */
+            payouts: number;
         };
         Statement: {
             /** Format: int64 */
@@ -783,7 +1069,7 @@ export interface components {
             data: components["schemas"]["Clock"];
         };
         AccountChanged: {
-            reasons: ("ORDER" | "TRADE" | "DEPOSIT" | "CONDITIONAL" | "MARGIN" | "SAVINGS")[];
+            reasons: ("ORDER" | "TRADE" | "DEPOSIT" | "CONDITIONAL" | "MARGIN" | "SAVINGS" | "PAYOUT" | "PAPER")[];
         };
         /** @description Something changed in the account; refetch `/me` and `/orders`. */
         WsAccountMessage: {
@@ -793,6 +1079,363 @@ export interface components {
         WsErrorMessage: {
             channel: string;
             error: components["schemas"]["Problem"];
+        };
+        Candle: {
+            /**
+             * Format: int64
+             * @description Start of the bank day (simulation ms)
+             */
+            start: number;
+            /** Format: int64 */
+            open: number;
+            /** Format: int64 */
+            high: number;
+            /** Format: int64 */
+            low: number;
+            /** Format: int64 */
+            close: number;
+            /** Format: int64 */
+            volume: number;
+        };
+        /** @enum {string} */
+        CalendarKind: "RATE_DECISION" | "EARNINGS" | "CONSENSUS" | "DIVIDEND_EX" | "COUPON" | "MATURITY" | "STORM";
+        CalendarEntry: {
+            /** Format: int64 */
+            at: number;
+            kind: components["schemas"]["CalendarKind"];
+            instrument?: string | null;
+            /** @description It already happened */
+            done: boolean;
+            /**
+             * Format: int64
+             * @description RATE_DECISION: expected rate (bps); EARNINGS/CONSENSUS: expected EPS (minor units)
+             */
+            consensus?: number | null;
+            /**
+             * Format: int64
+             * @description Result once done: rate (bps), EPS, dividend per share, coupon per bond, face value, storm volatility %
+             */
+            actual?: number | null;
+            /**
+             * Format: int64
+             * @description RATE_DECISION: rate before (bps)
+             */
+            previous?: number | null;
+            /** Format: int64 */
+            inflationBps?: number | null;
+        };
+        RateDecision: {
+            /** Format: int64 */
+            ts: number;
+            number: number;
+            /** Format: int64 */
+            rateBps: number;
+            /** Format: int64 */
+            previousBps: number;
+            /** Format: int64 */
+            consensusBps: number;
+            /** Format: int64 */
+            inflationBps: number;
+        };
+        Macro: {
+            /**
+             * Format: int64
+             * @description Central bank rate, 1600 = 16%
+             */
+            policyRateBps: number;
+            /** Format: int64 */
+            inflationBps: number;
+            /**
+             * Format: int64
+             * @description Policy rate minus inflation
+             */
+            realRateBps: number;
+            /**
+             * Format: int64
+             * @description Rate offered on new deposits
+             */
+            savingsRateBps: number;
+            /** @enum {string} */
+            regime: "CALM" | "STORM";
+            /** @description 100 = normal; a storm is 200–400 */
+            volatilityPct: number;
+            /** Format: int64 */
+            nextDecisionAt?: number | null;
+            /** Format: int64 */
+            nextConsensusBps?: number | null;
+            decisions: components["schemas"]["RateDecision"][];
+        };
+        /** @description Quarterly report; money in SPARK minor units, EPS per share */
+        EarningsReport: {
+            /** Format: int64 */
+            ts: number;
+            season: number;
+            /** Format: int64 */
+            revenue: number;
+            /** Format: int64 */
+            netProfit: number;
+            /** Format: int64 */
+            eps: number;
+            /** Format: int64 */
+            debt: number;
+            /** Format: int64 */
+            operatingCashFlow: number;
+            /** Format: int64 */
+            dividendPerShare: number;
+            /**
+             * Format: int64
+             * @description Management's EPS forecast for the next season
+             */
+            guidanceEps: number;
+            /** Format: int64 */
+            sharesOutstanding: number;
+            /** Format: int64 */
+            consensusEps: number;
+        };
+        Consensus: {
+            /** Format: int64 */
+            ts: number;
+            season: number;
+            /** Format: int64 */
+            reportAt: number;
+            /** Format: int64 */
+            revenue: number;
+            /** Format: int64 */
+            netProfit: number;
+            /** Format: int64 */
+            eps: number;
+        };
+        InsiderTrade: {
+            /** Format: int64 */
+            ts: number;
+            insider: string;
+            /** @enum {string} */
+            role: "CEO" | "CFO" | "DIRECTOR";
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            qty: number;
+            /** Format: int64 */
+            price: number;
+        };
+        Dividend: {
+            /** Format: int64 */
+            perShare: number;
+            /**
+             * Format: int64
+             * @description Holders at this time are paid; the price drops by about the dividend
+             */
+            exDate: number;
+            paid: boolean;
+        };
+        Company: {
+            instrument: string;
+            /** Format: int64 */
+            sharesOutstanding: number;
+            /** Format: int64 */
+            lastPrice?: number | null;
+            /**
+             * Format: int64
+             * @description EPS of the last four seasons (annualised if fewer)
+             */
+            epsTtm?: number | null;
+            /**
+             * Format: int64
+             * @description P/E × 100 (1250 = 12.5); null if EPS ≤ 0
+             */
+            peX100?: number | null;
+            /**
+             * Format: int64
+             * @description Debt / yearly net profit × 100
+             */
+            debtToProfitX100?: number | null;
+            /** Format: int64 */
+            dividendYieldBps?: number | null;
+            lastReport?: components["schemas"]["EarningsReport"] | null;
+            /**
+             * Format: int64
+             * @description (EPS − consensus) / |consensus|
+             */
+            surpriseBps?: number | null;
+            /** @description Consensus for the coming report, once published */
+            consensus?: components["schemas"]["Consensus"] | null;
+            /** Format: int64 */
+            nextReportAt?: number | null;
+            /** @description false on a report night */
+            tradingOpen: boolean;
+            insiderTrades: components["schemas"]["InsiderTrade"][];
+            dividends: components["schemas"]["Dividend"][];
+            reports: components["schemas"]["EarningsReport"][];
+        };
+        /** @description A report comes out tonight while the market is closed; the open may gap through these stops */
+        GapWarning: {
+            /** Format: int64 */
+            reportAt: number;
+            conditionalIds: number[];
+        };
+        MobileCompanyCard: {
+            company: components["schemas"]["Company"];
+            name: components["schemas"]["LocalisedName"];
+            gapWarning?: components["schemas"]["GapWarning"] | null;
+        };
+        Bond: {
+            instrument: string;
+            /**
+             * Format: int64
+             * @description Repaid at maturity, SPARK minor units per bond
+             */
+            faceValue: number;
+            /**
+             * Format: int64
+             * @description Coupon a year, % of face
+             */
+            couponBps: number;
+            couponsPerYear: number;
+            /** Format: int64 */
+            couponPerUnit: number;
+            /** Format: int64 */
+            maturityAt: number;
+            /** @enum {string} */
+            rating: "AAA" | "AA" | "A" | "BBB" | "BB" | "B" | "CCC";
+            /** @enum {string} */
+            status: "ACTIVE" | "DEFAULTED" | "REDEEMED";
+            /** Format: int64 */
+            lastPrice?: number | null;
+            /**
+             * Format: int64
+             * @description Last trade price, or the fair price if none yet
+             */
+            price: number;
+            /**
+             * Format: int64
+             * @description Yield to maturity at `price`; always shown
+             */
+            ytmBps: number;
+            /**
+             * Format: int64
+             * @description Modified duration, years × 100
+             */
+            durationX100: number;
+            /** Format: int64 */
+            nextCouponAt?: number | null;
+            couponsPaid: number;
+            couponsLeft: number;
+            /**
+             * Format: int64
+             * @description Policy rate + credit spread for the rating
+             */
+            fairYieldBps: number;
+            /** Format: int64 */
+            policyRateBps: number;
+        };
+        RealSource: {
+            id: string;
+            name: string;
+            url?: string | null;
+            /** @description What the terms of use allow, as checked */
+            terms: string;
+            /** @description Recorded sample data, not a live feed */
+            sample: boolean;
+            delayed: boolean;
+        };
+        RealQuote: {
+            /** @example USD/KZT */
+            symbol: string;
+            base: string;
+            quoteCurrency: string;
+            /**
+             * Format: int64
+             * @description Minor units of quoteCurrency; 52431 with scale 2 = 524.31
+             */
+            price: number;
+            scale: number;
+            /**
+             * Format: int64
+             * @description Real time (epoch ms) of the quote
+             */
+            asOf: number;
+            source: components["schemas"]["RealSource"];
+        };
+        RealPoint: {
+            /** Format: int64 */
+            date: number;
+            /** Format: int64 */
+            price: number;
+        };
+        RealRateDecision: {
+            /** Format: int64 */
+            date: number;
+            /** Format: int64 */
+            rateBps: number;
+        };
+        RealBaseRate: {
+            bank: string;
+            /** Format: int64 */
+            rateBps: number;
+            /** Format: int64 */
+            asOf: number;
+            history: components["schemas"]["RealRateDecision"][];
+            upcoming: number[];
+            source: components["schemas"]["RealSource"];
+        };
+        RealWorld: {
+            quotes: components["schemas"]["RealQuote"][];
+            baseRate?: components["schemas"]["RealBaseRate"] | null;
+        };
+        OpenPaperRequest: {
+            symbol: string;
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            qty: number;
+        };
+        /** @description A paper («учебная») position; no money moves. P&L in minor units of the quote currency. */
+        PaperPosition: {
+            /** Format: int64 */
+            paperId: number;
+            symbol: string;
+            side: components["schemas"]["Side"];
+            /** Format: int64 */
+            qty: number;
+            /** Format: int64 */
+            entryPrice: number;
+            /**
+             * Format: int64
+             * @description Simulation time it was opened
+             */
+            openedAt: number;
+            /**
+             * Format: int64
+             * @description Real time of the quote used
+             */
+            quotedAt: number;
+            source: string;
+            open: boolean;
+            /** Format: int64 */
+            exitPrice?: number | null;
+            /** Format: int64 */
+            closedAt?: number | null;
+            /** Format: int64 */
+            currentPrice: number;
+            /** Format: int64 */
+            pnl: number;
+        };
+        LocalisedName: {
+            ru: string;
+            en: string;
+        };
+        CatalogueItem: {
+            instrument: string;
+            /** @enum {string} */
+            kind: "STOCK" | "FX" | "BOND";
+            real: components["schemas"]["LocalisedName"];
+            /** @description Only from the game BFF */
+            lore?: components["schemas"]["LocalisedName"] | null;
+        };
+        GlossaryTerm: {
+            id: string;
+            real: components["schemas"]["LocalisedName"];
+            definition: components["schemas"]["LocalisedName"];
+            /** @description Only from the game BFF */
+            lore?: components["schemas"]["LocalisedName"] | null;
         };
     };
     responses: {
@@ -807,6 +1450,11 @@ export interface components {
         };
     };
     parameters: {
+        /**
+         * @description Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+         *     request created instead of creating it again, so a retry after a timeout is safe.
+         */
+        IdempotencyKey: string;
         InstrumentId: string;
     };
     requestBodies: never;
@@ -986,7 +1634,11 @@ export interface operations {
         parameters: {
             query?: never;
             header?: {
-                "Idempotency-Key"?: string;
+                /**
+                 * @description Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+                 *     request created instead of creating it again, so a retry after a timeout is safe.
+                 */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
             };
             path?: never;
             cookie?: never;
@@ -1062,7 +1714,13 @@ export interface operations {
     placeConditionalOrder: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /**
+                 * @description Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+                 *     request created instead of creating it again, so a retry after a timeout is safe.
+                 */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -1136,7 +1794,13 @@ export interface operations {
     openMarginPosition: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /**
+                 * @description Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+                 *     request created instead of creating it again, so a retry after a timeout is safe.
+                 */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -1211,7 +1875,13 @@ export interface operations {
     openSavings: {
         parameters: {
             query?: never;
-            header?: never;
+            header?: {
+                /**
+                 * @description Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+                 *     request created instead of creating it again, so a retry after a timeout is safe.
+                 */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
             path?: never;
             cookie?: never;
         };
@@ -1285,6 +1955,388 @@ export interface operations {
                 };
             };
             401: components["responses"]["Problem"];
+        };
+    };
+    getCandles: {
+        parameters: {
+            query?: {
+                limit?: number;
+            };
+            header?: never;
+            path: {
+                instrumentId: components["parameters"]["InstrumentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Candles */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Candle"][];
+                };
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    getEconomicCalendar: {
+        parameters: {
+            query?: {
+                /** @description Simulation time (ms); default now minus 30 bank days */
+                from?: number;
+                /** @description Simulation time (ms); default now plus 120 bank days */
+                to?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Calendar entries in time order */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CalendarEntry"][];
+                };
+            };
+        };
+    };
+    getMacro: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Macro state */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Macro"];
+                };
+            };
+        };
+    };
+    listCompanies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Companies */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Company"][];
+                };
+            };
+        };
+    };
+    getCompany: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                instrumentId: components["parameters"]["InstrumentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Company */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Company"];
+                };
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    listBonds: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bonds */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bond"][];
+                };
+            };
+        };
+    };
+    getBond: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                instrumentId: components["parameters"]["InstrumentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Bond */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Bond"];
+                };
+            };
+            404: components["responses"]["Problem"];
+        };
+    };
+    getRealWorld: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Real-world data */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RealWorld"];
+                };
+            };
+        };
+    };
+    getRealHistory: {
+        parameters: {
+            query: {
+                symbol: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Points, oldest first (empty for an unknown symbol) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RealPoint"][];
+                };
+            };
+        };
+    };
+    listPaperPositions: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Positions, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaperPosition"][];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    openPaperPosition: {
+        parameters: {
+            query?: never;
+            header?: {
+                /**
+                 * @description Optional client key, at most 64 characters. A repeated key (same account, same endpoint) returns what the first
+                 *     request created instead of creating it again, so a retry after a timeout is safe.
+                 */
+                "Idempotency-Key"?: components["parameters"]["IdempotencyKey"];
+            };
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["OpenPaperRequest"];
+            };
+        };
+        responses: {
+            /** @description Opened */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaperPosition"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    closePaperPosition: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                paperId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Closed */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["PaperPosition"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+        };
+    };
+    getMobileCatalogue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalogue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueItem"][];
+                };
+            };
+        };
+    };
+    getMobileGlossary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Terms */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GlossaryTerm"][];
+                };
+            };
+        };
+    };
+    getMobileCompanyCard: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                instrumentId: components["parameters"]["InstrumentId"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Card */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MobileCompanyCard"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    getGameCatalogue: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Catalogue */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogueItem"][];
+                };
+            };
+        };
+    };
+    getGameGlossary: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Terms */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["GlossaryTerm"][];
+                };
+            };
         };
     };
     getClock: {
