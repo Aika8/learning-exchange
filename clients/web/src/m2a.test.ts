@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canCancel, collateralPreview, equityPercent, fieldsFor, fillText, phaseOf, queriesFor } from './m2a';
+import { bpsPercent, canCancel, collateralPreview, equityPercent, fieldsFor, fillText, phaseOf, queriesFor } from './m2a';
 
 describe('conditional orders', () => {
   it('fired is not filled', () => {
@@ -40,5 +40,13 @@ describe('account nudges', () => {
   it('refetch M2a queries by reason', () => {
     expect(queriesFor(['MARGIN'])).toContain('margin');
     expect(queriesFor(['ORDER'])).not.toContain('savings');
+  });
+});
+
+describe('rates', () => {
+  it('formats basis points as percent without trailing zeros', () => {
+    expect(bpsPercent(1000, 'en')).toBe('10');
+    expect(bpsPercent(1450, 'en')).toBe('14.5');
+    expect(bpsPercent(1405, 'ru')).toBe('14,05');
   });
 });

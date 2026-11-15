@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import type { Clock } from '../api/client';
 import { useStatement } from '../hooks';
 import { formatMinor } from '../money';
+import { bpsPercent } from '../m2a';
 
 const SCALE = 2; // statement money is in the quote currency (SPARK)
 const PERIODS = { all: null, hour: 3_600_000, day: 86_400_000 } as const;
@@ -46,7 +47,7 @@ export function StatementPanel({ clock }: { clock: Clock | null }) {
                 <td>{money(st.totals.spreadPaid)}</td>
                 <th>{t('statement.pnl')}</th>
                 <td className={st.totals.realisedPnl < 0 ? 'error' : 'ok'}>{money(st.totals.realisedPnl)}</td>
-                <th>{t('statement.tax', { rate: formatMinor(st.totals.taxRateBps, 2, i18n.language) })}</th>
+                <th>{t('statement.tax', { rate: bpsPercent(st.totals.taxRateBps, i18n.language) })}</th>
                 <td>{money(st.totals.tax)}</td>
                 <th>{t('statement.interest')}</th>
                 <td className="ok">{money(st.totals.interest)}</td>

@@ -4,6 +4,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { api, ApiError, unwrap } from '../api/client';
 import { useSavings } from '../hooks';
 import { formatMinor, parseToMinor } from '../money';
+import { bpsPercent } from '../m2a';
 
 const SCALE = 2; // SPARK
 
@@ -40,7 +41,7 @@ export function Savings() {
       {p && (
         <p className="hint" data-testid="savings-product">
           {t('savings.product', {
-            rate: formatMinor(p.rateBps, 2, i18n.language),
+            rate: bpsPercent(p.rateBps, i18n.language),
             asset: p.asset,
             seconds: Math.floor(p.dayMillis / 1000),
           })}
@@ -87,7 +88,7 @@ export function Savings() {
               <td>{money(d.principal)}</td>
               <td className="ok">{money(d.interest)}</td>
               <td>{money(d.balance)}</td>
-              <td>{formatMinor(d.rateBps, 2, i18n.language)}%</td>
+              <td>{bpsPercent(d.rateBps, i18n.language)}%</td>
               <td>{t(`dstatus.${d.status}`)}</td>
               <td>
                 {d.status === 'OPEN' && (

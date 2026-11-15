@@ -72,3 +72,12 @@ export function equityPercent(equity: number, collateral: number): number {
   if (collateral <= 0) return 0;
   return Math.max(0, Math.min(100, Math.floor((equity * 100) / collateral)));
 }
+
+/** Basis points as a percent string: 1000 → "10", 1450 → "14.5" (decimal separator from the locale). */
+export function bpsPercent(bps: number, locale: string): string {
+  const whole = Math.trunc(bps / 100);
+  const frac = Math.abs(bps % 100).toString().padStart(2, '0').replace(/0+$/, '');
+  if (!frac) return String(whole);
+  const decimal = new Intl.NumberFormat(locale).formatToParts(1.5).find((p) => p.type === 'decimal')?.value ?? '.';
+  return `${whole}${decimal}${frac}`;
+}

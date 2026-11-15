@@ -69,3 +69,4 @@ form.row { flex-direction: row; flex-wrap: wrap; align-items: flex-end; gap: 12p
 .meter .mark { position: absolute; left: 50%; top: -2px; bottom: -2px; width: 2px; background: var(--text2); }
 table.totals { margin-bottom: 6px; } table.totals th { font-size: 12px; }
 td .chip { margin-left: 6px; font-size: 11px; }
+.card h2 .segmented { font-size: 12px; font-weight: 400; }
