@@ -31,7 +31,10 @@
     "statement": "Statement",
     "fxAccount": "Currency account",
     "funds": "Funds",
-    "review": "Session review"
+    "review": "Session review",
+    "assistant": "Assistant",
+    "achievements": "Achievements",
+    "plan": "My plan"
   },
   "instrument": {
     "kind": "Practice instrument",
@@ -512,5 +515,73 @@
     "none": "Not noted",
     "orders": "orders: {{count}}",
     "wins": "in profit: {{count}}"
+  },
+  "assistant": {
+    "title": "Assistant",
+    "intro": "Ask about your own numbers: statement, positions, journal, reports and the central bank. It explains, it does not advise.",
+    "placeholder": "Your question",
+    "ask": "Ask",
+    "sourceModel": "Answered by {{model}} from your facts",
+    "sourceTemplate": "Template answer from your facts",
+    "guarded": "advice filtered out",
+    "q": {
+      "expectations": "What changed against expectations?",
+      "costs": "How much did I pay in fees and spread?",
+      "session": "How did my session go?"
+    }
+  },
+  "achievements": {
+    "title": "Achievements",
+    "intro": "Shared with the game «Летопись Ветров»: the same account, the same events.",
+    "FIRST_TRADE": {
+      "title": "First trade",
+      "desc": "One of your orders was filled"
+    },
+    "FIRST_STOP": {
+      "title": "Anchor dropped",
+      "desc": "You placed a stop or another conditional order"
+    },
+    "STOP_FIRED": {
+      "title": "The Anchor held",
+      "desc": "A stop of yours triggered"
+    },
+    "JOURNAL_5": {
+      "title": "Ship's log",
+      "desc": "Five orders with a journal note"
+    },
+    "DIVERSIFIED_3": {
+      "title": "Three harbours",
+      "desc": "Traded three different instruments"
+    },
+    "FIRST_SAVINGS": {
+      "title": "Saver",
+      "desc": "Opened a savings deposit"
+    },
+    "FIRST_DIVIDEND": {
+      "title": "First dividend",
+      "desc": "Received a dividend"
+    }
+  },
+  "plan": {
+    "rebalanceTitle": "Rebalancing reminder",
+    "rebalanceIntro": "Set target shares. Twice a year the app checks whether a share drifted by more than 5 percentage points.",
+    "actual": "now {{pct}}",
+    "target": "Target, %",
+    "noTargets": "No targets yet.",
+    "due": "Time to look: drifted more than 5 p.p. — {{list}}.",
+    "withinBand": "All shares are within 5 p.p. of the targets.",
+    "notYet": "Next check after {{date}}.",
+    "checked": "I checked",
+    "dcaTitle": "Lump sum vs DCA",
+    "dcaIntro": "Invest the whole amount at once, or in equal parts on consecutive days? Computed over every start in the price history, not a picked one.",
+    "amount": "Amount, SPARK",
+    "windows": "Starts tested",
+    "lumpWins": "Lump sum ended higher",
+    "avgEdge": "Average edge of the lump sum",
+    "worstLump": "Worst lump sum",
+    "worstDca": "Worst DCA",
+    "notEnough": "Not enough history yet ({{count}} days).",
+    "honest": "Statistics of this simulated series only. Past prices do not tell future ones; DCA lowers the regret of a bad start, a lump sum is in the market longer.",
+    "parts": "parts: {{count}}"
   }
 }

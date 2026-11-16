@@ -638,6 +638,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/assistant/ask": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Ask «Помощник» (app) or «Летописец» (game) a question about my own facts (ADR-0013)
+         * @description The server computes the facts from my account (statement totals, balances, open positions, trade-journal review,
+         *     the last rate decision and company reports against their consensus) and, for the game, takes the client's
+         *     SessionFacts as data. A language model only narrates those facts when a key is configured; without a key, or when
+         *     the model fails or its text looks like advice, a template answers. Never investment advice; the disclaimer is
+         *     always returned and must be shown.
+         */
+        post: operations["askAssistant"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/achievements": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** My achievements, shared by the app and the game (a projection of my account's events) */
+        get: operations["listAchievements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clock": {
         parameters: {
             query?: never;
@@ -1614,6 +1655,67 @@ export interface components {
              * @description Average R × 100 over the orders with a planned risk
              */
             expectancyRx100?: number | null;
+        };
+        AssistantQuestion: {
+            question: string;
+            /**
+             * @default ru
+             * @enum {string}
+             */
+            lang: "ru" | "en";
+            /**
+             * @description HELPER: real words (app, web); CHRONICLER: lore words (game)
+             * @default HELPER
+             * @enum {string}
+             */
+            persona: "HELPER" | "CHRONICLER";
+            game?: components["schemas"]["GameSessionFacts"];
+        };
+        /** @description The game's SessionFacts for the day (ADR-0023), passed as data only. Money in minor units. */
+        GameSessionFacts: {
+            voyages?: number;
+            wins?: number;
+            /** Format: int64 */
+            expectancyRx100?: number | null;
+            /** Format: int64 */
+            fees?: number;
+            /** Format: int64 */
+            spreadPaid?: number;
+            /** Format: int64 */
+            result?: number;
+            /** Format: int64 */
+            dayReturnBps?: number | null;
+            /** Format: int64 */
+            basketReturnBps?: number | null;
+            gapsThroughStop?: number;
+        };
+        AssistantFact: {
+            /** @description Stable fact key, e.g. statement.fees; clients may translate it */
+            key: string;
+            /** @description Number (minor units, bps or ×100) or code as text */
+            value: string;
+        };
+        AssistantAnswer: {
+            answer: string;
+            /** @enum {string} */
+            source: "CLAUDE" | "TEMPLATE";
+            model?: string | null;
+            disclaimer: string;
+            /** @description True when the model text was dropped by the advice guard (or the question asked for advice) */
+            guarded: boolean;
+            facts: components["schemas"]["AssistantFact"][];
+        };
+        Achievement: {
+            /** @enum {string} */
+            id: "FIRST_TRADE" | "FIRST_STOP" | "STOP_FIRED" | "JOURNAL_5" | "DIVERSIFIED_3" | "FIRST_SAVINGS" | "FIRST_DIVIDEND";
+            unlocked: boolean;
+            /**
+             * Format: int64
+             * @description Simulation time it was unlocked
+             */
+            at?: number | null;
+            progress: number;
+            target: number;
         };
         /** @enum {string} */
         FundKind: "INDEX" | "ACTIVE";
@@ -2697,6 +2799,53 @@ export interface operations {
                 };
             };
             404: components["responses"]["Problem"];
+        };
+    };
+    askAssistant: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AssistantQuestion"];
+            };
+        };
+        responses: {
+            /** @description Answer */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssistantAnswer"];
+                };
+            };
+            400: components["responses"]["Problem"];
+            401: components["responses"]["Problem"];
+        };
+    };
+    listAchievements: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Achievements, unlocked or with progress */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Achievement"][];
+                };
+            };
+            401: components["responses"]["Problem"];
         };
     };
     getClock: {

@@ -21,7 +21,7 @@ export function useMe() {
 
 /** Account nudges (ORDER, TRADE, DEPOSIT, CONDITIONAL, MARGIN, SAVINGS) all mean «refetch what the account shows». */
 export function refetchAccount(qc: QueryClient) {
-  for (const key of ['me', 'orders', 'conditional', 'savings', 'statement']) void qc.invalidateQueries({ queryKey: [key] });
+  for (const key of ['me', 'orders', 'conditional', 'savings', 'statement', 'achievements']) void qc.invalidateQueries({ queryKey: [key] });
 }
 
 export function useConditionalOrders() {
@@ -147,4 +147,9 @@ export function useFund(id: string) {
 
 export function useSessionReview() {
   return useQuery({ queryKey: ['session-review'], queryFn: () => call(api.GET('/session-review')), refetchInterval: 15_000 });
+}
+
+/** M4: achievements shared with the game (a projection of the same account's events). */
+export function useAchievements() {
+  return useQuery({ queryKey: ['achievements'], queryFn: () => call(api.GET('/achievements')) });
 }
