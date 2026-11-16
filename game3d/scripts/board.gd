@@ -20,6 +20,8 @@ var _bars_target: Array[float] = []
 
 func _ready() -> void:
 	var h := (DEPTH * 2 + 1) * ROW_H + 2.6
+	name = "Board"
+	Solid.box(self, Vector3(WIDTH + 0.8, h + 0.8, 0.5), Vector3(0, h * 0.5, -0.12))
 	add_child(Proc.box(Vector3(WIDTH + 0.8, h + 0.8, 0.3), Proc.BRASS, Vector3(0, h * 0.5, -0.2)))
 	var panel := Proc.box(Vector3(WIDTH, h, 0.2), Color("0f141f"), Vector3(0, h * 0.5, -0.02))
 	add_child(panel)
