@@ -31,6 +31,7 @@ func _ready() -> void:
 	if Game.plan != null:
 		_instrument = Game.plan.instrument
 	Archipelago.sky(self, true)
+	Session.limit_ink(1)  # the board must keep its colours: no engraving in the hall
 	HallRoom.build(self)
 	_board = Board.new()
 	_board.position = Vector3(0, 0.6, -9.0)
@@ -65,6 +66,7 @@ func _ready() -> void:
 
 
 func _exit_tree() -> void:
+	Session.limit_ink(2)
 	MarketStream.close()
 
 

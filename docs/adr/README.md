@@ -34,3 +34,4 @@ superseding ADR explaining why reality differed.
 | [0021](0021-scheduled-economy.md) | Seeded economy schedule journalled as decisions; halts, payouts, default | Generator, Event Sourcing, Observer | Accepted |
 | [0022](0022-dividend-dates-funds-and-trade-journal.md) | Dividend dates with tax at source, funds with TER, trade-journal notes — new event types only | Event Sourcing, Projection | Accepted (M2c) |
 | [0023](0023-game3d-day-loop-and-client-session-facts.md) | game3d M3: day loop as a state machine, client day log, SessionFacts as a fold | State machine, Event Sourcing, Projection | Accepted (M3) |
+| [0024](0024-game3d-stylised-lowpoly-with-ink.md) | game3d look: stylised low-poly built in code, faceless silhouettes, ink outline and engraving post-effect; PBR behind `--pbr` | Strategy, Builder | Proposed |

@@ -50,6 +50,8 @@ func _ready() -> void:
 
 func _label(x: float, y: float, size: int, color: Color, align: HorizontalAlignment) -> Label3D:
 	var l := Label3D.new()
+	l.render_priority = 110  # drawn after the ink post-effect (priority 100), so the writing stays readable
+	l.outline_render_priority = 109
 	l.position = Vector3(x, y, 0.16)
 	l.font_size = size
 	l.pixel_size = 0.006
@@ -59,7 +61,6 @@ func _label(x: float, y: float, size: int, color: Color, align: HorizontalAlignm
 	l.shaded = false
 	l.double_sided = false
 	l.no_depth_test = true
-	l.render_priority = 2
 	l.font = Hud.mono()
 	add_child(l)
 	return l

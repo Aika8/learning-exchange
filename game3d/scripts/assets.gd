@@ -12,8 +12,10 @@ static var _scenes: Dictionary = {}
 static var _thinned: Dictionary = {}
 
 
+## True when the downloaded PBR art is on disk and the PBR look is on (`--pbr`, ADR-0024); the default low-poly look
+## uses none of it.
 static func available() -> bool:
-	return ResourceLoader.exists(HDRI)
+	return Style.pbr() and ResourceLoader.exists(HDRI)
 
 
 static func tex(set_name: String, map: String) -> Texture2D:
@@ -48,6 +50,8 @@ static func pbr(set_name: String, tint: Color = Color.WHITE, scale: float = 0.5)
 
 ## Instance of a Poly Haven glTF model, or null when it is not downloaded.
 static func model(name: String) -> Node3D:
+	if not Style.pbr():
+		return null
 	if not _scenes.has(name):
 		var p := "%s/models/%s/%s_1k.gltf" % [ROOT, name, name]
 		_scenes[name] = load(p) if ResourceLoader.exists(p) else null
@@ -64,6 +68,8 @@ static func model(name: String) -> Node3D:
 
 ## A MakeHuman character (CC0, posed, game-engine skeleton) from assets/models/people, or null.
 static func person(name: String) -> Node3D:
+	if not Style.pbr():
+		return null
 	var key := "people/" + name
 	if not _scenes.has(key):
 		var p := "%s/models/people/%s.glb" % [ROOT, name]

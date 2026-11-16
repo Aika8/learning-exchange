@@ -2,6 +2,11 @@
 
 Updated: 2026-11-16, G3D polish after M4. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`.
 
+## G3D style (ADR-0024, Proposed) — `docs/demo/G3D-style.md`
+- Default look is stylised low-poly built in code; people are faceless silhouettes from the concept sheets on a
+  code-made skeleton with the same gait; ink outline by default, engraving on V; `--pbr` keeps the old look.
+- 118 fps average at 1080p on the laptop (display cap 120), GUT 79, world audit 0 problems.
+
 ## G3D polish (after M4) — `docs/demo/G3D-polish.md`
 - World audit (`WorldProbe`, `--audit`): 451 problems before → 0 after on 1270 grid points, 8384 walks, 172 objects
   (holes, falls, walk-through buildings and props, floating props, z-fighting, missing LODs). GUT 59 → 74.

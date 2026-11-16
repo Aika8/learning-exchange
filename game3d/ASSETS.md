@@ -1,5 +1,8 @@
 # game3d — assets and licences
 
+**Since ADR-0024 the default look uses none of the downloads below**: the world and the people are built in code
+(our own work, CC0). The Poly Haven art and the MakeHuman people are used only with `--pbr`.
+
 ## Downloaded CC0 art (ADR-0019)
 
 Not in git. `make assets` downloads every file listed in `game3d/assets.lock` (source URL, size, MD5 published by
@@ -70,6 +73,7 @@ How they are used: `scripts/assets.gd` (paths, fallbacks), `scripts/proc.gd` (`_
 | Island, windmill, wharf, pier and figure meshes; fallback look of everything | Generated in code: `scripts/proc.gd`, `scripts/archipelago.gd`, `scripts/board.gd`, `scripts/hall_room.gd` | Our own work, CC0 |
 | Modular half-timbered houses (plinth, frame, windows with shutters, door, tiled roof, chimney, sign) | Generated in code: `scripts/houses.gd`, `scripts/kit.gd`; materials are the Poly Haven sets above | Our own work, CC0 |
 | Period costumes of the people (tricorn, bandana, coat and tails, sash, slops, skirt, boots, stockings; cloth and stripe materials) | Generated in code: `scripts/costume.gd`, skinned to the MakeHuman rig | Our own work, CC0 |
+| Concept sheets `docs/design/concepts/*.jpg` (reference only, not shipped in the game) | Drawn by an image model from our own brief (`docs/design/concept-prompt.md`), chosen by Aika | Ours; no third-party work copied |
 | Grime and wear decal textures | Painted in code from `FastNoiseLite`: `scripts/decals.gd` | Our own work, CC0 |
 | Colliders, edge fences, navmesh | Generated in code: `scripts/solid.gd`, `scripts/nav.gd` (Godot `NavigationServer3D`) | Our own work; engine MIT |
 | Cloud sea, sail, terrain shaders | `shaders/cloud_sea.gdshader`, `shaders/sail.gdshader`, `shaders/terrain.gdshader` | Our own work, CC0 |

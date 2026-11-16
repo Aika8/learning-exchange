@@ -99,12 +99,12 @@ func _dress() -> void:
 			at.y += Archipelago.silk_ground(at - Archipelago.SILK)
 			Assets.put(self, "wooden_crate_02" if i % 2 else "wooden_crate_01", at, i * 0.4, 1.0)
 		_villager("child", Color("6a9ab0"), Archipelago.SILK + Vector3(2, 0, 4), 9.0)
-		_villager("sailor", Color("4e6fa8"), Archipelago.SILK + Vector3(-12, 0, 12), 8.0)
+		_villager("sailor", Color("4e6fa8"), Archipelago.SILK + Vector3(-12, 0, 12), 8.0, "sailor2")
 		return
-	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2)
+	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2, "mara")
 	mara.name = "Mara"
-	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8).name = "Olva"
-	_npc("oldman", Color("3a3a5a"), HARBOUR_SPOTS["chronicler"][0], 0.6).name = "Chronicler"
+	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8, "olva").name = "Olva"
+	_npc("", Color("3a3a5a"), HARBOUR_SPOTS["chronicler"][0], 0.6, "chronicler").name = "Chronicler"
 	if Assets.put(self, "treasure_chest", HARBOUR_SPOTS["debt"][0], 1.2, 1.0) == null:
 		var chest := Proc.box(Vector3(1.2, 0.7, 0.8), Proc.TIMBER_DARK, HARBOUR_SPOTS["debt"][0] + Vector3(0, 0.35, 0))
 		add_child(chest)
@@ -144,6 +144,8 @@ func _dress() -> void:
 		Solid.post(board, 0.09, 1.2, Vector3(x, 0, 0))
 	Solid.box(board, Vector3(2.4, 1.6, 0.14), Vector3(0, 1.9, 0))
 	var label := Label3D.new()
+	label.render_priority = 110  # drawn after the ink post-effect (priority 100), so the writing stays readable
+	label.outline_render_priority = 109
 	label.text = "BOARD_TREASURY"
 	label.font_size = 40
 	label.outline_size = 8
@@ -152,12 +154,13 @@ func _dress() -> void:
 	board.add_child(label)
 	var homes := [[Vector3(2, 0, 3), 7.0], [Vector3(-6, 0, 2), 9.0], [Vector3(8, 0, 4), 8.0], [Vector3(-3, 0, -3), 10.0], [Vector3(30, 0.2, 2), 6.0]]
 	var who := ["child", "oldman", "sailor", "trader", "sailor"]
+	var roles := ["child", "townsman", "sailor", "trader", "sailor3"]
 	for i in homes.size():  # villagers strolling round the square and the wharf
-		_villager(who[i], Color("8a6a4a"), homes[i][0], homes[i][1])
+		_villager(who[i], Color("8a6a4a"), homes[i][0], homes[i][1], roles[i])
 
 
-func _npc(who: String, coat: Color, pos: Vector3, yaw: float) -> Node3D:
-	var n := Proc.figure(coat, Color("2a3550"), who)
+func _npc(who: String, coat: Color, pos: Vector3, yaw: float, role: String = "") -> Node3D:
+	var n := Proc.figure(coat, Color("2a3550"), who, role)
 	n.position = pos
 	n.rotation.y = yaw
 	add_child(n)
@@ -167,9 +170,10 @@ func _npc(who: String, coat: Color, pos: Vector3, yaw: float) -> Node3D:
 	return n
 
 
-func _villager(who: String, coat: Color, home: Vector3, roam: float) -> void:
+func _villager(who: String, coat: Color, home: Vector3, roam: float, role: String = "") -> void:
 	var v := Villager.new()
 	v.setup(who, coat, home, roam)
+	v.role = role
 	add_child(v)
 	_villagers.append(v)
 
