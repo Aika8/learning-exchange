@@ -58,7 +58,7 @@ func _measure() -> void:
 
 
 func _p(bone: String) -> Vector3:
-	if sk == null:  # the stand-in has no skeleton: joints of a 1.75 m adult, scaled
+	if built:  # a person built in code: joints of a 1.75 m adult, scaled
 		var side := -1.0 if bone.ends_with("_r") else 1.0
 		var j: Vector3 = JOINTS[bone.trim_suffix("_l").trim_suffix("_r")]
 		return Vector3(j.x * side, j.y, j.z) * k
@@ -69,29 +69,56 @@ func _p(bone: String) -> Vector3:
 ## with Blender by tools/people/build.sh, `make assets` cannot download them). No skeleton: it glides and bobs.
 static func stand_in(role: String, tint: Color = Color.WHITE) -> Node3D:
 	var c := Costume.new()
+	c.built = true
 	c.person = Node3D.new()
-	c.person.name = "StandIn"
+	c.person.name = "Person"
 	c.person.set_meta("stand_in", true)
 	c.k = {"child": 0.72, "trader": 0.93, "olva": 0.93, "mara": 0.95, "townsman": 0.97}.get(role, 1.0)
 	c.top = 1.75 * c.k
+	if role != "chronicler":  # the owl stands and has no limbs to move
+		c.sk = c._skeleton()
+		c.person.add_child(c.sk)
 	c._wear(role, tint)
-	if role == "chronicler":
-		c._commit()
-		return c.person
-	c._body(role)
+	if role != "chronicler":
+		c._body(role)
 	c._commit()
 	return c.person
 
 
+## The small skeleton of a built person: the bones the gait (Walker) moves, at the joints of JOINTS, all rest
+## rotations zero. Costume pieces are skinned to these bones by name.
+func _skeleton() -> Skeleton3D:
+	var s := Skeleton3D.new()
+	s.name = "Skeleton3D"
+	var at: Dictionary = {"Root": Vector3.ZERO}
+	for b: Array in BONES:
+		var name: String = b[0]
+		var idx := s.add_bone(name)
+		var pos := Vector3.ZERO if name == "Root" else _p(name)
+		at[name] = pos
+		if b[1] != "":
+			s.set_bone_parent(idx, s.find_bone(b[1]))
+		var rest := Transform3D(Basis(), pos - (at[b[1]] as Vector3 if b[1] != "" else Vector3.ZERO))
+		s.set_bone_rest(idx, rest)
+		s.set_bone_pose_position(idx, rest.origin)
+	return s
+
+
+const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
+	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
+	["lowerarm_r", "upperarm_r"], ["hand_r", "lowerarm_r"], ["thigh_l", "pelvis"], ["calf_l", "thigh_l"], ["foot_l", "calf_l"],
+	["thigh_r", "pelvis"], ["calf_r", "thigh_r"], ["foot_r", "calf_r"]]
 const JOINTS := {"head": Vector3(0, 1.61, 0.03), "neck_01": Vector3(0, 1.5, 0.01), "pelvis": Vector3(0, 0.95, 0), "spine_01": Vector3(0, 1.0, 0),
 	"spine_02": Vector3(0, 1.1, 0), "spine_03": Vector3(0, 1.2, 0), "thigh": Vector3(0.1, 0.94, 0), "calf": Vector3(0.11, 0.51, 0.01),
 	"foot": Vector3(0.11, 0.08, 0), "upperarm": Vector3(0.2, 1.42, 0), "lowerarm": Vector3(0.235, 1.15, 0.01), "hand": Vector3(0.25, 0.9, 0.04)}
+var built := false  ## true for a person built whole in code (no downloaded body under the costume)
 var _bare_arms := false  ## rolled sleeves: the stand-in shows skin on the forearm
 var _bare_calves := false
 var _own: Dictionary = {}  ## stand-in only: what the person's own clothes are made of (top, bot, lea)
 
 
-## The stand-in's body under the costume: head, neck, hands, trunk, arms, legs, shoes.
+## The built person's body under the costume: head, neck, hands, trunk, arms, legs, shoes. No face: the
+## silhouette (hat, coat, sash) says who it is (ADR-0024).
 func _body(role: String) -> void:
 	var skin := _plain("skin", Color("d9a882"), 0.6)
 	var shirt: Material = _own.get("top", cloth(LINEN))
@@ -99,9 +126,6 @@ func _body(role: String) -> void:
 	var shoes: Material = _own.get("lea", leather(LEATHER))
 	var head := Vector3(0, top - 0.115 * k, _p("head").z)
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * k), head))
-	_box("head", skin, Vector3(0.03, 0.045, 0.03) * k, head + Vector3(0, -0.02, 0.105) * k)  # nose
-	for x: float in [-0.04, 0.04]:
-		_ball("head", _plain("eye", Color("2a2420"), 0.4), head + Vector3(x, 0.015, 0.098) * k, 0.012 * k)
 	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child"]:  # hair under the hat or kerchief
 		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara"] else Color("5a3a26"), 0.9), head + Vector3(0, 0.0, -0.012) * k, Vector3(0.106, 0.125, 0.116) * k)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * k, 0.05 * k, 0.048 * k)
@@ -120,8 +144,8 @@ func _body(role: String) -> void:
 
 static func _sphere() -> SphereMesh:
 	var m := SphereMesh.new()
-	m.radial_segments = 16
-	m.rings = 8
+	m.radial_segments = 9
+	m.rings = 5
 	return m
 
 
@@ -256,13 +280,13 @@ func _r_trader(tint: Color) -> void:
 ## Sheet 04, the old man: brown wide hat, long brown coat, green waistcoat, breeches, white stockings, buckled shoes.
 func _r_townsman(tint: Color) -> void:
 	var coat := cloth(Color("7a4f33").lerp(tint, 0.1))
-	_recolour("top", coat if sk != null else cloth(Color("5d6b4a")))  # his own bulky jacket is the coat
+	_recolour("top", coat if not built else cloth(Color("5d6b4a")))  # his own bulky jacket is the coat
 	_recolour("bot", cloth(Color("5e4633")))
 	_recolour("lea", leather(SHOE))
 	_hide("fedora")
 	_breeches(cloth(Color("5e4633")), 0.108)
 	_stockings(cloth(Color("e8e0cc")))
-	if sk == null:
+	if built:
 		_open_coat(coat, cloth(GOLD.darkened(0.2)), _p("calf_l").y, 60.0, false)
 		_coat_sleeves(coat, cloth(GOLD.darkened(0.2)), cloth(LINEN))
 	else:
@@ -366,7 +390,7 @@ static func _glow() -> Material:
 ## Replaces the texture of the clothing surfaces whose material name ends in `part` (top, bot, lea) with `m`,
 ## keeping the folds of the original normal map.
 func _recolour(part: String, m: Material) -> void:
-	if sk == null:
+	if built:
 		_own[part] = m
 		return
 	for mi: MeshInstance3D in sk.find_children("*", "MeshInstance3D", true, false):
@@ -384,7 +408,7 @@ func _recolour(part: String, m: Material) -> void:
 
 
 func _hide(what: String) -> void:
-	if sk == null:
+	if built:
 		return
 	for mi: MeshInstance3D in sk.find_children("*", "MeshInstance3D", true, false):
 		if str(mi.name).contains(what):
@@ -518,8 +542,8 @@ func _slops(m: Material) -> void:
 
 ## Bare calves below slops or breeches: the downloaded body wears long trousers, so skin goes over them.
 func _bare_legs() -> void:
-	if sk == null:
-		return  # the stand-in draws its own calves in skin
+	if built:
+		return  # the built person draws its own calves in skin
 	for s: String in ["l", "r"]:
 		var knee := _p("calf_" + s)
 		var ankle := _p("foot_" + s)
@@ -666,7 +690,6 @@ func _tricorn(m: Material, trim: Material) -> void:
 		brim.cap_top = false
 		brim.cap_bottom = part[0] == m
 		_add("head", part[0], brim, Transform3D(turn, c + Vector3(0, (float(part[1]) + float(part[2])) * 0.5 - 0.01, 0) * k))
-	_ball("head", metal(), c + Vector3(0.12, 0.05, 0.045) * k, 0.014 * k)
 
 
 ## A felt hat with a wide round brim that droops a little.
@@ -794,7 +817,7 @@ void fragment() {
 # ---------------------------------------------------------------- mesh assembly
 
 ## A tube from `a` to `b` (skeleton space), radius `r0` at `a` and `r1` at `b`, squashed front-to-back by `flat`.
-func _tube(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, caps: bool = false, sides: int = 14) -> void:
+func _tube(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, caps: bool = false, sides: int = 8) -> void:
 	var c := CylinderMesh.new()
 	c.bottom_radius = r0
 	c.top_radius = r1
@@ -812,7 +835,7 @@ func _tube(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: flo
 
 ## An open or closed shell round the vertical line from `a` up to `b`: radius `r0` at `a`, `r1` at `b`, squashed
 ## front-to-back by `flat`, covering the angles `from`..`to` in degrees, measured from the front towards the left.
-func _shell(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, from: float = 0.0, to: float = 360.0, sides: int = 16) -> void:
+func _shell(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, from: float = 0.0, to: float = 360.0, sides: int = 10) -> void:
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var steps := maxi(1, int(ceil(sides * absf(to - from) / 360.0)))
@@ -835,9 +858,12 @@ func _box(bone: String, m: Material, size: Vector3, at: Vector3, rot: Vector3 = 
 
 
 func _ball(bone: String, m: Material, at: Vector3, r: float) -> void:
+	if r < 0.02 * k:  # a button or a chain link: a tiny cube reads the same and costs 12 triangles
+		_box(bone, m, Vector3.ONE * r * 1.7, at, Vector3(0.6, 0.6, 0))
+		return
 	var s := SphereMesh.new()
-	s.radial_segments = 10
-	s.rings = 5
+	s.radial_segments = 8
+	s.rings = 4
 	_add(bone, m, s, Transform3D(Basis().scaled(Vector3.ONE * r * 2.0), at))
 
 
@@ -847,8 +873,8 @@ func _dome(bone: String, m: Material, at: Vector3, r: Vector3) -> void:
 	s.is_hemisphere = true
 	s.radius = 1.0
 	s.height = 1.0
-	s.radial_segments = 14
-	s.rings = 6
+	s.radial_segments = 10
+	s.rings = 3
 	_add(bone, m, s, Transform3D(Basis().scaled(r), at))
 
 
@@ -883,7 +909,8 @@ func _add(bone: String, m: Material, mesh: Mesh, xf: Transform3D) -> void:
 	_parts[m] = {"v": v, "n": n, "u": u, "b": bones, "w": weights, "i": index}  # packed arrays are values: store them back
 
 
-## One skinned mesh for the whole costume, a surface per material.
+## One mesh for the whole costume, a surface per material; skinned when there is a skeleton. A built person is
+## faceted: every triangle gets its own flat normal, the low-poly look of ADR-0024.
 func _commit() -> void:
 	if _parts.is_empty():
 		return
@@ -892,13 +919,42 @@ func _commit() -> void:
 		var part: Dictionary = _parts[m]
 		var arrays := []
 		arrays.resize(Mesh.ARRAY_MAX)
-		arrays[Mesh.ARRAY_VERTEX] = part["v"]
-		arrays[Mesh.ARRAY_NORMAL] = part["n"]
-		arrays[Mesh.ARRAY_TEX_UV] = part["u"]
-		if sk != null:
+		if built:
+			var v: PackedVector3Array = part["v"]
+			var b: PackedInt32Array = part["b"]
+			var idx: PackedInt32Array = part["i"]
+			var fv := PackedVector3Array()
+			var fn := PackedVector3Array()
+			var u: PackedVector2Array = part["u"]
+			var fu := PackedVector2Array()
+			var fb := PackedInt32Array()
+			var fw := PackedFloat32Array()
+			for t in range(0, idx.size(), 3):
+				var p0 := v[idx[t]]
+				var p1 := v[idx[t + 1]]
+				var p2 := v[idx[t + 2]]
+				var n := (p2 - p0).cross(p1 - p0).normalized()
+				if n.dot((part["n"] as PackedVector3Array)[idx[t]]) < 0.0:
+					n = -n
+				for j in 3:
+					fv.append(v[idx[t + j]])
+					fn.append(n)
+					fu.append(u[idx[t + j]])
+					fb.append_array(PackedInt32Array([b[idx[t + j] * 4], 0, 0, 0]))
+					fw.append_array(PackedFloat32Array([1.0, 0.0, 0.0, 0.0]))
+			arrays[Mesh.ARRAY_VERTEX] = fv
+			arrays[Mesh.ARRAY_NORMAL] = fn
+			arrays[Mesh.ARRAY_TEX_UV] = fu
+			if sk != null:
+				arrays[Mesh.ARRAY_BONES] = fb
+				arrays[Mesh.ARRAY_WEIGHTS] = fw
+		else:
+			arrays[Mesh.ARRAY_VERTEX] = part["v"]
+			arrays[Mesh.ARRAY_NORMAL] = part["n"]
+			arrays[Mesh.ARRAY_TEX_UV] = part["u"]
 			arrays[Mesh.ARRAY_BONES] = part["b"]
 			arrays[Mesh.ARRAY_WEIGHTS] = part["w"]
-		arrays[Mesh.ARRAY_INDEX] = part["i"]
+			arrays[Mesh.ARRAY_INDEX] = part["i"]
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		mesh.surface_set_material(mesh.get_surface_count() - 1, m)
 	var mi := MeshInstance3D.new()
@@ -911,4 +967,3 @@ func _commit() -> void:
 	mi.skin = sk.create_skin_from_rest_transforms()
 	sk.add_child(mi)
 	mi.skeleton = NodePath("..")
-	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED

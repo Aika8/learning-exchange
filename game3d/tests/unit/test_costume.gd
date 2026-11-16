@@ -53,21 +53,45 @@ func test_the_captain_wears_a_hat_the_townsman_does_not_keep_the_fedora() -> voi
 			assert_false(mi.visible, "the modern hat is hidden")
 
 
-func test_the_stand_in_wears_the_same_costume_when_the_people_are_missing() -> void:
+func test_people_are_built_in_code_with_a_skeleton_the_gait_can_move() -> void:
 	var looks: Dictionary = {}
 	for role: String in ROLES:
-		var p := Costume.stand_in(role, Color("8a6a4a"))
+		var p := Proc.figure(Color("8a6a4a"), Color("2a3550"), ROLES[role], role)
 		add_child_autofree(p)
 		var mesh: MeshInstance3D = p.find_child("Costume", true, false)
 		assert_not_null(mesh, role)
-		assert_null(mesh.skin, role + ": the stand-in has no skeleton")
+		assert_not_null(mesh.skin, role + ": skinned to the skeleton built in code")
+		var walker := Walker.attach(p)
+		assert_true(walker.animated(), role + ": the gait with foot IK drives it")
+		var sk: Skeleton3D = p.find_children("*", "Skeleton3D", true, false)[0]
+		var foot := sk.find_bone("foot_l")
+		var rest := sk.get_bone_global_pose(foot).origin
+		for i in 20:
+			walker.step(0.016, 4.2)
+		assert_gt(sk.get_bone_global_pose(foot).origin.distance_to(rest), 0.05, role + ": the foot moves when walking")
 		var size := mesh.get_aabb().size
 		assert_between(size.y, 1.1, 2.1, role + " is person-sized")
 		looks["%d/%s" % [mesh.mesh.get_surface_count(), str(size.snapped(Vector3.ONE * 0.01))]] = true
-	assert_eq(looks.size(), ROLES.size(), "every role looks different (not five copies of one figure)")
-	var captain := Costume.stand_in("captain")
-	add_child_autofree(captain)
-	assert_gt((captain.find_child("Costume", true, false) as MeshInstance3D).get_aabb().end.y, 1.75, "the tricorn is on")
+	assert_eq(looks.size(), ROLES.size(), "every role has its own silhouette (not copies of one figure)")
+
+
+func test_the_default_look_needs_no_downloaded_art() -> void:
+	assert_false(Style.pbr(), "low-poly is the default (ADR-0024)")
+	assert_false(Assets.available())
+	assert_null(Assets.person("sailor"), "no MakeHuman people in the default look")
+
+
+func test_the_ink_effect_has_three_modes_and_the_hall_caps_it() -> void:
+	var was: int = Session.ink_mode
+	Session.set_ink(2)
+	var m: ShaderMaterial = (Session.get_node("Ink") as MeshInstance3D).material_override
+	assert_eq(int(m.get_shader_parameter("mode")), 2)
+	Session.limit_ink(1)
+	assert_eq(int(m.get_shader_parameter("mode")), 1, "the hall keeps the board in colour")
+	Session.limit_ink(2)
+	Session.set_ink(0)
+	assert_false((Session.get_node("Ink") as MeshInstance3D).visible)
+	Session.set_ink(was)
 
 
 func test_the_chronicler_is_an_owl_built_in_code_with_a_lit_lantern() -> void:
