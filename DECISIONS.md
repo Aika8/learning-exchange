@@ -272,6 +272,6 @@ Build and CI
   millionths to stay integer. Reports win share, average edge and the worst outcome of each — no single cherry-picked start.
 - Mobile memo: the order-book row formatter is `useCallback`-stable so `memo` rows skip re-render; home and
   achievement rows are memoised.
-- game3d fps: the hitch after a camera teleport was SDFGI cascades and the HDRI sky refiltering in one frame. Sky →
-  `PROCESS_MODE_INCREMENTAL`, SDFGI converges/updates lights over more frames, softer directional shadow filter.
-  Measured with `game3d/tools/fps_probe.gd`.
+- game3d fps: NOT fixed in M4. A `-s` SceneTree probe could not build the harbour (autoloads missing), so its numbers
+  were of an empty sea; with that probe SDFGI showed 30–150 ms frames after far teleports, but that is not evidence for
+  the real island. Next: a probe started as a normal run (`--fps-probe` flag in `Session`), then decide on SDFGI.
