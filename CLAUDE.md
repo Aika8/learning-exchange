@@ -20,6 +20,9 @@ Start with `intent/02-platform.md`, `docs/adr/README.md`, `docs/lore/world-bible
 
 ## Running
 - Backend + bots: see README (`make dev`).
+- Agents: start your own server on another port with an in-memory journal (`make dev PORT=8091 JOURNAL=memory`),
+  never touch Aika's 8080. Whatever server or long-running process you start, you stop before you finish
+  (`make stop PORT=8091`); check with `make ps` that nothing of yours is left.
 - Each client: its folder's README.
 
 ## Don'ts
