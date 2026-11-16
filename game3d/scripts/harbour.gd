@@ -11,8 +11,8 @@ const HARBOUR_SPOTS := {
 	"mara": [Archipelago.MARA_POS, "PROMPT_MARA", 4.0],
 	"olva": [Vector3(10, 0, 9), "PROMPT_OLVA", 3.5],
 	"chronicler": [Vector3(-7, 0, -4), "PROMPT_CHRONICLER", 3.5],
-	"debt": [Vector3(38, 0, -1.5), "PROMPT_DEBT", 3.2],
-	"provisions": [Vector3(37, 0, 10), "PROMPT_PROVISIONS", 3.2],
+	"debt": [Vector3(38, Archipelago.DECK_Y, -2.4), "PROMPT_DEBT", 3.2],
+	"provisions": [Vector3(37, Archipelago.DECK_Y, 10.4), "PROMPT_PROVISIONS", 3.2],
 	"garden": [Vector3(-14, 0, 12), "PROMPT_GARDEN", 4.0],
 	"fog": [Vector3(15, 0, -4), "PROMPT_FOG", 3.2],
 }
@@ -41,7 +41,9 @@ var _plan: PlanPanel
 var _post: PanelContainer
 var _post_text: Label
 var _post_qty := 0
-var _strollers: Array = []  ## [node, walker, centre, radius, phase]
+var _villagers: Array[Villager] = []
+var _idlers: Array[Walker] = []
+var _nav: NavigationRegion3D
 var _report_timer := 0.0
 
 
@@ -57,6 +59,7 @@ func _ready() -> void:
 	Archipelago.sky(self)
 	_parts = Archipelago.build(self)
 	_dress()
+	_nav = Nav.bake(self, Archipelago.walk_areas(Game.island))
 	var ship := Proc.ship()
 	ship.name = "Wayfarer"
 	ship.position = (Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)) if _silk() else Archipelago.PIER_END + Vector3(0, 1.2, 4.5)
@@ -64,20 +67,10 @@ func _ready() -> void:
 	add_child(ship)
 	_captain = Captain.new()
 	add_child(_captain)
-	match Session.spawn:
-		"pier":
-			if _silk():
-				_captain.position = Archipelago.SILK_DOCK + Vector3(6, 0.5, -2)
-				_captain.yaw = -2.3
-			else:
-				_captain.position = Archipelago.PIER_END + Vector3(-6, 0.5, 0)
-				_captain.yaw = PI / 2
-		"exchange":
-			_captain.position = Archipelago.EXCHANGE_DOOR + Vector3(0, 0.5, 3)
-			_captain.yaw = 0.0
-		_:
-			_captain.position = Vector3(6, 0.5, 10)
-			_captain.yaw = 0.5
+	var at := Archipelago.spawn_point(Game.island, Session.spawn)
+	_captain.position = at[0]
+	_captain.respawn = at[0]
+	_captain.yaw = at[1]
 	_fly = Camera3D.new()
 	_fly.fov = 65
 	add_child(_fly)
@@ -88,56 +81,79 @@ func _ready() -> void:
 	Game.report_event.connect(_on_report)
 	if Game.flow.state == GameFlow.State.SAILING:  # arrived
 		Game.move(GameFlow.State.PORT)
-	if not Session.active():
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	else:
+	if Session.active():
 		_demo()
+	elif not Session.tooling():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
-## People and Act I props. Each NPC is a MakeHuman character when downloaded (ADR-0019).
+## People and Act I props. Each NPC is a MakeHuman character when downloaded (ADR-0019). Everything stands on the
+## ground and has a collider; the strollers walk the navmesh (Villager).
 func _dress() -> void:
 	if _silk():
-		var keeper := _npc("trader", Color("9a6ab0"), SILK_POST + Vector3(0, 0, -1.6), 0.0)
+		var post_y := Archipelago.silk_ground(SILK_POST - Archipelago.SILK)
+		var keeper := _npc("trader", Color("9a6ab0"), SILK_POST + Vector3(0, post_y, -1.6), 0.0)
 		keeper.name = "PostKeeper"
 		for i in 4:
-			Assets.put(self, "wooden_crate_02" if i % 2 else "wooden_crate_01", SILK_POST + Vector3(-2.2 + i * 1.4, 0, -2.6), i * 0.4, 1.0)
-		var walkers := _npc("child", Color("6a9ab0"), Archipelago.SILK + Vector3(4, 0, 0), 0.0)
-		_strollers.append([walkers, Walker.attach(walkers), Archipelago.SILK + Vector3(0, 0, 2), 7.0, 0.0])
+			var at := SILK_POST + Vector3(-2.2 + i * 1.4, 0, -2.8)
+			at.y += Archipelago.silk_ground(at - Archipelago.SILK)
+			Assets.put(self, "wooden_crate_02" if i % 2 else "wooden_crate_01", at, i * 0.4, 1.0)
+		_villager("child", Color("6a9ab0"), Archipelago.SILK + Vector3(2, 0, 4), 9.0)
+		_villager("sailor", Color("4e6fa8"), Archipelago.SILK + Vector3(-12, 0, 12), 8.0)
 		return
 	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2)
 	mara.name = "Mara"
 	_npc("", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8).name = "Olva"
 	_npc("oldman", Color("3a3a5a"), HARBOUR_SPOTS["chronicler"][0], 0.6).name = "Chronicler"
 	if Assets.put(self, "treasure_chest", HARBOUR_SPOTS["debt"][0], 1.2, 1.0) == null:
-		add_child(Proc.box(Vector3(1.2, 0.7, 0.8), Proc.TIMBER_DARK, HARBOUR_SPOTS["debt"][0] + Vector3(0, 0.35, 0)))
+		var chest := Proc.box(Vector3(1.2, 0.7, 0.8), Proc.TIMBER_DARK, HARBOUR_SPOTS["debt"][0] + Vector3(0, 0.35, 0))
+		add_child(chest)
+		chest.set_meta("solid", Solid.box(self, Vector3(1.2, 0.7, 0.8), chest.position))
 	for i in 5:
-		var p: Vector3 = HARBOUR_SPOTS["provisions"][0] + Vector3(-1.6 + (i % 3) * 1.2, (i / 3) * 0.9, -1.4)
+		var p: Vector3 = HARBOUR_SPOTS["provisions"][0] + (Vector3(-1.6 + i * 1.2, 0, -1.4) if i < 3 else Vector3(-2.6 + (i - 3) * 4.4, 0, -0.2))
 		if Assets.put(self, "wooden_barrels_01" if i == 4 else "wooden_crate_01", p, i * 0.5, 1.0) == null:
-			add_child(Proc.box(Vector3(0.9, 0.9, 0.9), Proc.TIMBER, p + Vector3(0, 0.45, 0)))
+			var crate := Proc.box(Vector3(0.9, 0.9, 0.9), Proc.TIMBER, p + Vector3(0, 0.45, 0))
+			add_child(crate)
+			crate.set_meta("solid", Solid.box(self, Vector3(0.9, 0.9, 0.9), crate.position))
 	var g: Vector3 = HARBOUR_SPOTS["garden"][0]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 72
 	for i in 3:  # the garden: three trees, each season taller (compound interest)
-		var t := Proc.round_tree(rng)
-		t.position = g + Vector3(-3 + i * 3, 0, -2)
-		t.scale = Vector3.ONE * (0.6 + 0.45 * i)
+		var at := g + Vector3(-3 + i * 3, 0, -2)
+		var size := 0.6 + 0.45 * i
+		var t := Assets.thinned("island_tree_02", 3)
+		if t != null:
+			t.set_meta("asset", "island_tree_02")
+			t.scale = Vector3.ONE * size * 1.3
+			t.rotation.y = i * 2.1
+		else:
+			t = Proc.round_tree(rng)
+			t.scale = Vector3.ONE * size
+		t.name = "GardenTree"
+		t.position = at
 		add_child(t)
-	var board_pos: Vector3 = HARBOUR_SPOTS["fog"][0] + Vector3(0, 0, -1.4)
-	add_child(Proc.box(Vector3(2.4, 1.6, 0.12), Proc.TIMBER_DARK, board_pos + Vector3(0, 1.7, 0)))
-	add_child(Proc.box(Vector3(2.1, 1.3, 0.14), Proc.CANVAS, board_pos + Vector3(0, 1.7, 0.02)))
-	for x in [-1.0, 1.0]:
-		add_child(Proc.box(Vector3(0.12, 1.4, 0.12), Proc.TIMBER_DARK, board_pos + Vector3(x, 0.7, 0)))
+		Solid.model(self, t, "island_tree_02" if t.has_meta("asset") else "procedural")
+	var board := Node3D.new()  # the Treasurers' notice board: one object on two legs
+	board.name = "TreasuryBoard"
+	board.position = HARBOUR_SPOTS["fog"][0] + Vector3(0, 0, -1.4)
+	add_child(board)
+	board.add_child(Proc.box(Vector3(2.4, 1.6, 0.12), Proc.TIMBER_DARK, Vector3(0, 1.9, 0)))
+	board.add_child(Proc.box(Vector3(2.1, 1.3, 0.14), Proc.CANVAS, Vector3(0, 1.9, 0.02)))
+	for x: float in [-1.0, 1.0]:
+		board.add_child(Proc.box(Vector3(0.12, 1.2, 0.12), Proc.TIMBER_DARK, Vector3(x, 0.6, 0)))
+		Solid.post(board, 0.09, 1.2, Vector3(x, 0, 0))
+	Solid.box(board, Vector3(2.4, 1.6, 0.14), Vector3(0, 1.9, 0))
 	var label := Label3D.new()
 	label.text = "BOARD_TREASURY"
 	label.font_size = 40
 	label.outline_size = 8
 	label.modulate = Proc.TIMBER_DARK
-	label.position = board_pos + Vector3(0, 2.1, 0.12)
-	add_child(label)
-	for k in 2:  # villagers strolling round the square
-		var who := "child" if k == 0 else "oldman"
-		var s := _npc(who, Color("8a6a4a"), Vector3.ZERO, 0.0)
-		_strollers.append([s, Walker.attach(s), Vector3(2, 0, 6) if k == 0 else Vector3(-4, 0, 2), 6.0 + k * 3.0, k * 2.0])
+	label.position = Vector3(0, 2.3, 0.12)
+	board.add_child(label)
+	var homes := [[Vector3(2, 0, 3), 7.0], [Vector3(-6, 0, 2), 9.0], [Vector3(8, 0, 4), 8.0], [Vector3(-3, 0, -3), 10.0], [Vector3(30, 0.2, 2), 6.0]]
+	var who := ["child", "oldman", "sailor", "trader", "sailor"]
+	for i in homes.size():  # villagers strolling round the square and the wharf
+		_villager(who[i], Color("8a6a4a"), homes[i][0], homes[i][1])
 
 
 func _npc(who: String, coat: Color, pos: Vector3, yaw: float) -> Node3D:
@@ -145,7 +161,17 @@ func _npc(who: String, coat: Color, pos: Vector3, yaw: float) -> Node3D:
 	n.position = pos
 	n.rotation.y = yaw
 	add_child(n)
+	n.set_meta("solid", Solid.person(self, pos))
+	var w := Walker.attach(n)  # stands, breathes, shifts weight
+	_idlers.append(w)
 	return n
+
+
+func _villager(who: String, coat: Color, home: Vector3, roam: float) -> void:
+	var v := Villager.new()
+	v.setup(who, coat, home, roam)
+	add_child(v)
+	_villagers.append(v)
 
 
 func _build_ui() -> void:
@@ -226,13 +252,8 @@ func _process(delta: float) -> void:
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
 		ship.position.y = (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
-	for s: Array in _strollers:
-		s[4] = float(s[4]) + delta * 1.2 / float(s[3])
-		var a := float(s[4])
-		var n: Node3D = s[0]
-		n.position = (s[2] as Vector3) + Vector3(cos(a), 0, sin(a)) * float(s[3])
-		n.rotation.y = atan2(-sin(a), cos(a))
-		(s[1] as Walker).step(delta, 1.2)
+	for w in _idlers:
+		w.step(delta, 0.0)
 	if _flying:
 		_fly_move(delta)
 	_target = _nearest()

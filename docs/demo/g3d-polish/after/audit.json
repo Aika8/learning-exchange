@@ -1,0 +1,29 @@
+{
+  "hall": {
+    "by_kind": {},
+    "clusters": [],
+    "free_points": 104,
+    "issues": 0,
+    "objects": 52,
+    "points": 120,
+    "walks": 832
+  },
+  "harbour": {
+    "by_kind": {},
+    "clusters": [],
+    "free_points": 597,
+    "issues": 0,
+    "objects": 90,
+    "points": 746,
+    "walks": 4776
+  },
+  "silk": {
+    "by_kind": {},
+    "clusters": [],
+    "free_points": 347,
+    "issues": 0,
+    "objects": 30,
+    "points": 404,
+    "walks": 2776
+  }
+}

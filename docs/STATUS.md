@@ -1,6 +1,20 @@
 # Status
 
-Updated: 2026-11-16, end of M4 (assistant and polish). Demo: `docs/demo/M4.md`.
+Updated: 2026-11-16, G3D polish after M4. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`.
+
+## G3D polish (after M4) — `docs/demo/G3D-polish.md`
+- World audit (`WorldProbe`, `--audit`): 451 problems before → 0 after on 1270 grid points, 8384 walks, 172 objects
+  (holes, falls, walk-through buildings and props, floating props, z-fighting, missing LODs). GUT 59 → 74.
+- Every building and prop has a collider that follows its shape; wharf and pier decks with floors; invisible fences
+  round the islands and decks; spring-arm camera stops at walls.
+- Modular half-timbered houses, windmill and hall interior rebuilt; grime decals. No new assets.
+- People dressed for the age of sail in code (`Costume`): captain in tricorn, coat, sash and boots; sailors in stripes,
+  bandana and slops; traders and townsfolk in period dress. No jeans, T-shirts, fedora.
+- Walking: acceleration, run (Shift), stairs and slopes; computed gait with foot IK (idle/walk/run); villagers on a
+  navmesh with avoidance.
+- Harbour fps at 1080p (Apple M5): average 65–109 (was 55–118 with 45–65 ms frames after a camera jump); the long
+  frame is gone (SDFGI off by default). 1%-low is 53–57 fps in the three heaviest views — a hard 60 floor not reached.
+- Not done: real animation clips (needs a source decision); M3 `--demo` not re-run against a live exchange.
 
 ## M4 — what works
 - Assistant (ADR-0013, now Accepted): port `Assistant`, `TemplateAssistant`, `ClaudeAssistant` (Messages API, model from
@@ -17,8 +31,7 @@ Updated: 2026-11-16, end of M4 (assistant and polish). Demo: `docs/demo/M4.md`.
   every start in the last 180 closes (win share, average edge, worst of each).
 
 ## M4 — not done
-- game3d harbour fps (45–68 after a camera teleport) — **not fixed**. A `-s` probe could not build the harbour
-  (autoloads), so its numbers were not the island; changes were reverted. Next: probe via a normal run flag.
+- game3d harbour fps (45–68 after a camera teleport) — was not fixed in M4; done in the G3D polish pass above.
 - Quests from world bible §4/§5b — none started: Совет Казначеев rate decision, «Наследство деда», «Золотой Парус» vs
   Корзина Ветлы, «Корзина уплыла», «Щедрая гильдия», insider records, dividend day.
 - The real Claude API was never called (no key); only the fake-HTTP test covers the adapter.

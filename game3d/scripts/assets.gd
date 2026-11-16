@@ -52,7 +52,14 @@ static func model(name: String) -> Node3D:
 		var p := "%s/models/%s/%s_1k.gltf" % [ROOT, name, name]
 		_scenes[name] = load(p) if ResourceLoader.exists(p) else null
 	var s: PackedScene = _scenes[name]
-	return s.instantiate() if s != null else null
+	if s == null:
+		return null
+	var n: Node3D = s.instantiate()
+	# downloaded models stay out of SDFGI (when it is on, `--sdfgi`): a 600k-triangle tree is costly to voxelise;
+	# the island, the decks and the houses carry the bounce light
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	return n
 
 
 ## A MakeHuman character (CC0, posed, game-engine skeleton) from assets/models/people, or null.
@@ -73,12 +80,16 @@ static func put(parent: Node3D, name: String, pos: Vector3, yaw: float = 0.0, sc
 	n.position = pos
 	n.rotation.y = yaw
 	n.scale = Vector3.ONE * scale
+	n.set_meta("asset", name)
 	parent.add_child(n)
+	Solid.model(parent, n, name)
 	return n
 
 
 ## Model whose foliage surfaces (material name contains "leaves") keep only every `keep`-th leaf card.
 ## Poly Haven trees carry ~700k leaf triangles; thinning them holds 60 fps in the harbour (ADR-0019).
+## The crown you see casts no shadow itself: a second, five times sparser copy is drawn into the shadow maps only,
+## so the dappled shade stays and the four shadow passes cost a fifth.
 static func thinned(name: String, keep: int = 3) -> Node3D:
 	var n := model(name)
 	if n == null:
@@ -87,8 +98,17 @@ static func thinned(name: String, keep: int = 3) -> Node3D:
 		var key := "%s/%s/%d" % [name, mi.name, keep]
 		if not _thinned.has(key):
 			_thinned[key] = _thin_mesh(mi.mesh as ArrayMesh, keep)
+			_thinned[key + "/shadow"] = _thin_mesh(mi.mesh as ArrayMesh, keep * 5)
 		mi.mesh = _thinned[key]
-		mi.lod_bias = 2.5  # generated LODs drop whole leaf cards; keep the crown full at distance
+		mi.lod_bias = 1.5  # generated LODs drop whole leaf cards; keep the crown fairly full at distance
+		mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		var shade := MeshInstance3D.new()
+		shade.name = "Shade"
+		shade.mesh = _thinned[key + "/shadow"]
+		shade.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_SHADOWS_ONLY
+		shade.lod_bias = 0.6
+		shade.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		mi.add_child(shade)
 	return n
 
 
