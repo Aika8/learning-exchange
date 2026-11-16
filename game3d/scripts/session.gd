@@ -28,6 +28,8 @@ func _ready() -> void:
 	_layer.add_child(_fps)
 	if not arg("audit").is_empty():
 		Audit.run.call_deferred(get_tree())
+	elif not arg("views").is_empty():
+		Audit.views.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:

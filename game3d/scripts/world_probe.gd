@@ -10,6 +10,10 @@ const FRAMES := 45  ## physics steps per walk
 const DT := 1.0 / 60.0
 const SOFT: Array[String] = ["fern", "grass", "shrub", "root"]  ## plants you walk through by design
 const HEAVY_TRIS := 4000  ## a mesh above this needs LODs
+const PROXY_LAYER := 1 << 19  ## physics layer of the "what you see" copies used to check colliders against shape
+const PROXY_TRIS := 30000  ## heavier things (tree crowns) are not copied
+const SHAPE_SLACK := 0.45  ## how far inside the surface you see a collider may sit (you would walk into the thing)
+const HULL_SLACK := 0.8  ## how far in front of it (an open shelf is a solid box; more is an invisible wall)
 
 var world: Node3D
 var areas: Array[Dictionary]
@@ -20,6 +24,8 @@ var points := 0
 var free_points := 0
 var walks := 0
 var units := 0
+var _people: Array[RID] = []  ## villagers and the captain: they move, the audit is about the world
+var _proxies: Dictionary = {}  ## unit → StaticBody3D with the unit's real triangles, on PROXY_LAYER
 
 
 func _init(root: Node3D, walk_areas: Array[Dictionary]) -> void:
@@ -35,9 +41,45 @@ func _init(root: Node3D, walk_areas: Array[Dictionary]) -> void:
 
 func done() -> void:
 	body.queue_free()
+	for u: Node in _proxies:
+		(_proxies[u] as Node).queue_free()
+
+
+## Before the scans: ignore walking people, and put a triangle-exact copy of every object on its own physics layer
+## so colliders can be compared with what the eye sees. Await it.
+func prepare() -> void:
+	for c in world.find_children("*", "CharacterBody3D", true, false):
+		if c != body:
+			body.add_collision_exception_with(c)
+			_people.append((c as CharacterBody3D).get_rid())
+	for u in _units():
+		var meshes := _meshes(u)
+		var tris := 0
+		for m in meshes:
+			tris += triangles(m.mesh)
+		if meshes.is_empty() or tris > PROXY_TRIS or u.has_meta("flat"):
+			continue
+		var proxy := StaticBody3D.new()
+		proxy.collision_layer = PROXY_LAYER
+		proxy.collision_mask = 0
+		for m in meshes:
+			var faces := m.mesh.get_faces()
+			if faces.is_empty():
+				continue
+			var shape := ConcavePolygonShape3D.new()
+			shape.backface_collision = true
+			shape.set_faces(m.global_transform * faces)
+			var cs := CollisionShape3D.new()
+			cs.shape = shape
+			proxy.add_child(cs)
+		world.add_child(proxy)
+		_proxies[u] = proxy
+	await world.get_tree().physics_frame
+	await world.get_tree().physics_frame
 
 
 func run_all() -> void:
+	await prepare()
 	walk_grid()
 	scan_objects()
 	scan_zfight()
@@ -122,11 +164,28 @@ static func grid(area: Dictionary, margin: float = 0.6, step: float = STEP) -> A
 
 # ---------------------------------------------------------------- physics helpers
 
+## What every query ignores: the probe itself and the people, plus `more`.
+func _skip(more: Array[RID] = []) -> Array[RID]:
+	var out: Array[RID] = [body.get_rid()]
+	out.append_array(_people)
+	out.append_array(more)
+	return out
+
+
 ## The ground under `p`: looks from 2.6 m above the area's level (above any hill, under any roof) down 4 m.
 func floor_at(p: Vector3, exclude: Array[RID] = []) -> Dictionary:
-	var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 2.6, 0), p + Vector3(0, -4.0, 0))
-	q.exclude = exclude + [body.get_rid()]
+	var q := PhysicsRayQueryParameters3D.create(p + Vector3(0, 2.6, 0), p + Vector3(0, -4.0, 0), 1)
+	q.exclude = _skip(exclude)
 	return space.intersect_ray(q)
+
+
+## True when the thing hit by `floor_at` is an object standing on the ground (a crate, a desk), not the ground.
+func on_top_of_something(hit: Dictionary) -> bool:
+	var from: Vector3 = hit["position"]
+	var q := PhysicsRayQueryParameters3D.create(from + Vector3(0, -0.02, 0), from + Vector3(0, -2.6, 0), 1)
+	q.exclude = _skip([hit["rid"]])
+	var under := space.intersect_ray(q)
+	return not under.is_empty() and from.y - (under["position"] as Vector3).y > 0.5
 
 
 ## True when a walker's capsule fits at `feet` (lifted a little, so touching the ground does not count).
@@ -137,7 +196,8 @@ func fits(feet: Vector3) -> bool:
 	cap.height = Mover.HEIGHT - 0.3
 	q.shape = cap
 	q.transform = Transform3D(Basis(), feet + Vector3(0, Mover.HEIGHT * 0.5 + 0.2, 0))
-	q.exclude = [body.get_rid()]
+	q.collision_mask = 1
+	q.exclude = _skip()
 	return space.intersect_shape(q, 1).is_empty()
 
 
@@ -152,7 +212,7 @@ func walk_grid() -> void:
 				_add("hole", p, area["name"])
 				continue
 			var feet: Vector3 = hit["position"]
-			if not fits(feet):
+			if on_top_of_something(hit) or not fits(feet):
 				continue  # a building or a prop stands here
 			free_points += 1
 			var moved := 0.0
@@ -178,8 +238,8 @@ func _walk(feet: Vector3, dir: Vector3, where: String) -> float:
 			break
 		if body.is_on_floor():
 			ground = now.y
-		var q := PhysicsRayQueryParameters3D.create(before + Vector3(0, 1.0, 0), now + Vector3(0, 1.0, 0))
-		q.exclude = [body.get_rid()]
+		var q := PhysicsRayQueryParameters3D.create(before + Vector3(0, 1.0, 0), now + Vector3(0, 1.0, 0), 1)
+		q.exclude = _skip()
 		if not space.intersect_ray(q).is_empty():
 			_add("tunnel", now, where)
 			break
@@ -193,7 +253,7 @@ func check_spawn(name: String, p: Vector3) -> bool:
 	if hit.is_empty():
 		_add("spawn", p, name + ": no ground")
 		return false
-	if not fits(hit["position"]):
+	if on_top_of_something(hit) or not fits(hit["position"]):
 		_add("spawn", p, name + ": inside a collider")
 		return false
 	return true
@@ -204,7 +264,7 @@ func check_spot(name: String, p: Vector3, radius: float) -> bool:
 	for k in 17:
 		var off := Vector3.ZERO if k == 0 else Vector3(cos(TAU * k / 8.0), 0, sin(TAU * k / 8.0)) * radius * (0.45 if k <= 8 else 0.8)
 		var hit := floor_at(p + off)
-		if not hit.is_empty() and in_any(p + off, 0.5) and fits(hit["position"]):
+		if not hit.is_empty() and in_any(p + off, 0.5) and not on_top_of_something(hit) and fits(hit["position"]):
 			return true
 	_add("spot", p, name + ": nowhere to stand")
 	return false
@@ -220,7 +280,9 @@ func _units() -> Array[Node3D]:
 			for g in c.get_children():
 				if g is Node3D:
 					out.append(g)
-		elif c is Node3D and c != body and not c is CharacterBody3D:
+		elif c is StaticBody3D or c is Decal:
+			continue
+		elif c is Node3D and c != body and not c is CharacterBody3D and not c is NavigationRegion3D:
 			out.append(c)
 	return out
 
@@ -249,6 +311,8 @@ static func _own_bodies(n: Node) -> Array[RID]:
 	var out: Array[RID] = []
 	if n is CollisionObject3D:
 		out.append((n as CollisionObject3D).get_rid())
+	if n.has_meta("solid") and n.get_meta("solid") != null:
+		out.append((n.get_meta("solid") as CollisionObject3D).get_rid())
 	for b in n.find_children("*", "CollisionObject3D", true, false):
 		out.append((b as CollisionObject3D).get_rid())
 	return out
@@ -312,22 +376,19 @@ func _area_y(p: Vector3) -> float:
 	return p.y
 
 
-## 0 = nothing solid, 1 = a collider that misses the shape by more than 0.6 m, 2 = a collider that follows it.
-## Rays go through the object in its own frame at knee and chest height, three per side.
+## 0 = nothing solid, 1 = a collider that does not follow the shape, 2 = a collider that follows it.
+## Rays go through the object in its own frame at knee and chest height, three per side. Each ray is cast twice:
+## at the triangles you see (the proxy) and at the colliders. Where the eye sees a surface there must be a collider
+## within SHAPE_SLACK of it.
 func _hits(u: Node3D, meshes: Array[MeshInstance3D], ground: float) -> int:
 	var frame := u.global_transform.orthonormalized()
-	var band: Array[MeshInstance3D] = []
-	for m in meshes:  # only what stands in a walker's way (not the roof, not the canopy)
-		var g := m.global_transform * m.get_aabb()
-		if g.position.y < ground + 1.6 and g.end.y > ground + 0.3 and g.size.y > 0.4:
-			band.append(m)
-	if band.is_empty():
-		band = meshes
-	var box := _bounds(band, frame)
-	var any := false
-	var loose := false
-	var composite := not u.has_meta("asset") and band.size() > 1
+	var box := _bounds(meshes, frame)
 	var world_box := (frame * box).grow(0.3)
+	var proxy: StaticBody3D = _proxies.get(u)
+	var own := _own_bodies(u)  # its own colliders; a thing without any may lean on a shared one
+	var seen := 0
+	var missed := 0
+	var off := 0
 	for axis: int in [0, 2]:
 		var other := 2 - axis
 		for side: float in [-1.0, 1.0]:
@@ -342,23 +403,47 @@ func _hits(u: Node3D, meshes: Array[MeshInstance3D], ground: float) -> int:
 					var b := frame * to
 					a.y = ground + minf(h, maxf(0.15, (frame * box).end.y - ground - 0.1))
 					b.y = a.y
-					var exclude: Array[RID] = [body.get_rid()]
-					for attempt in 4:
-						var q := PhysicsRayQueryParameters3D.create(a, b)
-						q.exclude = exclude
-						var r := space.intersect_ray(q)
-						if r.is_empty():
-							break
-						if not world_box.has_point(r["position"]):
-							exclude.append(r["rid"])
-							continue
-						any = true
-						if composite and t != 0.0 and absf((r["position"] as Vector3).distance_to(a) - 0.6) > 0.6:
-							loose = true
-						break
-					if composite and t != 0.0 and any and space.intersect_ray(PhysicsRayQueryParameters3D.create(a, b, 0xFFFFFFFF, exclude)).is_empty():
-						loose = true  # the corner of the thing sticks out of its collider
-	return 0 if not any else (1 if loose else 2)
+					var solid := _ray_in(a, b, 1, world_box, null, own)
+					if proxy == null:  # too heavy to copy (a tree): any collider in its place will do
+						seen += 1
+						missed += 1 if solid.is_empty() else 0
+						continue
+					var visual := _ray_in(a, b, PROXY_LAYER, world_box, proxy)
+					if visual.is_empty():
+						continue
+					seen += 1
+					if solid.is_empty():
+						missed += 1
+						if OS.has_environment("PROBE_DEBUG"):
+							print("miss ", label(u), " ray ", a, "→", b, " sees ", visual["position"])
+					else:
+						var sunk := (solid["position"] as Vector3).distance_to(a) - (visual["position"] as Vector3).distance_to(a)
+						if sunk > SHAPE_SLACK or sunk < -HULL_SLACK:
+							off += 1
+							if OS.has_environment("PROBE_DEBUG"):
+								print("loose ", label(u), " ray ", a, "→", b, " collider behind surface by ", sunk)
+	if proxy == null:
+		return 0 if missed == seen else 2
+	if seen == 0:
+		return 2
+	if missed == seen:
+		return 0
+	return 1 if missed + off > 0 else 2
+
+
+## First hit of a ray on `mask` that lies inside `inside` (and, when given, on `only`); other things are skipped.
+func _ray_in(a: Vector3, b: Vector3, mask: int, inside: AABB, only: CollisionObject3D, own: Array[RID] = []) -> Dictionary:
+	var exclude := _skip()
+	for attempt in 12:
+		var q := PhysicsRayQueryParameters3D.create(a, b, mask)
+		q.exclude = exclude
+		var r := space.intersect_ray(q)
+		if r.is_empty():
+			return {}
+		if inside.has_point(r["position"]) and (only == null or r["collider"] == only) and (own.is_empty() or r["rid"] in own):
+			return r
+		exclude.append(r["rid"])
+	return {}
 
 
 # ---------------------------------------------------------------- 3. z-fighting
