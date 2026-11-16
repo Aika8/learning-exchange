@@ -137,6 +137,7 @@ Same camera, same place (`--views`).
 | The hall, looking up ![](g3d-polish/before/view-hall-up.jpg) | ![](g3d-polish/after/view-hall-up.jpg) |
 
 (The "before" wharf camera stands inside a later house; the old picture shows what was there: a pier in the air.)
+The hall "after" camera stands lower than the "before" one: the old spot is now on the gallery, behind the balustrade.
 
 ### Buildings (`scripts/houses.gd`, `scripts/kit.gd`, `scripts/decals.gd`)
 A house is built from modules: stone plinth with a foundation that goes into a slope, plastered walls in a timber
