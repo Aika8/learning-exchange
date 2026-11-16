@@ -32,7 +32,7 @@ func _ready() -> void:
 	_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_toast.offset_left = -500
 	_toast.offset_right = 500
-	_toast.offset_top = -120
+	_toast.offset_top = -130
 	_root.add_child(_toast)
 	_build_card()
 	_build_book()
@@ -73,10 +73,11 @@ func is_modal() -> bool:
 
 func _build_flow() -> void:
 	var bar := HBoxContainer.new()
-	bar.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	bar.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	bar.offset_left = -430
 	bar.offset_right = 430
-	bar.offset_top = 92
+	bar.offset_top = -78
+	bar.offset_bottom = -20
 	bar.alignment = BoxContainer.ALIGNMENT_CENTER
 	bar.add_theme_constant_override("separation", 6)
 	bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -251,7 +252,7 @@ func _render_banner() -> void:
 		"OPENED":
 			var d := _banner_data
 			_banner_text.text = tr("REPORT_OPENED") % [Money.format(int(d["eps"]), 2, loc), Money.format(int(d["consensusEps"]), 2, loc),
-				Chronicler.arg_text({"bps": d["surpriseBps"]}, tr, loc), Chronicler.arg_text({"bps": d["gapBps"]}, tr, loc),
+				Chronicler.arg_text({"dbps": d["surpriseBps"]}, tr, loc), Chronicler.arg_text({"dbps": d["gapBps"]}, tr, loc),
 				tr("QUEST_OUTCOME_" + str(d["outcome"]))]
 
 

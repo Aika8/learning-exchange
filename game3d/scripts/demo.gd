@@ -35,6 +35,7 @@ static func until(cond: Callable, seconds: float) -> bool:
 static func harbour(h: Node3D) -> void:
 	var hud: GameHud = h.hud()
 	stage += 1
+	print("demo: harbour stage ", stage, " island ", Game.island)
 	await Session.wait(2.0)
 	match stage:
 		1:
@@ -42,11 +43,11 @@ static func harbour(h: Node3D) -> void:
 			await Session.wait(0.7)
 			await shot(h, "harbour-captain-walks")
 			Input.action_release("move_forward")
-			await h.demo_go("debt", 0.3)
+			await h.demo_go("debt", -PI / 2)
 			await Session.wait(0.8)
 			await shot(h, "act1-debt")
 			await close_cards(hud)
-			await h.demo_go("provisions", 0.0)
+			await h.demo_go("provisions", -PI / 2)
 			await Session.wait(0.8)
 			await shot(h, "act1-provisions")
 			await close_cards(hud)
@@ -95,9 +96,16 @@ static func harbour(h: Node3D) -> void:
 			await h.demo_go("ship", -PI / 2)
 		4:  # home again: the Кузня report season
 			await Game.set_speed(60)
-			await h.demo_go("olva", -PI * 0.2)
-			await until(func() -> bool: return Game.report["phase"] == ReportSeason.Phase.CONSENSUS and _season(4), 600.0)
+			# seed 42: FORGE misses badly in seasons 4, 8 and 10 (DECISIONS.md → M3); the demo knows it, the game does not
+			for i in 4800:  # until Ольва Перо publishes the consensus of one of them (≈5 bank days before the night)
+				var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/companies/" + Game.FORGE)
+				var c: Variant = r["data"].get("consensus") if r["ok"] else null
+				if c is Dictionary and int(c["season"]) in [4, 8, 10]:
+					break
+				await Session.wait(0.25)
 			await Game.set_speed(1)
+			print("demo: miss-season consensus")
+			await close_cards(hud)
 			await h.demo_go("olva", -PI * 0.2)
 			await Session.wait(1.0)
 			await shot(h, "olva-consensus")
@@ -151,6 +159,7 @@ static func _season(n: int) -> bool:
 
 static func hall(h: Node3D) -> void:
 	var hud: GameHud = h.hud()
+	print("demo: hall stage ", stage)
 	await until(func() -> bool: return h.book().best_bid() > 0, 15.0)
 	await Session.wait(1.0)
 	if stage == 1:
@@ -195,6 +204,7 @@ static func voyage(v: Node3D) -> void:
 
 static func chronicle(c: Node3D) -> void:
 	await Session.wait(2.5)
+	await close_cards(c.hud())
 	await shot(c, "chronicle")
 	Locale.set_locale("en")
 	await Session.wait(0.6)
@@ -203,6 +213,7 @@ static func chronicle(c: Node3D) -> void:
 	c.start_replay()
 	await Session.wait(0.6 * 8)
 	c._playing = false
+	await close_cards(c.hud())
 	await Session.wait(0.4)
 	await shot(c, "replay")
 	c.next_day()

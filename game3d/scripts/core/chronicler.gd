@@ -6,8 +6,8 @@ class_name Chronicler
 extends RefCounted
 
 
-## Port. Each line: {key: String, args: Array} where an arg is {m: minor units} | {r: R × 100} | {bps: int} |
-## {t: translation key} | int | String.
+## Port. Each line: {key: String, args: Array} where an arg is {m: money, minor units} | {d: signed money result} |
+## {p: price} | {r: R × 100, signed} | {bps: rate} | {dbps: signed change, bps} | {t: translation key} | int | String.
 func review(_facts: SessionFacts) -> Array[Dictionary]:
 	return []
 
@@ -27,23 +27,23 @@ class Template:
 			out.append(Chronicler.line("CHR_NO_TRADES"))
 		for v in traded:
 			out.append(Chronicler.line("CHR_VOYAGE_OPEN" if v["open"] else "CHR_VOYAGE",
-				[v["n"], v["instrument"], {"m": v["pnl"]}, {"r": v["r_x100"]}, {"m": v["risk"]}]))
+				[v["n"], v["instrument"], {"d": v["pnl"]}, {"r": v["r_x100"]}, {"m": v["risk"]}]))
 		if not traded.is_empty():
 			out.append(Chronicler.line("CHR_EXPECTANCY", [{"r": f.expectancy_x100}, traded.size()]))
 			if traded.size() < 20:
 				out.append(Chronicler.line("CHR_FEW_TRADES"))
-			out.append(Chronicler.line("CHR_COSTS", [{"m": -f.fees}, {"m": -f.spread}, {"m": -f.costs()}]))
+			out.append(Chronicler.line("CHR_COSTS", [{"d": -f.fees}, {"d": -f.spread}, {"d": -f.costs()}]))
 		for g in f.gaps:
 			out.append(Chronicler.line("CHR_GAP_THROUGH" if g["through"] else "CHR_SLIP",
-				[g["instrument"], {"p": g["trigger"]}, {"p": g["trade"]}, {"m": -int(g["slip"])}]))
+				[g["instrument"], {"p": g["trigger"]}, {"p": g["trade"]}, {"d": -int(g["slip"])}]))
 		if f.basket_start > 0:
-			out.append(Chronicler.line("CHR_BASKET", [{"bps": f.return_bps()}, {"m": f.pnl}, {"bps": f.basket_bps()}, {"m": f.basket_pnl()}]))
+			out.append(Chronicler.line("CHR_BASKET", [{"d": f.pnl}, {"dbps": f.return_bps()}, {"d": f.basket_pnl()}, {"dbps": f.basket_bps()}]))
 			out.append(Chronicler.line("CHR_BASKET_AHEAD" if f.basket_pnl() > f.pnl else "CHR_BASKET_BEHIND"))
 		if f.storms > 0:
 			out.append(Chronicler.line("CHR_STORM", [f.storms]))
 		for r in f.reports:
-			out.append(Chronicler.line("CHR_REPORT", [str(r.get("instrument", "")), {"bps": int(r.get("surpriseBps", 0))},
-				{"bps": int(r.get("gapBps", 0))}, {"t": "QUEST_OUTCOME_" + str(r.get("outcome", ReportSeason.OTHER))}]))
+			out.append(Chronicler.line("CHR_REPORT", [str(r.get("instrument", "")), {"dbps": int(r.get("surpriseBps", 0))},
+				{"dbps": int(r.get("gapBps", 0))}, {"t": "QUEST_OUTCOME_" + str(r.get("outcome", ReportSeason.OTHER))}]))
 		for id in f.lessons:
 			out.append(Chronicler.line("CHR_LESSON", [{"t": Lessons.title_key(id)}, {"t": Lessons.real_key(id)}]))
 		out.append(Chronicler.line("CHR_DISCLAIMER"))
@@ -63,7 +63,9 @@ static func arg_text(a: Variant, translate: Callable, locale: String, scale: int
 	if a is Dictionary:
 		var d: Dictionary = a
 		if d.has("m"):
-			var m := int(d["m"])
+			return Money.format(int(d["m"]), scale, locale) + " ✦"
+		if d.has("d"):
+			var m := int(d["d"])
 			return ("+" if m > 0 else "") + Money.format(m, scale, locale) + " ✦"
 		if d.has("p"):
 			return Money.format(int(d["p"]), scale, locale)
@@ -71,7 +73,9 @@ static func arg_text(a: Variant, translate: Callable, locale: String, scale: int
 			var r := int(d["r"])
 			return ("+" if r > 0 else "") + Money.format(r, 2, locale) + " R"
 		if d.has("bps"):
-			var b := int(d["bps"])
+			return Money.format(int(d["bps"]), 2, locale) + "%"
+		if d.has("dbps"):
+			var b := int(d["dbps"])
 			return ("+" if b > 0 else "") + Money.format(b, 2, locale) + "%"
 		if d.has("t"):
 			return str(translate.call(str(d["t"])))

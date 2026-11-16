@@ -201,15 +201,15 @@ func _facts_text(f: SessionFacts) -> String:
 	var loc := Locale.current()
 	var rows: PackedStringArray = []
 	for v in f.traded():
-		rows.append(tr("FACTS_VOYAGE") % [str(v["n"]), str(v["instrument"]), Chronicler.arg_text({"m": v["pnl"]}, tr, loc),
+		rows.append(tr("FACTS_VOYAGE") % [str(v["n"]), str(v["instrument"]), Chronicler.arg_text({"d": v["pnl"]}, tr, loc),
 			Chronicler.arg_text({"r": v["r_x100"]}, tr, loc), tr("FACTS_OPEN") if v["open"] else ""])
 	if rows.is_empty():
 		rows.append(tr("FACTS_NONE"))
 	rows.append(tr("FACTS_EXPECTANCY") % Chronicler.arg_text({"r": f.expectancy_x100}, tr, loc))
 	rows.append(tr("FACTS_FEES") % Money.format(f.fees, 2, loc))
 	rows.append(tr("FACTS_SPREAD") % Money.format(f.spread, 2, loc))
-	rows.append(tr("FACTS_YOU") % [Chronicler.arg_text({"m": f.pnl}, tr, loc), Chronicler.arg_text({"bps": f.return_bps()}, tr, loc)])
-	rows.append(tr("FACTS_BASKET") % [Chronicler.arg_text({"m": f.basket_pnl()}, tr, loc), Chronicler.arg_text({"bps": f.basket_bps()}, tr, loc)])
+	rows.append(tr("FACTS_YOU") % [Chronicler.arg_text({"d": f.pnl}, tr, loc), Chronicler.arg_text({"dbps": f.return_bps()}, tr, loc)])
+	rows.append(tr("FACTS_BASKET") % [Chronicler.arg_text({"d": f.basket_pnl()}, tr, loc), Chronicler.arg_text({"dbps": f.basket_bps()}, tr, loc)])
 	rows.append(tr("FACTS_EVENTS") % [str(_cursor if _cursor >= 0 else Game.daylog.size()), str(Game.daylog.size())])
 	return "\n".join(rows)
 
@@ -235,7 +235,7 @@ func _events_text(n: int) -> String:
 			"STOP_FIRED":
 				what = tr("EV_STOP_FIRED") % [Money.format(int(d["trigger"]), 2, loc), Money.format(int(d["trade"]), 2, loc), str(d.get("filled", 0)), str(d.get("qty", 0))]
 			"REPORT":
-				what = tr("EV_REPORT") % [Chronicler.arg_text({"bps": d["surpriseBps"]}, tr, loc), Chronicler.arg_text({"bps": d["gapBps"]}, tr, loc)]
+				what = tr("EV_REPORT") % [Chronicler.arg_text({"dbps": d["surpriseBps"]}, tr, loc), Chronicler.arg_text({"dbps": d["gapBps"]}, tr, loc)]
 			_:
 				what = tr("EV_" + str(e["kind"]))
 		out.append("%s  %s" % [t, what])

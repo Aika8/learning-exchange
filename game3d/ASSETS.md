@@ -85,3 +85,8 @@ No sounds or music. Nothing is taken from existing games: the Poly Haven models 
 clothes, hair, eye and skin asset used are CC0; the clothes are recoloured and the pose set as rest pose by
 `restyle.py`. MPFB itself is GPL, its output is not. The files are git-ignored like the rest; without them the
 procedural person stands in.
+
+## Animation (M3)
+
+The captain and the villagers walk with a procedural cycle written in code (`scripts/walker.gd`): bone rotations on the
+MakeHuman game-engine rig. No animation files are downloaded; nothing new was added to `assets.lock`.

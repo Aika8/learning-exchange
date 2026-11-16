@@ -493,8 +493,10 @@ func sell_cargo() -> void:
 	var r: Dictionary = await Game.place({"instrument": "SILK-SPARK", "side": "SELL", "type": "MARKET", "qty": _post_qty})
 	Game.move(GameFlow.State.PORT)
 	if r["ok"]:
-		await Game.lift_anchor()
-		_post_text.text = tr("POST_SOLD") % [str(int(r["data"]["filledQty"])), str(_post_qty)]
+		var sold := int(r["data"]["filledQty"])
+		if sold >= _post_qty:
+			await Game.lift_anchor()  # nothing left to protect
+		_post_text.text = tr("POST_SOLD") % [str(sold), str(_post_qty)]
 		var f := Game.facts()
 		Game.lesson("FEES", [{"m": f.fees}, {"m": f.spread}, Money.format(int(ExchangeApi.instrument("SILK-SPARK")["feeBps"]), 2, Locale.current())])
 		_post_qty = 0

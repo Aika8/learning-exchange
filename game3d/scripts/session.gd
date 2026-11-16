@@ -62,7 +62,13 @@ static func active() -> bool:
 
 
 func shot(node: Node, file: String) -> void:
-	await RenderingServer.frame_post_draw
+	# wait for a drawn frame, but never hang if the OS stops drawing a hidden window
+	var drawn := [false]
+	RenderingServer.frame_post_draw.connect(func() -> void: drawn[0] = true, CONNECT_ONE_SHOT)
+	for i in 60:
+		if drawn[0]:
+			break
+		await get_tree().create_timer(0.05).timeout
 	var img := node.get_viewport().get_texture().get_image()
 	var path := arg("demo").path_join(file + ".png")
 	img.save_png(path)

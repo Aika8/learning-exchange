@@ -58,6 +58,8 @@ func move(to: GameFlow.State) -> bool:
 	var why := flow.go(to, ctx())
 	if not why.is_empty():
 		refused.emit(why)
+		if Session.active():
+			print("demo: refused ", GameFlow.name_of(to), " ", why)
 		return false
 	record("STATE", {"state": GameFlow.name_of(to)})
 	return true
@@ -140,8 +142,8 @@ func atr_of(instrument: String) -> int:
 	return 0
 
 
-func set_speed(speed: int) -> void:
-	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_PUT, "/clock", {"paused": false, "speed": speed})
+func set_speed(speed: int, paused: bool = false) -> void:
+	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_PUT, "/clock", {"paused": paused, "speed": speed})
 	if r["ok"]:
 		clock = SimClock.from_dict(r["data"], Time.get_ticks_msec())
 
@@ -170,7 +172,7 @@ func drop_anchor(qty: int) -> Dictionary:
 		PackedStringArray(["Idempotency-Key: " + key]))
 	if r["ok"]:
 		anchor_id = int(r["data"]["conditionalId"])
-		anchor = body
+		anchor = {"instrument": plan.instrument, "trigger": plan.stop, "limit": plan.anchor_limit(), "qty": qty}
 		record("ANCHOR", {"instrument": plan.instrument, "trigger": plan.stop, "limit": plan.anchor_limit(), "qty": qty})
 		lesson("ANCHOR")
 	return r
@@ -202,10 +204,14 @@ func sync() -> void:
 	_syncing = true
 	var st: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/statement?from=%d" % day_start)
 	if st["ok"] and st["data"] is Dictionary:
+		var seen: Dictionary = {}
 		for l: Dictionary in st["data"].get("lines", []):
 			if str(l["kind"]) != "TRADE" or l.get("instrument") == null:
 				continue
-			var key := "st-%d-%s-%s-%d" % [int(l["ts"]), str(l.get("refId")), str(l["side"]), int(l["qty"])]
+			# one order can fill several identical lines at once: the n-th identical line gets its own key
+			var base := "st-%d-%s-%s-%d-%d" % [int(l["ts"]), str(l.get("refId")), str(l["side"]), int(l["price"]), int(l["qty"])]
+			seen[base] = int(seen.get(base, 0)) + 1
+			var key := "%s-%d" % [base, int(seen[base])]
 			record("FILL", {"instrument": str(l["instrument"]), "side": str(l["side"]), "price": int(l["price"]),
 				"qty": int(l["qty"]), "fee": int(l["fee"]), "spread": int(l["spreadPaid"])}, key)
 	if anchor_id > 0:
@@ -257,24 +263,42 @@ func watch_report() -> void:
 		ReportSeason.Phase.OPENED:
 			var rep: Dictionary = co["lastReport"]
 			report["season"] = int(rep["season"])
-			var open: int = await _first_trade_after(FORGE, int(rep["ts"]))
-			var close := int(report["close"])
+			var around: Array = await _trades_around(FORGE, int(rep["ts"]))
+			var close: int = around[0] if around[0] > 0 else int(report["close"])
+			# the open = mid of the book the market makers quote around the new fair value (an old resting order can
+			# still print near yesterday's price, so the first trade is a noisy measure)
+			var open: int = await _book_mid(FORGE)
+			if open <= 0:
+				open = around[1]
 			var gap := ReportSeason.gap_bps(close, open) if close > 0 and open > 0 else 0
 			var data := {"instrument": FORGE, "season": int(rep["season"]), "eps": int(rep["eps"]),
 				"consensusEps": int(rep["consensusEps"]), "surpriseBps": ReportSeason.surprise_bps(int(rep["eps"]), int(rep["consensusEps"])),
 				"close": close, "open": open, "gapBps": gap, "record": ReportSeason.record_kind(rep, ReportSeason.earlier(co, rep)),
 				"outcome": ReportSeason.outcome(rep, ReportSeason.earlier(co, rep), gap)}
 			record("REPORT", data, "report-%d" % int(rep["season"]))
-			lesson("SURPRISE", [{"bps": data["surpriseBps"]}, {"bps": gap}])
+			lesson("SURPRISE", [{"dbps": data["surpriseBps"]}, {"dbps": gap}])
 			report_event.emit("OPENED", data)
 			await sync()
 
 
-func _first_trade_after(instrument: String, ts: int) -> int:
+func _book_mid(instrument: String) -> int:
+	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/instruments/%s/book" % instrument)
+	if not r["ok"]:
+		return 0
+	var b := BookModel.from_snapshot(r["data"])
+	@warning_ignore("integer_division")
+	return (b.best_bid() + b.best_ask()) / 2 if b.best_bid() > 0 and b.best_ask() > 0 else 0
+
+
+## [last price before ts, first price after ts] from the recent tape (0 when not in it).
+func _trades_around(instrument: String, ts: int) -> Array:
 	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/instruments/%s/trades?limit=200" % instrument)
-	var first := 0
+	var before := 0
+	var after := 0
 	if r["ok"] and r["data"] is Array:
 		for t: Dictionary in r["data"]:  # newest first
 			if int(t["ts"]) > ts:
-				first = int(t["price"])
-	return first
+				after = int(t["price"])
+			elif before == 0:
+				before = int(t["price"])
+	return [before, after]

@@ -15,7 +15,7 @@ var _rain: GPUParticles3D
 var _flash := 0.0
 var _sync_t := 0.0
 var _fired_seen := 0
-var _hud: GameHud
+var _ghud: GameHud
 var _home := false
 
 var _model: VoyageModel
@@ -54,8 +54,8 @@ func _ready() -> void:
 	_cam.far = 3000
 	add_child(_cam)
 	_build_ui()
-	_hud = GameHud.new()
-	add_child(_hud)
+	_ghud = GameHud.new()
+	add_child(_ghud)
 	_rain = _make_rain()
 	_cam.add_child(_rain)
 	_storm_met = Game.facts().storms > 0
@@ -267,7 +267,7 @@ func _watch_anchor() -> void:
 		_fired_seen = f.stops_fired
 		var e := Game.daylog.last_of("STOP_FIRED")
 		var d: Dictionary = e.get("data", {})
-		_hud.toast(tr("VOYAGE_ANCHOR_FIRED") % [Money.format(int(d.get("trigger", 0)), 2, Locale.current()),
+		_ghud.toast(tr("VOYAGE_ANCHOR_FIRED") % [Money.format(int(d.get("trigger", 0)), 2, Locale.current()),
 			Money.format(int(d.get("trade", 0)), 2, Locale.current())])
 
 
@@ -314,7 +314,7 @@ func demo_storm(level: float) -> void:
 
 
 func hud() -> GameHud:
-	return _hud
+	return _ghud
 
 
 func arrived() -> bool:

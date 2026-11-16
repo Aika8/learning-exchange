@@ -88,8 +88,9 @@ func test_template_chronicle_names_every_lesson_and_ends_with_the_disclaimer() -
 
 func test_render_formats_money_and_r() -> void:
 	var id := func(k: String) -> String: return {"K": "%s / %s / %s"}.get(k, k)
-	var txt := Chronicler.render({"key": "K", "args": [{"m": -60500}, {"r": 122}, {"bps": 100}]}, id, "en")
+	var txt := Chronicler.render({"key": "K", "args": [{"d": -60500}, {"r": 122}, {"dbps": 100}]}, id, "en")
 	assert_eq(txt, "−605.00 ✦ / +1.22 R / +1.00%")
+	assert_eq(Chronicler.arg_text({"m": 500000}, id, "ru"), "5 000,00 ✦", "amounts carry no plus sign")
 
 
 func test_glossary_unlocks_once_and_keeps_order() -> void:
