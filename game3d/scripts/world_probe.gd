@@ -24,6 +24,7 @@ var points := 0
 var free_points := 0
 var walks := 0
 var units := 0
+var spacing := STEP  ## the tests walk a coarser grid
 var _people: Array[RID] = []  ## villagers and the captain: they move, the audit is about the world
 var _proxies: Dictionary = {}  ## unit → StaticBody3D with the unit's real triangles, on PROXY_LAYER
 
@@ -205,7 +206,7 @@ func fits(feet: Vector3) -> bool:
 
 func walk_grid() -> void:
 	for area in areas:
-		for p in grid(area):
+		for p in grid(area, 0.6, spacing):
 			points += 1
 			var hit := floor_at(p)
 			if hit.is_empty():
