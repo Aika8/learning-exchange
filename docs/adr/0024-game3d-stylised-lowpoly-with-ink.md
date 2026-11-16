@@ -41,6 +41,19 @@ role-per-sheet structure of `Costume` are carried into this work; the MakeHuman-
 This supersedes the art direction of ADR-0019 once Accepted. The shared kernel, scenes, collision, walking and the
 audit are untouched.
 
+### Reference, and what we take from it
+Aika named the illustrated "sky pirates" books of her childhood (The Edge Chronicles) as the feeling to aim for:
+characters you never confuse with one another. We take **principles**, never the characters, creatures, ships or
+drawings themselves (copyright, and the "don't copy" rule of `CLAUDE.md`):
+- **Exaggerated silhouettes and proportions**: lanky and portly figures, tall and short, long noses, hats too big for
+  the head. In the code: `Costume.BUILDS` — height, girth, head-and-hat size and nose length per role.
+- **Layers and things that hang on a person**: coat over waistcoat over shirt, sash under belt, pouch, flask, spyglass,
+  a coil of rope, a rolled chart, a badge on a chain.
+- **A pen line with hatching**: our ink outline and the engraving mode stand for it.
+- **More than one kind of folk**: the world bible has one non-human so far, the Chronicler (an owl here). New kinds are
+  a lore decision for Aika, not something the art invents.
+The people themselves are ours, from the world bible and Aika's concept sheets (`docs/design/README.md`).
+
 ## Why this and not the alternatives
 | Alternative | Why not (now) |
 |---|---|

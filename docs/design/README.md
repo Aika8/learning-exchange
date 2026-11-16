@@ -10,6 +10,10 @@ coat, sash), no faces; an ink outline by default and an engraving mode on **V** 
 `Style` (`game3d/scripts/style.gd`) is the switch; `--pbr` is the old realistic look. The concept sheets give the
 silhouettes and the colours; their pen line is what the ink outline stands for. Pictures: `docs/demo/G3D-style.md`.
 
+**Characters are told apart by outline.** Reference for the feeling, by Aika: the illustrated sky-pirate books of
+The Edge Chronicles — principles only (exaggerated proportions, big hats, long noses, layers of clothes and gear, a
+pen line), never their characters or drawings. Builds are in `Costume.BUILDS`; give every new role its own.
+
 ## Concept sheets (`docs/design/concepts/`)
 Ink-and-watercolour sheets drawn by an image model from our own brief (the brief is at the end of this file). Original
 world; nothing is copied from a book, film or game. The palette row at the bottom of each sheet is the game palette.
