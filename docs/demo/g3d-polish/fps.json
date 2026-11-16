@@ -1,0 +1,337 @@
+{
+ "machine": "Apple M5, 1920x1080, Godot 4.7.2 Forward+",
+ "before": [
+  {
+   "avg": 63.9,
+   "frames": 192,
+   "low": 59.5,
+   "view": "harbour captain",
+   "worst_ms": 17.1
+  },
+  {
+   "avg": 55.6,
+   "frames": 56,
+   "low": 22.1,
+   "view": "view-square jump",
+   "worst_ms": 45.3
+  },
+  {
+   "avg": 57.4,
+   "frames": 115,
+   "low": 53.8,
+   "view": "view-square settled",
+   "worst_ms": 18.8
+  },
+  {
+   "avg": 82.6,
+   "frames": 83,
+   "low": 16.9,
+   "view": "view-houses jump",
+   "worst_ms": 59.2
+  },
+  {
+   "avg": 88.0,
+   "frames": 176,
+   "low": 67.6,
+   "view": "view-houses settled",
+   "worst_ms": 15.4
+  },
+  {
+   "avg": 115.3,
+   "frames": 116,
+   "low": 69.5,
+   "view": "view-house-close jump",
+   "worst_ms": 31.4
+  },
+  {
+   "avg": 118.2,
+   "frames": 237,
+   "low": 74.8,
+   "view": "view-house-close settled",
+   "worst_ms": 16.8
+  },
+  {
+   "avg": 73.5,
+   "frames": 74,
+   "low": 16.4,
+   "view": "view-wharf jump",
+   "worst_ms": 61.1
+  },
+  {
+   "avg": 78.2,
+   "frames": 157,
+   "low": 72.1,
+   "view": "view-wharf settled",
+   "worst_ms": 15.6
+  },
+  {
+   "avg": 59.5,
+   "frames": 60,
+   "low": 18.5,
+   "view": "view-pier jump",
+   "worst_ms": 54.0
+  },
+  {
+   "avg": 61.3,
+   "frames": 123,
+   "low": 58.0,
+   "view": "view-pier settled",
+   "worst_ms": 17.5
+  },
+  {
+   "avg": 63.3,
+   "frames": 64,
+   "low": 15.8,
+   "view": "view-exchange jump",
+   "worst_ms": 63.2
+  },
+  {
+   "avg": 66.8,
+   "frames": 134,
+   "low": 60.9,
+   "view": "view-exchange settled",
+   "worst_ms": 17.3
+  },
+  {
+   "avg": 94.3,
+   "frames": 95,
+   "low": 25.6,
+   "view": "view-top jump",
+   "worst_ms": 39.1
+  },
+  {
+   "avg": 99.6,
+   "frames": 200,
+   "low": 61.4,
+   "view": "view-top settled",
+   "worst_ms": 16.6
+  },
+  {
+   "avg": 59.0,
+   "frames": 178,
+   "low": 56.0,
+   "view": "silk captain",
+   "worst_ms": 18.1
+  },
+  {
+   "avg": 46.3,
+   "frames": 47,
+   "low": 15.3,
+   "view": "view-silk jump",
+   "worst_ms": 65.4
+  },
+  {
+   "avg": 50.3,
+   "frames": 101,
+   "low": 48.2,
+   "view": "view-silk settled",
+   "worst_ms": 21.2
+  },
+  {
+   "avg": 100.5,
+   "frames": 101,
+   "low": 47.5,
+   "view": "view-silk-houses jump",
+   "worst_ms": 54.5
+  },
+  {
+   "avg": 109.2,
+   "frames": 219,
+   "low": 81.3,
+   "view": "view-silk-houses settled",
+   "worst_ms": 14.7
+  },
+  {
+   "avg": 71.6,
+   "frames": 72,
+   "low": 17.1,
+   "view": "view-silk-pier jump",
+   "worst_ms": 58.3
+  },
+  {
+   "avg": 76.9,
+   "frames": 154,
+   "low": 71.4,
+   "view": "view-silk-pier settled",
+   "worst_ms": 14.5
+  }
+ ],
+ "after": [
+  {
+   "avg": 74.8,
+   "drawn": 225,
+   "frames": 225,
+   "low": 61.4,
+   "view": "harbour captain",
+   "worst_ms": 17.5
+  },
+  {
+   "avg": 64.8,
+   "drawn": 65,
+   "frames": 65,
+   "low": 53.5,
+   "view": "view-square jump",
+   "worst_ms": 18.7
+  },
+  {
+   "avg": 64.8,
+   "drawn": 130,
+   "frames": 130,
+   "low": 53.7,
+   "view": "view-square settled",
+   "worst_ms": 18.7
+  },
+  {
+   "avg": 72.9,
+   "drawn": 73,
+   "frames": 73,
+   "low": 57.4,
+   "view": "view-houses jump",
+   "worst_ms": 17.4
+  },
+  {
+   "avg": 73.4,
+   "drawn": 147,
+   "frames": 147,
+   "low": 56.8,
+   "view": "view-houses settled",
+   "worst_ms": 18.0
+  },
+  {
+   "avg": 96.9,
+   "drawn": 97,
+   "frames": 97,
+   "low": 66.0,
+   "view": "view-house-close jump",
+   "worst_ms": 15.1
+  },
+  {
+   "avg": 95.6,
+   "drawn": 192,
+   "frames": 192,
+   "low": 65.6,
+   "view": "view-house-close settled",
+   "worst_ms": 16.6
+  },
+  {
+   "avg": 109.0,
+   "drawn": 109,
+   "frames": 109,
+   "low": 73.0,
+   "view": "view-wharf jump",
+   "worst_ms": 36.6
+  },
+  {
+   "avg": 101.3,
+   "drawn": 203,
+   "frames": 203,
+   "low": 73.5,
+   "view": "view-wharf settled",
+   "worst_ms": 14.0
+  },
+  {
+   "avg": 68.8,
+   "drawn": 69,
+   "frames": 69,
+   "low": 59.7,
+   "view": "view-pier jump",
+   "worst_ms": 16.7
+  },
+  {
+   "avg": 67.5,
+   "drawn": 136,
+   "frames": 136,
+   "low": 55.6,
+   "view": "view-pier settled",
+   "worst_ms": 18.1
+  },
+  {
+   "avg": 94.0,
+   "drawn": 94,
+   "frames": 94,
+   "low": 67.2,
+   "view": "view-exchange jump",
+   "worst_ms": 14.9
+  },
+  {
+   "avg": 91.2,
+   "drawn": 183,
+   "frames": 183,
+   "low": 67.4,
+   "view": "view-exchange settled",
+   "worst_ms": 16.5
+  },
+  {
+   "avg": 108.6,
+   "drawn": 109,
+   "frames": 109,
+   "low": 90.6,
+   "view": "view-top jump",
+   "worst_ms": 11.7
+  },
+  {
+   "avg": 109.5,
+   "drawn": 220,
+   "frames": 220,
+   "low": 89.0,
+   "view": "view-top settled",
+   "worst_ms": 11.6
+  },
+  {
+   "avg": 120.0,
+   "drawn": 361,
+   "frames": 361,
+   "low": 101.2,
+   "view": "silk captain",
+   "worst_ms": 9.9
+  },
+  {
+   "avg": 85.2,
+   "drawn": 86,
+   "frames": 86,
+   "low": 74.6,
+   "view": "view-silk jump",
+   "worst_ms": 13.4
+  },
+  {
+   "avg": 85.1,
+   "drawn": 171,
+   "frames": 171,
+   "low": 75.5,
+   "view": "view-silk settled",
+   "worst_ms": 13.5
+  },
+  {
+   "avg": 120.4,
+   "drawn": 121,
+   "frames": 121,
+   "low": 100.0,
+   "view": "view-silk-houses jump",
+   "worst_ms": 12.3
+  },
+  {
+   "avg": 119.9,
+   "drawn": 240,
+   "frames": 240,
+   "low": 103.5,
+   "view": "view-silk-houses settled",
+   "worst_ms": 9.9
+  },
+  {
+   "avg": 120.0,
+   "drawn": 120,
+   "frames": 120,
+   "low": 100.5,
+   "view": "view-silk-pier jump",
+   "worst_ms": 11.6
+  },
+  {
+   "avg": 120.1,
+   "drawn": 241,
+   "frames": 241,
+   "low": 98.4,
+   "view": "view-silk-pier settled",
+   "worst_ms": 10.6
+  }
+ ]
+}
