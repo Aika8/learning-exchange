@@ -44,6 +44,9 @@ Walking (the gait with foot IK drives the built people too):
   sailors, Mara, money-changer, Olva, market woman, old man, child) and the Chronicler as an owl. The same `Walker`
   (computed gait, foot IK) moves them. The MakeHuman people are not used any more in the default look, so the game no
   longer depends on a Blender build or on `make assets`.
+- **Exaggerated builds** (`Costume.BUILDS`): a lanky sailor with a coil of rope, a short stocky one with a flask, a
+  wiry old one with a long nose and a spyglass, a portly money-changer under a big tricorn, a broad market woman, a
+  thin tall analyst, a child with a big head. Noses are part of the outline; there are still no eyes or mouths.
 - **Ink** (`game3d/shaders/ink.gdshader`, one full-screen quad owned by `Session`): outline on depth and normal edges;
   engraving = paper and ink only, three layers of hatching by brightness, the sky kept clean. Text on the board and on
   the notice board is drawn after the effect so it stays readable; the hall caps the effect at outline.
@@ -74,7 +77,7 @@ Walking (the gait with foot IK drives the built people too):
 - It is low-poly made in code, not modelled by an artist: shapes are tubes, boxes and domes. Good at a distance and in
   motion, plain up close. Trees are balls and cones, the ship is the old simple one, the ground is one flat green.
 - The grass and the light were not re-tuned for the new look; the ground reads pale.
-- No faces at all, by decision. Body builds do not vary.
+- No faces, by decision (a nose only). Builds vary by height, girth, head and nose; there is still one body plan.
 - Engraving is uniform screen-space hatching: it does not follow the forms, and it shimmers a little when the camera moves.
 - Checked on still pictures and by tests; not watched in play.
 - The older demo pages (M3, M4, G3D polish, G3D characters) show the previous looks.
