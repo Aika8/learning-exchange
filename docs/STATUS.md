@@ -1,5 +1,44 @@
 # Status
 
+Updated: 2026-11-16, end of M4 (assistant and polish). Demo: `docs/demo/M4.md`.
+
+## M4 — what works
+- Assistant (ADR-0013, now Accepted): port `Assistant`, `TemplateAssistant`, `ClaudeAssistant` (Messages API, model from
+  `assistant.model`, default `claude-haiku-5-5`, key only from env `ANTHROPIC_API_KEY`, `.env.example`), `FallbackAssistant`
+  + `AdviceGuard` (ru/en buy/sell advice → template, `guarded=true`; advice questions never reach the model). Facts from
+  statement, balances, margin positions, journal review, last rate decision, report surprises, game SessionFacts.
+  `POST /assistant/ask`. Clients: mobile screen, web panel, game3d chronicle (`Chronicler.Remote`, template fallback).
+- Achievements shared by app and game: `AchievementsProjection` over the account's events, `GET /achievements`; mobile
+  screen and web list. Rebuilt from any readable journal on start.
+- Performance: book snapshots throttled to ≤ 1 per 250 ms per instrument with trailing edge, no repeats
+  (`BookThrottle`); mobile book rows actually memoised (stable formatter), home and achievement rows memoised.
+- `docs/teaching/README.md`: 19 patterns — where, which ADR, a 5-minute exercise each.
+- Mobile «Мой план»: rebalancing reminder (twice a year in simulation time, drift > 5 p.p.) and lump sum vs DCA over
+  every start in the last 180 closes (win share, average edge, worst of each).
+
+## M4 — not done
+- game3d harbour fps (45–68 after a camera teleport) — **not fixed**. A `-s` probe could not build the harbour
+  (autoloads), so its numbers were not the island; changes were reverted. Next: probe via a normal run flag.
+- Quests from world bible §4/§5b — none started: Совет Казначеев rate decision, «Наследство деда», «Золотой Парус» vs
+  Корзина Ветлы, «Корзина уплыла», «Щедрая гильдия», insider records, dividend day.
+- The real Claude API was never called (no key); only the fake-HTTP test covers the adapter.
+- Lump sum vs DCA was shown only with too little history on a fresh exchange; the maths is unit-tested.
+- iOS simulator / Maestro still not run (no Xcode); mobile checked in Expo web at 375×812.
+
+## ADRs (all)
+Accepted: 0001–0012, 0013 (M4), 0014, 0015, 0016, 0018–0023. Superseded: 0017 (by 0019). Proposed: none.
+
+## Risks (M4)
+- The advice guard is regex-based: strict, may also drop harmless model text (template answers instead).
+- Prompt injection: facts and the question are passed as tagged data; the guard still checks the output.
+- API cost with a key: no per-session cache yet (ADR-0013 suggests one).
+
+## Next steps
+- Fix the harbour fps with a proper in-game probe; then the quests in `fable-build.md` order.
+- Cache assistant answers per (account, facts hash); add a live data adapter per ADR-0015.
+
+---
+
 Updated: 2026-11-16, end of M3 (game vertical slice in `game3d/`: the day loop as a state machine, Act I in short,
 spread/fees/liquidity, the first storm and the Anchor with a gap, the Forge report season and the record-but-fell
 quest, the evening chronicle from SessionFacts with replay, the captain's glossary, walking people). Demo:
