@@ -13,6 +13,33 @@ const SILK := Vector3(330, -6, -260)
 const SILK_RADIUS := 26.0
 const SILK_DOCK := Vector3(330 - 34, -6, -260 + 14)
 const CLOUD_LEVEL := -55.0
+const HARBOUR_SEED := 11
+const SILK_SEED := 23
+const PIER_FROM := Vector3(28.2, 0.05, 2.0)  ## the Spark Harbour pier, a rectangle of planks
+const PIER_TO := Vector3(49.4, 0.05, 6.0)
+const SILK_PIER_FROM := SILK + Vector3(-36.8, 0.05, 12.0)
+const SILK_PIER_TO := SILK + Vector3(-22.2, 0.05, 16.0)
+
+
+## Where people can stand on an island: the flat cap (a wobbly disc) and the pier (a rectangle).
+static func walk_areas(island_id: String) -> Array[Dictionary]:
+	if island_id == "silk":
+		return [{"name": "silk", "kind": "disc", "centre": SILK, "radius": SILK_RADIUS, "seed": SILK_SEED},
+			{"name": "silk-pier", "kind": "rect", "from": SILK_PIER_FROM, "to": SILK_PIER_TO}]
+	return [{"name": "harbour", "kind": "disc", "centre": HARBOUR, "radius": HARBOUR_RADIUS, "seed": HARBOUR_SEED},
+		{"name": "pier", "kind": "rect", "from": PIER_FROM, "to": PIER_TO}]
+
+
+## Where the captain appears: [position, camera yaw]. `spawn` is Session.spawn (start | pier | exchange).
+static func spawn_point(island_id: String, spawn: String) -> Array:
+	if island_id == "silk":
+		return [SILK_DOCK + Vector3(6, 0.5, -2), -2.3]  # every arrival at Silk Reach is by ship
+	match spawn:
+		"pier":
+			return [PIER_END + Vector3(-6, 0.5, 0), PI / 2]
+		"exchange":
+			return [EXCHANGE_DOOR + Vector3(0, 0.5, 3), 0.0]
+	return [Vector3(6, 0.5, 10), 0.5]
 
 
 ## Environment, sun and cloud sea. `hall` = indoor variant (no clouds, warm and dim).
@@ -235,7 +262,7 @@ static func build(root: Node3D, detail: bool = true) -> Dictionary:
 static func _spark_harbour(detail: bool) -> Node3D:
 	var h := Node3D.new()
 	h.name = "SparkHarbour"
-	h.add_child(island(HARBOUR_RADIUS, 42.0, 11, 0.0, true))
+	h.add_child(island(HARBOUR_RADIUS, 42.0, HARBOUR_SEED, 0.0, true))
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 7
 	# the Wind Exchange on a terrace
@@ -395,7 +422,7 @@ static func _solid(parent: Node3D, pos: Vector3, r: float) -> void:
 static func _silk_reach() -> Node3D:
 	var s := Node3D.new()
 	s.name = "SilkReach"
-	s.add_child(island(SILK_RADIUS, 34.0, 23, 1.2, true))  # walkable since M3
+	s.add_child(island(SILK_RADIUS, 34.0, SILK_SEED, 1.2, true))  # walkable since M3
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 23
 	for row in 4:

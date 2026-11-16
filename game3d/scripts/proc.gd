@@ -181,6 +181,19 @@ static func island_mesh(radius: float, depth: float, seed_value: int, bumps: flo
 	return st.commit()
 
 
+## How far the flat, walkable cap of an island reaches in direction `angle` (atan2(z, x)); follows the outline of
+## whichever mesh is in use, so fences, the navmesh and the audit agree with the ground.
+static func cap_radius(radius: float, seed_value: int, angle: float) -> float:
+	if Assets.available():
+		return radius * 0.97 * (7.0 / 7.8) * (1.0  # the last flat ring of island_mesh_hd
+			 + 0.12 * sin(angle * 6.0 + seed_value) + 0.06 * sin(angle * 17.0 + seed_value * 0.3))
+	var s := fposmod(angle, TAU) / TAU * 30.0  # low-poly island: 30 sides, the outline is per side
+	var lo := 1.0e9
+	for k: int in [int(floor(s)) % 30, int(ceil(s)) % 30]:
+		lo = minf(lo, 1.0 + 0.12 * sin(k * 0.62 + seed_value) + 0.06 * sin(k * 1.7 + seed_value * 0.3))
+	return radius * 0.92 * 0.97 * lo * cos(PI / 30.0)
+
+
 ## Dense island for the PBR look (ADR-0019): 120 sides, 26 rings, noise-carved cliffs with ledges (strata) and a
 ## grass lip that rolls over the edge. Cap stays flat at y=0 inside 0.9 radius so walking and placement are unchanged.
 static func island_mesh_hd(radius: float, depth: float, seed_value: int, bumps: float = 0.0) -> ArrayMesh:

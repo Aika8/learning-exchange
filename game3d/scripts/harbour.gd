@@ -64,20 +64,9 @@ func _ready() -> void:
 	add_child(ship)
 	_captain = Captain.new()
 	add_child(_captain)
-	match Session.spawn:
-		"pier":
-			if _silk():
-				_captain.position = Archipelago.SILK_DOCK + Vector3(6, 0.5, -2)
-				_captain.yaw = -2.3
-			else:
-				_captain.position = Archipelago.PIER_END + Vector3(-6, 0.5, 0)
-				_captain.yaw = PI / 2
-		"exchange":
-			_captain.position = Archipelago.EXCHANGE_DOOR + Vector3(0, 0.5, 3)
-			_captain.yaw = 0.0
-		_:
-			_captain.position = Vector3(6, 0.5, 10)
-			_captain.yaw = 0.5
+	var at := Archipelago.spawn_point(Game.island, Session.spawn)
+	_captain.position = at[0]
+	_captain.yaw = at[1]
 	_fly = Camera3D.new()
 	_fly.fov = 65
 	add_child(_fly)
@@ -88,10 +77,10 @@ func _ready() -> void:
 	Game.report_event.connect(_on_report)
 	if Game.flow.state == GameFlow.State.SAILING:  # arrived
 		Game.move(GameFlow.State.PORT)
-	if not Session.active():
-		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
-	else:
+	if Session.active():
 		_demo()
+	elif Session.arg("audit").is_empty():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 
 ## People and Act I props. Each NPC is a MakeHuman character when downloaded (ADR-0019).

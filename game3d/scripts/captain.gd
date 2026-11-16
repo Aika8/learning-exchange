@@ -17,13 +17,7 @@ var walker: Walker
 
 
 func _ready() -> void:
-	var shape := CollisionShape3D.new()
-	var cap := CapsuleShape3D.new()
-	cap.radius = 0.45
-	cap.height = 2.0
-	shape.shape = cap
-	shape.position.y = 1.0
-	add_child(shape)
+	Mover.capsule(self)
 	body = Proc.figure(Color("2f5d8a"), Color("8a5a3c"), "sailor")
 	add_child(body)
 	walker = Walker.attach(body)
@@ -67,10 +61,7 @@ func _physics_process(delta: float) -> void:
 	if controlled:
 		input = Input.get_vector("move_left", "move_right", "move_forward", "move_back")
 	var dir := (Basis(Vector3.UP, yaw) * Vector3(input.x, 0, input.y)).normalized()
-	velocity.x = dir.x * SPEED
-	velocity.z = dir.z * SPEED
-	velocity.y = 0.0 if is_on_floor() else velocity.y - GRAVITY * delta
-	move_and_slide()
+	Mover.step(self, dir, delta)
 	if position.y < -30.0:  # fell off the island: back to the square
 		position = Vector3(0, 2, 0)
 		velocity = Vector3.ZERO

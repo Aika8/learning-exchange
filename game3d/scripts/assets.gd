@@ -73,6 +73,7 @@ static func put(parent: Node3D, name: String, pos: Vector3, yaw: float = 0.0, sc
 	n.position = pos
 	n.rotation.y = yaw
 	n.scale = Vector3.ONE * scale
+	n.set_meta("asset", name)
 	parent.add_child(n)
 	return n
 

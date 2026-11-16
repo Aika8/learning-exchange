@@ -26,6 +26,8 @@ func _ready() -> void:
 	_fps.position = Vector2(12, 8)
 	_fps.visible = active() or not arg("fps").is_empty()
 	_layer.add_child(_fps)
+	if not arg("audit").is_empty():
+		Audit.run.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:
