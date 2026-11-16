@@ -87,7 +87,9 @@ func _on_start() -> void:
 	if not r["ok"]:
 		_status.text = "ERR_" + str(r["code"])
 		return
+	await Game.start_day()
 	Session.spawn = "start"
+	Game.island = "harbour"
 	Session.go("harbour")
 
 

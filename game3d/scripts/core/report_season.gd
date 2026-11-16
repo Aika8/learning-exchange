@@ -27,14 +27,21 @@ static func gap_bps(close: int, open: int) -> int:
 	return (open - close) * 10000 / close if close > 0 else 0
 
 
-## A record = net profit above every earlier report (needs at least one).
-static func is_record(report: Dictionary, earlier: Array) -> bool:
+## A record: revenue or net profit above every earlier report (needs at least one). Returns "PROFIT", "REVENUE" or "".
+## Revenue records with a profit miss are the classic «рекордная выручка, а акция упала» headline.
+static func record_kind(report: Dictionary, earlier: Array) -> String:
 	if earlier.is_empty():
-		return false
+		return ""
+	var profit := true
+	var revenue := true
 	for r: Dictionary in earlier:
-		if int(r["netProfit"]) >= int(report["netProfit"]):
-			return false
-	return true
+		profit = profit and int(r["netProfit"]) < int(report["netProfit"])
+		revenue = revenue and int(r.get("revenue", 0)) < int(report.get("revenue", 0))
+	return "PROFIT" if profit else ("REVENUE" if revenue else "")
+
+
+static func is_record(report: Dictionary, earlier: Array) -> bool:
+	return not record_kind(report, earlier).is_empty()
 
 
 ## The quest outcome from the report and the move at the open.

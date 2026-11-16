@@ -32,10 +32,10 @@ class Template:
 			out.append(Chronicler.line("CHR_EXPECTANCY", [{"r": f.expectancy_x100}, traded.size()]))
 			if traded.size() < 20:
 				out.append(Chronicler.line("CHR_FEW_TRADES"))
-			out.append(Chronicler.line("CHR_COSTS", [{"m": f.fees}, {"m": f.spread}, {"m": f.costs()}]))
+			out.append(Chronicler.line("CHR_COSTS", [{"m": -f.fees}, {"m": -f.spread}, {"m": -f.costs()}]))
 		for g in f.gaps:
 			out.append(Chronicler.line("CHR_GAP_THROUGH" if g["through"] else "CHR_SLIP",
-				[g["instrument"], {"p": g["trigger"]}, {"p": g["trade"]}, {"m": g["slip"]}]))
+				[g["instrument"], {"p": g["trigger"]}, {"p": g["trade"]}, {"m": -int(g["slip"])}]))
 		if f.basket_start > 0:
 			out.append(Chronicler.line("CHR_BASKET", [{"bps": f.return_bps()}, {"m": f.pnl}, {"bps": f.basket_bps()}, {"m": f.basket_pnl()}]))
 			out.append(Chronicler.line("CHR_BASKET_AHEAD" if f.basket_pnl() > f.pnl else "CHR_BASKET_BEHIND"))

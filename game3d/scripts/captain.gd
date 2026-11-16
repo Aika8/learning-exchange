@@ -1,4 +1,6 @@
-## The player's captain: third-person walking with an orbit camera on a spring arm (mouse to look, wheel to zoom).
+## The player's captain: a MakeHuman character (CC0, «sailor») with a procedural walk cycle (Walker), third-person
+## walking with an orbit camera on a spring arm (mouse to look, wheel to zoom). Without the downloaded people the
+## procedural figure stands in and bobs.
 class_name Captain
 extends CharacterBody3D
 
@@ -11,7 +13,7 @@ var arm: SpringArm3D
 var camera: Camera3D
 var body: Node3D
 var controlled := true
-var _walk := 0.0
+var walker: Walker
 
 
 func _ready() -> void:
@@ -22,15 +24,17 @@ func _ready() -> void:
 	shape.shape = cap
 	shape.position.y = 1.0
 	add_child(shape)
-	body = Proc.figure(Color("2f5d8a"), Color("8a5a3c"))
+	body = Proc.figure(Color("2f5d8a"), Color("8a5a3c"), "sailor")
 	add_child(body)
-	var scarf := Proc.box(Vector3(0.75, 0.16, 0.75), Hud.BRASS, Vector3(0, 1.38, 0))
-	if Assets.available():  # a knitted brass scarf on the realistic figure (ADR-0019)
-		var ring := TorusMesh.new()
-		ring.inner_radius = 0.1
-		ring.outer_radius = 0.2
-		scarf = Proc.mesh_node(ring, Assets.pbr("quatrefoil_jacquard_fabric", Hud.BRASS, 3.0), Vector3(0, 1.47, 0))
-	body.add_child(scarf)
+	walker = Walker.attach(body)
+	if not walker.animated():  # procedural figure: the old brass scarf marks the captain
+		var scarf := Proc.box(Vector3(0.75, 0.16, 0.75), Hud.BRASS, Vector3(0, 1.38, 0))
+		if Assets.available():
+			var ring := TorusMesh.new()
+			ring.inner_radius = 0.1
+			ring.outer_radius = 0.2
+			scarf = Proc.mesh_node(ring, Assets.pbr("quatrefoil_jacquard_fabric", Hud.BRASS, 3.0), Vector3(0, 1.47, 0))
+		body.add_child(scarf)
 	arm = SpringArm3D.new()
 	arm.spring_length = 9.0
 	arm.position.y = 2.0
@@ -70,9 +74,8 @@ func _physics_process(delta: float) -> void:
 	if position.y < -30.0:  # fell off the island: back to the square
 		position = Vector3(0, 2, 0)
 		velocity = Vector3.ZERO
-	if dir.length() > 0.1:
+	var moving := dir.length() > 0.1
+	if moving:
 		body.rotation.y = lerp_angle(body.rotation.y, atan2(dir.x, dir.z), 10.0 * delta)
-		_walk += delta * 11.0
-		body.position.y = absf(sin(_walk)) * 0.12
-	else:
-		body.position.y = lerpf(body.position.y, 0.0, 10.0 * delta)
+	walker.step(delta, SPEED if moving else 0.0)
+	body.position.y = walker.bob() * (0.4 if walker.animated() else 2.0)

@@ -17,7 +17,7 @@ var _keys: Dictionary = {}
 
 ## Appends an event at sim time `t`. A non-empty `key` already seen makes it a no-op; returns whether it was added.
 func append(kind: String, t: int, data: Dictionary = {}, key: String = "") -> bool:
-	assert(kind in KINDS, "unknown day-log kind " + kind)
+	assert(kind in KINDS, "unknown day-out kind " + kind)
 	if not key.is_empty():
 		if _keys.has(key):
 			return false
@@ -47,17 +47,17 @@ func to_json() -> String:
 
 
 static func from_json(text: String) -> DayLog:
-	var log := DayLog.new()
+	var out := DayLog.new()
 	var parsed: Variant = JSON.parse_string(text)
 	if not parsed is Dictionary:
-		return log
-	log.day = int(parsed.get("day", 1))
+		return out
+	out.day = int(parsed.get("day", 1))
 	for e: Variant in parsed.get("events", []):
 		if e is Dictionary:
 			var d: Dictionary = e
 			# JSON numbers come back as floats; money and time are ints again here
-			log.append(str(d["kind"]), int(d["t"]), _ints(d.get("data", {})), str(d.get("key", "")))
-	return log
+			out.append(str(d["kind"]), int(d["t"]), _ints(d.get("data", {})), str(d.get("key", "")))
+	return out
 
 
 static func _ints(v: Variant) -> Variant:

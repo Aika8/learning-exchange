@@ -47,6 +47,12 @@ func test_report_season_record_but_fell() -> void:
 	assert_eq(ReportSeason.outcome(report, earlier, -450), ReportSeason.RECORD_BUT_FELL)
 	assert_eq(ReportSeason.outcome({"season": 2, "netProfit": 800, "eps": 120, "consensusEps": 100}, earlier, 500), ReportSeason.BEAT_ROSE)
 	assert_false(ReportSeason.is_record(report, []), "the first report is not a record")
+	assert_eq(ReportSeason.record_kind(report, earlier), "PROFIT")
+	# FORGE season 15 of seed 42: record revenue, EPS 2.56 vs consensus 2.83
+	var rev_only := {"season": 15, "revenue": 2788820226, "netProfit": 256850342, "eps": 256, "consensusEps": 283}
+	var before := [{"season": 14, "revenue": 2786734188, "netProfit": 296787191}, {"season": 9, "revenue": 2622570666, "netProfit": 382108546}]
+	assert_eq(ReportSeason.record_kind(rev_only, before), "REVENUE")
+	assert_eq(ReportSeason.outcome(rev_only, before, -300), ReportSeason.RECORD_BUT_FELL)
 
 
 func test_report_season_phases_and_gap_through_anchor() -> void:
@@ -60,14 +66,14 @@ func test_report_season_phases_and_gap_through_anchor() -> void:
 
 
 func test_template_chronicle_names_every_lesson_and_ends_with_the_disclaimer() -> void:
-	var log := DayLog.new()
-	log.append("DAY_START", 0, {"capital": 10000000, "basket": 10000})
-	log.append("PLAN", 1, {"instrument": "SILK-SPARK", "entry": 10000, "stop": 9800, "qty": 10, "risk": 2198})
-	log.append("FILL", 2, {"instrument": "SILK-SPARK", "side": "BUY", "price": 10000, "qty": 10, "fee": 100, "spread": 50})
-	log.append("LESSON", 3, {"id": "FEES"})
-	log.append("LESSON", 4, {"id": "ANCHOR"})
-	log.append("BASKET", 5, {"price": 10050})
-	var lines := Chronicler.Template.new().review(SessionFacts.from_events(log.events))
+	var dl := DayLog.new()
+	dl.append("DAY_START", 0, {"capital": 10000000, "basket": 10000})
+	dl.append("PLAN", 1, {"instrument": "SILK-SPARK", "entry": 10000, "stop": 9800, "qty": 10, "risk": 2198})
+	dl.append("FILL", 2, {"instrument": "SILK-SPARK", "side": "BUY", "price": 10000, "qty": 10, "fee": 100, "spread": 50})
+	dl.append("LESSON", 3, {"id": "FEES"})
+	dl.append("LESSON", 4, {"id": "ANCHOR"})
+	dl.append("BASKET", 5, {"price": 10050})
+	var lines := Chronicler.Template.new().review(SessionFacts.from_events(dl.events))
 	var keys := lines.map(func(l: Dictionary) -> String: return l["key"])
 	assert_eq(keys[0], "CHR_INTRO")
 	assert_has(keys, "CHR_VOYAGE_OPEN")

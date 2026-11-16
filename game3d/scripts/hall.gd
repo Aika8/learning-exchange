@@ -1,8 +1,10 @@
-## The Exchange hall inside the windmill: the live order book glows on a 3D board; the order ticket, balances,
-## my orders and the trade tape are a HUD. Scenes never touch the socket or HTTP — only the autoloads do.
+## The Exchange hall inside the windmill (GameFlow state TRADING): the live order book glows on a 3D board; the order
+## ticket, balances, my orders, the trade tape, the approved voyage plan with the Anchor (stop-loss) and the «Реальный
+## мир» board (USD/KZT, M2b) are a HUD. Lessons: spread on the first look at the book, fees on the first fill.
+## Scenes never touch the socket or HTTP — only the autoloads do.
 extends Node3D
 
-const INSTRUMENT := "SILK-SPARK"
+var _instrument := "SILK-SPARK"
 
 var _board: Board
 var _cam: Camera3D
@@ -17,9 +19,17 @@ var _details: Dictionary = {}
 var _orders: Array = []
 var _tape: Array = []
 var _live: Label
+var _hud: GameHud
+var _held := 0
+
+
+func _trading() -> bool:
+	return Game.flow.state == GameFlow.State.TRADING
 
 
 func _ready() -> void:
+	if Game.plan != null:
+		_instrument = Game.plan.instrument
 	Archipelago.sky(self, true)
 	_room()
 	_board = Board.new()
@@ -29,6 +39,8 @@ func _ready() -> void:
 	_cam.fov = 58
 	add_child(_cam)
 	_build_ui()
+	_hud = GameHud.new()
+	add_child(_hud)
 	MarketStream.book_received.connect(_on_book)
 	MarketStream.trades_received.connect(_on_trades)
 	MarketStream.account_changed.connect(func(_r: Array) -> void: ExchangeApi.refresh_account())
@@ -36,15 +48,20 @@ func _ready() -> void:
 	ExchangeApi.account_updated.connect(_on_account)
 	ExchangeApi.orders_updated.connect(_on_orders)
 	Locale.locale_changed.connect(_on_locale)
-	var ch: Array[String] = ["market.%s.book" % INSTRUMENT, "market.%s.trades" % INSTRUMENT, "clock"]
+	var ch: Array[String] = ["market.%s.book" % _instrument, "market.%s.trades" % _instrument, "clock"]
 	if ExchangeApi.account.has("accountId"):
 		ch.append("account.%s" % ExchangeApi.account["accountId"])
 	MarketStream.open(ExchangeApi.token, ch)
 	ExchangeApi.refresh_account()
 	_on_live(MarketStream.is_live())
 	_redraw()
+	_real_world()
+	if Game.plan != null:
+		_draft.qty_text = str(Game.plan.qty)
+		(_ui["qty"] as LineEdit).text = _draft.qty_text
+		_set_type("MARKET")
 	if Session.active():
-		_demo()
+		await Demo.hall(self)
 
 
 func _exit_tree() -> void:
@@ -189,6 +206,8 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _leave() -> void:
+	if _trading():
+		Game.move(GameFlow.State.PORT)
 	Session.spawn = "exchange"
 	Session.go("harbour")
 
@@ -309,11 +328,43 @@ func _build_ui() -> void:
 	tp.offset_left = 28
 	tp.offset_right = 330
 	tp.offset_top = 130
-	tp.offset_bottom = -470
+	tp.offset_bottom = -560
 	root.add_child(tp)
 	tape.add_child(Hud.text("TAPE_TITLE", 18, Hud.BRASS))
 	_ui["tape"] = Hud.text("", 15)
 	tape.add_child(_ui["tape"])
+
+	# left bottom: the voyage plan and the Anchor; the «Реальный мир» board
+	var left := VBoxContainer.new()
+	left.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
+	left.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	left.offset_left = 28
+	left.offset_right = 520
+	left.offset_bottom = -60
+	left.add_theme_constant_override("separation", 10)
+	root.add_child(left)
+	var pl := VBoxContainer.new()
+	left.add_child(Hud.panel(pl))
+	pl.add_child(Hud.text("HALL_PLAN", 18, Hud.BRASS))
+	pl.add_child(Hud.lore("HALL_PLAN_LORE"))
+	_ui["plan"] = Hud.text("", 15)
+	(_ui["plan"] as Label).autowrap_mode = TextServer.AUTOWRAP_WORD
+	(_ui["plan"] as Label).custom_minimum_size = Vector2(460, 0)
+	pl.add_child(_ui["plan"])
+	var anchor := Hud.button("HALL_ANCHOR")
+	anchor.name = "Anchor"
+	anchor.pressed.connect(_drop_anchor)
+	pl.add_child(anchor)
+	pl.add_child(Hud.lore("HALL_ANCHOR_LORE"))
+	_ui["anchor"] = anchor
+	var rw := VBoxContainer.new()
+	left.add_child(Hud.panel(rw))
+	rw.add_child(Hud.text("REAL_TITLE", 18, Hud.BRASS))
+	rw.add_child(Hud.lore("REAL_LORE"))
+	_ui["real"] = Hud.text("REAL_LOADING", 15)
+	(_ui["real"] as Label).autowrap_mode = TextServer.AUTOWRAP_WORD
+	(_ui["real"] as Label).custom_minimum_size = Vector2(460, 0)
+	rw.add_child(_ui["real"])
 	_set_side("BUY")
 	_set_type("LIMIT")
 
@@ -343,14 +394,14 @@ func _set_type(t: String) -> void:
 
 
 func _ins() -> Dictionary:
-	return ExchangeApi.instrument(INSTRUMENT)
+	return ExchangeApi.instrument(_instrument)
 
 
 func _redraw() -> void:
 	if _ui.is_empty():
 		return
 	var ins := _ins()
-	_draft.instrument = INSTRUMENT
+	_draft.instrument = _instrument
 	_draft.price_scale = int(ins["priceScale"])
 	_draft.qty_scale = int(ins["qtyScale"])
 	var limit := _draft.type == "LIMIT"
@@ -360,7 +411,8 @@ func _redraw() -> void:
 	(_ui["price_label"] as Label).text = tr("FORM_PRICE") % ins["quote"]
 	(_ui["qty_label"] as Label).text = tr("FORM_QTY") % ins["base"]
 	(_ui["fee"] as Label).text = tr("FEE_LORE") % Money.format(int(ins["feeBps"]), 2, Locale.current())
-	(_ui["submit"] as Button).disabled = not _draft.is_valid()
+	(_ui["submit"] as Button).disabled = not _draft.is_valid() or not _trading()
+	_paint_plan()
 	_board.show_book(_book, _last_text())
 	_on_account(_details)
 	_on_orders(_orders)
@@ -385,10 +437,13 @@ func _on_live(live: bool) -> void:
 
 
 func _on_book(book: BookModel) -> void:
-	if book.instrument != INSTRUMENT:
+	if book.instrument != _instrument:
 		return
 	_book = book
 	_board.show_book(_book, _last_text())
+	if _trading() and book.best_bid() > 0 and book.best_ask() > 0:
+		var sp := Lessons.spread(book.best_bid(), book.best_ask())
+		Game.lesson("SPREAD", [{"p": book.best_bid()}, {"p": book.best_ask()}, {"p": sp["abs"]}, {"bps": sp["bps"]}])
 
 
 func _on_trades(trades: Array) -> void:
@@ -445,7 +500,7 @@ func _submit() -> void:
 		return
 	(_ui["submit"] as Button).disabled = true
 	result.text = "FORM_SENDING"
-	var r: Dictionary = await ExchangeApi.place_order(body)
+	var r: Dictionary = await Game.place(body)
 	(_ui["submit"] as Button).disabled = false
 	if r["ok"]:
 		var o: Dictionary = r["data"]
@@ -453,40 +508,114 @@ func _submit() -> void:
 		result.text = tr("FORM_PLACED") % [str(int(o["orderId"])), tr("STATUS_" + str(o["status"])),
 			Money.format(int(o["filledQty"]), qs, Locale.current()), Money.format(int(o["qty"]), qs, Locale.current())]
 		result.add_theme_color_override("font_color", Hud.BID)
+		var f := Game.facts()
+		if f.fees > 0:
+			Game.lesson("FEES", [{"m": f.fees}, {"m": f.spread}, Money.format(int(_ins()["feeBps"]), 2, Locale.current())])
+		_paint_plan()
 	else:
 		result.text = tr("ERR_" + str(r["code"]))
 		result.add_theme_color_override("font_color", Hud.ASK)
 	ExchangeApi.refresh_account()
 
 
-## Demo: wait for the live book, place a limit order below the best bid and a small market buy, take screenshots.
-func _demo() -> void:
-	for i in 40:
-		if _book.best_bid() > 0:
-			break
-		await Session.wait(0.25)
-	await Session.wait(1.0)
-	await Session.shot(self, "6-hall-board")
-	var ps := int(_ins()["priceScale"])
-	var bid := _book.best_bid() if _book.best_bid() > 0 else 10000
-	_set_side("BUY")
-	_set_type("LIMIT")
-	(_ui["price"] as LineEdit).text = Money.format(bid - 5 * int(pow(10, ps - 1)), ps, "en").replace(",", "")
-	(_ui["price"] as LineEdit).text_changed.emit((_ui["price"] as LineEdit).text)
-	(_ui["qty"] as LineEdit).text = "5"
-	(_ui["qty"] as LineEdit).text_changed.emit("5")
+# ---------------------------------------------------------------- plan, Anchor, real world
+
+func _held_qty() -> int:
+	var q := 0
+	for v in Game.facts().voyages:
+		if v["instrument"] == _instrument:
+			q += maxi(0, int(v["qty"]))
+	return q
+
+
+func _paint_plan() -> void:
+	if not _ui.has("plan"):
+		return
+	var loc := Locale.current()
+	var p := Game.plan
+	_held = _held_qty()
+	if p == null:
+		(_ui["plan"] as Label).text = tr("HALL_NO_PLAN")
+		(_ui["anchor"] as Button).disabled = true
+		return
+	var anchor_txt := tr("HALL_ANCHOR_SET") % [Money.format(int(Game.anchor["trigger"]), 2, loc), Money.format(int(Game.anchor["limit"]), 2, loc)] \
+		if Game.anchor_id > 0 else tr("HALL_ANCHOR_NONE")
+	(_ui["plan"] as Label).text = tr("HALL_PLAN_ROW") % [p.instrument, Money.format(p.entry, 2, loc), Money.format(p.stop, 2, loc),
+		str(p.qty), Money.format(p.risk(), 2, loc), Money.format(p.risk_bps(), 2, loc), str(_held), anchor_txt]
+	(_ui["anchor"] as Button).disabled = _held <= 0 or Game.anchor_id > 0 or not _trading()
+
+
+func _drop_anchor() -> void:
+	var r: Dictionary = await Game.drop_anchor(_held_qty())
+	var result: Label = _ui["result"]
+	if r["ok"]:
+		result.text = tr("HALL_ANCHOR_DONE") % Money.format(Game.plan.stop, 2, Locale.current())
+		result.add_theme_color_override("font_color", Hud.BID)
+	else:
+		result.text = tr("ERR_" + str(r["code"]))
+		result.add_theme_color_override("font_color", Hud.ASK)
+	_paint_plan()
+
+
+var _real: Dictionary = {}
+
+
+func _real_world() -> void:
+	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/real-world")
+	_real = r["data"] if r["ok"] and r["data"] is Dictionary else {}
+	_paint_real()
+	if not Locale.locale_changed.is_connected(_paint_real_l):
+		Locale.locale_changed.connect(_paint_real_l)
+
+
+func _paint_real_l(_c: String) -> void:
+	_paint_real()
+
+
+func _paint_real() -> void:
+	var label: Label = _ui["real"]
+	if _real.is_empty():
+		label.text = tr("REAL_NONE")
+		return
+	var loc := Locale.current()
+	var lines: PackedStringArray = []
+	for q: Dictionary in _real.get("quotes", []):
+		if str(q["symbol"]) != "USD/KZT":
+			continue
+		var src: Dictionary = q.get("source", {})
+		var day := Time.get_date_string_from_unix_time(int(q["asOf"]) / 1000)
+		lines.append(tr("REAL_ROW") % [str(q["symbol"]), Money.format(int(q["price"]), int(q["scale"]), loc), day])
+		if bool(src.get("sample", false)):
+			lines.append(tr("REAL_SAMPLE"))
+	lines.append(tr("REAL_NOTE"))
+	label.text = "\n".join(lines)
+
+
+## Demo hooks.
+func demo_order(side: String, type: String, qty: int) -> void:
+	_set_side(side)
+	_set_type(type)
+	(_ui["qty"] as LineEdit).text = str(qty)
+	(_ui["qty"] as LineEdit).text_changed.emit(str(qty))
 	await _submit()
-	await Session.wait(1.2)
-	await Session.shot(self, "7-hall-limit")
-	_set_type("MARKET")
-	(_ui["qty"] as LineEdit).text = "2"
-	(_ui["qty"] as LineEdit).text_changed.emit("2")
-	await _submit()
-	await Session.wait(1.2)
-	Locale.set_locale("en")
-	_yaw = -0.35
-	_dist = 12.0
-	await Session.wait(0.6)
-	await Session.shot(self, "8-hall-market-en")
-	Locale.set_locale("ru")
+
+
+func demo_anchor() -> void:
+	await _drop_anchor()
+
+
+func demo_camera(yaw: float, dist: float) -> void:
+	_yaw = yaw
+	_dist = dist
+
+
+func book() -> BookModel:
+	return _book
+
+
+func hud() -> GameHud:
+	return _hud
+
+
+func leave() -> void:
 	_leave()
