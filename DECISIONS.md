@@ -313,3 +313,7 @@ Build and CI
   stride). Roles: captain, sailor, trader, townsman, child; `who` picks the body, `role` the dress. `--plain` shows the
   people as downloaded. Packed arrays inside a Dictionary are values in GDScript — write them back after appending.
 
+- People missing after a fresh `make assets` (docs/demo/G3D-people.md): the MakeHuman people are a Blender build, not a
+  download, so a fresh assets folder has none and the game fell back to one capsule figure for everybody. Not fixed by
+  hosting them (a source decision for Aika); fixed by making the fallback honest: `Costume.stand_in` builds every role
+  in the same costume, `make assets` and the game say the people are missing.

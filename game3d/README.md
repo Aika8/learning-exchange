@@ -11,6 +11,8 @@ glossary (G), the «Реальный мир» board. Two islands: Spark Harbour 
 ## Run
 1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make assets` (once, ~170 MB of CC0 art from Poly Haven, MD5-checked; ADR-0019). 4. `make game3d`.
 Without `make assets` the game still runs with the old procedural look.
+The MakeHuman people are **not** part of `make assets`: build them with `game3d/tools/people/build.sh` (Blender + MPFB) or
+copy `game3d/assets/models/people/` from a checkout that has them; without them dressed stand-in figures are shown.
 Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, Shift (run), mouse, Tab (fly camera), E (interact),
 Space (sail during the voyage), G (glossary), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
 
