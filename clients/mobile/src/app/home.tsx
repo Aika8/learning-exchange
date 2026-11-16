@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { View } from 'react-native';
 import { router } from 'expo-router';
 import { useTranslation } from 'react-i18next';
@@ -52,11 +53,16 @@ export default function Home() {
         <Button testID="go-funds" title={t('home.funds')} color={c.primary} onPress={() => router.push('/funds')} />
         <Button testID="go-review" title={t('home.review')} color={c.textSecondary} onPress={() => router.push('/review')} />
       </View>
+      <View style={{ flexDirection: 'row', gap: 8 }}>
+        <Button testID="go-assistant" title={t('home.assistant')} color={c.accent} onPress={() => router.push('/assistant')} />
+        <Button testID="go-achievements" title={t('home.achievements')} color={c.textSecondary} onPress={() => router.push('/achievements')} />
+        <Button testID="go-plan" title={t('home.plan')} color={c.textSecondary} onPress={() => router.push('/plan')} />
+      </View>
     </Screen>
   );
 }
 
-function Row({ title, value, sub, testID }: { title: string; value: string; sub?: string; testID: string }) {
+const Row = memo(function Row({ title, value, sub, testID }: { title: string; value: string; sub?: string; testID: string }) {
   return (
     <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
       <Body>{title}</Body>
@@ -68,4 +74,4 @@ function Row({ title, value, sub, testID }: { title: string; value: string; sub?
       </View>
     </View>
   );
-}
+});

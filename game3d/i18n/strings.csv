@@ -290,3 +290,5 @@ LESSON_SURPRISE_TEXT,"Сюрприз %s, гэп на открытии %s. Цен
 LESSON_CHRONICLE,Вечерняя летопись,The evening chronicle
 LESSON_CHRONICLE_REAL,Матожидание и сравнение с индексом,Expectancy and the index benchmark
 LESSON_CHRONICLE_TEXT,"Итог дня в R и сравнение с индексным фондом: так видно, помогает ли торговля.",The day in R and against an index fund: that shows whether trading helps.
+CHR_REMOTE_MODEL,"Летописец (модель %s) пересказывает ваш день по тем же цифрам:","The Chronicler (model %s) retells your day from the same numbers:"
+CHR_REMOTE_TEMPLATE,"Летописец биржи пересказывает ваш день по тем же цифрам:","The exchange's Chronicler retells your day from the same numbers:"

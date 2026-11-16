@@ -1,4 +1,4 @@
-import { memo } from 'react';
+import { memo, useCallback } from 'react';
 import { Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import type { BookSnapshot, Instrument } from '../api/client';
@@ -17,7 +17,8 @@ export function OrderBook({ book, instrument, depth = 6 }: { book: BookSnapshot;
   const max = Math.max(1, ...asks.map((l) => l.qty), ...bids.map((l) => l.qty));
   const bestBid = book.bids[0]?.price;
   const bestAsk = book.asks[0]?.price;
-  const fmt = (p: number) => formatMinor(p, instrument.priceScale, i18n.language);
+  // Stable formatter: the memoised rows re-render only when their level changes (M4 performance).
+  const fmt = useCallback((p: number) => formatMinor(p, instrument.priceScale, i18n.language), [instrument.priceScale, i18n.language]);
   const spread = bestBid !== undefined && bestAsk !== undefined ? bestAsk - bestBid : null;
   const spreadPct = spread !== null && bestAsk ? ((spread * 10000) / bestAsk / 100).toLocaleString(i18n.language, { maximumFractionDigits: 2 }) : null;
 

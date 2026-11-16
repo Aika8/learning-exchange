@@ -31,7 +31,8 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * WebSocket adapter for {@code api/asyncapi.yaml}. Subscribes to the core as a {@link MarketListener} and pushes
- * to clients once per market-data tick (100 ms): a fresh book snapshot when the book changed, the new trades, the clock
+ * to clients once per market-data tick (100 ms): a fresh book snapshot when the book changed (throttled to one per
+ * 250 ms per instrument by {@link BookThrottle}, M4), the new trades, the clock
  * when it changed, and an "account changed" nudge to the owner's channel.
  *
  * <p>Pattern: Observer (twice: the hub observes the core, clients observe channels). The listener only enqueues on
@@ -52,6 +53,9 @@ public class MarketDataHub extends TextWebSocketHandler implements MarketListene
     private final ScheduledExecutorService ticker = Executors.newSingleThreadScheduledExecutor(
             Thread.ofPlatform().name("market-data").daemon().factory());
     private long lastClockPush;
+    /** Book snapshots to clients at most every 250 ms per instrument, never a repeat (M4). */
+    static final long BOOK_MIN_MILLIS = 250;
+    private final BookThrottle books = new BookThrottle(BOOK_MIN_MILLIS);
 
     public MarketDataHub(TradingService market, DevAuth auth, JsonMapper json) {
         this.market = market;
@@ -198,10 +202,15 @@ public class MarketDataHub extends TextWebSocketHandler implements MarketListene
         if (clients.isEmpty()) {
             return;
         }
-        for (String instrument : dirtyBooks) {
+        long nowMs = System.currentTimeMillis();
+        dirtyBooks.forEach(books::dirty);
+        for (String instrument : books.due(nowMs)) {
             String channel = "market." + instrument + ".book";
             if (anyone(channel)) {
-                broadcast(channel, Dto.BookDto.of(market.book(instrument, 20)));
+                Dto.BookDto snapshot = Dto.BookDto.of(market.book(instrument, 20));
+                if (books.shouldSend(instrument, List.of(snapshot.bids(), snapshot.asks(), String.valueOf(snapshot.lastPrice())), nowMs)) {
+                    broadcast(channel, snapshot);
+                }
             }
         }
         trades.forEach((instrument, list) -> broadcast("market." + instrument + ".trades", list));

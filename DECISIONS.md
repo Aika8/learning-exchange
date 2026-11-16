@@ -255,3 +255,23 @@ Build and CI
   `bps` rate, `dbps` signed change), so ru/en re-render on the fly.
 - Walking: a procedural walk cycle on the MakeHuman game-engine rig (`Walker`), no downloaded animation. Quaternius
   animations would need retargeting in Blender and have no stable URLs.
+
+## M4 (assistant and polish)
+- Assistant facts are integers/codes with a kind (money, bps, R×100, count); the template formats them, the model gets
+  them as `key=value (kind)` data lines inside `<facts>`. The game's SessionFacts reach the server as integers only.
+- The advice guard is a list of regular expressions (ru/en), not a classifier: clear, testable, strict on purpose.
+  False positives are cheap (the template answers). Java needs `UNICODE_CHARACTER_CLASS` for `\b` around Cyrillic.
+- `assistant.use-key=false` disables Claude even when the env var is set (tests, demo).
+- Achievements: seven, fixed in code (`AchievementsProjection.Id`); names are client i18n keys. Sub-accounts (margin)
+  don't earn them. Rebuilt from the journal on start, so any journal version the upcasters read gives them.
+- Book throttle: at most one snapshot per instrument per 250 ms, trailing edge kept, identical books (ignoring `ts`)
+  not resent. Trades and account nudges are not throttled. No contract change: the channel still sends snapshots.
+- Mobile: rebalancing check uses the simulation clock (182 bank days = half a year), so it can be seen in a demo; targets
+  and the last check live in a persisted Zustand store (local, not server). Values are SPARK cash + holdings × last price.
+- Lump sum vs DCA: every start in the last 180 daily closes, N equal parts on consecutive days; units counted in
+  millionths to stay integer. Reports win share, average edge and the worst outcome of each — no single cherry-picked start.
+- Mobile memo: the order-book row formatter is `useCallback`-stable so `memo` rows skip re-render; home and
+  achievement rows are memoised.
+- game3d fps: NOT fixed in M4. A `-s` SceneTree probe could not build the harbour (autoloads missing), so its numbers
+  were of an empty sea; with that probe SDFGI showed 30–150 ms frames after far teleports, but that is not evidence for
+  the real island. Next: a probe started as a normal run (`--fps-probe` flag in `Session`), then decide on SDFGI.
