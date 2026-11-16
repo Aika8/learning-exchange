@@ -19,5 +19,9 @@ subprojects {
 
     tasks.withType(Test).configureEach {
         useJUnitPlatform()
+        // No test run may hang forever and burn a core (a test worker once ran for 23 h): the whole task is cut
+        // after 15 minutes, and every JUnit Jupiter test after 2 minutes unless it declares its own @Timeout.
+        timeout = java.time.Duration.ofMinutes(15)
+        systemProperty 'junit.jupiter.execution.timeout.default', '2 m'
     }
 }

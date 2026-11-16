@@ -23,6 +23,7 @@ Never connected to a real market. Built as a one-year learning project.
 Requires Java 25 and Node 22+. Gradle finds an installed JDK 25; if there is none it downloads one (foojay toolchain resolver).
 
 - Backend with bots: `make dev` → http://localhost:8080 (`/api/v1`, WebSocket `/ws`). `make reset` deletes the journal.
+  Another port: `make dev PORT=8091 JOURNAL=memory`. `make ps` lists running exchanges of all worktrees, `make stop` stops this folder's one.
 - Web client: `make web` → http://localhost:5173 (see `clients/web/README.md`).
 - Mobile: `make mobile` (Expo; `i` for iOS simulator) or `make mobile-web` → http://localhost:8081 (see `clients/mobile/README.md`).
 - All tests: `make test`; backend only `./gradlew test`; web E2E `make e2e` (with `make dev` running).
