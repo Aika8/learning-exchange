@@ -81,14 +81,15 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 	env.glow_blend_mode = Environment.GLOW_BLEND_MODE_SOFTLIGHT
 	env.ssao_enabled = true
 	env.ssao_radius = 1.2
-	env.ssao_intensity = 1.4
-	# indoors: screen-space GI and reflections on the floor and brass; outdoors SDFGI does the bounce light
-	# and there is nothing glossy enough for SSR, so both are off there to hold 60 fps
+	env.ssao_intensity = 1.4 if hall else 1.8
+	# indoors: screen-space GI and reflections on the floor and brass. Outdoors the sky lights the scene and SSAO
+	# grounds things: SDFGI is off by default — it cost ~9 fps in the harbour and rebuilt its cascades in one
+	# 45–70 ms frame whenever the camera jumped (measured, docs/demo/G3D-polish.md); `--sdfgi` turns it back on
 	env.ssil_enabled = hall
 	env.ssil_intensity = 0.8
 	env.ssr_enabled = hall
 	env.ssr_max_steps = 64
-	env.sdfgi_enabled = not hall
+	env.sdfgi_enabled = not hall and not Session.arg("sdfgi").is_empty()
 	env.sdfgi_use_occlusion = true
 	env.sdfgi_cascades = 3
 	env.sdfgi_min_cell_size = 0.2
@@ -135,7 +136,7 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 	sun.shadow_blur = 1.0
 	sun.light_angular_distance = 0.8
 	sun.directional_shadow_mode = DirectionalLight3D.SHADOW_PARALLEL_4_SPLITS
-	sun.directional_shadow_max_distance = 160.0
+	sun.directional_shadow_max_distance = 120.0  # the island is 60 m across; the far ones never had shadows
 	sun.directional_shadow_blend_splits = true
 	sun.light_volumetric_fog_energy = 1.6
 	root.add_child(sun)

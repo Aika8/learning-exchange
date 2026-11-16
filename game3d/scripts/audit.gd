@@ -37,6 +37,125 @@ static func views(tree: SceneTree) -> void:
 	tree.quit()
 
 
+## `--fps=<file>`: frame rate in the harbour — the captain's own camera, then every fixed view right after the camera
+## jumps there (the first second) and settled (the next two). Writes a JSON table; run at 1920x1080.
+static func fps(tree: SceneTree) -> void:
+	var rows: Array = []
+	for place: String in ["harbour", "silk"]:
+		Game.island = place
+		tree.change_scene_to_file("res://scenes/harbour.tscn")
+		await Session.wait(3.0)
+		await _await_drawn(tree)
+		await Session.wait(1.0)
+		var scene := tree.current_scene as Node3D
+		rows.append(await _measure(tree, place + " captain", 0.0, 3.0))
+		var cam := Camera3D.new()
+		cam.fov = 60
+		scene.add_child(cam)
+		cam.current = true
+		for v: Array in VIEWS[place]:
+			await _await_drawn(tree)
+			cam.position = v[1]
+			cam.look_at(v[2])
+			rows.append(await _measure(tree, str(v[0]) + " jump", 0.0, 1.0))
+			rows.append(await _measure(tree, str(v[0]) + " settled", 0.0, 2.0))
+	for r: Dictionary in rows:
+		print("fps: %-28s avg %5.1f  low %5.1f  (worst frame %4.1f ms)  drawn %d of %d" % [r["view"], r["avg"], r["low"], r["worst_ms"], r["drawn"], r["frames"]])
+	var f := FileAccess.open(Session.arg("fps"), FileAccess.WRITE)
+	f.store_string(JSON.stringify(rows, "  "))
+	f.close()
+	tree.quit()
+
+
+## Waits (up to a minute) until the window is really drawn: macOS stops drawing a covered window, and then a
+## frame-time measurement only measures the idle loop.
+static func _await_drawn(tree: SceneTree) -> void:
+	for attempt in 60:
+		var drawn := [0]
+		var count := func() -> void: drawn[0] += 1
+		RenderingServer.frame_post_draw.connect(count)
+		await Session.wait(0.3)
+		RenderingServer.frame_post_draw.disconnect(count)
+		if drawn[0] > 3:
+			return
+		await Session.wait(0.7)
+
+
+static func _measure(tree: SceneTree, view: String, skip: float, seconds: float) -> Dictionary:
+	if skip > 0.0:
+		await Session.wait(skip)
+	var times: Array[float] = []
+	var drawn := [0]
+	var count := func() -> void: drawn[0] += 1
+	RenderingServer.frame_post_draw.connect(count)
+	var start := Time.get_ticks_usec()
+	var last := start
+	while Time.get_ticks_usec() - start < seconds * 1e6:
+		await tree.process_frame
+		var now := Time.get_ticks_usec()
+		times.append((now - last) / 1000.0)
+		last = now
+	RenderingServer.frame_post_draw.disconnect(count)
+	if drawn[0] < times.size() / 2:
+		push_warning("fps: the window is hidden, frames are not drawn — the numbers for '%s' mean nothing" % view)
+	times.sort()
+	var total := 0.0
+	for t in times:
+		total += t
+	var p99 := times[mini(times.size() - 1, int(times.size() * 0.99))]
+	return {"view": view, "avg": snappedf(1000.0 * times.size() / total, 0.1), "low": snappedf(1000.0 / p99, 0.1), "worst_ms": snappedf(times[-1], 0.1), "frames": times.size(), "drawn": drawn[0]}
+
+
+## `--gait=<dir>`: the captain idles, walks, runs and climbs a doorstep; a side camera takes a picture of each.
+static func gait(tree: SceneTree) -> void:
+	var dir := Session.arg("gait")
+	DirAccess.make_dir_recursive_absolute(dir)
+	Game.island = "harbour"
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(2.0)
+	var scene := tree.current_scene as Node3D
+	var captain: Captain = scene.get("_captain")
+	captain.global_position = Vector3(20, 0.1, -3)
+	captain.yaw = PI / 2  # W walks towards −x
+	for step: Array in [["gait-idle", "", 1.2], ["gait-walk", "move_forward", 1.13], ["gait-walk-2", "move_forward", 0.27], ["gait-run", "run", 1.2], ["gait-run-2", "run", 0.14]]:
+		if step[1] != "":
+			Input.action_press("move_forward")
+		if step[1] == "run":
+			Input.action_press("run")
+		await Session.wait(step[2])
+		var at := captain.global_position
+		await shot(scene, at + Vector3(0, 0.95, 0), dir.path_join(str(step[0]) + ".png"), at + Vector3(0.6, 1.2, 3.4), 0.0)
+		print("gait: ", step[0], " speed=", snappedf(captain.velocity.length(), 0.01), " at ", at.snapped(Vector3.ONE * 0.01))
+	Input.action_release("move_forward")
+	Input.action_release("run")
+	# up the doorstep of the first house
+	var house: Node3D = scene.find_child("House", true, false)
+	var door := house.global_transform * Vector3(0, 0, (house.get_meta("size") as Vector3).z * 0.5 + 2.4)
+	captain.global_position = door
+	captain.velocity = Vector3.ZERO
+	var to := house.global_position - door
+	captain.yaw = atan2(-to.x, -to.z)
+	await Session.wait(0.5)
+	Input.action_press("move_forward")
+	await Session.wait(0.78)
+	var on := captain.global_position
+	await shot(scene, on + Vector3(0, 0.8, 0), dir.path_join("gait-steps.png"), on - to.normalized() * 2.6 + to.normalized().cross(Vector3.UP) * 2.4 + Vector3(0, 0.9, 0), 0.0)
+	print("gait: steps y=", snappedf(on.y, 0.01))
+	Input.action_release("move_forward")
+	# the camera with its back to a wall
+	captain.global_position = house.global_transform * Vector3(0, 0.6, (house.get_meta("size") as Vector3).z * 0.5 + 1.6)
+	captain.yaw = house.rotation.y + PI  # the camera arm points into the house
+	captain.pitch = -0.2
+	await Session.wait(0.6)
+	captain.camera.current = true
+	for c in scene.find_children("*", "CanvasLayer", true, false):
+		(c as CanvasLayer).visible = false
+	await Session.wait(0.4)
+	scene.get_viewport().get_texture().get_image().save_png(dir.path_join("camera-at-wall.png"))
+	print("gait: camera arm ", snappedf(captain.arm.get_hit_length(), 0.01), " of ", captain.arm.spring_length)
+	tree.quit()
+
+
 static func run(tree: SceneTree) -> void:
 	var dir := Session.arg("audit")
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -93,7 +212,7 @@ static func spots(probe: WorldProbe, place: String) -> void:
 		probe.check_spot("spot " + id, table[id][0], table[id][2])
 
 
-static func shot(scene: Node3D, at: Vector3, path: String, from: Variant = null) -> void:
+static func shot(scene: Node3D, at: Vector3, path: String, from: Variant = null, settle: float = 0.25) -> void:
 	var cam := Camera3D.new()
 	cam.fov = 55
 	scene.add_child(cam)
@@ -110,13 +229,94 @@ static func shot(scene: Node3D, at: Vector3, path: String, from: Variant = null)
 	cam.current = true
 	for c in scene.find_children("*", "CanvasLayer", true, false):
 		(c as CanvasLayer).visible = false
-	await Session.wait(0.25)
+	if settle > 0.0:
+		await Session.wait(settle)
 	var drawn := [false]  # wait for a drawn frame, but never hang if the OS stops drawing a hidden window
 	RenderingServer.frame_post_draw.connect(func() -> void: drawn[0] = true, CONNECT_ONE_SHOT)
-	for i in 40:
+	for i in 600:  # up to half a minute: a covered window is not drawn, and the picture would be a stale one
 		if drawn[0]:
 			break
 		await Session.wait(0.05)
 	scene.get_viewport().get_texture().get_image().save_png(path)
 	cam.queue_free()
 	marker.queue_free()
+
+
+## `--profile=1`: what each effect costs in the harbour — turns one thing off at a time and measures.
+static func profile(tree: SceneTree) -> void:
+	Game.island = "harbour"
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(4.0)
+	var scene := tree.current_scene as Node3D
+	var env: Environment = (scene.find_child("WorldEnvironment", true, false) as WorldEnvironment).environment
+	var sun: DirectionalLight3D = scene.get_node("Sun")
+	var vp := scene.get_viewport().get_viewport_rid()
+	RenderingServer.viewport_set_measure_render_time(vp, true)
+	var base: Dictionary = await _measure(tree, "base", 0.0, 2.5)
+	print("profile: script process %.2f ms, physics %.2f ms, render cpu %.2f ms, render gpu %.2f ms, frame setup cpu %.2f ms" % [
+		Performance.get_monitor(Performance.TIME_PROCESS) * 1000.0, Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS) * 1000.0,
+		RenderingServer.viewport_get_measured_render_time_cpu(vp), RenderingServer.viewport_get_measured_render_time_gpu(vp),
+		RenderingServer.get_frame_setup_time_cpu()])
+	print("profile: base %.1f fps (%.2f ms)" % [base["avg"], 1000.0 / base["avg"]])
+	var toggles := {
+		"sdfgi": [func() -> void: env.sdfgi_enabled = false, func() -> void: env.sdfgi_enabled = true],
+		"ssao": [func() -> void: env.ssao_enabled = false, func() -> void: env.ssao_enabled = true],
+		"volumetric fog": [func() -> void: env.volumetric_fog_enabled = false, func() -> void: env.volumetric_fog_enabled = true],
+		"glow": [func() -> void: env.glow_enabled = false, func() -> void: env.glow_enabled = true],
+		"sun shadow": [func() -> void: sun.shadow_enabled = false, func() -> void: sun.shadow_enabled = true],
+		"decals": [func() -> void: _show(scene, "Decal", false), func() -> void: _show(scene, "Decal", true)],
+		"omni lights": [func() -> void: _show(scene, "OmniLight3D", false), func() -> void: _show(scene, "OmniLight3D", true)],
+		"villagers": [func() -> void: _show(scene, "Villager", false), func() -> void: _show(scene, "Villager", true)],
+		"houses": [func() -> void: _named(scene, "House", false), func() -> void: _named(scene, "House", true)],
+		"trees": [func() -> void: _named(scene, "island_tree_02", false), func() -> void: _named(scene, "island_tree_02", true)],
+		"tree shadows": [func() -> void: _tree_shadows(scene, false), func() -> void: _tree_shadows(scene, true)],
+		"cloud sea": [func() -> void: _named(scene, "CloudSea", false), func() -> void: _named(scene, "CloudSea", true)],
+		"far islands + silk": [func() -> void: _far(scene, false), func() -> void: _far(scene, true)],
+		"harbour island rock dress": [func() -> void: _dress(scene, false), func() -> void: _dress(scene, true)],
+		"ship": [func() -> void: _named(scene, "Wayfarer", false), func() -> void: _named(scene, "Wayfarer", true)],
+		"scale 3d 0.8→fsr off": [func() -> void: scene.get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_BILINEAR, func() -> void: scene.get_viewport().scaling_3d_mode = Viewport.SCALING_3D_MODE_FSR2],
+	}
+	for name: String in toggles:
+		(toggles[name][0] as Callable).call()
+		await Session.wait(0.8)
+		var r: Dictionary = await _measure(tree, name, 0.0, 2.0)
+		print("profile: without %-22s %.1f fps  saves %.2f ms" % [name, r["avg"], 1000.0 / base["avg"] - 1000.0 / r["avg"]])
+		(toggles[name][1] as Callable).call()
+	print("profile: draw calls ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_DRAW_CALLS_IN_FRAME),
+		" primitives ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME),
+		" objects ", RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_OBJECTS_IN_FRAME))
+	tree.quit()
+
+
+static func _show(scene: Node, type: String, on: bool) -> void:
+	for n in scene.find_children("*", type, true, false):
+		n.set("visible", on)
+
+
+static func _named(scene: Node, name: String, on: bool) -> void:
+	for n in scene.find_children("*", "Node3D", true, false):
+		if WorldProbe.label(n) == name:
+			(n as Node3D).visible = on
+
+
+static func _far(scene: Node, on: bool) -> void:
+	for n in scene.get_children():
+		if n is Node3D and (n as Node3D).position.length() > 100.0:
+			(n as Node3D).visible = on
+
+
+static func _dress(scene: Node, on: bool) -> void:
+	var island := scene.get_node("SparkHarbour").get_child(0)
+	for n in island.get_children():
+		if not n is MeshInstance3D and not n is StaticBody3D:
+			(n as Node3D).visible = on
+
+
+static func _tree_shadows(scene: Node, on: bool) -> void:
+	var tris := 0
+	for n in scene.find_children("*", "Node3D", true, false):
+		if WorldProbe.label(n) == "island_tree_02":
+			for m: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+				m.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_ON if on else GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+				tris += WorldProbe.triangles(m.mesh)
+	print("profile: tree triangles in total ", tris)

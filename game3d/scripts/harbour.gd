@@ -83,7 +83,7 @@ func _ready() -> void:
 		Game.move(GameFlow.State.PORT)
 	if Session.active():
 		_demo()
-	elif Session.arg("audit").is_empty() and Session.arg("views").is_empty():
+	elif not Session.tooling():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 
 

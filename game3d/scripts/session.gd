@@ -30,6 +30,12 @@ func _ready() -> void:
 		Audit.run.call_deferred(get_tree())
 	elif not arg("views").is_empty():
 		Audit.views.call_deferred(get_tree())
+	elif not arg("fps").is_empty() and arg("fps") != "1":
+		Audit.fps.call_deferred(get_tree())
+	elif not arg("profile").is_empty():
+		Audit.profile.call_deferred(get_tree())
+	elif not arg("gait").is_empty():
+		Audit.gait.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:
@@ -59,6 +65,11 @@ static func arg(key: String) -> String:
 		if a == "--" + key:
 			return "1"
 	return ""
+
+
+## True for the audit, views and gait runs: no mouse capture, the scripts drive the scene.
+static func tooling() -> bool:
+	return not (arg("audit") + arg("views") + arg("gait") + arg("profile")).is_empty() or arg("fps").length() > 1
 
 
 static func active() -> bool:
