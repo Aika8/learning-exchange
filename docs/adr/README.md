@@ -33,3 +33,4 @@ superseding ADR explaining why reality differed.
 | [0020](0020-journal-event-versioning.md) | Journal lines carry a format version; upcasters lift old lines | Upcaster | Accepted |
 | [0021](0021-scheduled-economy.md) | Seeded economy schedule journalled as decisions; halts, payouts, default | Generator, Event Sourcing, Observer | Accepted |
 | [0022](0022-dividend-dates-funds-and-trade-journal.md) | Dividend dates with tax at source, funds with TER, trade-journal notes — new event types only | Event Sourcing, Projection | Accepted (M2c) |
+| [0023](0023-game3d-day-loop-and-client-session-facts.md) | game3d M3: day loop as a state machine, client day log, SessionFacts as a fold | State machine, Event Sourcing, Projection | Accepted (M3) |
