@@ -1,6 +1,11 @@
 # Status
 
-Updated: 2026-11-15, end of M2c (ATR and position size by volatility, trade journal and session review, dividends
+Updated: 2026-11-16, end of M3 (game vertical slice in `game3d/`: the day loop as a state machine, Act I in short,
+spread/fees/liquidity, the first storm and the Anchor with a gap, the Forge report season and the record-but-fell
+quest, the evening chronicle from SessionFacts with replay, the captain's glossary, walking people). Demo:
+`docs/demo/M3.md`. Next: review №5, then M4 (LLM chronicler, polish).
+
+Earlier: 2026-11-15, end of M2c (ATR and position size by volatility, trade journal and session review, dividends
 with ex/record/pay dates and tax withheld at source, index and active funds with TER; WebSocketTest flake fixed).
 Demo: `docs/demo/M2c.md`. M2 is complete; next is M3.
 
@@ -38,6 +43,7 @@ Accepted: 0001, 0002, 0003 (server part amended by 0016), 0005, 0006, 0008, 0018
 M2a: 0008 Accepted, 0018 Accepted (amends 0006).
 M2b: 0004, 0012, 0015 Accepted; 0020 (journal versioning) and 0021 (scheduled economy) Accepted; 0017 Superseded by 0019.
 M2c: 0022 (dividend dates, funds, trade journal) Accepted.
+M3: 0023 (game3d day loop, day log, SessionFacts as a fold) Accepted. 0013 stays Proposed until the LLM adapter (M4).
 Proposed: 0013 (assistant, M4).
 
 ## Real-world data (ADR-0015)
