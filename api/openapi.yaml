@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: learning-exchange core API
-  version: 0.4.0
+  version: 0.5.0
   description: |
     Commands and queries of the exchange (ADR-0003). Streams are in `asyncapi.yaml`.
 
@@ -665,6 +665,40 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/Fund' }
         '404': { $ref: '#/components/responses/Problem' }
+  /assistant/ask:
+    post:
+      operationId: askAssistant
+      summary: Ask «Помощник» (app) or «Летописец» (game) a question about my own facts (ADR-0013)
+      description: |
+        The server computes the facts from my account (statement totals, balances, open positions, trade-journal review,
+        the last rate decision and company reports against their consensus) and, for the game, takes the client's
+        SessionFacts as data. A language model only narrates those facts when a key is configured; without a key, or when
+        the model fails or its text looks like advice, a template answers. Never investment advice; the disclaimer is
+        always returned and must be shown.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AssistantQuestion' }
+      responses:
+        '200':
+          description: Answer
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AssistantAnswer' }
+        '400': { $ref: '#/components/responses/Problem' }
+        '401': { $ref: '#/components/responses/Problem' }
+  /achievements:
+    get:
+      operationId: listAchievements
+      summary: My achievements, shared by the app and the game (a projection of my account's events)
+      responses:
+        '200':
+          description: Achievements, unlocked or with progress
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/Achievement' } }
+        '401': { $ref: '#/components/responses/Problem' }
   /clock:
     get:
       operationId: getClock
@@ -1383,6 +1417,52 @@ components:
         wins: { type: integer }
         result: { type: integer, format: int64 }
         expectancyRx100: { type: [integer, 'null'], format: int64, description: 'Average R × 100 over the orders with a planned risk' }
+    AssistantQuestion:
+      type: object
+      required: [question]
+      properties:
+        question: { type: string, minLength: 1, maxLength: 500 }
+        lang: { type: string, enum: [ru, en], default: ru }
+        persona: { type: string, enum: [HELPER, CHRONICLER], default: HELPER, description: 'HELPER: real words (app, web); CHRONICLER: lore words (game)' }
+        game: { $ref: '#/components/schemas/GameSessionFacts' }
+    GameSessionFacts:
+      type: object
+      description: The game's SessionFacts for the day (ADR-0023), passed as data only. Money in minor units.
+      properties:
+        voyages: { type: integer }
+        wins: { type: integer }
+        expectancyRx100: { type: [integer, 'null'], format: int64 }
+        fees: { type: integer, format: int64 }
+        spreadPaid: { type: integer, format: int64 }
+        result: { type: integer, format: int64 }
+        dayReturnBps: { type: [integer, 'null'], format: int64 }
+        basketReturnBps: { type: [integer, 'null'], format: int64 }
+        gapsThroughStop: { type: integer }
+    AssistantFact:
+      type: object
+      required: [key, value]
+      properties:
+        key: { type: string, description: 'Stable fact key, e.g. statement.fees; clients may translate it' }
+        value: { type: string, description: 'Number (minor units, bps or ×100) or code as text' }
+    AssistantAnswer:
+      type: object
+      required: [answer, source, disclaimer, facts, guarded]
+      properties:
+        answer: { type: string }
+        source: { type: string, enum: [CLAUDE, TEMPLATE] }
+        model: { type: [string, 'null'] }
+        disclaimer: { type: string }
+        guarded: { type: boolean, description: 'True when the model text was dropped by the advice guard (or the question asked for advice)' }
+        facts: { type: array, items: { $ref: '#/components/schemas/AssistantFact' } }
+    Achievement:
+      type: object
+      required: [id, unlocked, progress, target]
+      properties:
+        id: { type: string, enum: [FIRST_TRADE, FIRST_STOP, STOP_FIRED, JOURNAL_5, DIVERSIFIED_3, FIRST_SAVINGS, FIRST_DIVIDEND] }
+        unlocked: { type: boolean }
+        at: { type: [integer, 'null'], format: int64, description: 'Simulation time it was unlocked' }
+        progress: { type: integer }
+        target: { type: integer }
     FundKind:
       type: string
       enum: [INDEX, ACTIVE]
