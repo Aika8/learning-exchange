@@ -22,7 +22,7 @@ var _rise := 0.0  ## a stair just climbed, eased out so the model and the camera
 func _ready() -> void:
 	Mover.capsule(self)
 	Mover.setup(self)
-	body = Proc.figure(Color("2f5d8a"), Color("8a5a3c"), "sailor")
+	body = Proc.figure(Color("2f5d8a"), Color("8a5a3c"), "sailor", "captain")
 	add_child(body)
 	walker = Walker.attach(body)
 	walker.ground = Walker.ground_under(self)

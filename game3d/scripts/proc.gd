@@ -524,11 +524,14 @@ static func _real_ship() -> Node3D:
 
 
 ## A villager figure: body, head, hat. `coat` and `hat` colours tell people apart. `who` picks a MakeHuman
-## character (sailor, trader, oldman, child) when it is downloaded; otherwise the procedural person stands in.
-static func figure(coat: Color, hat: Color, who: String = "") -> Node3D:
+## character (sailor, trader, oldman, child) when it is downloaded, dressed for the age of sail by `Costume` (`role`:
+## captain, sailor, trader, townsman, child; by default the one that fits `who`); otherwise the procedural person stands in.
+static func figure(coat: Color, hat: Color, who: String = "", role: String = "") -> Node3D:
 	if not who.is_empty():
 		var p := Assets.person(who)
 		if p != null:
+			if Session.arg("plain").is_empty():  # `--plain` shows the people as downloaded (before/after pictures)
+				Costume.dress(p, role if not role.is_empty() else {"oldman": "townsman"}.get(who, who), coat)
 			return p
 	if Assets.available():
 		return _person(coat, hat)

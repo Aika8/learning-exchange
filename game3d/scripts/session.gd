@@ -34,6 +34,8 @@ func _ready() -> void:
 		Audit.fps.call_deferred(get_tree())
 	elif not arg("profile").is_empty():
 		Audit.profile.call_deferred(get_tree())
+	elif not arg("people").is_empty():
+		Audit.people.call_deferred(get_tree())
 	elif not arg("gait").is_empty():
 		Audit.gait.call_deferred(get_tree())
 
@@ -69,7 +71,7 @@ static func arg(key: String) -> String:
 
 ## True for the audit, views and gait runs: no mouse capture, the scripts drive the scene.
 static func tooling() -> bool:
-	return not (arg("audit") + arg("views") + arg("gait") + arg("profile")).is_empty() or arg("fps").length() > 1
+	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people")).is_empty() or arg("fps").length() > 1
 
 
 static func active() -> bool:

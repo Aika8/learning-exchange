@@ -106,6 +106,34 @@ static func _measure(tree: SceneTree, view: String, skip: float, seconds: float)
 	return {"view": view, "avg": snappedf(1000.0 * times.size() / total, 0.1), "low": snappedf(1000.0 / p99, 0.1), "worst_ms": snappedf(times[-1], 0.1), "frames": times.size(), "drawn": drawn[0]}
 
 
+## `--people=<dir>`: a line-up of every role on the wharf, front and back (add `--plain` for the people as downloaded).
+static func people(tree: SceneTree) -> void:
+	var dir := Session.arg("people")
+	DirAccess.make_dir_recursive_absolute(dir)
+	Game.island = "harbour"
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(2.0)
+	var scene := tree.current_scene as Node3D
+	for v in scene.find_children("*", "Villager", true, false):
+		(v as Node3D).visible = false
+	(scene.get("_captain") as Node3D).visible = false
+	var cast := [["sailor", "captain"], ["sailor", "sailor"], ["trader", "trader"], ["oldman", "townsman"], ["child", "child"]]
+	var walkers: Array[Walker] = []
+	for i in cast.size():
+		var f := Proc.figure(Color("8a6a4a"), Color("2a3550"), cast[i][0], cast[i][1])
+		f.position = Vector3(31.0 + i * 1.15, Archipelago.DECK_Y, -1.0)
+		scene.add_child(f)
+		var w := Walker.attach(f)
+		w.step(0.016, 0.0)
+		walkers.append(w)
+	var mid := Vector3(33.3, 1.0, -1.0)
+	var tag := "plain" if not Session.arg("plain").is_empty() else "dressed"
+	await shot(scene, mid, dir.path_join("people-%s-front.png" % tag), mid + Vector3(0.4, 0.35, 5.2))
+	await shot(scene, mid, dir.path_join("people-%s-back.png" % tag), mid + Vector3(-1.6, 0.5, -5.0))
+	await shot(scene, mid + Vector3(-2.3, 0.45, 0), dir.path_join("people-%s-captain.png" % tag), mid + Vector3(-1.6, 0.55, 2.3))
+	tree.quit()
+
+
 ## `--gait=<dir>`: the captain idles, walks, runs and climbs a doorstep; a side camera takes a picture of each.
 static func gait(tree: SceneTree) -> void:
 	var dir := Session.arg("gait")
