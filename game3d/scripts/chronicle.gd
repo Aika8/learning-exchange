@@ -1,6 +1,6 @@
 ## Evening chronicle (GameFlow state CHRONICLE): the Chronicler narrates SessionFacts computed from the day log —
 ## R per voyage, expectancy, fees and spread paid, the day against Бабушка Ветла's basket, each lesson's real name.
-## «Перечитать летопись» replays the day: the same fold over the first n events (ADR-0023). Template adapter only (M4: LLM).
+## «Перечитать летопись» replays the day: the same fold over the first n events (ADR-0023). M4: the remote «Летописец» (server assistant) adds a narration; the template lines stay as the fallback.
 extends Node3D
 
 var _cam: Camera3D
@@ -14,7 +14,9 @@ var _playing := false
 var _cursor := -1  ## -1 = the whole day
 var _play_t := 0.0
 var _hud: GameHud
-var chronicler: Chronicler = Chronicler.Template.new()
+var chronicler: Chronicler = Chronicler.Remote.new()
+var _narration: Dictionary = {}  ## the remote «Летописец» answer for the whole day; {} = template only
+var _asked_lang := ""
 
 
 func _ready() -> void:
@@ -34,7 +36,9 @@ func _ready() -> void:
 	_build_ui()
 	_hud = GameHud.new()
 	add_child(_hud)
-	Locale.locale_changed.connect(func(_c: String) -> void: render())
+	Locale.locale_changed.connect(func(_c: String) -> void:
+		_narration = {}
+		render())
 	await Game.sync()
 	Game.lesson("CHRONICLE")
 	render()
@@ -192,9 +196,29 @@ func render() -> void:
 		lab.autowrap_mode = TextServer.AUTOWRAP_WORD
 		lab.custom_minimum_size = Vector2(880, 0)
 		_lines.add_child(lab)
+	if _cursor < 0 and not _narration.is_empty():
+		var who := tr("CHR_REMOTE_MODEL") % _narration["model"] if _narration["source"] == "CLAUDE" else tr("CHR_REMOTE_TEMPLATE")
+		var head := Hud.text(who, 15, Hud.BRASS.lightened(0.2))
+		_lines.add_child(head)
+		var lab := Hud.text(str(_narration["text"]), 17, Hud.TEXT)
+		lab.autowrap_mode = TextServer.AUTOWRAP_WORD
+		lab.custom_minimum_size = Vector2(880, 0)
+		_lines.add_child(lab)
+		_lines.add_child(Hud.text(str(_narration["disclaimer"]), 14, Hud.MUTED))
+	elif _cursor < 0 and _asked_lang != Locale.current() and chronicler is Chronicler.Remote:
+		_ask_remote(f)
 	_facts.text = _facts_text(f)
 	if _replay_box.visible:
 		_events.text = _events_text(_cursor)
+
+
+func _ask_remote(f: SessionFacts) -> void:
+	_asked_lang = Locale.current()
+	var lang := _asked_lang
+	var n: Dictionary = await (chronicler as Chronicler.Remote).narrate(f, lang)
+	if not n.is_empty() and lang == Locale.current() and is_inside_tree():
+		_narration = n
+		render()
 
 
 func _facts_text(f: SessionFacts) -> String:

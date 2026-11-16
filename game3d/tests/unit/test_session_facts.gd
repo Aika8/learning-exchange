@@ -103,3 +103,22 @@ func test_planned_but_not_traded_is_not_a_voyage() -> void:
 	var f := SessionFacts.from_events(dl.events)
 	assert_eq(f.traded().size(), 0)
 	assert_eq(f.expectancy_x100, 0)
+
+
+## M4: the remote «Летописец» gets the same facts as integers, never as text in the question.
+func test_remote_chronicler_request_carries_the_facts_as_data() -> void:
+	var f := SessionFacts.from_events(_day().events)
+	var b := Chronicler.Remote.ask_body(f, "ru")
+	assert_eq(b["persona"], "CHRONICLER")
+	assert_eq(b["lang"], "ru")
+	var g: Dictionary = b["game"]
+	assert_eq(g["voyages"], 2)
+	assert_eq(g["wins"], 1)
+	assert_eq(g["fees"], f.fees)
+	assert_eq(g["spreadPaid"], f.spread)
+	assert_eq(g["result"], f.pnl)
+	assert_eq(g["expectancyRx100"], f.expectancy_x100)
+	assert_eq(g["gapsThroughStop"], 1)
+	assert_eq(g["basketReturnBps"], f.basket_bps())
+	assert_false(str(b["question"]).contains(str(f.pnl)))
+	assert_eq(Chronicler.Remote.ask_body(f, "en")["lang"], "en")

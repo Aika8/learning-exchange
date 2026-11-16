@@ -1,5 +1,7 @@
 ## Pattern: Port & Adapter + Fallback — the evening chronicle narrates SessionFacts and never computes a number
-## (ADR-0013). This is the port and the template adapter; the LLM adapter comes in M4 and falls back to this one.
+## (ADR-0013). This is the port, the template adapter and (M4) the remote adapter: the server's assistant with the
+## persona «Летописец», which narrates the same facts (LLM with a key, server template without) and falls back to the
+## local template when the exchange can't be reached.
 ## Lines are message keys with typed arguments, rendered at display time so ru/en switch on the fly.
 ## See docs/adr/0013-assistant-llm-with-fallback.md, docs/adr/0023-game3d-day-loop-and-client-session-facts.md
 class_name Chronicler
@@ -48,6 +50,42 @@ class Template:
 			out.append(Chronicler.line("CHR_LESSON", [{"t": Lessons.title_key(id)}, {"t": Lessons.real_key(id)}]))
 		out.append(Chronicler.line("CHR_DISCLAIMER"))
 		return out
+
+
+## M4 remote adapter: asks the exchange's assistant (`POST /assistant/ask`, persona CHRONICLER). The facts go as
+## integers (data, never as text in the question); on any failure the template lines stay the whole chronicle.
+class Remote:
+	extends Template
+
+	## Body of the request: pure, so it is unit-tested without a server.
+	static func ask_body(f: SessionFacts, lang: String) -> Dictionary:
+		var through := 0
+		for g in f.gaps:
+			if g["through"]:
+				through += 1
+		var game := {
+			"voyages": f.traded().size(), "wins": f.wins, "fees": f.fees, "spreadPaid": f.spread, "result": f.pnl,
+			"gapsThroughStop": through,
+		}
+		if not f.traded().is_empty():
+			game["expectancyRx100"] = f.expectancy_x100
+		if f.basket_start > 0:
+			game["dayReturnBps"] = f.return_bps()
+			game["basketReturnBps"] = f.basket_bps()
+		var en := lang.begins_with("en")
+		return {
+			"question": "Tell the chronicle of my day" if en else "Расскажи летопись моего дня",
+			"lang": "en" if en else "ru", "persona": "CHRONICLER", "game": game,
+		}
+
+	## Coroutine. Returns {text, source, model, disclaimer} or {} when the exchange did not answer (fallback).
+	func narrate(f: SessionFacts, lang: String) -> Dictionary:
+		var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_POST, "/assistant/ask", ask_body(f, lang))
+		if not r.get("ok", false) or not (r.get("data") is Dictionary):
+			return {}
+		var d: Dictionary = r["data"]
+		return {"text": str(d.get("answer", "")), "source": str(d.get("source", "TEMPLATE")),
+			"model": str(d.get("model", "")) if d.get("model") != null else "", "disclaimer": str(d.get("disclaimer", ""))}
 
 
 ## Renders a line with the current translations (`tr` from a node) and money/price scale.
