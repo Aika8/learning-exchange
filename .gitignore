@@ -14,3 +14,4 @@ playwright-report/
 
 # game3d CC0 assets: fetched by `make assets`, never committed
 game3d/assets/
+.env

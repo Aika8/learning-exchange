@@ -141,7 +141,7 @@ class ContractTest {
         return json.readTree(res.body());
     }
 
-    void callArray(String method, String path, String token, int status, String itemSchema) throws Exception {
+    JsonNode callArray(String method, String path, String token, int status, String itemSchema) throws Exception {
         HttpResponse<String> res = http.send(request(method, path, token, null).build(), HttpResponse.BodyHandlers.ofString());
         assertEquals(status, res.statusCode(), method + " " + path + " → " + res.body());
         JsonNode array = json.readTree(res.body());
@@ -149,6 +149,7 @@ class ContractTest {
         for (JsonNode item : array) {
             assertValid(itemSchema, json.writeValueAsString(item));
         }
+        return array;
     }
 
     HttpRequest.Builder request(String method, String path, String token, String body) {
