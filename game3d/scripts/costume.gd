@@ -4,7 +4,8 @@
 ## sash, slops, long skirt and apron, sea boots, stockings. Every added piece is rigidly skinned to one bone and all
 ## of them are one mesh per person, so a costume costs a draw call per material and follows the gait.
 ## Our own meshes and materials (CC0); generic period dress, no character from a game or a film.
-## Roles: captain, sailor, trader, townsman, child.
+## Roles: captain, sailor, trader, townsman, child. `stand_in()` builds the whole person in code in the same costume
+## for when the MakeHuman people are not on disk.
 class_name Costume
 extends RefCounted
 
@@ -61,7 +62,76 @@ func _measure() -> void:
 
 
 func _p(bone: String) -> Vector3:
+	if sk == null:  # the stand-in has no skeleton: joints of a 1.75 m adult, scaled
+		var side := -1.0 if bone.ends_with("_r") else 1.0
+		var j: Vector3 = JOINTS[bone.trim_suffix("_l").trim_suffix("_r")]
+		return Vector3(j.x * side, j.y, j.z) * k
 	return sk.get_bone_global_rest(sk.find_bone(bone)).origin
+
+
+## A person built whole in code, in the same costume, for when the MakeHuman people are not on disk (they are made
+## with Blender by tools/people/build.sh, `make assets` cannot download them). No skeleton: it glides and bobs.
+static func stand_in(role: String, tint: Color = Color.WHITE) -> Node3D:
+	var c := Costume.new()
+	c.person = Node3D.new()
+	c.person.name = "StandIn"
+	c.person.set_meta("stand_in", true)
+	c.k = {"child": 0.72, "trader": 0.93, "townsman": 0.97}.get(role, 1.0)
+	c.top = 1.75 * c.k
+	match role:
+		"captain":
+			c._captain()
+		"sailor":
+			c._sailor(tint)
+		"trader":
+			c._trader(tint)
+		"child":
+			c._child(tint)
+		_:
+			c._townsman(tint)
+	c._body(role)
+	c._commit()
+	return c.person
+
+
+const JOINTS := {"head": Vector3(0, 1.61, 0.03), "neck_01": Vector3(0, 1.5, 0.01), "pelvis": Vector3(0, 0.95, 0), "spine_01": Vector3(0, 1.0, 0),
+	"spine_02": Vector3(0, 1.1, 0), "spine_03": Vector3(0, 1.2, 0), "thigh": Vector3(0.1, 0.94, 0), "calf": Vector3(0.11, 0.51, 0.01),
+	"foot": Vector3(0.11, 0.08, 0), "upperarm": Vector3(0.2, 1.42, 0), "lowerarm": Vector3(0.235, 1.15, 0.01), "hand": Vector3(0.25, 0.9, 0.04)}
+var _own: Dictionary = {}  ## stand-in only: what the person's own clothes are made of (top, bot, lea)
+
+
+## The stand-in's body under the costume: head, neck, hands, trunk, arms, legs, shoes.
+func _body(role: String) -> void:
+	var skin := _plain("skin", Color("d9a882"), 0.6)
+	var shirt: Material = _own.get("top", cloth(LINEN))
+	var legs: Material = _own.get("bot", cloth(Color("4a4034")))
+	var shoes: Material = _own.get("lea", leather(LEATHER))
+	var head := Vector3(0, top - 0.115 * k, _p("head").z)
+	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * k), head))
+	_box("head", skin, Vector3(0.03, 0.045, 0.03) * k, head + Vector3(0, -0.02, 0.105) * k)  # nose
+	for x: float in [-0.04, 0.04]:
+		_ball("head", _plain("eye", Color("2a2420"), 0.4), head + Vector3(x, 0.015, 0.098) * k, 0.012 * k)
+	if role in ["trader", "townsman", "captain"]:  # hair under the hat or kerchief
+		_dome("head", _plain("hair", Color("9a9a96") if role == "townsman" else Color("3a2a1e"), 0.9), head + Vector3(0, 0.0, -0.012) * k, Vector3(0.106, 0.125, 0.116) * k)
+	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * k, 0.05 * k, 0.048 * k)
+	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
+	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
+	for s: String in ["l", "r"]:
+		_ball("spine_03", shirt, _p("upperarm_" + s), 0.062 * k)
+		_tube("upperarm_" + s, shirt, _p("upperarm_" + s), _p("lowerarm_" + s), 0.05 * k, 0.045 * k)
+		_tube("lowerarm_" + s, shirt, _p("lowerarm_" + s), _p("hand_" + s), 0.045 * k, 0.036 * k)
+		_ball("hand_" + s, skin, _p("hand_" + s) - Vector3(0, 0.045, 0) * k, 0.042 * k)
+		_tube("thigh_" + s, legs, _p("thigh_" + s), _p("calf_" + s), 0.085 * k, 0.062 * k)
+		_tube("calf_" + s, legs, _p("calf_" + s), _p("foot_" + s), 0.062 * k, 0.045 * k)
+		_box("foot_" + s, shoes, Vector3(0.09, 0.08, 0.24) * k, _p("foot_" + s) + Vector3(0, -0.04, 0.05) * k)
+	_tube("pelvis", legs, _p("pelvis") - Vector3(0, 0.1, 0) * k, _p("pelvis") + Vector3(0, 0.04, 0) * k, 0.16 * k, 0.168 * k, 0.74)
+
+
+static func _sphere() -> SphereMesh:
+	var m := SphereMesh.new()
+	m.radial_segments = 16
+	m.rings = 8
+	return m
 
 
 # ---------------------------------------------------------------- roles
@@ -127,6 +197,9 @@ func _child(tint: Color) -> void:
 ## Replaces the texture of the clothing surfaces whose material name ends in `part` (top, bot, lea) with `m`,
 ## keeping the folds of the original normal map.
 func _recolour(part: String, m: Material) -> void:
+	if sk == null:
+		_own[part] = m
+		return
 	for mi: MeshInstance3D in sk.find_children("*", "MeshInstance3D", true, false):
 		for s in mi.mesh.get_surface_count():
 			var old := mi.mesh.surface_get_material(s) as BaseMaterial3D
@@ -142,6 +215,8 @@ func _recolour(part: String, m: Material) -> void:
 
 
 func _hide(what: String) -> void:
+	if sk == null:
+		return
 	for mi: MeshInstance3D in sk.find_children("*", "MeshInstance3D", true, false):
 		if str(mi.name).contains(what):
 			mi.visible = false
@@ -401,7 +476,7 @@ func _dome(bone: String, m: Material, at: Vector3, r: Vector3) -> void:
 
 
 func _add(bone: String, m: Material, mesh: Mesh, xf: Transform3D) -> void:
-	var idx := sk.find_bone(bone)
+	var idx := sk.find_bone(bone) if sk != null else 0
 	if idx < 0 or m == null:
 		return
 	if not _parts.has(m):
@@ -443,14 +518,19 @@ func _commit() -> void:
 		arrays[Mesh.ARRAY_VERTEX] = part["v"]
 		arrays[Mesh.ARRAY_NORMAL] = part["n"]
 		arrays[Mesh.ARRAY_TEX_UV] = part["u"]
-		arrays[Mesh.ARRAY_BONES] = part["b"]
-		arrays[Mesh.ARRAY_WEIGHTS] = part["w"]
+		if sk != null:
+			arrays[Mesh.ARRAY_BONES] = part["b"]
+			arrays[Mesh.ARRAY_WEIGHTS] = part["w"]
 		arrays[Mesh.ARRAY_INDEX] = part["i"]
 		mesh.add_surface_from_arrays(Mesh.PRIMITIVE_TRIANGLES, arrays)
 		mesh.surface_set_material(mesh.get_surface_count() - 1, m)
 	var mi := MeshInstance3D.new()
 	mi.name = "Costume"
 	mi.mesh = mesh
+	mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	if sk == null:
+		person.add_child(mi)
+		return
 	mi.skin = sk.create_skin_from_rest_transforms()
 	sk.add_child(mi)
 	mi.skeleton = NodePath("..")

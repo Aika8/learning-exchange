@@ -14,6 +14,8 @@ func _ready() -> void:
 	if not server.is_empty():
 		ExchangeApi.base_url = server.trim_suffix("/") + "/api/v1"
 		MarketStream.url = server.trim_suffix("/").replace("http", "ws") + "/ws"
+	if Assets.available() and Assets.person("sailor") == null:
+		push_warning("The MakeHuman people are not in game3d/assets/models/people (make assets cannot download them): stand-in figures are shown. See game3d/ASSETS.md.")
 	_layer = CanvasLayer.new()
 	_layer.layer = 100
 	add_child(_layer)

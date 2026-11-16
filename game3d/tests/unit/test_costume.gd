@@ -50,3 +50,20 @@ func test_the_captain_wears_a_hat_the_townsman_does_not_keep_the_fedora() -> voi
 	for mi: MeshInstance3D in p.find_children("*", "MeshInstance3D", true, false):
 		if str(mi.name).contains("fedora"):
 			assert_false(mi.visible, "the modern hat is hidden")
+
+
+func test_the_stand_in_wears_the_same_costume_when_the_people_are_missing() -> void:
+	var looks: Dictionary = {}
+	for role: String in ROLES:
+		var p := Costume.stand_in(role, Color("8a6a4a"))
+		add_child_autofree(p)
+		var mesh: MeshInstance3D = p.find_child("Costume", true, false)
+		assert_not_null(mesh, role)
+		assert_null(mesh.skin, role + ": the stand-in has no skeleton")
+		var size := mesh.get_aabb().size
+		assert_between(size.y, 1.1, 2.1, role + " is person-sized")
+		looks["%d/%s" % [mesh.mesh.get_surface_count(), str(size.snapped(Vector3.ONE * 0.01))]] = true
+	assert_eq(looks.size(), ROLES.size(), "every role looks different (not five copies of one figure)")
+	var captain := Costume.stand_in("captain")
+	add_child_autofree(captain)
+	assert_gt((captain.find_child("Costume", true, false) as MeshInstance3D).get_aabb().end.y, 1.75, "the tricorn is on")
