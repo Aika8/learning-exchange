@@ -70,7 +70,7 @@ MENU_QUIT,Выход,Quit
 MENU_LOGGING_IN,Вход на биржу…,Logging in to the exchange…
 MENU_SERVER,Биржа: %s,Exchange: %s
 HARBOUR_TITLE,Гавань Искр,Spark Harbour
-HARBOUR_HELP,WASD — идти · мышь — обзор · Tab — облёт камерой · E — действие,WASD — walk · mouse — look · Tab — fly the camera · E — interact
+HARBOUR_HELP,WASD — идти · Shift — бег · мышь — обзор · Tab — облёт камерой · E — действие,WASD — walk · Shift — run · mouse — look · Tab — fly the camera · E — interact
 HARBOUR_FLY,Облёт камерой (Tab — вернуться к капитану),Camera flight (Tab — back to the captain)
 HARBOUR_ACCOUNT,Счёт %s · %s,Account %s · %s
 HARBOUR_MARA,"Мара Якорная: «Мельница наверху — Ветряная Биржа. В её зале горит Лестница — по-вашему, стакан заявок. А у причала ждёт твой «Попутчик».»","Mara Anchor: «The windmill up there is the Wind Exchange. The Ladder glows in its hall — the order book, as your world calls it. And your «Wayfarer» waits at the pier.»"
