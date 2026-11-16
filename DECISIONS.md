@@ -275,3 +275,36 @@ Build and CI
 - game3d fps: NOT fixed in M4. A `-s` SceneTree probe could not build the harbour (autoloads missing), so its numbers
   were of an empty sea; with that probe SDFGI showed 30–150 ms frames after far teleports, but that is not evidence for
   the real island. Next: a probe started as a normal run (`--fps-probe` flag in `Session`), then decide on SDFGI.
+
+## G3D polish (docs/demo/G3D-polish.md)
+- World audit as a tool, not a one-off: `WorldProbe` walks a 2 m grid with the captain's own capsule and `Mover`, and
+  compares every collider with the triangles you see (a copy of each mesh on physics layer 20). Before 451 findings on
+  1204 points, after 0 on 1270. The same probe on a 3 m grid is a GUT test, so a new hole fails the build.
+- Colliders are made in one place (`Solid`) and bodies are never scaled: boxes for walls, convex solids for the mill,
+  a hull per mesh for a downloaded model (transform baked into the points), 0.6 m prisms up a tree trunk. Plants (fern,
+  grass, shrub, roots) stay walk-through on purpose.
+- Islands and decks are fenced by invisible walls along `Archipelago.walk_areas` (the same outline the navmesh, the
+  audit and the placement use: `Proc.cap_radius`, `Proc.cap_height`). Decks also have visible rope rails. A captain who
+  still leaves the world respawns at the island's own spawn (before: at (0, 2, 0), which on Silk Reach is the other island).
+- The harbour layout changed: the cliff edge is ~26 m east of the centre, the old pier, the chest and the provisions
+  hung in the air 10 m past it. A timber wharf now carries them (`WHARF_FROM/TO`), the pier goes on from it; Act I spot
+  ids and texts are the same.
+- Houses are modules merged by `Kit` into one mesh per house with LODs. Signboards carry a brass emblem, no words (no
+  user-visible literals rule).
+- Walking: walk 4.2 m/s, run 7 m/s (Shift), acceleration 22, braking 30 m/s², stairs up to 0.45 m, slopes up to 46°,
+  no jump. The old constant 7 m/s is the run. Capsule 0.4 × 1.9 m (was 0.45 × 2.0) so a door-wide gap is passable.
+- Gait: no walk/run/idle clips in the allowed sources that load through `make assets`, so `Walker` computes the cycle
+  and solves two-bone IK per leg (feet planted, put on the ground under them). Real clips are a NEEDS USER.
+- Villagers: `NavigationServer3D` navmesh baked at scene start from static colliders (19 ms for Spark Harbour),
+  `NavigationAgent3D` avoidance, `Mover` for the body. They wait for the first map sync before moving: placing them at
+  "the closest navmesh point" earlier put all five at (0, 0, 0) and physics threw them 28 m up.
+- The Exchange hall stays an orbit camera with the HUD; it got colliders and an interior, and is audited, but the
+  captain does not walk in it (a different screen design, not a polish item).
+- game3d fps, closing the M4 note: measured with a normal run (`--fps`, `--profile`). SDFGI cost ~1.7 ms a frame and
+  one 45–65 ms frame after every far camera jump (cascade rebuild) — off by default outdoors, `--sdfgi` turns it on
+  (ADR-0019 names "SDFGI off" as a lever). Tree crowns no longer cast shadows themselves; a 5× sparser copy goes to
+  the shadow maps only (3.9 → 0.7 ms). Harbour averages 65–109 fps at 1080p on Apple M5; the 1%-low is 53–57 in the
+  three heaviest views, so a hard 60 floor is not reached there.
+- macOS does not draw a covered window; a frame-time loop then measures the idle sleep (145 "fps"). `--fps` counts
+  drawn frames and warns.
+
