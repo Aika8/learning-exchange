@@ -50,6 +50,7 @@ public final class ExchangeService implements TradingService, AutoCloseable {
     private final PaperBook paper = new PaperBook();
     private final CandleProjection candles;
     private final SessionReviewProjection reviews = new SessionReviewProjection();
+    private final AchievementsProjection achievements = new AchievementsProjection();
     private final application.economy.FundProjection funds = new application.economy.FundProjection();
     private final RealMarketData realData;
     private final EconomySchedule schedule;
@@ -101,6 +102,7 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         this.candles = new CandleProjection(options.savings().dayMillis());
         candles.onEvents(history);
         reviews.onEvents(history);
+        achievements.onEvents(history);
         funds.onEvents(history);
         this.realData = options.realData();
         this.schedule = new EconomySchedule(options.economySeed(), economy.epoch().orElse(clock.now()),
@@ -211,6 +213,11 @@ public final class ExchangeService implements TradingService, AutoCloseable {
             requireInstrument(ex, instrument);
             return ex.lastPrice(instrument);
         });
+    }
+
+    @Override
+    public List<AchievementsProjection.Achievement> achievements(String accountId) {
+        return sequencer.call(ex -> achievements.achievements(accountId));
     }
 
     @Override
@@ -636,6 +643,7 @@ public final class ExchangeService implements TradingService, AutoCloseable {
         paper.onEvents(events);
         candles.onEvents(events);
         reviews.onEvents(events);
+        achievements.onEvents(events);
         funds.onEvents(events);
         for (MarketListener l : listeners) {
             l.onEvents(events);

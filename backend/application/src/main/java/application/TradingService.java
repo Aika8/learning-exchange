@@ -138,6 +138,9 @@ public interface TradingService {
 
     SessionReviewProjection.Review sessionReview(String accountId, long from, long to);
 
+    /** Achievements of a person, shared by the app and the game (M4). */
+    List<AchievementsProjection.Achievement> achievements(String accountId);
+
     List<application.economy.EconomyViews.Fund> funds();
 
     /** The savings deposit on offer: annual rate, and how long a bank day is in simulation time. */
