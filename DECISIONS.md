@@ -307,4 +307,9 @@ Build and CI
   three heaviest views, so a hard 60 floor is not reached there.
 - macOS does not draw a covered window; a frame-time loop then measures the idle sleep (145 "fps"). `--fps` counts
   drawn frames and warns.
+- People's clothes: no Blender here, so the MakeHuman models are not rebuilt. `Costume` re-materials their own clothes
+  (plain cloth, stripes by shader, original normal map kept) and adds our own period pieces as one mesh per person,
+  each piece skinned rigidly to a single bone (coat tails and skirt halves hang from the thighs so they follow the
+  stride). Roles: captain, sailor, trader, townsman, child; `who` picks the body, `role` the dress. `--plain` shows the
+  people as downloaded. Packed arrays inside a Dictionary are values in GDScript — write them back after appending.
 

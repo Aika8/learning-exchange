@@ -4,10 +4,12 @@ Updated: 2026-11-16, G3D polish after M4. Demos: `docs/demo/M4.md`, `docs/demo/G
 
 ## G3D polish (after M4) — `docs/demo/G3D-polish.md`
 - World audit (`WorldProbe`, `--audit`): 451 problems before → 0 after on 1270 grid points, 8384 walks, 172 objects
-  (holes, falls, walk-through buildings and props, floating props, z-fighting, missing LODs). GUT 59 → 71.
+  (holes, falls, walk-through buildings and props, floating props, z-fighting, missing LODs). GUT 59 → 74.
 - Every building and prop has a collider that follows its shape; wharf and pier decks with floors; invisible fences
   round the islands and decks; spring-arm camera stops at walls.
 - Modular half-timbered houses, windmill and hall interior rebuilt; grime decals. No new assets.
+- People dressed for the age of sail in code (`Costume`): captain in tricorn, coat, sash and boots; sailors in stripes,
+  bandana and slops; traders and townsfolk in period dress. No jeans, T-shirts, fedora.
 - Walking: acceleration, run (Shift), stairs and slopes; computed gait with foot IK (idle/walk/run); villagers on a
   navmesh with avoidance.
 - Harbour fps at 1080p (Apple M5): average 65–109 (was 55–118 with 45–65 ms frames after a camera jump); the long

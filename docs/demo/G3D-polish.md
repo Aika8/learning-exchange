@@ -5,7 +5,7 @@ through walls, the houses were boxes and the walk was a bob. This pass: an autom
 world and lists every such problem with a picture, then the fixes, then the same audit again.
 
 **Result: 451 problems before → 0 after**, on 1270 grid points and 8384 walks (before: 1204 points, 8000 walks).
-GUT: 59 → 71 tests, all green. No contract change, the 2D game is untouched, the M3 game flow is untouched.
+GUT: 59 → 74 tests, all green. No contract change, the 2D game is untouched, the M3 game flow is untouched.
 
 ## 1. The audit
 
@@ -227,7 +227,40 @@ but one (37 ms once at the wharf). The 1%-low in the three heaviest harbour view
 53–57 fps, so "never under 60" is **not** reached there. The houses view is slower than before (88 → 73) because
 there is now something to draw.
 
-## 5. Not verified, and what needs Aika
+## 5. People: dressed for the age of sail (`scripts/costume.gd`)
+
+The MakeHuman people came in T-shirts, jeans and a fedora. Blender is not on this machine, so the models were not
+rebuilt; `Costume` dresses them when they are created:
+- their own clothes lose the denim and print textures and get plain period cloth (the folds of the normal map stay);
+  the sailor's shirt gets stripes from a small shader; the fedora is hidden;
+- our own meshes go on top, each piece rigidly skinned to one bone and all of them one mesh per person, so tails,
+  sleeves and boots follow the gait and a costume costs a draw call per material.
+
+| Role | Wears |
+|---|---|
+| Captain | tricorn with a brass edge, long navy coat with tails and brass buttons, turned-back cuffs with the shirt showing, red sash under a belt with a buckle, pale breeches, sea boots with folded tops |
+| Sailor | striped shirt with wide sleeves, bandana knotted at the back, sash, canvas slops to mid calf |
+| Trader (Mara, the post keeper, brokers) | long gown and skirt, linen apron and sleeves, shawl, kerchief |
+| Townsman (the Chronicler, strollers) | brown coat with tails, breeches with stockings and garters, soft felt hat |
+| Child | linen shirt, brown breeches, sash and bandana |
+
+No jeans, T-shirts or logos; no new assets; generic period dress, not a character from a game or a film.
+`godot --path game3d -- --people=<dir>` makes the line-up (`--plain` shows the people as downloaded).
+
+| Before | After |
+|---|---|
+| ![](g3d-polish/before/people-plain-front.jpg) | ![](g3d-polish/after/people-dressed-front.jpg) |
+| ![](g3d-polish/before/people-plain-back.jpg) | ![](g3d-polish/after/people-dressed-back.jpg) |
+| ![](g3d-polish/before/people-plain-captain.jpg) | ![](g3d-polish/after/people-dressed-captain.jpg) |
+
+The gait pictures in section 3 show the captain in the costume, walking and running. Frame rate with the costumes on
+is the same within noise (harbour captain 73 fps, the square 64–65).
+
+Limits: the pieces are simple shapes (tubes, boxes, domes) on a T-shirt-and-trousers body, so up close a coat is a
+coat-coloured shirt with tails, the bandana reads as a cap, and a boot top can clip a trouser leg. Real period clothes
+from MakeHuman would need Blender + MPFB and a rebuild of the four models.
+
+## 6. Not verified, and what needs Aika
 - The gait was checked on still frames and by a unit test, not by eye in motion. Play it.
 - The M3 self-run demo (`--demo`) was not re-run against a live exchange (ports busy): its screenshots in
   `docs/demo/M3.md` show the old harbour. The Act I spots moved onto the wharf; `demo_go` uses the same spot table.
@@ -235,6 +268,7 @@ there is now something to draw.
   in it.
 - Frame rate was measured on one machine. While the game window is covered macOS stops drawing it; `--fps` waits for
   a drawn frame and says so if there is none.
+- The costumes were checked on still pictures (line-up, walk, run), not in play.
 - **Animation source**: real walk/run/idle clips would look better than a computed gait. Poly Haven and ambientCG
   have none; MakeHuman gives the rig, not clips. Quaternius (an allowed source) publishes CC0 animation packs, but I
   did not download or check one: Quaternius has no stable direct URLs for `make assets` (see `game3d/ASSETS.md`) and the

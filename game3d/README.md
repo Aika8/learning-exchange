@@ -20,7 +20,7 @@ falls, spawns and spots are free, colliders follow the shapes, villagers stay on
 
 ## World audit and measurements (`docs/demo/G3D-polish.md`)
 `godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`), `--views=<dir>` (fixed views),
-`--gait=<dir>` (idle, walk, run, a doorstep), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
+`--gait=<dir>` (idle, walk, run, a doorstep), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
 effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 
 ## Layout
@@ -35,6 +35,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/game.gd` | Autoload `Game`: the day, its log, plan, Anchor, sync with the exchange, report-season watch |
 | `scripts/ui/` | `GameHud` (flow bar, lesson cards, glossary, report banner), `PlanPanel` |
 | `scripts/mover.gd`, `walker.gd`, `captain.gd` | Walking for everybody: acceleration, slopes, stairs (`Mover`); computed gait with foot IK — idle, walk, run (`Walker`); the captain with a spring-arm camera |
+| `scripts/costume.gd` | Period dress for the MakeHuman people: re-materials their clothes and adds skinned pieces (roles: captain, sailor, trader, townsman, child) |
 | `scripts/nav.gd`, `villager.gd` | Navmesh baked from the colliders; villagers who walk it and steer round each other |
 | `scripts/solid.gd`, `kit.gd`, `houses.gd`, `decals.gd`, `hall_room.gd` | Colliders that follow shapes; one mesh per building; modular half-timbered houses; grime decals; the hall interior |
 | `scripts/world_probe.gd`, `audit.gd` | The world audit (`WorldProbe`) and its runs |

@@ -69,6 +69,7 @@ How they are used: `scripts/assets.gd` (paths, fallbacks), `scripts/proc.gd` (`_
 |---|---|---|
 | Island, windmill, wharf, pier and figure meshes; fallback look of everything | Generated in code: `scripts/proc.gd`, `scripts/archipelago.gd`, `scripts/board.gd`, `scripts/hall_room.gd` | Our own work, CC0 |
 | Modular half-timbered houses (plinth, frame, windows with shutters, door, tiled roof, chimney, sign) | Generated in code: `scripts/houses.gd`, `scripts/kit.gd`; materials are the Poly Haven sets above | Our own work, CC0 |
+| Period costumes of the people (tricorn, bandana, coat and tails, sash, slops, skirt, boots, stockings; cloth and stripe materials) | Generated in code: `scripts/costume.gd`, skinned to the MakeHuman rig | Our own work, CC0 |
 | Grime and wear decal textures | Painted in code from `FastNoiseLite`: `scripts/decals.gd` | Our own work, CC0 |
 | Colliders, edge fences, navmesh | Generated in code: `scripts/solid.gd`, `scripts/nav.gd` (Godot `NavigationServer3D`) | Our own work; engine MIT |
 | Cloud sea, sail, terrain shaders | `shaders/cloud_sea.gdshader`, `shaders/sail.gdshader`, `shaders/terrain.gdshader` | Our own work, CC0 |
@@ -86,7 +87,7 @@ No sounds or music. Nothing is taken from existing games: the Poly Haven models 
 `sailor`, `trader`, `oldman`, `child` in `assets/models/people/*.glb` are built by `game3d/tools/people/build.sh`
 (Blender 4.5 + MPFB 2 add-on + MakeHuman CC0 system assets, makehumancommunity.org). The base mesh, rig and every
 clothes, hair, eye and skin asset used are CC0; the clothes are recoloured and the pose set as rest pose by
-`restyle.py`. MPFB itself is GPL, its output is not. The files are git-ignored like the rest; without them the
+`restyle.py`. In the game `Costume` replaces the look of those clothes (no denim, prints or fedora) and adds period pieces. MPFB itself is GPL, its output is not. The files are git-ignored like the rest; without them the
 procedural person stands in.
 
 ## Animation
