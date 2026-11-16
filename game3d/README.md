@@ -11,11 +11,17 @@ glossary (G), the «Реальный мир» board. Two islands: Spark Harbour 
 ## Run
 1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make assets` (once, ~170 MB of CC0 art from Poly Haven, MD5-checked; ADR-0019). 4. `make game3d`.
 Without `make assets` the game still runs with the old procedural look.
-Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, mouse, Tab (fly camera), E (interact),
+Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, Shift (run), mouse, Tab (fly camera), E (interact),
 Space (sail during the voyage), G (glossary), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
 
 ## Tests
-`make test-game3d` — GUT headless.
+`make test-game3d` — GUT headless. `tests/unit/test_world_walk.gd` walks a grid over both islands and the hall: nobody
+falls, spawns and spots are free, colliders follow the shapes, villagers stay on the ground.
+
+## World audit and measurements (`docs/demo/G3D-polish.md`)
+`godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`), `--views=<dir>` (fixed views),
+`--gait=<dir>` (idle, walk, run, a doorstep), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
+effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 
 ## Layout
 | Path | What |
@@ -28,7 +34,10 @@ Space (sail during the voyage), G (glossary), Enter (close a lesson card), F3 (f
 | `scripts/core/` | M3 pure logic, covered by GUT: `GameFlow` (state machine), `VoyagePlan` (Mara's check), `DayLog` (day events), `SessionFacts` (fold), `Chronicler` (port + template adapter), `Lessons`, `ReportSeason`, `CaptainGlossary` |
 | `scripts/game.gd` | Autoload `Game`: the day, its log, plan, Anchor, sync with the exchange, report-season watch |
 | `scripts/ui/` | `GameHud` (flow bar, lesson cards, glossary, report banner), `PlanPanel` |
-| `scripts/walker.gd` | Procedural walk cycle for the MakeHuman people |
+| `scripts/mover.gd`, `walker.gd`, `captain.gd` | Walking for everybody: acceleration, slopes, stairs (`Mover`); computed gait with foot IK — idle, walk, run (`Walker`); the captain with a spring-arm camera |
+| `scripts/nav.gd`, `villager.gd` | Navmesh baked from the colliders; villagers who walk it and steer round each other |
+| `scripts/solid.gd`, `kit.gd`, `houses.gd`, `decals.gd`, `hall_room.gd` | Colliders that follow shapes; one mesh per building; modular half-timbered houses; grime decals; the hall interior |
+| `scripts/world_probe.gd`, `audit.gd` | The world audit (`WorldProbe`) and its runs |
 | `scripts/chronicle.gd`, `scripts/demo.gd` | Evening chronicle scene; the self-run demo for screenshots |
 | `scripts/main_menu.gd`, `harbour.gd`, `captain.gd`, `hall.gd`, `board.gd`, `voyage.gd` | Scenes (`scenes/*.tscn` are a root node + script) |
 
