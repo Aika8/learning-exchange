@@ -482,5 +482,30 @@
     "basketReturn": "Basket return (no fee)",
     "gap": "Difference",
     "tenYear": "TER over 10 years (zero growth)"
+  },
+  "assistant": {
+    "title": "Assistant",
+    "intro": "Ask about your own numbers: statement, positions, journal, reports and the central bank. It explains, it does not advise.",
+    "placeholder": "Your question",
+    "ask": "Ask",
+    "sourceModel": "Answered by {{model}} from your facts",
+    "sourceTemplate": "Template answer from your facts",
+    "guarded": "advice filtered out",
+    "q": {
+      "expectations": "What changed against expectations?",
+      "costs": "How much did I pay in fees and spread?",
+      "session": "How did my session go?"
+    }
+  },
+  "achievements": {
+    "title": "Achievements (shared with the game)",
+    "done": "unlocked",
+    "FIRST_TRADE": "First trade",
+    "FIRST_STOP": "Anchor dropped (first stop)",
+    "STOP_FIRED": "The Anchor held (a stop triggered)",
+    "JOURNAL_5": "Ship's log (5 journal notes)",
+    "DIVERSIFIED_3": "Three harbours (3 instruments)",
+    "FIRST_SAVINGS": "Saver (first deposit)",
+    "FIRST_DIVIDEND": "First dividend"
   }
 }

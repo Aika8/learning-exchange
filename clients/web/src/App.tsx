@@ -16,6 +16,7 @@ import { LangSwitch } from './components/LangSwitch';
 import { InstrumentSwitch } from './components/InstrumentSwitch';
 import { M2aPanels } from './components/M2aPanels';
 import { M2bPanels } from './components/M2bPanels';
+import { M4Panels } from './components/M4Panels';
 
 export function App() {
   const { t } = useTranslation();
@@ -82,6 +83,9 @@ export function App() {
           </section>
           <section className="card m2b">
             <M2bPanels instrument={instrument} clock={clock} />
+          </section>
+          <section className="card m4">
+            <M4Panels />
           </section>
         </main>
       )}
