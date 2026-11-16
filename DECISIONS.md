@@ -232,3 +232,26 @@ Build and CI
 - WebSocketTest flake: `sendText().get()` only means the frame left the client; the orders could trade before the
   server registered `account.acc-ws-b`, so the account nudge went to nobody. The test now waits until every subscribe
   is answered (snapshot or error) before placing orders.
+
+## M3 (game3d vertical slice)
+- The day loop is `GameFlow` (ADR-0023): Port → Plan → Trading → Sailing → Port …, Chronicle only from Port. Guards: no
+  plan without provisions (the emergency fund), no trading without Mara's approval, no sailing with cargo and no Anchor.
+  Arriving moves Sailing → Port; Silk Reach's market is Trading on the other island (no second exchange).
+- Mara's 1% is counted from the trading capital = SPARK − provisions (6 × 5 000.00), with both fees in the risk. The
+  Anchor is a STOP_LIMIT sell whose limit is a quarter of the stop distance under the stop: a small slip still fills, a
+  gap through it leaves the order out of the market — the Act III lesson. Mara suggests the stop 2 × ATR(14) under entry.
+- Sailing sets the exchange clock to ×60 (PUT /clock, a dev endpoint) and ×1 on arrival: a voyage "takes days".
+  The first voyage of a day always crosses a storm (a scripted lesson); the market's own regime is shown in its text.
+- R per voyage = cash flow of that voyage's fills + open quantity × last price, over the planned risk; rounded toward
+  zero. Expectancy = mean R over voyages that traded. Fills belong to the latest plan for the same instrument.
+- Basket = IDX-SPARK (the index fund, M2c) — Бабушка Ветла's basket; the comparison applies its day's return to the
+  whole trading capital.
+- Statement lines are copied with a key (ts, order, side, price, qty, n-th identical line): one market order can fill
+  several identical lines at one timestamp.
+- «Рекорд, а акция упала»: a record is revenue *or* net profit above every earlier report. With seed 42 FORGE never has a
+  record profit with a miss in 16 seasons, but season 15 has record revenue with an EPS miss (2.56 vs 2.83) — the real
+  headline shape. Season 4 (EPS 1.11 vs 2.20) is the night the Anchor is gapped through.
+- Lessons format their numbers through the chronicler's typed args (`m` amount, `d` signed result, `p` price, `r` R,
+  `bps` rate, `dbps` signed change), so ru/en re-render on the fly.
+- Walking: a procedural walk cycle on the MakeHuman game-engine rig (`Walker`), no downloaded animation. Quaternius
+  animations would need retargeting in Blender and have no stable URLs.

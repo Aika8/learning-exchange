@@ -15,6 +15,7 @@ Locale="*res://shared/locale.gd"
 ExchangeApi="*res://shared/exchange_api.gd"
 MarketStream="*res://scripts/market_stream_3d.gd"
 Session="*res://scripts/session.gd"
+Game="*res://scripts/game.gd"
 
 [debug]
 

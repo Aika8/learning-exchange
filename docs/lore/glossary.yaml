@@ -130,3 +130,31 @@ terms:
     real: { ru: "Учебная позиция", en: "Paper position" }
     lore: { ru: "Пробный рейс", en: "Trial voyage" }
     definition: { ru: "Сделка понарошку по реальной цене: деньги не двигаются.", en: "A pretend trade at a real price: no money moves." }
+  - id: financial-cushion
+    real: { ru: "Финансовая подушка", en: "Emergency fund" }
+    lore: { ru: "Запас провизии", en: "Provisions" }
+    definition: { ru: "Деньги на 3–6 месяцев расходов, которые не вкладывают и не рискуют ими.", en: "Three to six months of expenses that are never invested or put at risk." }
+  - id: loan-interest
+    real: { ru: "Процент по долгу", en: "Loan interest" }
+    lore: { ru: "Долг Тихому Причалу", en: "Debt to the Quiet Mooring" }
+    definition: { ru: "Невыплаченный долг растёт по сложному проценту, как вклад, только против тебя.", en: "An unpaid debt compounds like a deposit, only against you." }
+  - id: liquidity
+    real: { ru: "Ликвидность", en: "Liquidity" }
+    lore: { ru: "Глубина Лестницы", en: "Depth of the Ladder" }
+    definition: { ru: "Сколько можно купить или продать, не сдвинув цену; крупная заявка проедает уровни стакана.", en: "How much can trade without moving the price; a big order eats through the book's levels." }
+  - id: risk-per-trade
+    real: { ru: "Риск на сделку (правило 1%)", en: "Risk per trade (1% rule)" }
+    lore: { ru: "Правило Мары", en: "Mara's rule" }
+    definition: { ru: "Убыток до стопа не больше 1% капитала; объём считается от расстояния до стопа.", en: "The loss to the stop is at most 1% of capital; size comes from the distance to the stop." }
+  - id: r-multiple
+    real: { ru: "R-мультипликатор", en: "R-multiple" }
+    lore: { ru: "R-счёт рейса", en: "Voyage R-count" }
+    definition: { ru: "Результат сделки в единицах заранее принятого риска: +2R — заработал два риска.", en: "A trade's result in units of the risk taken up front: +2R made twice the risk." }
+  - id: expectancy
+    real: { ru: "Матожидание", en: "Expectancy" }
+    lore: { ru: "Средний ветер", en: "The average wind" }
+    definition: { ru: "Средний результат сделки в R по многим сделкам; одна сделка о нём ничего не говорит.", en: "The average result per trade in R over many trades; one trade says nothing about it." }
+  - id: slippage
+    real: { ru: "Проскальзывание", en: "Slippage" }
+    lore: { ru: "Снос якоря", en: "Anchor drag" }
+    definition: { ru: "Разница между ценой стопа и ценой, по которой сделка прошла на самом деле.", en: "The difference between the stop price and the price the trade actually got." }

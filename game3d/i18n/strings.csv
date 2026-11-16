@@ -8,10 +8,10 @@ LADDER_LORE,Лестница,the Ladder
 LADDER_PRICE,"Цена, %s","Price, %s"
 LADDER_QTY,"Кол-во, %s","Qty, %s"
 LADDER_ORDERS,Заявок,Orders
-LADDER_SPREAD,"Спред %s %s","Spread %s %s"
+LADDER_SPREAD,Спред %s %s,Spread %s %s
 LADDER_SPREAD_LORE,Пропасть,the Chasm
 LADDER_SPREAD_NONE,Спред: нет встречных заявок,Spread: one side is empty
-LADDER_LAST,"Последняя сделка %s","Last trade %s"
+LADDER_LAST,Последняя сделка %s,Last trade %s
 LADDER_LAST_NONE,Сделок ещё не было,No trades yet
 LADDER_ASKS,Продавцы (ask) ▼,Sellers (ask) ▼
 LADDER_BIDS,Покупатели (bid) ▲,Buyers (bid) ▲
@@ -19,7 +19,7 @@ LADDER_BACK,В Гавань,To the Harbour
 LADDER_LIVE,онлайн,live
 LADDER_OFFLINE,нет связи,offline
 BALANCES_TITLE,Балансы,Balances
-BALANCE_ROW,"%s: доступно %s · в заявках %s","%s: available %s · in orders %s"
+BALANCE_ROW,%s: доступно %s · в заявках %s,%s: available %s · in orders %s
 FORM_TITLE,Новая заявка,New order
 FORM_BUY,Купить,Buy
 FORM_SELL,Продать,Sell
@@ -34,10 +34,10 @@ FORM_MARKET_HINT,Исполнится по лучшим ценам стакан�
 FORM_INVALID,Проверьте цену и количество,Check price and quantity
 FORM_PLACED,"Заявка №%s: %s, исполнено %s из %s","Order #%s: %s, filled %s of %s"
 FORM_SENDING,Отправляю…,Sending…
-FEE_LORE,"Комиссия %s%% · пошлина Биржи","Fee %s%% · the Exchange toll"
+FEE_LORE,Комиссия %s%% · пошлина Биржи,Fee %s%% · the Exchange toll
 ORDERS_TITLE,Мои заявки,My orders
 ORDERS_EMPTY,Заявок нет,No orders
-ORDERS_ROW,"№%s %s %s %s × %s — %s","#%s %s %s %s × %s — %s"
+ORDERS_ROW,№%s %s %s %s × %s — %s,#%s %s %s %s × %s — %s
 TAPE_TITLE,Лента сделок,Trades
 TAPE_EMPTY,Сделок ещё не было,No trades yet
 SIDE_BUY,Покупка,Buy
@@ -68,11 +68,11 @@ MENU_NAME,Имя капитана (счёт на бирже),Captain's name (exc
 MENU_START,Отправиться в Гавань,Set sail for the Harbour
 MENU_QUIT,Выход,Quit
 MENU_LOGGING_IN,Вход на биржу…,Logging in to the exchange…
-MENU_SERVER,"Биржа: %s","Exchange: %s"
+MENU_SERVER,Биржа: %s,Exchange: %s
 HARBOUR_TITLE,Гавань Искр,Spark Harbour
-HARBOUR_HELP,"WASD — идти · мышь — обзор · Tab — облёт камерой · E — действие","WASD — walk · mouse — look · Tab — fly the camera · E — interact"
+HARBOUR_HELP,WASD — идти · мышь — обзор · Tab — облёт камерой · E — действие,WASD — walk · mouse — look · Tab — fly the camera · E — interact
 HARBOUR_FLY,Облёт камерой (Tab — вернуться к капитану),Camera flight (Tab — back to the captain)
-HARBOUR_ACCOUNT,"Счёт %s · %s","Account %s · %s"
+HARBOUR_ACCOUNT,Счёт %s · %s,Account %s · %s
 HARBOUR_MARA,"Мара Якорная: «Мельница наверху — Ветряная Биржа. В её зале горит Лестница — по-вашему, стакан заявок. А у причала ждёт твой «Попутчик».»","Mara Anchor: «The windmill up there is the Wind Exchange. The Ladder glows in its hall — the order book, as your world calls it. And your «Wayfarer» waits at the pier.»"
 PROMPT_EXCHANGE,E — войти в зал Биржи,E — enter the Exchange hall
 PROMPT_SHIP,E — отплыть на Шёлковый Плёс,E — sail to Silk Reach
@@ -82,17 +82,211 @@ HALL_LORE,Ветряная Биржа,the Wind Exchange
 HALL_BACK,Выйти в Гавань,Back to the Harbour
 HALL_HELP,"Табло — живой стакан с биржи. Мышь — осмотреться, колесо — ближе/дальше.","The board is the live order book. Mouse — look around, wheel — zoom."
 VOYAGE_TITLE,Рейс: Гавань Искр → Шёлковый Плёс,Voyage: Spark Harbour → Silk Reach
-VOYAGE_CLOCK,"Время биржи %s","Exchange time %s"
+VOYAGE_CLOCK,Время биржи %s,Exchange time %s
 VOYAGE_CLOCK_LORE,часы Течений,the Current clock
 VOYAGE_PAUSED,Часы биржи на паузе,Exchange clock paused
-VOYAGE_SPEED,"скорость ×%s","speed ×%s"
-VOYAGE_ELAPSED,"В пути %s биржевого времени","At sea for %s of exchange time"
-VOYAGE_PROGRESS,"Пройдено %s%%","Covered %s%%"
-VOYAGE_WIND,"Ветер %s","Wind %s"
+VOYAGE_SPEED,скорость ×%s,speed ×%s
+VOYAGE_ELAPSED,В пути %s биржевого времени,At sea for %s of exchange time
+VOYAGE_PROGRESS,Пройдено %s%%,Covered %s%%
+VOYAGE_WIND,Ветер %s,Wind %s
 VOYAGE_WIND_FAIR,попутный,fair
 VOYAGE_WIND_SIDE,боковой,crosswind
-VOYAGE_MARKET,"Шёлк на Бирже: последняя сделка %s","Silk on the Exchange: last trade %s"
+VOYAGE_MARKET,%s на Бирже: последняя сделка %s,%s on the Exchange: last trade %s
 VOYAGE_ARRIVED,Шёлковый Плёс! Здесь растёт ветряной шёлк.,Silk Reach! Wind silk grows here.
 VOYAGE_HOME,Обратно в Гавань,Back to the Harbour
-VOYAGE_HELP,"Мышь — камера · колесо — ближе/дальше · Пробел — поднять парус","Mouse — camera · wheel — zoom · Space — raise the sail"
-FPS,"%s кадр/с","%s fps"
+VOYAGE_HELP,Мышь — камера · колесо — ближе/дальше · Пробел — поднять парус,Mouse — camera · wheel — zoom · Space — raise the sail
+FPS,%s кадр/с,%s fps
+VOYAGE_START,Отплытие,Departure
+VOYAGE_END,Прибытие,Arrival
+VOYAGE_TITLE_HOME,Рейс: Шёлковый Плёс → Гавань Искр,Voyage: Silk Reach → Spark Harbour
+VOYAGE_ARRIVED_HOME,Гавань Искр. Дома.,Spark Harbour. Home.
+VOYAGE_ASHORE,Сойти на берег,Go ashore
+VOYAGE_ANCHOR_FIRED,"Якорь сработал: стоп %s, сделка %s","The Anchor fired: stop %s, trade %s"
+BOARD_TREASURY,Совет Казначеев,Council of Treasurers
+BOOK_BUTTON,Словарь (G),Glossary (G)
+BOOK_EMPTY,Пока пусто — термины появятся с уроками.,Empty for now — terms arrive with lessons.
+BOOK_HELP,G или Esc — закрыть,G or Esc — close
+BOOK_LORE,Словарь капитана,the Captain's glossary
+BOOK_TITLE,Глоссарий,Glossary
+CHRONICLE_TITLE,Разбор дня,Day review
+CHRONICLE_LORE,Вечерняя летопись,the Evening chronicle
+CHRONICLE_NEXT_DAY,Новый день,Next day
+CHRONICLE_NO_ADVICE,"Разбор прошлого, не инвестиционный совет","A review of the past, not investment advice"
+CHRONICLE_REPLAY,Перечитать летопись (replay),Re-read the chronicle (replay)
+CHRONICLE_VOICE,Летописец,The Chronicler
+CHRONICLE_WHOLE,Весь день,Whole day
+CHR_INTRO,Вечер. Летописец раскрывает книгу дня.,Evening. The Chronicler opens the book of the day.
+CHR_NO_TRADES,Сделок сегодня не было — тоже решение.,No trades today — that is a decision too.
+CHR_VOYAGE,"Рейс %s, %s: результат %s = %s (риск 1R = %s).","Voyage %s, %s: result %s = %s (risk 1R = %s)."
+CHR_VOYAGE_OPEN,"Рейс %s, %s ещё открыт: по последней цене %s = %s (1R = %s).","Voyage %s, %s still open: at the last price %s = %s (1R = %s)."
+CHR_EXPECTANCY,Матожидание (средний R): %s за %s рейс(а).,Expectancy (mean R): %s over %s voyage(s).
+CHR_FEW_TRADES,По нескольким сделкам матожидание ничего не говорит — нужны десятки.,A few trades say nothing about expectancy — it takes dozens.
+CHR_COSTS,"Комиссии %s, спред %s — итого торговля стоила %s.","Fees %s, spread %s — trading cost %s in all."
+CHR_GAP_THROUGH,"%s: Якорь на %s, рынок открылся на %s — гэп прошёл сквозь стоп-лимит, заявка висит вне рынка (%s).","%s: Anchor at %s, the market opened at %s — the gap went through the stop-limit, the order hangs out of the market (%s)."
+CHR_SLIP,%s: Якорь на %s сработал по сделке %s — проскальзывание %s.,%s: the Anchor at %s fired on a trade at %s — slippage %s.
+CHR_BASKET,Твоя казна: %s (%s). Корзина Бабушки Ветлы (индексный фонд) за то же время: %s (%s).,Your treasury: %s (%s). Grandma Vetla's basket (index fund) over the same time: %s (%s).
+CHR_BASKET_AHEAD,"Сегодня корзина впереди. Так бывает чаще, чем кажется.",Today the basket is ahead. That happens more often than it seems.
+CHR_BASKET_BEHIND,Сегодня ты впереди корзины. Один день — не статистика.,Today you are ahead of the basket. One day is not statistics.
+CHR_STORM,"Штормов в пути: %s — волатильность растит и прибыль, и убыток.",Storms at sea: %s — volatility grows both profit and loss.
+CHR_REPORT,"Отчёт %s: сюрприз %s, гэп на открытии %s. %s","%s report: surprise %s, gap at the open %s. %s"
+CHR_LESSON,Урок «%s» — по-настоящему это «%s».,Lesson «%s» — in the real world: «%s».
+CHR_DISCLAIMER,"Летописец пересказывает прошлое и не советует, что покупать.",The Chronicler retells the past and never says what to buy.
+DEBT_LINE,Письмо деда: «Должен Тихому Причалу %s под 36%% годовых». Через год без выплат: %s.,Grandfather's letter: «I owe the Quiet Mooring %s at 36%% a year». A year without payments: %s.
+PROVISIONS_LINE,Провизия на шесть лун отложена: %s. Её не вкладывают и ею не рискуют.,"Provisions for six moons set aside: %s. Never invested, never at risk."
+EV_ANCHOR,"Якорь брошен: стоп %s, лимит %s","Anchor dropped: stop %s, limit %s"
+EV_FILL,"%s %s %s по %s, комиссия %s","%s %s %s at %s, fee %s"
+EV_LESSON,Урок «%s» (%s),Lesson «%s» (%s)
+EV_PLAN,"План: %s, вход %s, стоп %s, %s шт., риск %s","Plan: %s, entry %s, stop %s, %s units, risk %s"
+EV_REPORT,"Отчёт Кузни: сюрприз %s, гэп %s","Forge report: surprise %s, gap %s"
+EV_STATE,Этап: %s,Step: %s
+EV_STOP_FIRED,"Якорь сработал: стоп %s, сделка %s, исполнено %s из %s","Anchor fired: stop %s, trade %s, filled %s of %s"
+EV_DAY_START,Начало дня,Day starts
+EV_MARK,Цена отмечена,Price marked
+EV_BASKET,Цена корзины отмечена,Basket price marked
+EV_VOYAGE_START,Отплытие (часы ×60),Sailed (clock ×60)
+EV_VOYAGE_END,Прибытие,Arrived
+EV_STORM,Шторм,Storm
+EV_NOTE,Мара вернула план,Mara sent the plan back
+FACTS_TITLE,Факты дня,Facts of the day
+FACTS_LORE,счёт Летописца,the Chronicler's count
+FACTS_VOYAGE,Рейс %s %s: %s  %s %s,Voyage %s %s: %s  %s %s
+FACTS_OPEN,(открыт),(open)
+FACTS_NONE,Сделок нет,No trades
+FACTS_EXPECTANCY,Матожидание: %s,Expectancy: %s
+FACTS_FEES,Комиссии: %s,Fees: %s
+FACTS_SPREAD,Спред: %s,Spread: %s
+FACTS_YOU,Ты: %s (%s),You: %s (%s)
+FACTS_BASKET,Индексный фонд: %s (%s),Index fund: %s (%s)
+FACTS_EVENTS,Событий: %s из %s,Events: %s of %s
+FLOW_PORT,Порт,Port
+FLOW_PORT_LORE,пристань,the quay
+FLOW_PLAN,План сделки,Trade plan
+FLOW_PLAN_LORE,план рейса,voyage plan
+FLOW_TRADING,Торговля,Trading
+FLOW_TRADING_LORE,Лестница,the Ladder
+FLOW_SAILING,Время идёт,Time passes
+FLOW_SAILING_LORE,плавание,sailing
+FLOW_CHRONICLE,Разбор,Review
+FLOW_CHRONICLE_LORE,летопись,the chronicle
+FLOW_NEED_ANCHOR,Груз без Якоря (стоп-лосса) — Мара не выпустит в море.,Cargo with no Anchor (stop-loss) — Mara won't let you sail.
+FLOW_NEED_PLAN,Сначала план сделки у Мары.,First a trade plan with Mara.
+FLOW_NEED_PROVISIONS,Сначала провизия на шесть лун (финансовая подушка).,First provisions for six moons (emergency fund).
+FLOW_NO_EDGE,Сейчас так нельзя.,Not now.
+FLOW_NO_SAME,Уже здесь.,Already here.
+HALL_ANCHOR,Поставить стоп-лосс,Place the stop-loss
+HALL_ANCHOR_LORE,бросить Якорь,drop the Anchor
+HALL_ANCHOR_DONE,Стоп-лимит поставлен на %s.,Stop-limit placed at %s.
+HALL_ANCHOR_NONE,стоп-лосса нет,no stop-loss
+HALL_ANCHOR_SET,"стоп %s, лимит %s","stop %s, limit %s"
+HALL_NO_PLAN,Плана нет — торговать нельзя. Мара у причала.,No plan — no trading. Mara is by the pier.
+HALL_PLAN,План сделки,Trade plan
+HALL_PLAN_LORE,"план рейса, проверен Марой","voyage plan, checked by Mara"
+HALL_PLAN_ROW,"%s · вход %s · стоп %s · %s шт.
+риск %s ✦ (%s%%) · в трюме %s · %s","%s · entry %s · stop %s · %s units
+risk %s ✦ (%s%%) · in the hold %s · %s"
+LESSON_CARD_HEAD,Новый урок,New lesson
+LESSON_OK,Понятно (Enter),Got it (Enter)
+LESSON_REAL_NAME,По-настоящему: %s,In the real world: %s
+LESSON_TO_BOOK,В словарь: %s,Added to the glossary: %s
+MARA_ANCHOR_ABOVE,Стоп выше входа — это не стоп-лосс.,The stop is above the entry — that is not a stop-loss.
+MARA_APPROVED,"Мара: «%s, Якорь на %s. Иди на Биржу.»","Mara: «%s, Anchor at %s. Go to the Exchange.»"
+MARA_BUSY,Мара: «План уже есть. Сначала исполни его.»,Mara: «You have a plan. Carry it out first.»
+MARA_NO_ANCHOR,Нет стоп-лосса (Якоря).,No stop-loss (Anchor).
+MARA_NO_CAPITAL,Нет капитала.,No capital.
+MARA_NO_QTY,Не указан объём.,No size.
+MARA_OK,Мара одобрила план.,Mara approved the plan.
+MARA_PROVISIONS_FIRST,Мара: «Без провизии на шесть лун (подушки) в рейс не пойдёшь.»,Mara: «No voyage without provisions for six moons (an emergency fund).»
+MARA_TOO_MUCH_RISK,Риск больше 1% капитала — уменьши объём или придвинь стоп.,Risk is over 1% of capital — cut the size or move the stop.
+OLVA_CONSENSUS,"Ольва Перо: «Консенсус по Кузне: EPS %s, выручка %s. Рынок торгует сюрприз — разницу с этим числом.»","Olva Quill: «Forge consensus: EPS %s, revenue %s. The market trades the surprise — the difference from this number.»"
+OLVA_LAST,Ольва Перо: «Сезон %s: EPS %s при консенсусе %s. Ждём новых ожиданий.»,Olva Quill: «Season %s: EPS %s against a consensus of %s. Waiting for new expectations.»
+OLVA_WAIT,Ольва Перо: «Ожиданий пока нет.»,Olva Quill: «No expectations yet.»
+PLAN_TITLE,План сделки,Trade plan
+PLAN_LORE,план рейса с Марой Якорной,voyage plan with Mara Anchor
+PLAN_ATR,ATR(14) = %s; стоп предложен на 2 ATR ниже входа,ATR(14) = %s; stop suggested 2 ATR under the entry
+PLAN_ATR_NONE,ATR ещё не готов — стоп на 2% ниже входа,ATR not ready — stop 2% under the entry
+PLAN_CANCEL,Отмена,Cancel
+PLAN_CAPITAL,Торговый капитал %s ✦ (без подушки) · лимит риска 1%% = %s ✦,Trading capital %s ✦ (without the fund) · risk limit 1%% = %s ✦
+PLAN_CHECK,Показать Маре,Show Mara
+PLAN_ENTRY,Цена входа,Entry price
+PLAN_ENTRY_LORE,где ступить на Лестницу,where to step on the Ladder
+PLAN_MAX,Объём по правилу 1%,Size by the 1% rule
+PLAN_QTY,"Объём, шт.","Size, units"
+PLAN_QTY_LORE,груз,cargo
+PLAN_RISK,Риск до стопа с комиссиями: %s ✦ = %s%% капитала,Risk to the stop with fees: %s ✦ = %s%% of capital
+PLAN_STOP,Стоп-лосс,Stop-loss
+PLAN_STOP_LORE,Якорь,the Anchor
+POST_TITLE,Шёлковый рынок,Silk market
+POST_LORE,фактория Плёса,the Reach trading post
+POST_BOOK,"Лучшая цена покупки %s, на ней всего %s шт. Продать %s шт. рынком: последняя по %s, недополучишь %s ✦ против лучшей цены. В трюме: %s.","Best bid %s with only %s units. Selling %s at market: the last at %s, %s ✦ less than at the best price. In the hold: %s."
+POST_CLOSE,Закрыть,Close
+POST_EMPTY,Покупателей нет.,No buyers.
+POST_NOTHING,Трюм пуст.,The hold is empty.
+POST_SELL,Продать груз рыночной заявкой,Sell the cargo with a market order
+POST_SOLD,Продано %s из %s.,Sold %s of %s.
+PROMPT_CHRONICLER,E — вечер: разбор у Летописца,E — evening: review with the Chronicler
+PROMPT_DEBT,E — сундук деда,E — grandfather's chest
+PROMPT_FOG,E — доска Совета Казначеев,E — the Treasurers' board
+PROMPT_GARDEN,E — сад,E — the garden
+PROMPT_OLVA,"E — Ольва Перо, аналитик","E — Olva Quill, analyst"
+PROMPT_POST,E — шёлковый рынок,E — the silk market
+PROMPT_PROVISIONS,E — купить провизию,E — buy provisions
+PROMPT_SHIP_HOME,E — плыть в Гавань,E — sail to the Harbour
+QUEST_OUTCOME_RECORD_BUT_FELL,"«Рекорд, а акция упала»: рекорд, но ниже ожиданий — рынок торгует сюрприз.","«A record, yet the stock fell»: a record, but below expectations — the market trades the surprise."
+QUEST_OUTCOME_BEAT_ROSE,Лучше ожиданий — цена открылась выше.,Above expectations — the price opened higher.
+QUEST_OUTCOME_MISS_FELL,Хуже ожиданий — цена открылась ниже.,Below expectations — the price opened lower.
+QUEST_OUTCOME_OTHER,Цена и сюрприз разошлись — так тоже бывает.,Price and surprise disagreed — that happens too.
+REAL_TITLE,Реальный мир,Real world
+REAL_LORE,доска Земли-под-Облаками,the board of the Land-under-Clouds
+REAL_LOADING,Загрузка…,Loading…
+REAL_NONE,Нет данных,No data
+REAL_ROW,%s = %s (на %s),%s = %s (as of %s)
+REAL_SAMPLE,"образец данных, не официальный курс","sample data, not an official rate"
+REAL_NOTE,Только просмотр.,View only.
+REPLAY_TITLE,Повтор дня,Day replay
+REPLAY_LORE,перечитать летопись,re-read the chronicle
+REPORT_CONSENSUS,"Сезон отчётов Кузни. Консенсус EPS %s, отчёт ночью в %s.","Forge earnings season. Consensus EPS %s, report tonight at %s."
+REPORT_NIGHT,"Ночь отчёта: торги Кузней остановлены. Отчёт выходит, пока Биржа закрыта.",Report night: Forge trading halted. The report comes out while the Exchange is closed.
+REPORT_OPENED,"Отчёт: EPS %s против консенсуса %s, сюрприз %s. Открытие с гэпом %s. %s","Report: EPS %s vs consensus %s, surprise %s. Opened with a gap of %s. %s"
+SILK_TITLE,Шёлковый Плёс,Silk Reach
+LESSON_DEBT,Долг деда,Grandfather's debt
+LESSON_DEBT_REAL,Сложный процент по долгу,Compound interest on debt
+LESSON_DEBT_TEXT,"Долг %s под %s годовых, проценты каждый месяц. Через год — %s: на %s больше. Долг растёт по той же формуле, что и вклад, только против тебя.","A debt of %s at %s a year, interest monthly. A year later: %s, %s more. A debt grows by the same formula as a deposit, only against you."
+LESSON_CUSHION,Провизия на шесть лун,Provisions for six moons
+LESSON_CUSHION_REAL,Финансовая подушка,Emergency fund
+LESSON_CUSHION_TEXT,"Расходы команды %s в месяц, запас на шесть месяцев: %s. Этими деньгами не торгуют. Торговый капитал: %s.","Crew costs %s a month, six months set aside: %s. This money is never traded. Trading capital: %s."
+LESSON_GARDEN,Сад Причала,The Mooring garden
+LESSON_GARDEN_REAL,Сложный процент,Compound interest
+LESSON_GARDEN_TEXT,Вклад под %s годовых удваивается примерно за %s лет (правило 72). %s за 10 лет вырастают до %s.,A deposit at %s a year doubles in about %s years (rule of 72). %s grows to %s in 10 years.
+LESSON_FOG,Туман в трюме,Fog in the hold
+LESSON_FOG_REAL,Инфляция и реальная доходность,Inflation and real return
+LESSON_FOG_TEXT,"Инфляция %s, ставка вклада %s, реальная доходность ≈ %s. %s через 5 лет купят столько, сколько сегодня %s.","Inflation %s, deposit rate %s, real return ≈ %s. In 5 years %s will buy what %s buys today."
+LESSON_RISK,Правило Мары,Mara's rule
+LESSON_RISK_REAL,Риск 1% на сделку и R,1% risk per trade and R
+LESSON_RISK_TEXT,Риск до стопа %s = %s капитала. Это и есть 1R: результат сделки дальше считается в R.,Risk to the stop %s = %s of capital. That is 1R: the trade's result is counted in R from now on.
+LESSON_SPREAD,Пропасть,The Gap
+LESSON_SPREAD_REAL,Спред,Spread
+LESSON_SPREAD_TEXT,"Лучшая покупка %s, лучшая продажа %s. Между ними %s (%s) — столько стоит перейти рынок рыночной заявкой.","Best bid %s, best ask %s. Between them %s (%s) — what crossing the market with a market order costs."
+LESSON_FEES,Пошлина Биржи,The Exchange toll
+LESSON_FEES_REAL,Комиссия,Fee
+LESSON_FEES_TEXT,"Комиссии за день: %s, спред: %s. Ставка комиссии %s%% с каждой стороны сделки.","Fees today: %s, spread: %s. The fee is %s%% on each side of a trade."
+LESSON_LIQUIDITY,Глубина Лестницы,Depth of the Ladder
+LESSON_LIQUIDITY_REAL,Ликвидность,Liquidity
+LESSON_LIQUIDITY_TEXT,"Продать %s шт.: лучшая цена %s, последняя часть уйдёт по %s. Тонкий рынок забирает %s. Исполнится %s шт.","Selling %s units: best price %s, the last part goes at %s. A thin market takes %s. %s units fill."
+LESSON_STORM,Первый шторм,The first storm
+LESSON_STORM_REAL,Волатильность,Volatility
+LESSON_STORM_TEXT,Волатильность %s%% от обычной. ATR = %s; стоп на 2 ATR = %s от входа. В шторм — меньше груз при том же риске.,"Volatility at %s%% of normal. ATR = %s; a 2-ATR stop is %s from the entry. In a storm, less cargo for the same risk."
+LESSON_ANCHOR,Якорь,The Anchor
+LESSON_ANCHOR_REAL,Стоп-лосс (стоп-лимит),Stop-loss (stop-limit)
+LESSON_ANCHOR_TEXT,"Якорь бросают до выхода в море. Биржа держит его вне стакана и срабатывает по цене последней сделки, а не по стакану.","The Anchor is dropped before sailing. The exchange keeps it outside the book; it fires on the last trade price, not on the book."
+LESSON_GAP,Якорь сквозь гэп,Anchor through the gap
+LESSON_GAP_REAL,Гэп и проскальзывание стопа,Gap and stop slippage
+LESSON_GAP_TEXT,"Стоп %s, а первая сделка после гэпа — %s. Стоп-лимит висит вне рынка: стоп не гарантирует цену.","Stop %s, but the first trade after the gap was %s. The stop-limit hangs out of the market: a stop does not guarantee a price."
+LESSON_CONSENSUS,Ожидания Счётчиков,The Counters' expectations
+LESSON_CONSENSUS_REAL,Консенсус-прогноз,Consensus estimate
+LESSON_CONSENSUS_TEXT,Аналитики ждут EPS %s. Цена уже учитывает это число.,Analysts expect EPS %s. The price already reflects this number.
+LESSON_SURPRISE,Ночь ведомостей,Night of the ledgers
+LESSON_SURPRISE_REAL,Сюрприз отчёта и гэп,Earnings surprise and gap
+LESSON_SURPRISE_TEXT,"Сюрприз %s, гэп на открытии %s. Цену двигает разница с ожиданиями, а не сама прибыль.","Surprise %s, gap at the open %s. The price moves on the difference from expectations, not on profit itself."
+LESSON_CHRONICLE,Вечерняя летопись,The evening chronicle
+LESSON_CHRONICLE_REAL,Матожидание и сравнение с индексом,Expectancy and the index benchmark
+LESSON_CHRONICLE_TEXT,"Итог дня в R и сравнение с индексным фондом: так видно, помогает ли торговля.",The day in R and against an index fund: that shows whether trading helps.

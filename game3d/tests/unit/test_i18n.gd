@@ -1,8 +1,8 @@
 ## ADR-0014 (3D client): every key exists in ru and en, every key used in code is in the catalogue, every Problem code is translated.
 extends GutTest
 
-const CODE_DIRS := ["res://scripts"]
-const KEY_RE := "\"((?:GAME|MENU|LANG|HARBOUR|LADDER|BALANCES?|FORM|FEE|ORDERS|TAPE|SIDE|TYPE|STATUS|ERR|PROMPT|HALL|VOYAGE|FPS)_[A-Z0-9_]*)\""
+const CODE_DIRS := ["res://scripts", "res://scripts/ui", "res://scripts/core"]
+const KEY_RE := "\"((?:GAME|MENU|LANG|HARBOUR|LADDER|BALANCES?|FORM|FEE|ORDERS|TAPE|SIDE|TYPE|STATUS|ERR|PROMPT|HALL|VOYAGE|FPS|FLOW|LESSON|MARA|PLAN|CHR|BOOK|REPORT|QUEST|OLVA|POST|SILK|DEBT|PROVISIONS|REAL|FACTS|REPLAY|CHRONICLE|EV|BOARD)_[A-Z0-9_]*)\""
 
 
 func _catalogue() -> Dictionary:
@@ -80,3 +80,18 @@ func test_switching_locale_notifies_and_translates() -> void:
 	assert_eq(tr("FORM_BUY"), "Купить")
 	Locale.set_locale("xx")
 	assert_eq(Locale.current(), "ru", "unknown locale falls back to ru")
+
+
+func test_m3_runtime_keys_exist() -> void:
+	var keys := _keys()
+	for id: String in Lessons.ALL:
+		for k in [Lessons.title_key(id), Lessons.real_key(id), Lessons.text_key(id)]:
+			assert_has(keys, k)
+	for k: String in GameFlow.KEYS + GameFlow.LORE_KEYS:
+		assert_has(keys, k)
+	for s: String in GameFlow.State.keys():
+		assert_has(keys, "FLOW_" + s)
+	for o in [ReportSeason.RECORD_BUT_FELL, ReportSeason.BEAT_ROSE, ReportSeason.MISS_FELL, ReportSeason.OTHER]:
+		assert_has(keys, "QUEST_OUTCOME_" + o)
+	for kind: String in DayLog.KINDS:
+		assert_has(keys, "EV_" + kind)

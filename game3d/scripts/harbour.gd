@@ -1,6 +1,28 @@
-## Spark Harbour in 3D: walk the captain (WASD + mouse) or fly the camera (Tab). E near the windmill enters the
-## Exchange hall, near the pier sets sail for Silk Reach, near Mara starts her line.
+## Port scene of both islands of the slice (GameFlow state PORT / PLAN). Spark Harbour: the Exchange, Mara (plan the
+## voyage), Ольва Перо (consensus of the Кузня report), the Chronicler (evening), Act I spots — grandfather's chest
+## (debt), provisions (cushion), the garden (compound interest), the Treasurers' notice board (fog = inflation).
+## Silk Reach: the silk trading post (liquidity). Walk the captain (WASD + mouse) or fly (Tab); E interacts, G — glossary.
 extends Node3D
+
+## id → [position, prompt key, radius]; positions on the island top (y = 0 at the harbour, −6 at Silk Reach).
+const HARBOUR_SPOTS := {
+	"exchange": [Archipelago.EXCHANGE_DOOR, "PROMPT_EXCHANGE", 5.0],
+	"ship": [Archipelago.PIER_END, "PROMPT_SHIP", 9.0],
+	"mara": [Archipelago.MARA_POS, "PROMPT_MARA", 4.0],
+	"olva": [Vector3(10, 0, 9), "PROMPT_OLVA", 3.5],
+	"chronicler": [Vector3(-7, 0, -4), "PROMPT_CHRONICLER", 3.5],
+	"debt": [Vector3(38, 0, -1.5), "PROMPT_DEBT", 3.2],
+	"provisions": [Vector3(37, 0, 10), "PROMPT_PROVISIONS", 3.2],
+	"garden": [Vector3(-14, 0, 12), "PROMPT_GARDEN", 4.0],
+	"fog": [Vector3(15, 0, -4), "PROMPT_FOG", 3.2],
+}
+const SILK_POST := Archipelago.SILK + Vector3(-12, 0, 8)
+const SILK_SPOTS := {
+	"post": [SILK_POST, "PROMPT_POST", 5.0],
+	"ship": [Archipelago.SILK_DOCK, "PROMPT_SHIP_HOME", 9.0],
+}
+const DEBT := 5000000  ## grandfather's debt: 50 000.00 ✦
+const DEBT_RATE := 3600  ## 36% a year, monthly
 
 var _captain: Captain
 var _fly: Camera3D
@@ -8,31 +30,48 @@ var _flying := false
 var _prompt: Label
 var _help: Label
 var _dialog: PanelContainer
+var _dialog_text: Label
 var _account: Label
 var _parts: Dictionary
 var _target := ""
 var _fly_yaw := 0.0
 var _fly_pitch := -0.3
+var _hud: GameHud
+var _plan: PlanPanel
+var _post: PanelContainer
+var _post_text: Label
+var _post_qty := 0
+var _strollers: Array = []  ## [node, walker, centre, radius, phase]
+var _report_timer := 0.0
+
+
+func _silk() -> bool:
+	return Game.island == "silk"
+
+
+func _spots() -> Dictionary:
+	return SILK_SPOTS if _silk() else HARBOUR_SPOTS
 
 
 func _ready() -> void:
 	Archipelago.sky(self)
 	_parts = Archipelago.build(self)
+	_dress()
 	var ship := Proc.ship()
 	ship.name = "Wayfarer"
-	ship.position = Archipelago.PIER_END + Vector3(0, 1.2, 4.5)
+	ship.position = (Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)) if _silk() else Archipelago.PIER_END + Vector3(0, 1.2, 4.5)
 	ship.rotation.y = PI / 2
 	add_child(ship)
-	var mara := Proc.figure(Color("7a4e8a"), Color("2a3550"), "trader")
-	mara.position = Archipelago.MARA_POS
-	mara.rotation.y = -PI / 2
-	add_child(mara)
 	_captain = Captain.new()
 	add_child(_captain)
 	match Session.spawn:
 		"pier":
-			_captain.position = Archipelago.PIER_END + Vector3(-6, 0.5, 0)
-			_captain.yaw = PI / 2
+			if _silk():
+				_captain.position = Archipelago.SILK_DOCK + Vector3(6, 0.5, -2)
+				_captain.yaw = -2.3
+			else:
+				_captain.position = Archipelago.PIER_END + Vector3(-6, 0.5, 0)
+				_captain.yaw = PI / 2
 		"exchange":
 			_captain.position = Archipelago.EXCHANGE_DOOR + Vector3(0, 0.5, 3)
 			_captain.yaw = 0.0
@@ -43,10 +82,70 @@ func _ready() -> void:
 	_fly.fov = 65
 	add_child(_fly)
 	_build_ui()
+	_hud = GameHud.new()
+	add_child(_hud)
+	_hud.modal_changed.connect(_on_modal)
+	Game.report_event.connect(_on_report)
+	if Game.flow.state == GameFlow.State.SAILING:  # arrived
+		Game.move(GameFlow.State.PORT)
 	if not Session.active():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	else:
 		_demo()
+
+
+## People and Act I props. Each NPC is a MakeHuman character when downloaded (ADR-0019).
+func _dress() -> void:
+	if _silk():
+		var keeper := _npc("trader", Color("9a6ab0"), SILK_POST + Vector3(0, 0, -1.6), 0.0)
+		keeper.name = "PostKeeper"
+		for i in 4:
+			Assets.put(self, "wooden_crate_02" if i % 2 else "wooden_crate_01", SILK_POST + Vector3(-2.2 + i * 1.4, 0, -2.6), i * 0.4, 1.0)
+		var walkers := _npc("child", Color("6a9ab0"), Archipelago.SILK + Vector3(4, 0, 0), 0.0)
+		_strollers.append([walkers, Walker.attach(walkers), Archipelago.SILK + Vector3(0, 0, 2), 7.0, 0.0])
+		return
+	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2)
+	mara.name = "Mara"
+	_npc("", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8).name = "Olva"
+	_npc("oldman", Color("3a3a5a"), HARBOUR_SPOTS["chronicler"][0], 0.6).name = "Chronicler"
+	if Assets.put(self, "treasure_chest", HARBOUR_SPOTS["debt"][0], 1.2, 1.0) == null:
+		add_child(Proc.box(Vector3(1.2, 0.7, 0.8), Proc.TIMBER_DARK, HARBOUR_SPOTS["debt"][0] + Vector3(0, 0.35, 0)))
+	for i in 5:
+		var p: Vector3 = HARBOUR_SPOTS["provisions"][0] + Vector3(-1.6 + (i % 3) * 1.2, (i / 3) * 0.9, -1.4)
+		if Assets.put(self, "wooden_barrels_01" if i == 4 else "wooden_crate_01", p, i * 0.5, 1.0) == null:
+			add_child(Proc.box(Vector3(0.9, 0.9, 0.9), Proc.TIMBER, p + Vector3(0, 0.45, 0)))
+	var g: Vector3 = HARBOUR_SPOTS["garden"][0]
+	var rng := RandomNumberGenerator.new()
+	rng.seed = 72
+	for i in 3:  # the garden: three trees, each season taller (compound interest)
+		var t := Proc.round_tree(rng)
+		t.position = g + Vector3(-3 + i * 3, 0, -2)
+		t.scale = Vector3.ONE * (0.6 + 0.45 * i)
+		add_child(t)
+	var board_pos: Vector3 = HARBOUR_SPOTS["fog"][0] + Vector3(0, 0, -1.4)
+	add_child(Proc.box(Vector3(2.4, 1.6, 0.12), Proc.TIMBER_DARK, board_pos + Vector3(0, 1.7, 0)))
+	add_child(Proc.box(Vector3(2.1, 1.3, 0.14), Proc.CANVAS, board_pos + Vector3(0, 1.7, 0.02)))
+	for x in [-1.0, 1.0]:
+		add_child(Proc.box(Vector3(0.12, 1.4, 0.12), Proc.TIMBER_DARK, board_pos + Vector3(x, 0.7, 0)))
+	var label := Label3D.new()
+	label.text = "BOARD_TREASURY"
+	label.font_size = 40
+	label.outline_size = 8
+	label.modulate = Proc.TIMBER_DARK
+	label.position = board_pos + Vector3(0, 2.1, 0.12)
+	add_child(label)
+	for k in 2:  # villagers strolling round the square
+		var who := "child" if k == 0 else "oldman"
+		var s := _npc(who, Color("8a6a4a"), Vector3.ZERO, 0.0)
+		_strollers.append([s, Walker.attach(s), Vector3(2, 0, 6) if k == 0 else Vector3(-4, 0, 2), 6.0 + k * 3.0, k * 2.0])
+
+
+func _npc(who: String, coat: Color, pos: Vector3, yaw: float) -> Node3D:
+	var n := Proc.figure(coat, Color("2a3550"), who)
+	n.position = pos
+	n.rotation.y = yaw
+	add_child(n)
+	return n
 
 
 func _build_ui() -> void:
@@ -61,48 +160,63 @@ func _build_ui() -> void:
 	top.set_anchors_preset(Control.PRESET_TOP_WIDE)
 	top.offset_left = 28
 	top.offset_right = -28
-	top.offset_top = 30
+	top.offset_top = 22
 	root.add_child(top)
 	var titles := VBoxContainer.new()
-	var title := Hud.text("HARBOUR_TITLE", 40, Hud.BRASS)
+	var title := Hud.text("SILK_TITLE" if _silk() else "HARBOUR_TITLE", 36, Hud.BRASS)
 	title.add_theme_font_override("font", Hud.serif())
 	titles.add_child(title)
-	_account = Hud.text("", 16, Hud.TEXT)
+	_account = Hud.text("", 15, Hud.TEXT)
 	titles.add_child(_account)
 	top.add_child(titles)
 	var spacer := Control.new()
 	spacer.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	top.add_child(spacer)
+	var book := Hud.button("BOOK_BUTTON")
+	book.pressed.connect(func() -> void: _hud.toggle_book())
+	top.add_child(book)
 	top.add_child(Hud.lang_switch())
 	_prompt = Hud.text("", 24, Hud.TEXT)
 	_prompt.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
 	_prompt.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_prompt.offset_top = -170
-	_prompt.offset_left = -400
-	_prompt.offset_right = 400
+	_prompt.offset_left = -500
+	_prompt.offset_right = 500
 	root.add_child(_prompt)
 	_help = Hud.text("HARBOUR_HELP", 15, Hud.MUTED)
 	_help.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_help.offset_left = 28
 	_help.offset_top = -44
 	root.add_child(_help)
-	var line := Hud.text("HARBOUR_MARA", 19)
-	line.autowrap_mode = TextServer.AUTOWRAP_WORD
-	line.custom_minimum_size = Vector2(760, 0)
-	_dialog = Hud.panel(line)
+	_dialog_text = Hud.text("", 19)
+	_dialog_text.autowrap_mode = TextServer.AUTOWRAP_WORD
+	_dialog_text.custom_minimum_size = Vector2(860, 0)
+	_dialog = Hud.panel(_dialog_text)
 	_dialog.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
-	_dialog.offset_left = -400
-	_dialog.offset_right = 400
-	_dialog.offset_top = -320
-	_dialog.offset_bottom = -200
+	_dialog.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_dialog.offset_left = -450
+	_dialog.offset_right = 450
+	_dialog.offset_bottom = -210
 	_dialog.visible = false
 	root.add_child(_dialog)
+	_plan = PlanPanel.new()
+	_plan.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_plan.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_plan.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_plan.offset_right = -40
+	_plan.visible = false
+	root.add_child(_plan)
+	_plan.approved.connect(_on_plan_approved)
+	_plan.cancelled.connect(_close_plan)
+	_build_post(root)
 	Locale.locale_changed.connect(_on_locale)
 	_on_locale("")
 
 
 func _on_locale(_code: String) -> void:
 	_account.text = tr("HARBOUR_ACCOUNT") % [ExchangeApi.account.get("name", "—"), ExchangeApi.account.get("accountId", "—")]
+	if _post.visible:
+		_paint_post()
 
 
 func _process(delta: float) -> void:
@@ -111,33 +225,46 @@ func _process(delta: float) -> void:
 		blades.rotation.z += delta * 0.5
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
-		ship.position.y = Archipelago.PIER_END.y + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+		ship.position.y = (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+	for s: Array in _strollers:
+		s[4] = float(s[4]) + delta * 1.2 / float(s[3])
+		var a := float(s[4])
+		var n: Node3D = s[0]
+		n.position = (s[2] as Vector3) + Vector3(cos(a), 0, sin(a)) * float(s[3])
+		n.rotation.y = atan2(-sin(a), cos(a))
+		(s[1] as Walker).step(delta, 1.2)
 	if _flying:
 		_fly_move(delta)
 	_target = _nearest()
-	var keys := {"exchange": "PROMPT_EXCHANGE", "ship": "PROMPT_SHIP", "mara": "PROMPT_MARA"}
-	_prompt.text = keys.get(_target, "")
-	if _target != "mara":
+	_prompt.text = _spots()[_target][1] if not _target.is_empty() else ""
+	if _target.is_empty():
 		_dialog.visible = false
+	_report_timer -= delta
+	if _report_timer <= 0.0 and not _silk():
+		_report_timer = 2.0
+		Game.watch_report()
 
 
 func _nearest() -> String:
-	if _flying:
+	if _flying or _hud.is_modal() or _plan.visible:
 		return ""
 	var p := _captain.global_position
-	if p.distance_to(Archipelago.EXCHANGE_DOOR) < 5.0:
-		return "exchange"
-	if p.distance_to(Archipelago.PIER_END) < 9.0:
-		return "ship"
-	if p.distance_to(Archipelago.MARA_POS) < 4.0:
-		return "mara"
+	var spots := _spots()
+	for id: String in spots:
+		var pos: Vector3 = spots[id][0]
+		if Vector2(p.x, p.z).distance_to(Vector2(pos.x, pos.z)) < float(spots[id][2]):
+			return id
 	return ""
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		if _plan.visible:
+			_close_plan()
+		elif _post.visible:
+			_post.visible = false
 		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE:
+	elif event is InputEventMouseButton and event.pressed and Input.mouse_mode == Input.MOUSE_MODE_VISIBLE and not _ui_open():
 		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	elif event.is_action_pressed("toggle_camera"):
 		set_flying(not _flying)
@@ -147,6 +274,16 @@ func _unhandled_input(event: InputEvent) -> void:
 		var m := event as InputEventMouseMotion
 		_fly_yaw -= m.relative.x * 0.004
 		_fly_pitch = clampf(_fly_pitch - m.relative.y * 0.003, -1.4, 1.4)
+
+
+func _ui_open() -> bool:
+	return _plan.visible or _post.visible or _hud.is_modal()
+
+
+func _on_modal(open: bool) -> void:
+	_captain.controlled = not open and not _plan.visible and not _post.visible and not _flying
+	if open:
+		Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
 func set_flying(on: bool) -> void:
@@ -171,42 +308,236 @@ func _fly_move(delta: float) -> void:
 	_fly.position += (_fly.basis * Vector3(v.x, 0, v.y) + Vector3.UP * up) * speed * delta
 
 
+func _say(text: String) -> void:
+	_dialog_text.text = text
+	_dialog.visible = true
+
+
 func interact() -> void:
 	match _target:
 		"exchange":
+			if Game.approved and Game.flow.state != GameFlow.State.TRADING:
+				Game.move(GameFlow.State.TRADING)
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			Session.go("hall")
 		"ship":
-			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-			Session.go("voyage")
+			if Game.move(GameFlow.State.SAILING):
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				Session.go("voyage")
 		"mara":
-			_dialog.visible = not _dialog.visible
+			open_plan()
+		"olva":
+			_olva()
+		"chronicler":
+			if Game.move(GameFlow.State.CHRONICLE):
+				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+				Session.go("chronicle")
+		"debt":
+			var year := Lessons.debt_after(DEBT, DEBT_RATE, 12, 12)
+			_say(tr("DEBT_LINE") % [Money.format(DEBT, 2, Locale.current()), Money.format(year, 2, Locale.current())])
+			Game.lesson("DEBT", [{"m": DEBT}, {"bps": DEBT_RATE}, {"m": year}, {"m": year - DEBT}])
+		"provisions":
+			Game.provisions = true
+			var cushion := Lessons.cushion(Game.MONTHLY_COSTS)
+			var capital: int = await Game.trading_capital()
+			_say(tr("PROVISIONS_LINE") % Money.format(cushion, 2, Locale.current()))
+			Game.lesson("CUSHION", [{"m": Game.MONTHLY_COSTS}, {"m": cushion}, {"m": capital}])
+		"garden":
+			var rates := await _rates()
+			var rate := int(rates.get("savingsRateBps", 1400))
+			var x10 := Lessons.years_to_double_x10(rate)
+			Game.lesson("GARDEN", [{"bps": rate}, "%d,%d" % [x10 / 10, x10 % 10] if Locale.current() == "ru" else "%d.%d" % [x10 / 10, x10 % 10],
+				{"m": 10000000}, {"m": Lessons.compound(10000000, rate, 10)}])
+		"fog":
+			var rates := await _rates()
+			var infl := int(rates.get("inflationBps", 1100))
+			var dep := int(rates.get("savingsRateBps", 1400))
+			Game.lesson("FOG", [{"bps": infl}, {"bps": dep}, {"bps": Lessons.real_rate_bps(dep, infl)}, {"m": 10000000},
+				{"m": Lessons.after_fog(10000000, infl, 5)}])
+		"post":
+			await open_post()
 
+
+func _rates() -> Dictionary:
+	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/economy/rates")
+	return r["data"] if r["ok"] and r["data"] is Dictionary else {}
+
+
+# ---------------------------------------------------------------- Mara's plan
+
+func open_plan() -> void:
+	if Game.flow.state == GameFlow.State.PORT and not Game.move(GameFlow.State.PLAN):
+		_say(tr("MARA_PROVISIONS_FIRST"))
+		return
+	if Game.flow.state != GameFlow.State.PLAN:
+		_say(tr("MARA_BUSY"))
+		return
+	_dialog.visible = false
+	_plan.visible = true
+	_captain.controlled = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if Game.plan == null:
+		await _plan.pick(VoyagePlan.new().instrument)
+
+
+func _close_plan() -> void:
+	_plan.visible = false
+	_captain.controlled = true
+	if Game.flow.state == GameFlow.State.PLAN and not Game.approved:
+		Game.move(GameFlow.State.PORT)
+
+
+func _on_plan_approved() -> void:
+	await Session.wait(1.2)
+	_plan.visible = false
+	_captain.controlled = true
+	_say(tr("MARA_APPROVED") % [_plan.plan.instrument, Money.format(_plan.plan.stop, 2, Locale.current())])
+
+
+# ---------------------------------------------------------------- Ольва Перо and the report season
+
+func _olva() -> void:
+	await Game.watch_report()
+	var co: Dictionary = Game.report["company"]
+	var loc := Locale.current()
+	if co.get("consensus") is Dictionary:
+		var c: Dictionary = co["consensus"]
+		_say(tr("OLVA_CONSENSUS") % [Money.format(int(c["eps"]), 2, loc), Money.format(int(c["revenue"]), 2, loc)])
+		Game.lesson("CONSENSUS", [{"p": int(c["eps"])}])
+	elif co.get("lastReport") is Dictionary:
+		var r: Dictionary = co["lastReport"]
+		_say(tr("OLVA_LAST") % [str(int(r["season"])), Money.format(int(r["eps"]), 2, loc), Money.format(int(r["consensusEps"]), 2, loc)])
+	else:
+		_say(tr("OLVA_WAIT"))
+
+
+func _on_report(kind: String, data: Dictionary) -> void:
+	if kind == "OPENED" and Game.anchor.get("instrument", "") == Game.FORGE:
+		var a := Game.anchor
+		if ReportSeason.through_anchor(int(data["open"]), int(a["trigger"]), int(a["limit"])):
+			Game.lesson("GAP", [{"p": int(a["trigger"])}, {"p": int(data["open"])}])
+
+
+# ---------------------------------------------------------------- Silk Reach trading post (liquidity)
+
+func _build_post(root: Control) -> void:
+	var box := VBoxContainer.new()
+	box.add_theme_constant_override("separation", 10)
+	box.custom_minimum_size = Vector2(600, 0)
+	var title := Hud.text("POST_TITLE", 28, Hud.BRASS)
+	title.add_theme_font_override("font", Hud.serif())
+	box.add_child(title)
+	box.add_child(Hud.lore("POST_LORE"))
+	_post_text = Hud.text("", 17)
+	_post_text.autowrap_mode = TextServer.AUTOWRAP_WORD
+	box.add_child(_post_text)
+	var sell := Hud.button("POST_SELL")
+	sell.name = "PostSell"
+	sell.pressed.connect(sell_cargo)
+	box.add_child(sell)
+	var close := Hud.button("POST_CLOSE")
+	close.pressed.connect(func() -> void: _post.visible = false; _captain.controlled = true)
+	box.add_child(close)
+	_post = Hud.panel(box)
+	_post.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
+	_post.grow_horizontal = Control.GROW_DIRECTION_BEGIN
+	_post.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_post.offset_right = -40
+	_post.visible = false
+	root.add_child(_post)
+
+
+var _walk: Dictionary = {}
+var _bids: Array = []
+
+
+func open_post() -> void:
+	var f := Game.facts()
+	_post_qty = 0
+	for v in f.voyages:
+		if v["instrument"] == "SILK-SPARK":
+			_post_qty += maxi(0, int(v["qty"]))
+	var r: Dictionary = await ExchangeApi.call_api(HTTPClient.METHOD_GET, "/instruments/SILK-SPARK/book")
+	_bids = []
+	if r["ok"]:
+		for b: Dictionary in BookModel.from_snapshot(r["data"]).bids:
+			_bids.append([int(b["price"]), int(b["qty"])])
+	var probe := maxi(_post_qty, 200)  # the whole hold, or a big cargo to show the depth
+	_walk = Lessons.walk_book(_bids, probe)
+	_walk["probe"] = probe
+	_paint_post()
+	_post.visible = true
+	_captain.controlled = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	if not _bids.is_empty():
+		Game.lesson("LIQUIDITY", [probe, {"p": int(_bids[0][0])}, {"p": int(_walk["worst"])}, {"m": int(_walk["cost"])}, int(_walk["filled"])])
+
+
+func _paint_post() -> void:
+	var loc := Locale.current()
+	if _bids.is_empty():
+		_post_text.text = tr("POST_EMPTY")
+		return
+	var top := int(_bids[0][1])
+	_post_text.text = tr("POST_BOOK") % [Money.format(int(_bids[0][0]), 2, loc), str(top), str(int(_walk["probe"])),
+		Money.format(int(_walk["worst"]), 2, loc), Money.format(int(_walk["cost"]), 2, loc), str(_post_qty)]
+
+
+## Sells the hold at market at the post (Trading on Silk Reach), then back to port.
+func sell_cargo() -> void:
+	if _post_qty <= 0:
+		_post_text.text = tr("POST_NOTHING")
+		return
+	if not Game.move(GameFlow.State.TRADING):
+		return
+	var r: Dictionary = await Game.place({"instrument": "SILK-SPARK", "side": "SELL", "type": "MARKET", "qty": _post_qty})
+	Game.move(GameFlow.State.PORT)
+	if r["ok"]:
+		var sold := int(r["data"]["filledQty"])
+		if sold >= _post_qty:
+			await Game.lift_anchor()  # nothing left to protect
+		_post_text.text = tr("POST_SOLD") % [str(sold), str(_post_qty)]
+		var f := Game.facts()
+		Game.lesson("FEES", [{"m": f.fees}, {"m": f.spread}, Money.format(int(ExchangeApi.instrument("SILK-SPARK")["feeBps"]), 2, Locale.current())])
+		_post_qty = 0
+	else:
+		_post_text.text = tr("ERR_" + str(r["code"]))
+
+
+# ---------------------------------------------------------------- demo (screenshots for docs/demo/M3.md)
 
 func _demo() -> void:
-	if Session.spawn == "exchange":  # second visit in the demo: back from the hall, go to the ship
-		await Session.wait(1.0)
-		_captain.position = Archipelago.PIER_END + Vector3(-5, 0.5, 0)
-		await Session.wait(0.4)
-		interact()
-		return
-	await Session.wait(2.0)
-	await Session.shot(self, "3-harbour-walk")
-	_captain.position = Archipelago.MARA_POS + Vector3(-2.5, 0.5, 1)
-	_captain.yaw = 1.9
-	_captain.pitch = -0.2
-	await Session.wait(0.6)
-	interact()
-	await Session.wait(1.6)  # let the 1-second fps average settle after the teleport
-	await Session.shot(self, "4-harbour-mara")
+	await Demo.harbour(self)
+
+
+func demo_go(spot: String, yaw: float = 0.0, pitch: float = -0.25) -> void:
+	var p: Vector3 = _spots()[spot][0]
+	var dir := Vector3(sin(yaw), 0, cos(yaw))
+	_captain.position = p - dir * 2.2 + Vector3(0, 0.6, 0)
+	_captain.velocity = Vector3.ZERO
+	_captain.yaw = yaw + PI
+	_captain.pitch = pitch
+	_captain.body.rotation.y = yaw
+	await Session.wait(0.4)
+	_target = spot
+	await interact()
+
+
+func demo_view(pos: Vector3, look: Vector3) -> void:
 	set_flying(true)
-	_fly.position = Vector3(70, 26, 48)
-	_fly.look_at(Vector3(5, 4, -8))
+	_fly.position = pos
+	_fly.look_at(look)
 	_fly_yaw = _fly.rotation.y
 	_fly_pitch = _fly.rotation.x
-	await Session.wait(2.0)  # fps average settles after the camera jump
-	await Session.shot(self, "5-harbour-fly")
+
+
+func demo_walk() -> void:
 	set_flying(false)
-	_captain.position = Archipelago.EXCHANGE_DOOR + Vector3(0, 0.5, 2)
-	await Session.wait(0.3)
-	interact()
+
+
+func plan_panel() -> PlanPanel:
+	return _plan
+
+
+func hud() -> GameHud:
+	return _hud

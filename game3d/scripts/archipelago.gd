@@ -90,6 +90,7 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 		env.volumetric_fog_detail_spread = 2.0
 		env.volumetric_fog_sky_affect = 0.0
 	var we := WorldEnvironment.new()
+	we.name = "WorldEnvironment"
 	we.environment = env
 	root.add_child(we)
 
@@ -394,7 +395,7 @@ static func _solid(parent: Node3D, pos: Vector3, r: float) -> void:
 static func _silk_reach() -> Node3D:
 	var s := Node3D.new()
 	s.name = "SilkReach"
-	s.add_child(island(SILK_RADIUS, 34.0, 23, 1.2))
+	s.add_child(island(SILK_RADIUS, 34.0, 23, 1.2, true))  # walkable since M3
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 23
 	for row in 4:
@@ -427,3 +428,29 @@ static func _silk_reach() -> Node3D:
 	for i in 6:
 		s.add_child(Proc.box(Vector3(3.6, 0.3, 4.0), Proc.TIMBER, Vector3(-24 - i * 2.2, -0.1, 14)))
 	return s
+
+
+## Weather over the base sky: 0 = the calm late afternoon, 1 = a storm (grey fog, dim sun, darker sky), and `night`
+## for the report night and the evening chronicle. Only parameters of the existing environment change (60 fps).
+static func weather(root: Node3D, storm: float, night: float = 0.0) -> void:
+	var we: WorldEnvironment = root.find_child("WorldEnvironment", false, false)
+	if we == null:
+		for c in root.get_children():
+			if c is WorldEnvironment:
+				we = c
+	var sun: DirectionalLight3D = root.get_node_or_null("Sun")
+	if we == null or sun == null:
+		return
+	var env := we.environment
+	var calm_fog := 0.0004 if Assets.available() else 0.0009
+	env.fog_density = lerpf(calm_fog, 0.006, storm)
+	env.fog_light_color = Color("e9c9a3").lerp(Color("5a6270"), storm).lerp(Color("1c2236"), night)
+	env.volumetric_fog_density = lerpf(0.0005, 0.004, storm)
+	env.volumetric_fog_albedo = Color("fff0dc").lerp(Color("8a92a0"), storm)
+	env.ambient_light_energy = lerpf(0.55, 0.3, storm) * lerpf(1.0, 0.35, night)
+	env.adjustment_saturation = lerpf(1.08, 0.6, storm) * lerpf(1.0, 0.7, night)
+	env.adjustment_brightness = lerpf(1.0, 0.75, storm) * lerpf(1.0, 0.45, night)
+	if env.sky and env.sky.sky_material is PanoramaSkyMaterial:
+		(env.sky.sky_material as PanoramaSkyMaterial).energy_multiplier = lerpf(0.85, 0.35, storm) * lerpf(1.0, 0.25, night)
+	sun.light_energy = lerpf(1.35, 0.25, storm) * lerpf(1.0, 0.12, night)
+	sun.light_color = Color("ffe1b0").lerp(Color("9fb4d8"), night)
