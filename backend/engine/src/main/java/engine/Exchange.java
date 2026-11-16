@@ -36,6 +36,11 @@ public final class Exchange {
     private final Ledger ledger = new Ledger();
     private final Map<String, Market> markets = new LinkedHashMap<>();
     private final Map<Long, OrderState> orders = new HashMap<>();
+    // Per-account indexes so that "my orders" costs O(answer), not O(every order ever placed): bots ask for their
+    // open orders on every step, and a scan of the whole history made a long-running exchange burn a core.
+    // Ids only grow and an order never reopens, so closed orders are pruned from openByAccount lazily, on read.
+    private final Map<String, java.util.NavigableMap<Long, OrderState>> byAccount = new HashMap<>();
+    private final Map<String, java.util.NavigableMap<Long, OrderState>> openByAccount = new HashMap<>();
     private final Map<String, Long> idempotency = new HashMap<>();
     private final Map<String, String> names = new LinkedHashMap<>();
     private final Map<Long, Conditional> conditionals = new LinkedHashMap<>();
@@ -169,25 +174,41 @@ public final class Exchange {
 
     /** Orders of one account, newest first; {@code openOnly} keeps NEW and PARTIALLY_FILLED. */
     public List<OrderView> ordersOf(String account, boolean openOnly, int limit) {
-        return orders.values().stream()
-                .filter(s -> s.account.equals(account))
-                .map(OrderState::view)
-                .filter(v -> !openOnly || v.open())
-                .sorted((a, b) -> Long.compare(b.orderId(), a.orderId()))
-                .limit(limit)
-                .toList();
+        java.util.NavigableMap<Long, OrderState> index = (openOnly ? openOf(account) : byAccount.get(account));
+        if (index == null) {
+            return List.of();
+        }
+        List<OrderView> out = new ArrayList<>();
+        for (OrderState s : index.descendingMap().values()) {
+            if (out.size() >= limit) {
+                break;
+            }
+            out.add(s.view());
+        }
+        return out;
+    }
+
+    /** Open orders of one account by id; drops the ones that have closed since the last read. */
+    private java.util.NavigableMap<Long, OrderState> openOf(String account) {
+        java.util.NavigableMap<Long, OrderState> open = openByAccount.get(account);
+        if (open != null) {
+            open.values().removeIf(s -> !s.isOpen());
+        }
+        return open;
     }
 
     /** Quote reserved by open buys + base reserved by open sells of one account, as tracked per order. */
     public long reservedByOpenOrders(String account, String asset) {
+        java.util.NavigableMap<Long, OrderState> open = openOf(account);
+        if (open == null) {
+            return 0;
+        }
         long sum = 0;
-        for (OrderState s : orders.values()) {
-            if (s.account.equals(account) && s.isOpen()) {
-                Instrument i = markets.get(s.instrument).instrument;
-                String reservedAsset = s.side == Order.Side.BUY ? i.quote() : i.base();
-                if (reservedAsset.equals(asset)) {
-                    sum += s.reservedLeft;
-                }
+        for (OrderState s : open.values()) {
+            Instrument i = markets.get(s.instrument).instrument;
+            String reservedAsset = s.side == Order.Side.BUY ? i.quote() : i.base();
+            if (reservedAsset.equals(asset)) {
+                sum += s.reservedLeft;
             }
         }
         return sum;
@@ -416,6 +437,8 @@ public final class Exchange {
         m.byBookId.put(result.orderId(), orderId);
         OrderState taker = new OrderState(orderId, result.orderId(), c, reserve, ts);
         orders.put(orderId, taker);
+        byAccount.computeIfAbsent(taker.account, a -> new java.util.TreeMap<>()).put(orderId, taker);
+        openByAccount.computeIfAbsent(taker.account, a -> new java.util.TreeMap<>()).put(orderId, taker);
 
         events.add(new Event.OrderAccepted(ts, orderId, c.account(), i.id(), c.side(), c.type(),
                 c.type() == Order.Type.LIMIT ? c.price() : 0, c.qty(), c.idempotencyKey()));

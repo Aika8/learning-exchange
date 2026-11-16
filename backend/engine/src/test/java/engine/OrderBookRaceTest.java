@@ -38,7 +38,8 @@ class OrderBookRaceTest {
         for (int t = 0; t < threads; t++) {
             Order.Side side = t % 2 == 0 ? Order.Side.BUY : Order.Side.SELL;
             long price = side == Order.Side.BUY ? 100 - t : 200 + t;
-            Thread w = Thread.ofPlatform().start(() -> {
+            // Daemon: a race can corrupt the book's maps so that a thread loops forever; it must not keep the JVM alive.
+            Thread w = Thread.ofPlatform().daemon().start(() -> {
                 try {
                     start.await();
                     for (int i = 0; i < perThread; i++) {
@@ -55,8 +56,13 @@ class OrderBookRaceTest {
             workers.add(w);
         }
         start.countDown();
+        // A thread stuck in a corrupted map is a race too: give up on it instead of joining forever.
+        long deadline = System.nanoTime() + java.util.concurrent.TimeUnit.SECONDS.toNanos(10);
         for (Thread w : workers) {
-            w.join();
+            long left = deadline - System.nanoTime();
+            if (left <= 0 || !w.join(java.time.Duration.ofNanos(left))) {
+                return true;
+            }
         }
         long submits = (long) threads * perThread;
         return failed.get()

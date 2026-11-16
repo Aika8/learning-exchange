@@ -119,6 +119,20 @@ class ExchangeTest {
     }
 
     @Test
+    void ordersOfListsNewestFirstAndOpenOnlyDropsClosedOrders() {
+        long a = place("alice", BUY, LIMIT, 1_000, 1).orderId();
+        long b = place("alice", BUY, LIMIT, 1_001, 1).orderId();
+        long c = place("alice", BUY, LIMIT, 1_002, 1).orderId();
+        ex.execute(new Command.CancelOrder("alice", b), 10);
+
+        assertEquals(List.of(c, a), ex.ordersOf("alice", true, 10).stream().map(OrderView::orderId).toList());
+        assertEquals(List.of(c, b, a), ex.ordersOf("alice", false, 10).stream().map(OrderView::orderId).toList());
+        assertEquals(List.of(c), ex.ordersOf("alice", false, 1).stream().map(OrderView::orderId).toList());
+        assertEquals(ex.ledger().reserved("alice", "SPARK"), ex.reservedByOpenOrders("alice", "SPARK"));
+        assertTrue(ex.ordersOf("nobody", true, 10).isEmpty());
+    }
+
+    @Test
     void unknownAccountAndInvalidOrdersAreRejected() {
         assertEquals(Rejection.UNKNOWN_ACCOUNT, place("nobody", BUY, LIMIT, 1, 1).rejection());
         assertEquals(Rejection.INVALID_ORDER, place("alice", BUY, LIMIT, 0, 1).rejection());
