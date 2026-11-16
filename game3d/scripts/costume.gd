@@ -16,6 +16,12 @@ const FELT := Color("1f1b1a")
 const BRASS := Color("d9a441")
 const SASH := Color("a8322a")
 const NAVY := Color("22324f")
+const COAT := Color("2f3d62")  ## the captain's coat on the sheet: navy, a little faded
+const GOLD := Color("c9983a")  ## braid and edging
+const CREAM := Color("e6dcc0")
+const CANVAS_LIGHT := Color("d9cba6")
+const BOOT := Color("6b4630")
+const SHOE := Color("5a3d28")
 
 static var _mats: Dictionary = {}
 static var _stripes: Shader
@@ -32,17 +38,7 @@ static func dress(person: Node3D, role: String, tint: Color = Color.WHITE) -> vo
 	if c.sk.find_bone("head") < 0 or c.sk.find_bone("pelvis") < 0:
 		return
 	c._measure()
-	match role:
-		"captain":
-			c._captain()
-		"sailor":
-			c._sailor(tint)
-		"trader":
-			c._trader(tint)
-		"child":
-			c._child(tint)
-		_:
-			c._townsman(tint)
+	c._wear(role, tint)
 	c._commit()
 
 
@@ -76,19 +72,12 @@ static func stand_in(role: String, tint: Color = Color.WHITE) -> Node3D:
 	c.person = Node3D.new()
 	c.person.name = "StandIn"
 	c.person.set_meta("stand_in", true)
-	c.k = {"child": 0.72, "trader": 0.93, "townsman": 0.97}.get(role, 1.0)
+	c.k = {"child": 0.72, "trader": 0.93, "olva": 0.93, "mara": 0.95, "townsman": 0.97}.get(role, 1.0)
 	c.top = 1.75 * c.k
-	match role:
-		"captain":
-			c._captain()
-		"sailor":
-			c._sailor(tint)
-		"trader":
-			c._trader(tint)
-		"child":
-			c._child(tint)
-		_:
-			c._townsman(tint)
+	c._wear(role, tint)
+	if role == "chronicler":
+		c._commit()
+		return c.person
 	c._body(role)
 	c._commit()
 	return c.person
@@ -97,6 +86,8 @@ static func stand_in(role: String, tint: Color = Color.WHITE) -> Node3D:
 const JOINTS := {"head": Vector3(0, 1.61, 0.03), "neck_01": Vector3(0, 1.5, 0.01), "pelvis": Vector3(0, 0.95, 0), "spine_01": Vector3(0, 1.0, 0),
 	"spine_02": Vector3(0, 1.1, 0), "spine_03": Vector3(0, 1.2, 0), "thigh": Vector3(0.1, 0.94, 0), "calf": Vector3(0.11, 0.51, 0.01),
 	"foot": Vector3(0.11, 0.08, 0), "upperarm": Vector3(0.2, 1.42, 0), "lowerarm": Vector3(0.235, 1.15, 0.01), "hand": Vector3(0.25, 0.9, 0.04)}
+var _bare_arms := false  ## rolled sleeves: the stand-in shows skin on the forearm
+var _bare_calves := false
 var _own: Dictionary = {}  ## stand-in only: what the person's own clothes are made of (top, bot, lea)
 
 
@@ -111,18 +102,18 @@ func _body(role: String) -> void:
 	_box("head", skin, Vector3(0.03, 0.045, 0.03) * k, head + Vector3(0, -0.02, 0.105) * k)  # nose
 	for x: float in [-0.04, 0.04]:
 		_ball("head", _plain("eye", Color("2a2420"), 0.4), head + Vector3(x, 0.015, 0.098) * k, 0.012 * k)
-	if role in ["trader", "townsman", "captain"]:  # hair under the hat or kerchief
-		_dome("head", _plain("hair", Color("9a9a96") if role == "townsman" else Color("3a2a1e"), 0.9), head + Vector3(0, 0.0, -0.012) * k, Vector3(0.106, 0.125, 0.116) * k)
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child"]:  # hair under the hat or kerchief
+		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara"] else Color("5a3a26"), 0.9), head + Vector3(0, 0.0, -0.012) * k, Vector3(0.106, 0.125, 0.116) * k)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * k, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
 	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
 	for s: String in ["l", "r"]:
 		_ball("spine_03", shirt, _p("upperarm_" + s), 0.062 * k)
 		_tube("upperarm_" + s, shirt, _p("upperarm_" + s), _p("lowerarm_" + s), 0.05 * k, 0.045 * k)
-		_tube("lowerarm_" + s, shirt, _p("lowerarm_" + s), _p("hand_" + s), 0.045 * k, 0.036 * k)
+		_tube("lowerarm_" + s, skin if _bare_arms else shirt, _p("lowerarm_" + s), _p("hand_" + s), 0.045 * k, 0.036 * k)
 		_ball("hand_" + s, skin, _p("hand_" + s) - Vector3(0, 0.045, 0) * k, 0.042 * k)
 		_tube("thigh_" + s, legs, _p("thigh_" + s), _p("calf_" + s), 0.085 * k, 0.062 * k)
-		_tube("calf_" + s, legs, _p("calf_" + s), _p("foot_" + s), 0.062 * k, 0.045 * k)
+		_tube("calf_" + s, skin if _bare_calves else legs, _p("calf_" + s), _p("foot_" + s), 0.062 * k, 0.045 * k)
 		_box("foot_" + s, shoes, Vector3(0.09, 0.08, 0.24) * k, _p("foot_" + s) + Vector3(0, -0.04, 0.05) * k)
 	_tube("pelvis", legs, _p("pelvis") - Vector3(0, 0.1, 0) * k, _p("pelvis") + Vector3(0, 0.04, 0) * k, 0.16 * k, 0.168 * k, 0.74)
 
@@ -134,62 +125,240 @@ static func _sphere() -> SphereMesh:
 	return m
 
 
-# ---------------------------------------------------------------- roles
+# ---------------------------------------------------------------- roles (docs/design/concepts/*.jpg)
 
-func _captain() -> void:
-	var coat := cloth(Color("1f3557"))
-	_recolour("top", coat)
-	_recolour("bot", cloth(Color("d8cfb8")))  # pale breeches
-	_recolour("lea", leather(LEATHER))
-	_hide("fedora")
-	_coat(coat, 0.56, true)
-	_sleeves(coat, cloth(LINEN), true)
-	_sash(cloth(SASH), true)
-	_boots(leather(LEATHER), 0.92)
-	_tricorn(felt(FELT), metal())
+func _wear(role: String, tint: Color) -> void:
+	var fn := "_r_" + role
+	call(fn if has_method(fn) else "_r_townsman", tint)
 
 
-func _sailor(tint: Color) -> void:
-	var blue := NAVY.lerp(tint, 0.25)
-	_recolour("top", striped(LINEN, blue, 26.0))
-	_recolour("bot", cloth(CANVAS.darkened(0.1)))
-	_recolour("lea", leather(LEATHER.lightened(0.1)))
-	_hide("fedora")
-	_sleeves(striped(LINEN, blue, 9.0), null, false)
-	_slops(cloth(CANVAS))
-	_sash(cloth(SASH.lerp(tint, 0.2)), false)
-	_bandana(cloth(SASH.lerp(tint, 0.35)))
-
-
-func _trader(tint: Color) -> void:
-	var gown := Color("5a3d5c").lerp(tint, 0.3).darkened(0.15)
-	_recolour("top", cloth(gown))
-	_recolour("bot", cloth(gown.darkened(0.2)))
-	_recolour("lea", leather(LEATHER))
-	_skirt(cloth(gown.darkened(0.12)), cloth(LINEN))
-	_sleeves(cloth(LINEN), null, false)
-	_shawl(cloth(Color("b9a06a")))
-	_kerchief(cloth(LINEN))
-
-
-func _townsman(tint: Color) -> void:
-	var coat := cloth(Color("6b4a2e").lerp(tint, 0.2))
-	_recolour("top", coat)  # his own jacket becomes the coat; tails are added
-	_recolour("bot", cloth(Color("4a4034")))
-	_recolour("lea", leather(LEATHER))
-	_hide("fedora")
-	_tails(coat, 0.34)
-	_stockings(cloth(Color("d6ccb4")))
-	_slouch_hat(felt(Color("3b2f26")))
-
-
-func _child(tint: Color) -> void:
+## Sheet 01: tricorn with a gold edge, long open navy coat with gold trim, cream shirt and breeches, red sash under a
+## belt with a brass buckle, pouch and spyglass, tall brown boots with wide folded tops.
+func _r_captain(_tint: Color) -> void:
+	var coat := cloth(COAT)
 	_recolour("top", cloth(LINEN))
-	_recolour("bot", cloth(Color("6a5238").lerp(tint, 0.15)))
-	_recolour("lea", leather(LEATHER.lightened(0.15)))
-	_sleeves(cloth(LINEN), null, false)
-	_sash(cloth(Color("3f6f8f")), false)
-	_bandana(cloth(Color("3f6f8f")))
+	_recolour("bot", cloth(CREAM))
+	_recolour("lea", leather(BOOT))
+	_hide("fedora")
+	_breeches(cloth(CREAM), 0.118)
+	_open_coat(coat, cloth(GOLD), _p("calf_l").y - 0.1 * k, 56.0, false)
+	_coat_sleeves(coat, cloth(GOLD), cloth(LINEN))
+	_sash(cloth(SASH), true, 0.42)
+	_pouch("r")
+	_spyglass()
+	_boots(leather(BOOT))
+	_tricorn(felt(Color("1d2740")), cloth(GOLD))
+
+
+## Sheet 02, the tall sailor: striped shirt with rolled sleeves, red sash, baggy slops, bandana.
+func _r_sailor(tint: Color) -> void:
+	_sailor(cloth(SASH.lerp(tint, 0.1)), cloth(CANVAS_LIGHT))
+	_bandana(cloth(SASH), true)
+
+
+## Sheet 02, the stocky sailor: navy sash and a knitted cap.
+func _r_sailor2(_tint: Color) -> void:
+	_sailor(cloth(Color("3b4f7a")), cloth(CANVAS_LIGHT))
+	_knit_cap(cloth(Color("2f4470")))
+
+
+## Sheet 02, the old sailor: a navy waistcoat over the stripes, darker slops.
+func _r_sailor3(_tint: Color) -> void:
+	_sailor(cloth(SASH), cloth(Color("8f7f5e")))
+	_waistcoat(cloth(Color("34425f")), 64.0)
+	_bandana(cloth(Color("b5553a")), true)
+
+
+func _sailor(sash: Material, slops: Material) -> void:
+	var stripes := striped(Color("e6dcc3"), Color("33426a"), 13.0)
+	_recolour("top", stripes)
+	_recolour("bot", slops)
+	_recolour("lea", leather(SHOE))
+	_hide("fedora")
+	_bare_arms = true
+	_bare_calves = true
+	_rolled_sleeves(striped(Color("e6dcc3"), Color("33426a"), 4.0), cloth(Color("e6dcc3")))
+	_slops(slops)
+	_bare_legs()
+	_sash(sash, false, 0.34)
+	_buckles()
+
+
+## Sheet 03: wide felt hat over a red headscarf, long patched navy storm coat with gold buttons, cravat, the anchor
+## badge on a chain, red sash, cream underskirt, boots, a rolled chart under the arm.
+func _r_mara(_tint: Color) -> void:
+	var coat := cloth(Color("2c3654"))
+	_recolour("top", cloth(Color("2a2d3a")))
+	_recolour("bot", cloth(CREAM))
+	_recolour("lea", leather(BOOT))
+	var hem := _p("foot_l").y + 0.2 * k
+	_long_skirt(cloth(CREAM), cloth(Color("3a3340")), hem - 0.06 * k, 0.33, false)
+	_open_coat(coat, cloth(GOLD.darkened(0.15)), hem, 44.0, true)
+	_coat_sleeves(coat, cloth(GOLD.darkened(0.15)), cloth(LINEN))
+	for spot: Array in [[150.0, 0.2, 0.34], [215.0, 0.55, 0.36], [80.0, 0.82, 0.38], [300.0, 0.7, 0.37]]:  # patches
+		var hip := _p("pelvis")
+		_box("pelvis", cloth(Color("6f6a66")), Vector3(0.1, 0.09, 0.012) * k, _on(hip, Vector3(hip.x, hem, hip.z), 0.222 * k, float(spot[2]) * k, 0.8, spot[0], spot[1]),
+			Vector3(0, deg_to_rad(spot[0]), 0))
+	_sash(cloth(Color("8f2a2e")), false, 0.5)
+	_cravat()
+	_medallion()
+	_chart()
+	_boots(leather(BOOT))
+	_headscarf(cloth(Color("9a2f33")))
+	_wide_hat(felt(Color("262c40")), 0.24, 0.085)
+
+
+## Sheet 04, the guild money-changer: tricorn, navy coat, brown waistcoat and breeches, white stockings, red sash, pouch.
+func _r_changer(tint: Color) -> void:
+	var coat := cloth(Color("33466e").lerp(tint, 0.12))
+	_recolour("top", cloth(Color("7a5236")))
+	_recolour("bot", cloth(Color("6e4c33")))
+	_recolour("lea", leather(SHOE))
+	_hide("fedora")
+	_breeches(cloth(Color("6e4c33")), 0.112)
+	_stockings(cloth(Color("e8e0cc")))
+	_open_coat(coat, cloth(GOLD), _p("calf_l").y + 0.02 * k, 70.0, false)
+	_coat_sleeves(coat, cloth(GOLD), cloth(LINEN))
+	_sash(cloth(SASH), false, 0.36)
+	_cravat()
+	_pouch("l")
+	_buckles()
+	_tricorn(felt(Color("27324f")), cloth(GOLD))
+
+
+## Sheet 04, Olva the analyst: cream blouse with full sleeves, dark bodice, long blue skirt, apron, red sash, satchel.
+func _r_olva(_tint: Color) -> void:
+	_recolour("top", cloth(LINEN))
+	_recolour("bot", cloth(Color("3c4d78")))
+	_recolour("lea", leather(SHOE))
+	_long_skirt(cloth(Color("3c4d78")), cloth(Color("32406a")), _p("foot_l").y + 0.1 * k, 0.4, false)
+	_apron(cloth(LINEN), _p("foot_l").y + 0.1 * k, 0.4, false)
+	_waistcoat(cloth(Color("2e2e3a")), 40.0)
+	_shirt_sleeves(cloth(LINEN))
+	_sash(cloth(SASH), false, 0.3)
+	_satchel()
+	_bun()
+
+
+## Sheet 04, the market woman: white kerchief, teal shawl knotted in front, red skirt over a teal one, apron.
+func _r_trader(tint: Color) -> void:
+	var skirt := Color("b04a38").lerp(tint, 0.12)
+	_recolour("top", cloth(LINEN))
+	_recolour("bot", cloth(skirt))
+	_recolour("lea", leather(SHOE))
+	_long_skirt(cloth(skirt), cloth(Color("3f7f7a")), _p("foot_l").y + 0.1 * k, 0.4, true)
+	_apron(cloth(LINEN), _p("foot_l").y + 0.1 * k, 0.4, true)
+	_shirt_sleeves(cloth(LINEN))
+	_shawl(cloth(Color("3f8f8a")))
+	_kerchief(cloth(Color("efe6d2")))
+
+
+## Sheet 04, the old man: brown wide hat, long brown coat, green waistcoat, breeches, white stockings, buckled shoes.
+func _r_townsman(tint: Color) -> void:
+	var coat := cloth(Color("7a4f33").lerp(tint, 0.1))
+	_recolour("top", coat if sk != null else cloth(Color("5d6b4a")))  # his own bulky jacket is the coat
+	_recolour("bot", cloth(Color("5e4633")))
+	_recolour("lea", leather(SHOE))
+	_hide("fedora")
+	_breeches(cloth(Color("5e4633")), 0.108)
+	_stockings(cloth(Color("e8e0cc")))
+	if sk == null:
+		_open_coat(coat, cloth(GOLD.darkened(0.2)), _p("calf_l").y, 60.0, false)
+		_coat_sleeves(coat, cloth(GOLD.darkened(0.2)), cloth(LINEN))
+	else:
+		_coat_skirts(coat, cloth(GOLD.darkened(0.2)), _p("calf_l").y, 70.0, 0.235, 0.3)
+	_buckles()
+	_wide_hat(felt(Color("6b4a30")), 0.19, 0.1)
+
+
+## Sheet 04, the child: cream shirt, grey breeches to the knee, red sash, blue beret.
+func _r_child(_tint: Color) -> void:
+	_recolour("top", cloth(LINEN))
+	_recolour("bot", cloth(Color("6f6a66")))
+	_recolour("lea", leather(SHOE))
+	_bare_calves = true
+	_shirt_sleeves(cloth(LINEN))
+	_breeches(cloth(Color("6f6a66")), 0.12)
+	_bare_legs()
+	_sash(cloth(SASH), false, 0.3)
+	_buckles()
+	_beret(cloth(Color("35466e")))
+
+
+## Sheet 05, the Chronicler: an owl in a blue robe under a cloak of pale feathers, a blue cowl with a brass clasp,
+## round brass spectacles, a chained book and a lit lantern. Built whole in code; there is no human under it.
+func _r_chronicler(_tint: Color) -> void:
+	var feather := _plain("feather", Color("e3d2ad"), 1.0)
+	var feather_dark := _plain("feather", Color("c9b48a"), 1.0)
+	var brown := _plain("feather", Color("9a7a55"), 1.0)
+	var robe := cloth(Color("34425f"))
+	var base := Vector3(0, 0.0, 0)
+	var neck := Vector3(0, 1.42, 0) * k
+	_shell("", robe, base + Vector3(0, 0.12, 0) * k, neck, 0.36 * k, 0.15 * k, 0.86)  # robe
+	_shell("", cloth(CREAM), base + Vector3(0, 0.08, 0) * k, base + Vector3(0, 0.3, 0) * k, 0.375 * k, 0.33 * k, 0.86, 320.0, 400.0)
+	_box("", cloth(CREAM), Vector3(0.2, 0.7, 0.02) * k, Vector3(0, 0.55, 0.3) * k, Vector3(-0.1, 0, 0))  # pale front panel
+	for i in 6:  # the cloak: tiers of feathers, open at the front
+		var y1 := (1.36 - i * 0.17) * k
+		var r := (0.2 + i * 0.045) * k
+		_shell("", feather if i % 2 == 0 else feather_dark, Vector3(0, y1 - 0.3 * k, 0), Vector3(0, y1, 0), r + 0.09 * k, r - 0.035 * k, 0.9, 42.0, 318.0, 18)
+	for sx: float in [-1.0, 1.0]:  # folded wings
+		_add("", feather_dark, _sphere(), Transform3D(Basis.from_euler(Vector3(0, 0, sx * 0.12)).scaled_local(Vector3(0.16, 1.0, 0.36) * k), Vector3(sx * 0.33, 0.78, -0.02) * k))
+		_tube("", leather(BOOT), Vector3(sx * 0.1, 0.0, 0.02) * k, Vector3(sx * 0.1, 0.2, 0) * k, 0.07 * k, 0.06 * k)
+		_box("", leather(BOOT), Vector3(0.13, 0.07, 0.28) * k, Vector3(sx * 0.1, 0.035, 0.08) * k)
+		for t in 3:
+			_box("", _plain("claw", Color("2a2622"), 0.5), Vector3(0.025, 0.03, 0.08) * k, Vector3(sx * 0.1 + (t - 1) * 0.045, 0.02, 0.25) * k)
+	_shell("", cloth(Color("3d5a8a")), neck - Vector3(0, 0.16, 0) * k, neck + Vector3(0, 0.05, 0) * k, 0.26 * k, 0.15 * k, 0.9)  # cowl
+	_ball("", metal(), neck + Vector3(0, -0.1, 0.215) * k, 0.04 * k)
+	var head := neck + Vector3(0, 0.2, 0.01) * k
+	_add("", brown, _sphere(), Transform3D(Basis().scaled(Vector3(0.36, 0.36, 0.33) * k), head))
+	_add("", _plain("feather", Color("efe3c8"), 1.0), _sphere(), Transform3D(Basis().scaled(Vector3(0.3, 0.3, 0.12) * k), head + Vector3(0, -0.01, 0.125) * k))
+	for sx: float in [-1.0, 1.0]:
+		var eye := head + Vector3(sx * 0.07, 0.02, 0.17) * k
+		_ball("", _plain("eye", Color("e0a030"), 0.3), eye, 0.04 * k)
+		_ball("", _plain("eye", Color("1c1814"), 0.3), eye + Vector3(0, 0, 0.022) * k, 0.022 * k)
+		var rim := TorusMesh.new()
+		rim.inner_radius = 0.85
+		rim.outer_radius = 1.0
+		rim.rings = 14
+		rim.ring_segments = 6
+		_add("", metal(), rim, Transform3D(Basis.from_euler(Vector3(PI / 2, 0, 0)).scaled(Vector3.ONE * 0.058 * k), eye + Vector3(0, 0, 0.03) * k))
+		_tube("", brown, head + Vector3(sx * 0.13, 0.1, 0) * k, head + Vector3(sx * 0.22, 0.25, -0.02) * k, 0.06 * k, 0.0)  # ear tufts
+	_box("", metal(), Vector3(0.05, 0.012, 0.012) * k, head + Vector3(0, 0.02, 0.2) * k)
+	_tube("", _plain("claw", Color("5a5148"), 0.5), head + Vector3(0, -0.02, 0.17) * k, head + Vector3(0, -0.09, 0.21) * k, 0.03 * k, 0.0)  # beak
+	_shell("", leather(BOOT), Vector3(0, 0.9, 0) * k, Vector3(0, 0.96, 0) * k, 0.3 * k, 0.29 * k, 0.86, 40.0, 320.0)  # belt under the cloak
+	_box("", cloth(SASH), Vector3(0.09, 0.5, 0.02) * k, Vector3(0.05, 0.68, 0.33) * k, Vector3(-0.12, 0, 0))
+	# the chained book on the left hip, the lantern in the right hand
+	var book := Vector3(0.36, 0.72, 0.16) * k
+	_box("", leather(Color("5a3d26")), Vector3(0.08, 0.34, 0.26) * k, book, Vector3(0, 0.3, 0.1))
+	_box("", cloth(LINEN), Vector3(0.062, 0.3, 0.262) * k, book + Vector3(0, -0.012, 0.004) * k, Vector3(0, 0.3, 0.1))
+	_ball("", metal(), book + Vector3(0.045, 0.02, 0.02) * k, 0.035 * k)
+	for i in 7:
+		_ball("", metal(), Vector3(0.3 - i * 0.03, 0.9 - sin(i / 6.0 * PI) * 0.16, 0.3) * k, 0.014 * k)
+	var lamp := Vector3(-0.36, 0.62, 0.22) * k
+	_tube("", metal(), lamp + Vector3(0, 0.17, 0) * k, lamp + Vector3(0, 0.3, 0) * k, 0.008 * k, 0.008 * k)
+	_tube("", metal(), lamp + Vector3(0, 0.09, 0) * k, lamp + Vector3(0, 0.17, 0) * k, 0.06 * k, 0.015 * k, 1.0, true, 6)
+	_tube("", _glow(), lamp - Vector3(0, 0.08, 0) * k, lamp + Vector3(0, 0.09, 0) * k, 0.05 * k, 0.05 * k, 1.0, true, 6)
+	_tube("", metal(), lamp - Vector3(0, 0.11, 0) * k, lamp - Vector3(0, 0.08, 0) * k, 0.06 * k, 0.06 * k, 1.0, true, 6)
+	_add("", feather, _sphere(), Transform3D(Basis().scaled(Vector3(0.1, 0.1, 0.1) * k), lamp + Vector3(0.02, 0.32, -0.02) * k))  # the hand
+	var light := OmniLight3D.new()
+	light.position = lamp
+	light.light_color = Color("ffc56e")
+	light.light_energy = 0.8
+	light.omni_range = 4.0
+	light.distance_fade_enabled = true
+	light.distance_fade_begin = 30.0
+	person.add_child(light)
+
+
+static func _glow() -> Material:
+	if not _mats.has("glow"):
+		var m := StandardMaterial3D.new()
+		m.albedo_color = Color("ffd27a")
+		m.emission_enabled = true
+		m.emission = Color("ffb84a")
+		m.emission_energy_multiplier = 2.5
+		_mats["glow"] = m
+	return _mats["glow"]
 
 
 # ---------------------------------------------------------------- the person's own clothes
@@ -224,151 +393,339 @@ func _hide(what: String) -> void:
 
 # ---------------------------------------------------------------- garments (skeleton space, rest pose)
 
-## A coat or waistcoat over the trunk: body, collar, buttons, and two tails that hang from the thighs so they move
-## with the legs. `length` is how far the tails reach down the thigh (0..1 of thigh to knee and beyond).
-func _coat(m: Material, length: float, buttons: bool) -> void:
-	var hip := _p("pelvis")
+## A point on a shell from `a` up to `b`: `deg` round from the front (towards the person's left), `t` along it.
+func _on(a: Vector3, b: Vector3, r0: float, r1: float, flat: float, deg: float, t: float) -> Vector3:
+	var th := deg_to_rad(deg)
+	return a.lerp(b, t) + (Vector3.BACK * cos(th) * flat + Vector3.RIGHT * sin(th)) * lerpf(r0, r1, t)
+
+
+## An open long coat: trunk, shoulders, standing collar, skirts down to `hem` (height), a gap of `gap` degrees at the
+## front, an edge and a hem in `trim`, a row of buttons. Skirts hang from the thighs (two halves that follow the
+## stride) or, for somebody who stands (`standing`), from the hips in one piece.
+func _open_coat(m: Material, trim: Material, hem: float, gap: float, standing: bool) -> void:
+	var hip := _p("pelvis") + Vector3(0, 0.03, 0) * k
 	var chest := _p("spine_03")
 	var neck := _p("neck_01")
-	var w := 0.2 * k
-	_tube("spine_01", m, hip + Vector3(0, 0.02, 0) * k, chest + Vector3(0, 0.02, 0), w * 0.98, w * 1.06, 0.74)
-	_tube("spine_03", m, chest, neck - Vector3(0, 0.05, 0) * k, w * 1.06, w * 0.86, 0.72)
-	_box("spine_03", m, Vector3(0.3, 0.05, 0.2) * k, neck + Vector3(0, -0.03, -0.02) * k)  # collar
-	_tails(m, length)
-	if buttons:
-		for i in 4:
-			var at := hip.lerp(neck, 0.22 + i * 0.17) + Vector3(0.03, 0, 0.158) * k
-			_ball("spine_02", metal(), at, 0.014 * k)
-
-
-## Coat tails: a flattened tube round each thigh, so they move with the legs.
-func _tails(m: Material, length: float) -> void:
+	var g := gap * 0.5
+	_shell("spine_01", m, hip, chest, 0.205 * k, 0.222 * k, 0.88, g, 360.0 - g)
+	_shell("spine_03", m, chest, neck - Vector3(0, 0.04, 0) * k, 0.222 * k, 0.13 * k, 0.88, g + 6.0, 354.0 - g)
+	_shell("spine_03", m, neck - Vector3(0, 0.06, 0) * k, neck + Vector3(0, 0.035, 0) * k, 0.1 * k, 0.118 * k, 0.9, 62.0, 298.0)  # collar
 	for s: String in ["l", "r"]:
-		var thigh := _p("thigh_" + s)
-		var knee := _p("calf_" + s)
-		var side := signf(thigh.x)
-		var end := thigh.lerp(knee, length / 0.56 * 0.62)
-		_tube("thigh_" + s, m, thigh + Vector3(side * 0.02, 0.03, -0.02) * k, end + Vector3(side * 0.05, 0, -0.04) * k, 0.125 * k, 0.15 * k, 0.9)
+		_ball("spine_03", m, _p("upperarm_" + s) + Vector3(0, 0.005, 0) * k, 0.072 * k)
+	for e: float in [g, 360.0 - g - 5.0]:  # the gold edge down the front
+		_shell("spine_01", trim, hip, chest, 0.208 * k, 0.225 * k, 0.88, e, e + 5.0, 2)
+	for i in 5:
+		_ball("spine_02", metal(), _on(hip, chest, 0.21 * k, 0.227 * k, 0.88, g + 11.0, 0.08 + i * 0.2), 0.013 * k)
+		_ball("spine_02", metal(), _on(hip, chest, 0.21 * k, 0.227 * k, 0.88, 349.0 - g, 0.08 + i * 0.2), 0.013 * k)
+	_coat_skirts(m, trim, hem, gap, 0.205, 0.33, standing)
 
 
-## Sleeves: `m` down the upper arm and (billowing, gathered at the wrist) the forearm. With `cuffs`, the upper sleeve is
-## the coat's and a wide turned-back cuff sits at the wrist with the shirt `under` it showing.
-func _sleeves(m: Material, under: Material, cuffs: bool) -> void:
+func _coat_skirts(m: Material, trim: Material, hem: float, gap: float, r_top: float, r_hem: float, standing: bool = false) -> void:
+	var hip := _p("pelvis") + Vector3(0, 0.04, 0) * k
+	var low := Vector3(hip.x, hem, hip.z)
+	var g := gap * 0.5
+	var halves := [["pelvis", g, 360.0 - g]] if standing else [["thigh_l", g, 180.0], ["thigh_r", 180.0, 360.0 - g]]
+	for h: Array in halves:
+		_shell(h[0], m, low, hip, r_hem * k, r_top * k, 0.8, h[1], h[2])
+		_shell(h[0], trim, low, low + Vector3(0, 0.022, 0) * k, (r_hem + 0.004) * k, (r_hem + 0.003) * k, 0.8, h[1], h[2])
+	_shell("pelvis" if standing else "thigh_l", trim, low, hip, (r_hem + 0.004) * k, (r_top + 0.004) * k, 0.8, g, g + 4.0, 2)
+	_shell("pelvis" if standing else "thigh_r", trim, low, hip, (r_hem + 0.004) * k, (r_top + 0.004) * k, 0.8, 356.0 - g, 360.0 - g, 2)
+	if not standing:  # the vent at the back
+		_shell("thigh_l", trim, low, low.lerp(hip, 0.5), (r_hem + 0.004) * k, ((r_hem + r_top) * 0.5 + 0.004) * k, 0.8, 177.0, 180.0, 2)
+
+
+## A waistcoat or bodice over the shirt, open `gap` degrees at the front.
+func _waistcoat(m: Material, gap: float) -> void:
+	var hip := _p("pelvis") + Vector3(0, 0.07, 0) * k
+	var chest := _p("spine_03")
+	var g := gap * 0.5
+	_shell("spine_01", m, hip, chest, 0.2 * k, 0.215 * k, 0.88, g, 360.0 - g)
+	_shell("spine_03", m, chest, _p("neck_01") - Vector3(0, 0.06, 0) * k, 0.215 * k, 0.15 * k, 0.88, g + 14.0, 346.0 - g)
+	for i in 4:
+		_ball("spine_02", metal(), _on(hip, chest, 0.204 * k, 0.218 * k, 0.88, g + 8.0, 0.12 + i * 0.24), 0.011 * k)
+
+
+## Coat sleeves with a wide turned-back cuff edged in `trim` and the shirt's lace at the wrist.
+func _coat_sleeves(m: Material, trim: Material, lace: Material) -> void:
 	for s: String in ["l", "r"]:
 		var sh := _p("upperarm_" + s)
 		var el := _p("lowerarm_" + s)
 		var wr := _p("hand_" + s)
-		_tube("upperarm_" + s, m, sh.lerp(el, 0.02), el, 0.062 * k, 0.058 * k)
-		if cuffs:
-			_tube("lowerarm_" + s, m, el, el.lerp(wr, 0.72), 0.058 * k, 0.056 * k)
-			_tube("lowerarm_" + s, m, el.lerp(wr, 0.6), el.lerp(wr, 0.9), 0.075 * k, 0.082 * k)
-			_tube("lowerarm_" + s, under, el.lerp(wr, 0.86), el.lerp(wr, 1.02), 0.05 * k, 0.062 * k)
-		else:
-			_tube("lowerarm_" + s, m, el, el.lerp(wr, 0.55), 0.058 * k, 0.078 * k)
-			_tube("lowerarm_" + s, m, el.lerp(wr, 0.55), el.lerp(wr, 0.93), 0.078 * k, 0.04 * k)
+		_tube("upperarm_" + s, m, sh.lerp(el, 0.02), el, 0.066 * k, 0.06 * k)
+		_tube("lowerarm_" + s, m, el, el.lerp(wr, 0.7), 0.06 * k, 0.058 * k)
+		_tube("lowerarm_" + s, m, el.lerp(wr, 0.5), el.lerp(wr, 0.9), 0.082 * k, 0.092 * k)
+		_tube("lowerarm_" + s, trim, el.lerp(wr, 0.5), el.lerp(wr, 0.56), 0.085 * k, 0.086 * k)
+		_tube("lowerarm_" + s, lace, el.lerp(wr, 0.86), el.lerp(wr, 1.04), 0.05 * k, 0.07 * k)
+		for i in 2:
+			_ball("lowerarm_" + s, metal(), el.lerp(wr, 0.64 + i * 0.14) + Vector3(signf(sh.x) * 0.088, 0, 0) * k, 0.012 * k)
 
 
-## A sash wound round the waist, knotted on the left hip with the ends hanging (on the thigh, so they swing).
-func _sash(m: Material, wide: bool) -> void:
+## Full shirt sleeves, billowing and gathered at the wrist.
+func _shirt_sleeves(m: Material) -> void:
+	for s: String in ["l", "r"]:
+		var sh := _p("upperarm_" + s)
+		var el := _p("lowerarm_" + s)
+		var wr := _p("hand_" + s)
+		_tube("upperarm_" + s, m, sh.lerp(el, 0.02), el, 0.068 * k, 0.07 * k)
+		_tube("lowerarm_" + s, m, el, el.lerp(wr, 0.6), 0.07 * k, 0.086 * k)
+		_tube("lowerarm_" + s, m, el.lerp(wr, 0.6), el.lerp(wr, 0.92), 0.086 * k, 0.042 * k)
+
+
+## Sleeves rolled above the elbow: the forearm is bare.
+func _rolled_sleeves(m: Material, roll: Material) -> void:
+	for s: String in ["l", "r"]:
+		var sh := _p("upperarm_" + s)
+		var el := _p("lowerarm_" + s)
+		_tube("upperarm_" + s, m, sh.lerp(el, 0.02), sh.lerp(el, 0.86), 0.07 * k, 0.074 * k)
+		_tube("upperarm_" + s, roll, sh.lerp(el, 0.78), sh.lerp(el, 0.98), 0.08 * k, 0.078 * k)
+
+
+## A sash wound round the waist, knotted on the left hip with a long fringed end on the thigh (it swings with the
+## leg). With `belt`, a leather belt with a brass buckle goes over it.
+func _sash(m: Material, belt: bool, end: float) -> void:
 	var hip := _p("pelvis") + Vector3(0, 0.07, 0) * k
-	var h := (0.11 if wide else 0.075) * k
-	_tube("pelvis", m, hip - Vector3(0, h * 0.5, 0), hip + Vector3(0, h * 0.5, 0), 0.215 * k, 0.212 * k, 0.76)
-	var knot := hip + Vector3(0.17, -0.01, 0.07) * k
-	_ball("pelvis", m, knot, 0.045 * k)
-	_box("thigh_l", m, Vector3(0.05, 0.3, 0.02) * k, knot + Vector3(0.012, -0.17, 0.0) * k, Vector3(0, 0, 0.08))
-	_box("thigh_l", m, Vector3(0.045, 0.24, 0.02) * k, knot + Vector3(-0.03, -0.14, 0.012) * k, Vector3(0, 0, -0.1))
-	if wide:  # a belt over it with a brass buckle
-		_tube("pelvis", leather(LEATHER), hip - Vector3(0, 0.016, 0) * k, hip + Vector3(0, 0.016, 0) * k, 0.222 * k, 0.222 * k, 0.76)
-		_box("pelvis", metal(), Vector3(0.055, 0.05, 0.012) * k, hip + Vector3(0, 0, 0.172) * k)
+	_shell("pelvis", m, hip - Vector3(0, 0.06, 0) * k, hip + Vector3(0, 0.06, 0) * k, 0.218 * k, 0.214 * k, 0.8)
+	var knot := hip + Vector3(0.165, -0.02, 0.085) * k
+	_ball("pelvis", m, knot, 0.05 * k)
+	_box("thigh_l", m, Vector3(0.075, end, 0.02) * k, knot + Vector3(0.012, -end * 0.5, 0.004) * k, Vector3(0, 0.5, 0.07))
+	_box("thigh_l", m, Vector3(0.06, end * 0.8, 0.02) * k, knot + Vector3(-0.035, -end * 0.4, 0.016) * k, Vector3(0, 0.5, -0.09))
+	if belt:
+		_shell("pelvis", leather(Color("5e3b28")), hip - Vector3(0, 0.022, 0) * k, hip + Vector3(0, 0.022, 0) * k, 0.226 * k, 0.226 * k, 0.8)
+		_box("pelvis", metal(), Vector3(0.07, 0.06, 0.014) * k, hip + Vector3(0, 0, 0.183) * k)
+		_box("pelvis", leather(Color("5e3b28")), Vector3(0.04, 0.035, 0.016) * k, hip + Vector3(0, 0, 0.184) * k)
 
 
-## Sea boots: a leg to under the knee with a wide folded top.
-func _boots(m: Material, height: float) -> void:
+## Breeches: full in the thigh, gathered under the knee.
+func _breeches(m: Material, fullness: float) -> void:
 	for s: String in ["l", "r"]:
+		var hip := _p("thigh_" + s)
 		var knee := _p("calf_" + s)
 		var ankle := _p("foot_" + s)
-		var up := ankle.lerp(knee, height)
-		_tube("calf_" + s, m, ankle - Vector3(0, 0.02, 0.012) * k, up - Vector3(0, 0, 0.012) * k, 0.086 * k, 0.096 * k)
-		_tube("calf_" + s, m, up - Vector3(0, 0.07, 0.012) * k, up + Vector3(0, 0.01, -0.012) * k, 0.104 * k, 0.116 * k)
+		_tube("thigh_" + s, m, hip.lerp(knee, 0.08), knee, 0.1 * k, fullness * k)
+		_tube("calf_" + s, m, knee, knee.lerp(ankle, 0.2), fullness * k, 0.066 * k)
 
 
-## Stockings to the knee with a garter, for breeches.
-func _stockings(m: Material) -> void:
-	for s: String in ["l", "r"]:
-		var knee := _p("calf_" + s)
-		var ankle := _p("foot_" + s)
-		_tube("calf_" + s, m, ankle + Vector3(0, 0.0, 0) * k, ankle.lerp(knee, 0.9), 0.078 * k, 0.09 * k)
-		_tube("calf_" + s, cloth(Color("4a4034")), ankle.lerp(knee, 0.86), ankle.lerp(knee, 0.97), 0.093 * k, 0.096 * k)
-
-
-## Slops: wide sailor's trousers that end at mid calf.
+## Slops: very baggy sailor's trousers gathered below the knee; the calf is bare.
 func _slops(m: Material) -> void:
 	for s: String in ["l", "r"]:
 		var hip := _p("thigh_" + s)
 		var knee := _p("calf_" + s)
 		var ankle := _p("foot_" + s)
-		_tube("thigh_" + s, m, hip.lerp(knee, 0.12), knee, 0.1 * k, 0.105 * k)
-		_tube("calf_" + s, m, knee, knee.lerp(ankle, 0.5), 0.105 * k, 0.115 * k)
+		_tube("thigh_" + s, m, hip.lerp(knee, 0.06), knee, 0.112 * k, 0.15 * k)
+		_tube("calf_" + s, m, knee, knee.lerp(ankle, 0.2), 0.15 * k, 0.13 * k)
+		_tube("calf_" + s, m, knee.lerp(ankle, 0.2), knee.lerp(ankle, 0.34), 0.13 * k, 0.062 * k)
 
 
-## A long skirt in two halves (one per thigh, so it follows the stride) and an apron.
-func _skirt(m: Material, apron: Material) -> void:
-	var hip := _p("pelvis")
-	_tube("pelvis", m, hip + Vector3(0, 0.1, 0) * k, hip - Vector3(0, 0.06, 0) * k, 0.2 * k, 0.24 * k, 0.8)
+## Bare calves below slops or breeches: the downloaded body wears long trousers, so skin goes over them.
+func _bare_legs() -> void:
+	if sk == null:
+		return  # the stand-in draws its own calves in skin
 	for s: String in ["l", "r"]:
-		var thigh := _p("thigh_" + s)
 		var knee := _p("calf_" + s)
 		var ankle := _p("foot_" + s)
-		var side := signf(thigh.x)
-		_tube("thigh_" + s, m, thigh + Vector3(side * 0.01, 0.02, 0) * k, knee + Vector3(side * 0.03, 0, 0) * k, 0.15 * k, 0.19 * k, 0.9)
-		_tube("calf_" + s, m, knee + Vector3(side * 0.03, 0, 0) * k, knee.lerp(ankle, 0.78) + Vector3(side * 0.05, 0, 0) * k, 0.19 * k, 0.22 * k, 0.9)
-	_box("pelvis", apron, Vector3(0.26, 0.36, 0.012) * k, hip + Vector3(0, -0.12, 0.215) * k, Vector3(-0.12, 0, 0))
-	_tube("pelvis", apron, hip + Vector3(0, 0.07, 0) * k, hip + Vector3(0, 0.1, 0) * k, 0.208 * k, 0.206 * k, 0.8)
+		_tube("calf_" + s, _plain("skin", Color("d9a882"), 0.6), knee.lerp(ankle, 0.15) - Vector3(0, 0, 0.012) * k, ankle + Vector3(0, 0.0, -0.01) * k, 0.084 * k, 0.08 * k)
 
 
-## A shawl over the shoulders.
+## Sea boots: brown, to the knee, with a wide folded top.
+func _boots(m: Material) -> void:
+	for s: String in ["l", "r"]:
+		var knee := _p("calf_" + s)
+		var ankle := _p("foot_" + s)
+		var up := ankle.lerp(knee, 0.86)
+		_tube("calf_" + s, m, ankle - Vector3(0, 0.05, 0.014) * k, up - Vector3(0, 0, 0.012) * k, 0.092 * k, 0.096 * k)
+		_tube("calf_" + s, m, up - Vector3(0, 0.1, 0.012) * k, up + Vector3(0, 0.03, -0.012) * k, 0.1 * k, 0.128 * k)
+
+
+## White stockings to the knee.
+func _stockings(m: Material) -> void:
+	for s: String in ["l", "r"]:
+		var knee := _p("calf_" + s)
+		var ankle := _p("foot_" + s)
+		_tube("calf_" + s, m, ankle, knee.lerp(ankle, 0.16), 0.074 * k, 0.086 * k)
+
+
+## Brass buckles on the shoes.
+func _buckles() -> void:
+	for s: String in ["l", "r"]:
+		_box("foot_" + s, metal(), Vector3(0.05, 0.02, 0.035) * k, _p("foot_" + s) + Vector3(0, 0.0, 0.085) * k, Vector3(0.5, 0, 0))
+
+
+## A long skirt down to `hem` (height) with a band of another colour at the foot. For somebody who walks it is in
+## halves that follow the thighs and calves; for somebody who stands it is one bell from the hips.
+func _long_skirt(m: Material, band: Material, hem: float, r_hem: float, walks: bool) -> void:
+	var hip := _p("pelvis") + Vector3(0, 0.08, 0) * k
+	var low := Vector3(hip.x, hem, hip.z)
+	if not walks:
+		_shell("pelvis", m, low, hip, r_hem * k, 0.205 * k, 0.86)
+		_shell("pelvis", band, low - Vector3(0, 0.04, 0) * k, low + Vector3(0, 0.05, 0) * k, (r_hem + 0.012) * k, (r_hem - 0.004) * k, 0.86)
+		return
+	var knee_y := _p("calf_l").y
+	var mid := Vector3(hip.x, knee_y, hip.z)
+	var r_mid := lerpf(0.205, r_hem, (hip.y - knee_y) / (hip.y - hem))
+	_shell("pelvis", m, hip - Vector3(0, 0.1, 0) * k, hip, 0.235 * k, 0.205 * k, 0.86)
+	for h: Array in [["l", 0.0, 180.0], ["r", 180.0, 360.0]]:
+		_shell("thigh_" + str(h[0]), m, mid, hip - Vector3(0, 0.08, 0) * k, r_mid * k, 0.23 * k, 0.86, h[1], h[2])
+		_shell("calf_" + str(h[0]), m, low, mid, r_hem * k, r_mid * k, 0.86, h[1], h[2])
+		_shell("calf_" + str(h[0]), band, low - Vector3(0, 0.04, 0) * k, low + Vector3(0, 0.05, 0) * k, (r_hem + 0.012) * k, (r_hem - 0.004) * k, 0.86, h[1], h[2])
+
+
+## An apron lying on a skirt that reaches `hem` with radius `r_hem`; in halves on the thighs when she walks.
+func _apron(m: Material, hem: float, r_hem: float, walks: bool) -> void:
+	var hip := _p("pelvis") + Vector3(0, 0.08, 0) * k
+	var low_y := _p("calf_l").y - 0.2 * k
+	var r_low := lerpf(0.205, r_hem, (hip.y - low_y) / (hip.y - hem)) + 0.014
+	var low := Vector3(hip.x, low_y, hip.z)
+	if walks:
+		_shell("thigh_l", m, low, hip, r_low * k, 0.222 * k, 0.86, 0.0, 40.0)
+		_shell("thigh_r", m, low, hip, r_low * k, 0.222 * k, 0.86, -40.0, 0.0)
+	else:
+		_shell("pelvis", m, low, hip, r_low * k, 0.222 * k, 0.86, -40.0, 40.0)
+	_shell("pelvis", m, hip - Vector3(0, 0.02, 0) * k, hip + Vector3(0, 0.02, 0) * k, 0.224 * k, 0.222 * k, 0.86)
+
+
+## A shawl over the shoulders, knotted on the chest with the ends hanging.
 func _shawl(m: Material) -> void:
 	var neck := _p("neck_01")
 	var chest := _p("spine_03")
-	_tube("spine_03", m, chest + Vector3(0, 0.1, 0) * k, neck - Vector3(0, 0.02, 0) * k, 0.24 * k, 0.12 * k, 0.72)
+	_shell("spine_03", m, chest - Vector3(0, 0.02, 0) * k, neck - Vector3(0, 0.02, 0) * k, 0.275 * k, 0.12 * k, 0.76)
+	var knot := chest + Vector3(0, 0.05, 0.19) * k
+	_ball("spine_03", m, knot, 0.045 * k)
+	for sx: float in [-1.0, 1.0]:
+		_box("spine_02", m, Vector3(0.07, 0.24, 0.02) * k, knot + Vector3(sx * 0.04, -0.14, 0.0) * k, Vector3(-0.1, 0, sx * 0.22))
 
 
+func _cravat() -> void:
+	var neck := _p("neck_01")
+	_ball("spine_03", cloth(LINEN), neck + Vector3(0, -0.035, 0.085) * k, 0.045 * k)
+	_box("spine_03", cloth(LINEN), Vector3(0.08, 0.13, 0.03) * k, neck + Vector3(0, -0.11, 0.105) * k, Vector3(-0.25, 0, 0))
+
+
+## The anchor badge of the Order: a brass ring with an anchor on a chain.
+func _medallion() -> void:
+	var at := _p("spine_03") + Vector3(0, 0.03, 0.172) * k
+	var ring := TorusMesh.new()
+	ring.inner_radius = 0.78
+	ring.outer_radius = 1.0
+	ring.rings = 14
+	ring.ring_segments = 6
+	_add("spine_03", metal(), ring, Transform3D(Basis.from_euler(Vector3(PI / 2, 0, 0)).scaled(Vector3.ONE * 0.05 * k), at))
+	_box("spine_03", metal(), Vector3(0.012, 0.07, 0.01) * k, at)
+	_box("spine_03", metal(), Vector3(0.04, 0.012, 0.01) * k, at + Vector3(0, 0.02, 0) * k)
+	_box("spine_03", metal(), Vector3(0.05, 0.012, 0.01) * k, at + Vector3(0, -0.028, 0) * k)
+	for i in 5:
+		for sx: float in [-1.0, 1.0]:
+			_ball("spine_03", metal(), at + Vector3(sx * (0.02 + i * 0.018), 0.05 + i * 0.03, -0.006 - i * 0.012) * k, 0.008 * k)
+
+
+## A rolled chart under the left arm.
+func _chart() -> void:
+	var at := _p("lowerarm_l") + Vector3(-0.07, -0.02, 0.07) * k
+	_tube("spine_02", cloth(Color("e9dcb8")), at + Vector3(0.0, -0.2, -0.12) * k, at + Vector3(0.03, 0.2, 0.12) * k, 0.045 * k, 0.045 * k, 1.0, true, 10)
+	_tube("spine_02", leather(Color("5e3b28")), at + Vector3(0.012, -0.04, -0.03) * k, at + Vector3(0.018, 0.04, 0.03) * k, 0.048 * k, 0.048 * k, 1.0, false, 10)
+
+
+## A leather pouch on the belt.
+func _pouch(side: String) -> void:
+	var sx := 1.0 if side == "l" else -1.0
+	var at := _p("pelvis") + Vector3(sx * 0.16, -0.03, 0.12) * k
+	_box("thigh_" + side, leather(Color("6b4630")), Vector3(0.1, 0.12, 0.05) * k, at, Vector3(0, sx * 0.6, 0))
+	_box("thigh_" + side, leather(Color("5e3b28")), Vector3(0.104, 0.05, 0.054) * k, at + Vector3(0, 0.04, 0) * k, Vector3(0, sx * 0.6, 0))
+	_ball("thigh_" + side, metal(), at + Vector3(sx * 0.015, 0.02, 0.028) * k, 0.01 * k)
+
+
+## A brass spyglass hung from the belt on the left.
+func _spyglass() -> void:
+	var a := _p("pelvis") + Vector3(0.2, 0.02, 0.06) * k
+	var b := a + Vector3(0.03, -0.26, 0.05) * k
+	_tube("thigh_l", metal(), a, a.lerp(b, 0.6), 0.02 * k, 0.026 * k, 1.0, true, 10)
+	_tube("thigh_l", leather(Color("5e3b28")), a.lerp(b, 0.25), a.lerp(b, 0.45), 0.027 * k, 0.028 * k, 1.0, false, 10)
+	_tube("thigh_l", metal(), a.lerp(b, 0.6), b, 0.03 * k, 0.036 * k, 1.0, true, 10)
+
+
+## A satchel on a strap across the body.
+func _satchel() -> void:
+	var at := _p("pelvis") + Vector3(-0.2, -0.06, 0.07) * k
+	_box("pelvis", leather(Color("6b4630")), Vector3(0.07, 0.17, 0.2) * k, at)
+	_box("pelvis", leather(Color("5e3b28")), Vector3(0.074, 0.07, 0.204) * k, at + Vector3(0, 0.05, 0) * k)
+	var chest := _p("spine_03")
+	_box("spine_02", leather(Color("5e3b28")), Vector3(0.03, 0.62, 0.012) * k, chest.lerp(at, 0.45) + Vector3(0.1, 0.04, 0.178) * k, Vector3(0, 0, -0.62))
+
+
+## A tricorn: a low crown and a brim turned up on three sides, a point forward, the edge in `trim`.
 func _tricorn(m: Material, trim: Material) -> void:
-	var c := Vector3(0, top - 0.02 * k, _p("head").z - 0.01 * k)
-	_tube("head", m, c, c + Vector3(0, 0.085, 0) * k, 0.1 * k, 0.088 * k, 1.0, true)
-	_tube("head", trim, c + Vector3(0, 0.004, 0) * k, c + Vector3(0, 0.022, 0) * k, 0.103 * k, 0.102 * k)
-	_tube("head", m, c - Vector3(0, 0.006, 0) * k, c + Vector3(0, 0.006, 0) * k, 0.2 * k, 0.2 * k, 1.0, true, 3)  # the brim: a triangle, a point forward
-	for i in 3:  # the three sides turned up
-		var a := TAU * i / 3.0 + PI / 3.0  # middle of a side
-		var out := Vector3(sin(a), 0, cos(a))
-		var at := c + out * 0.118 * k + Vector3(0, 0.04, 0) * k
-		_box("head", m, Vector3(0.33, 0.085, 0.012) * k, at, Vector3(-0.35, a, 0))
-		_box("head", trim, Vector3(0.33, 0.012, 0.016) * k, at + (Vector3(0, 0.04, 0) + out * 0.014) * k, Vector3(-0.35, a, 0))
+	var c := Vector3(0, top - 0.03 * k, _p("head").z - 0.012 * k)
+	var turn := Basis(Vector3.UP, PI)  # a corner of the three-sided brim to the front
+	_tube("head", m, c, c + Vector3(0, 0.075, 0) * k, 0.1 * k, 0.085 * k, 1.0, true, 12)
+	for part: Array in [[m, 0.0, 0.085, 0.13, 0.25], [trim, 0.078, 0.094, 0.248, 0.262]]:
+		var brim := CylinderMesh.new()
+		brim.bottom_radius = float(part[3]) * k
+		brim.top_radius = float(part[4]) * k
+		brim.height = (float(part[2]) - float(part[1])) * k
+		brim.radial_segments = 3
+		brim.rings = 1
+		brim.cap_top = false
+		brim.cap_bottom = part[0] == m
+		_add("head", part[0], brim, Transform3D(turn, c + Vector3(0, (float(part[1]) + float(part[2])) * 0.5 - 0.01, 0) * k))
+	_ball("head", metal(), c + Vector3(0.12, 0.05, 0.045) * k, 0.014 * k)
 
 
-func _bandana(m: Material) -> void:
+## A felt hat with a wide round brim that droops a little.
+func _wide_hat(m: Material, brim: float, crown: float) -> void:
+	var c := Vector3(0, top - 0.025 * k, _p("head").z - 0.012 * k)
+	_tube("head", m, c, c + Vector3(0, crown, 0) * k, 0.105 * k, 0.085 * k, 1.0, true)
+	_tube("head", m, c - Vector3(0, 0.03, 0) * k, c + Vector3(0, 0.008, 0) * k, brim * k, 0.1 * k, 1.0, false, 18)
+	_tube("head", m, c - Vector3(0, 0.032, 0) * k, c - Vector3(0, 0.024, 0) * k, brim * k, brim * 0.99 * k, 1.0, true, 18)
+
+
+## A scarf tied round the head under the hat, its ends hanging at the back.
+func _headscarf(m: Material) -> void:
+	var c := Vector3(0, top - 0.09 * k, _p("head").z - 0.014 * k)
+	_dome("head", m, c, Vector3(0.114, 0.085, 0.13) * k)
+	_tube("head", m, c - Vector3(0, 0.03, 0) * k, c + Vector3(0, 0.012, 0) * k, 0.118 * k, 0.116 * k, 1.13)
+	var knot := c + Vector3(0, -0.03, -0.14) * k
+	_ball("head", m, knot, 0.032 * k)
+	for sx: float in [-1.0, 1.0]:
+		_box("head", m, Vector3(0.05, 0.2, 0.014) * k, knot + Vector3(sx * 0.03, -0.1, -0.01) * k, Vector3(0.2, 0, sx * 0.2))
+
+
+## A bandana tied over the hair; the knot and its ends sit at the side (`side`) or at the back.
+func _bandana(m: Material, side: bool = false) -> void:
 	_hide("short")  # the cloth covers the hair
 	var c := Vector3(0, top - 0.085 * k, _p("head").z - 0.012 * k)
 	_dome("head", m, c, Vector3(0.112, 0.1, 0.128) * k)
-	_tube("head", m, c + Vector3(0, -0.018, 0) * k, c + Vector3(0, 0.02, 0) * k, 0.116 * k, 0.114 * k, 1.13)
-	var knot := c + Vector3(0.03, 0.0, -0.125) * k
-	_ball("head", m, knot, 0.026 * k)
-	_box("head", m, Vector3(0.04, 0.13, 0.012) * k, knot + Vector3(0.02, -0.07, -0.012) * k, Vector3(0.25, 0, 0.2))
-	_box("head", m, Vector3(0.036, 0.1, 0.012) * k, knot + Vector3(-0.02, -0.055, -0.01) * k, Vector3(0.3, 0, -0.25))
+	_tube("head", m, c + Vector3(0, -0.02, 0) * k, c + Vector3(0, 0.02, 0) * k, 0.116 * k, 0.114 * k, 1.13)
+	var knot := c + (Vector3(-0.115, -0.01, -0.05) if side else Vector3(0.03, 0.0, -0.125)) * k
+	_ball("head", m, knot, 0.03 * k)
+	_box("head", m, Vector3(0.045, 0.16, 0.012) * k, knot + Vector3(-0.012, -0.085, -0.012) * k, Vector3(0.2, 0, 0.3 if side else 0.2))
+	_box("head", m, Vector3(0.04, 0.12, 0.012) * k, knot + Vector3(0.012, -0.065, -0.02) * k, Vector3(0.3, 0, -0.2))
 
 
-## A kerchief tied over the hair.
+## A knitted cap with a rolled edge.
+func _knit_cap(m: Material) -> void:
+	_hide("short")
+	var c := Vector3(0, top - 0.075 * k, _p("head").z - 0.014 * k)
+	_dome("head", m, c, Vector3(0.112, 0.11, 0.126) * k)
+	_tube("head", m, c - Vector3(0, 0.025, 0) * k, c + Vector3(0, 0.02, 0) * k, 0.122 * k, 0.12 * k, 1.12)
+
+
+## A soft flat cap, wider than the head.
+func _beret(m: Material) -> void:
+	var c := Vector3(0, top - 0.045 * k, _p("head").z - 0.02 * k)
+	_dome("head", m, c, Vector3(0.15, 0.07, 0.16) * k)
+	_tube("head", m, c - Vector3(0, 0.025, 0) * k, c, 0.112 * k, 0.15 * k, 1.07)
+
+
+## A kerchief tied over the hair, a corner hanging behind.
 func _kerchief(m: Material) -> void:
 	var c := Vector3(0, top - 0.075 * k, _p("head").z - 0.02 * k)
-	_dome("head", m, c, Vector3(0.112, 0.112, 0.128) * k)
-	_box("head", m, Vector3(0.13, 0.12, 0.014) * k, c + Vector3(0, -0.04, -0.118) * k, Vector3(0.2, 0, 0))
+	_dome("head", m, c, Vector3(0.114, 0.105, 0.13) * k)
+	_tube("head", m, c - Vector3(0, 0.03, 0) * k, c + Vector3(0, 0.01, 0) * k, 0.118 * k, 0.116 * k, 1.12)
+	_box("head", m, Vector3(0.14, 0.15, 0.016) * k, c + Vector3(0, -0.07, -0.125) * k, Vector3(0.25, 0, 0))
 
 
-## A soft felt hat with a round brim, one side sagging.
-func _slouch_hat(m: Material) -> void:
-	var c := Vector3(0, top - 0.015 * k, _p("head").z - 0.01 * k)
-	_tube("head", m, c, c + Vector3(0, 0.1, 0) * k, 0.1 * k, 0.07 * k, 1.0, true)
-	_tube("head", m, c - Vector3(0, 0.008, 0) * k, c + Vector3(0, 0.004, 0) * k, 0.2 * k, 0.185 * k, 1.0, true)
+## Hair pinned up in a bun.
+func _bun() -> void:
+	_ball("head", _plain("hair", Color("5a3a26"), 0.9), Vector3(0, top - 0.02 * k, _p("head").z - 0.08 * k), 0.06 * k)
 
 
 # ---------------------------------------------------------------- materials
@@ -453,6 +810,26 @@ func _tube(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: flo
 	_add(bone, m, c, Transform3D(Basis(x, y, z * flat), (a + b) * 0.5))
 
 
+## An open or closed shell round the vertical line from `a` up to `b`: radius `r0` at `a`, `r1` at `b`, squashed
+## front-to-back by `flat`, covering the angles `from`..`to` in degrees, measured from the front towards the left.
+func _shell(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, from: float = 0.0, to: float = 360.0, sides: int = 16) -> void:
+	var st := SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var steps := maxi(1, int(ceil(sides * absf(to - from) / 360.0)))
+	for i in steps + 1:
+		var th := deg_to_rad(lerpf(from, to, float(i) / steps))
+		var out := Vector3.BACK * cos(th) * flat + Vector3.RIGHT * sin(th)
+		var n := (Vector3.BACK * cos(th) / maxf(flat, 0.01) + Vector3.RIGHT * sin(th)).normalized()
+		for t: float in [0.0, 1.0]:
+			st.set_normal(n)
+			st.set_uv(Vector2(float(i) / steps, 1.0 - t))
+			st.add_vertex(a.lerp(b, t) + out * lerpf(r0, r1, t))
+	for i in steps:
+		for j: int in [0, 1, 2, 2, 1, 3]:
+			st.add_index(i * 2 + j)
+	_add(bone, m, st.commit(), Transform3D())
+
+
 func _box(bone: String, m: Material, size: Vector3, at: Vector3, rot: Vector3 = Vector3.ZERO) -> void:
 	_add(bone, m, BoxMesh.new(), Transform3D(Basis.from_euler(rot).scaled_local(size), at))
 
@@ -476,7 +853,7 @@ func _dome(bone: String, m: Material, at: Vector3, r: Vector3) -> void:
 
 
 func _add(bone: String, m: Material, mesh: Mesh, xf: Transform3D) -> void:
-	var idx := sk.find_bone(bone) if sk != null else 0
+	var idx := sk.find_bone(bone) if sk != null and not bone.is_empty() else 0
 	if idx < 0 or m == null:
 		return
 	if not _parts.has(m):

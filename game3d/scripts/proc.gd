@@ -527,6 +527,8 @@ static func _real_ship() -> Node3D:
 ## character (sailor, trader, oldman, child) when it is downloaded, dressed for the age of sail by `Costume` (`role`:
 ## captain, sailor, trader, townsman, child; by default the one that fits `who`); otherwise the procedural person stands in.
 static func figure(coat: Color, hat: Color, who: String = "", role: String = "") -> Node3D:
+	if role == "chronicler":  # not a human: built whole in code (docs/design/concepts/05-chronicler.jpg)
+		return Costume.stand_in(role, coat)
 	if not who.is_empty():
 		var dress: String = role if not role.is_empty() else {"oldman": "townsman"}.get(who, who)
 		var p := Assets.person(who)

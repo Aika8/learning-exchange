@@ -8,6 +8,7 @@ const PACE := 1.5
 var home := Vector3.ZERO
 var roam := 6.0
 var who := ""
+var role := ""  ## the costume (Costume role); empty = the one that fits `who`
 var coat := Color.WHITE
 var agent: NavigationAgent3D
 var body: Node3D
@@ -32,7 +33,7 @@ func setup(character: String, colour: Color, at: Vector3, radius: float) -> void
 func _ready() -> void:
 	Mover.capsule(self, 0.32, 1.8)
 	Mover.setup(self)
-	body = Proc.figure(coat, Color("2a3550"), who)
+	body = Proc.figure(coat, Color("2a3550"), who, role)
 	add_child(body)
 	walker = Walker.attach(body)
 	walker.ground = Walker.ground_under(self)

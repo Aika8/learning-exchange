@@ -119,8 +119,9 @@ static func build(root: Node3D) -> void:
 			else:
 				Assets.put(root, "book_encyclopedia_set_01", dpos + Vector3(0.3, 0.77, 0), 0.3)
 				Assets.put(root, "seadogs_compass", dpos + Vector3(-0.4, 0.77, 0.1), 1.0, 2.0)
+			var clerk := (i + int(side > 0)) % 2 == 0  # a money-changer and an analyst at each side
 			var f := Proc.figure(Hud.BID.darkened(0.3) if side < 0 else Hud.ASK.darkened(0.3), Color("2a3550"),
-				"sailor" if (i + int(side > 0)) % 2 == 0 else "trader")
+				"sailor" if clerk else "trader", "changer" if clerk else "olva")
 			f.name = "Broker"
 			f.position = Vector3(side * (4.9 + i * 3.5), 0, -4.3 + i * 2.5)
 			root.add_child(f)

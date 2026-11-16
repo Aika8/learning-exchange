@@ -2,7 +2,8 @@
 ## they came with lose their modern textures (denim, prints). Skipped quietly when the people are not downloaded.
 extends GutTest
 
-const ROLES := {"captain": "sailor", "sailor": "sailor", "trader": "trader", "townsman": "oldman", "child": "child"}
+const ROLES := {"captain": "sailor", "sailor": "sailor", "sailor2": "sailor", "sailor3": "sailor", "mara": "trader", "changer": "sailor", "olva": "trader",
+	"trader": "trader", "townsman": "oldman", "child": "child"}
 
 
 func test_every_role_gets_a_costume_and_no_modern_textures() -> void:
@@ -67,3 +68,19 @@ func test_the_stand_in_wears_the_same_costume_when_the_people_are_missing() -> v
 	var captain := Costume.stand_in("captain")
 	add_child_autofree(captain)
 	assert_gt((captain.find_child("Costume", true, false) as MeshInstance3D).get_aabb().end.y, 1.75, "the tricorn is on")
+
+
+func test_the_chronicler_is_an_owl_built_in_code_with_a_lit_lantern() -> void:
+	var owl := Proc.figure(Color.WHITE, Color.WHITE, "", "chronicler")
+	add_child_autofree(owl)
+	assert_not_null(owl.find_child("Costume", true, false))
+	assert_eq(owl.find_children("*", "Skeleton3D", true, false).size(), 0, "no human under the feathers")
+	assert_eq(owl.find_children("*", "OmniLight3D", true, false).size(), 1, "the lantern is lit")
+
+
+func test_every_concept_sheet_has_its_roles() -> void:
+	for sheet: String in ["01-captain", "02-sailors", "03-mara", "04-townsfolk", "05-chronicler"]:
+		assert_true(FileAccess.file_exists("res://../docs/design/concepts/%s.jpg" % sheet) or FileAccess.file_exists(ProjectSettings.globalize_path("res://").path_join("../docs/design/concepts/%s.jpg" % sheet)), sheet)
+	var c := Costume.new()
+	for role: String in ROLES.keys() + ["chronicler"]:
+		assert_true(c.has_method("_r_" + role), "a costume for " + role)
