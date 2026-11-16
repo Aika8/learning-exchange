@@ -1,3 +1,6 @@
+> **Update (ADR-0024, Proposed):** the default look is stylised low-poly again, with an ink outline and an engraving
+> mode; PBR (ADR-0019) is kept behind `--pbr`. See `docs/design/README.md` and `docs/demo/G3D-style.md`.
+
 > **Update (ADR-0019):** the look moved to painterly realism — Poly Haven CC0 HDRI sky, PBR materials and models
 > (see `game3d/ASSETS.md`). Palette, light direction and the world below still hold; the procedural low-poly look
 > remains as the fallback without `make assets`.

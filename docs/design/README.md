@@ -4,6 +4,12 @@ Read this before changing the look of anything in `game3d/` (people, buildings, 
 `docs/design/concepts/` are Aika's approved designs: **the game follows the sheets, not the other way round.**
 Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/world-bible.md`.
 
+## Art style (ADR-0024)
+Stylised low-poly: flat colours of the palette, meshes built in code, soft light; people read by **silhouette** (hat,
+coat, sash), no faces; an ink outline by default and an engraving mode on **V** (`game3d/shaders/ink.gdshader`).
+`Style` (`game3d/scripts/style.gd`) is the switch; `--pbr` is the old realistic look. The concept sheets give the
+silhouettes and the colours; their pen line is what the ink outline stands for. Pictures: `docs/demo/G3D-style.md`.
+
 ## Concept sheets (`docs/design/concepts/`)
 Ink-and-watercolour sheets drawn by an image model from our own brief (the brief is at the end of this file). Original
 world; nothing is copied from a book, film or game. The palette row at the bottom of each sheet is the game palette.
@@ -26,9 +32,8 @@ the ship «Попутчик», the establishing view of Spark Harbour, props. Wh
   `_waistcoat`, `_sash`, `_breeches`, `_slops`, `_boots`, `_stockings`, `_long_skirt`, `_apron`, `_shawl`, hats
   (`_tricorn`, `_wide_hat`, `_bandana`, `_knit_cap`, `_beret`, `_kerchief`, `_headscarf`), accessories (`_pouch`,
   `_spyglass`, `_medallion`, `_chart`, `_satchel`, `_buckles`).
-- The same role function dresses a MakeHuman person (when `game3d/assets/models/people` exists) and the stand-in built
-  in code (when it does not), so both follow the sheet. The Chronicler is always built in code: there is no human
-  under the feathers.
+- People are built whole in code on a small skeleton (`Costume.stand_in`), faceted and faceless; the same role
+  function also dresses a MakeHuman person in the `--pbr` look. The Chronicler is an owl with no human under the feathers.
 - Check your work against the sheet: `godot --path game3d --resolution 1600x900 -- --people=<dir>` makes the line-up.
 
 ## Rules

@@ -321,4 +321,10 @@ Build and CI
   `docs/design/concepts/` are the reference; `Costume` has one function per role that reads like its sheet (11 roles).
   The Chronicler became an owl built in code, as the world bible says ("a creature"), not a human. The sheets are
   generated images of our own brief; they are kept in git (2.5 MB) because every session must be able to see them.
+- Art style (ADR-0024, docs/demo/G3D-style.md): low-poly is the default and is simply the code-built look the game
+  already had as its no-assets fallback, now chosen by `Style`; PBR stays behind `--pbr`. People get a skeleton made
+  in code (19 bones at fixed joints, zero rest rotations) so `Walker` drives them unchanged. The ink effect is one quad
+  owned by `Session`, so it survives scene changes; writing (Label3D) is drawn after it; the hall caps it at outline
+  because bid and ask need colour. Buttons and chain links are cubes: a person stays under 4000 triangles.
+- PR #22 was closed, not merged: its sheets, design docs and role-per-sheet costumes are part of the low-poly PR.
 
