@@ -144,6 +144,14 @@ static func build(root: Node3D) -> void:
 		l.omni_range = 12.0
 		l.light_volumetric_fog_energy = 1.0
 		root.add_child(l)
+	for at: Vector3 in [Vector3(-5, 3.2, 1.5), Vector3(5, 3.2, 1.5), Vector3(0, 3.4, 8.5)]:  # the floor, the carpet and the rostrum are lit too
+		var fill := OmniLight3D.new()
+		fill.position = at
+		fill.light_color = Color("ffd9a8")
+		fill.light_energy = 1.1
+		fill.omni_range = 9.5
+		fill.light_specular = 0.2
+		root.add_child(fill)
 	var board_light := SpotLight3D.new()
 	board_light.position = Vector3(0, 12, -1)
 	board_light.rotation_degrees = Vector3(-50, 0, 0)

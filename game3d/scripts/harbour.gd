@@ -132,7 +132,7 @@ func _dress() -> void:
 		t.name = "GardenTree"
 		t.position = at
 		add_child(t)
-		t.set_meta("solid", Solid.post(self, 0.2 * size, 2.0, at))
+		Solid.model(self, t, "island_tree_02" if t.has_meta("asset") else "procedural")
 	var board := Node3D.new()  # the Treasurers' notice board: one object on two legs
 	board.name = "TreasuryBoard"
 	board.position = HARBOUR_SPOTS["fog"][0] + Vector3(0, 0, -1.4)

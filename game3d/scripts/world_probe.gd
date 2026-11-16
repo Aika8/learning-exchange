@@ -413,6 +413,8 @@ func _hits(u: Node3D, meshes: Array[MeshInstance3D], ground: float) -> int:
 					if visual.is_empty():
 						continue
 					seen += 1
+					if solid.is_empty() and _collider_near(visual["position"], own):
+						continue  # the ray grazed the rim of something round: its collider is right there
 					if solid.is_empty():
 						missed += 1
 						if OS.has_environment("PROBE_DEBUG"):
@@ -430,6 +432,22 @@ func _hits(u: Node3D, meshes: Array[MeshInstance3D], ground: float) -> int:
 	if missed == seen:
 		return 0
 	return 1 if missed + off > 0 else 2
+
+
+## True when one of the object's own colliders (any collider, if it has none of its own) is within SHAPE_SLACK
+## of a point on its visible surface.
+func _collider_near(at: Vector3, own: Array[RID]) -> bool:
+	var ball := SphereShape3D.new()
+	ball.radius = SHAPE_SLACK
+	var q := PhysicsShapeQueryParameters3D.new()
+	q.shape = ball
+	q.transform = Transform3D(Basis(), at)
+	q.collision_mask = 1
+	q.exclude = _skip()
+	for hit in space.intersect_shape(q, 16):
+		if own.is_empty() or hit["rid"] in own:
+			return true
+	return false
 
 
 ## First hit of a ray on `mask` that lies inside `inside` (and, when given, on `only`); other things are skipped.

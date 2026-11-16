@@ -314,7 +314,7 @@ static func _spark_harbour(detail: bool) -> Node3D:
 		var t := Proc.round_tree(rng) if rng.randf() < 0.6 else Proc.tree(rng)
 		t.position = pos
 		h.add_child(t)
-		t.set_meta("solid", Solid.post(h, 0.25, 3.0, pos))
+		Solid.model(h, t, "procedural")
 	h.add_child(_deck("Wharf", WHARF_FROM, WHARF_TO, [true, false, true, true], Vector3(WHARF_FROM.x, 0, 4)))
 	h.add_child(_deck("Pier", PIER_FROM, PIER_TO, [true, true, false, false], Vector3(PIER_FROM.x, 0, 4)))
 	if detail:
@@ -349,7 +349,7 @@ static func lamp_post(at: Vector3, yaw: float) -> Node3D:
 		lantern.position = Vector3(0, 2.2, 0.08)
 		lp.add_child(lantern)
 	else:
-		lp.add_child(Proc.ball(0.2, Color("ffcf6e"), Vector3(0, 2.7, 0.45), 4.0))
+		lp.add_child(Proc.ball(0.2, Color("ffcf6e"), Vector3(0, 2.7, 0.26), 4.0))
 	var ll := OmniLight3D.new()
 	ll.position = Vector3(0, 2.7, 0.7)
 	ll.light_color = Color("ffc979")
@@ -577,7 +577,7 @@ static func _silk_reach() -> Node3D:
 		var t := Proc.round_tree(rng)
 		t.position = pos
 		s.add_child(t)
-		t.set_meta("solid", Solid.post(s, 0.25, 3.0, pos))
+		Solid.model(s, t, "procedural")
 	s.add_child(_deck("Pier", SILK_PIER_FROM - SILK, SILK_PIER_TO - SILK, [true, false, true, true], SILK_PIER_TO - SILK + Vector3(0, 0, -2)))
 	fence_areas(s, "silk")
 	return s
