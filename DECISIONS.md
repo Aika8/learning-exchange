@@ -328,3 +328,15 @@ Build and CI
   because bid and ask need colour. Buttons and chain links are cubes: a person stays under 4000 triangles.
 - PR #22 was closed, not merged: its sheets, design docs and role-per-sheet costumes are part of the low-poly PR.
 
+
+- Idle CPU (2026-11-16): a long-running `make dev` burned ~70–100 % of a core with nobody trading. Cause: every bot
+  step asked for its open orders and `Exchange.ordersOf` scanned every order ever placed (2.9 M journal lines after a
+  few days), on the sequencer thread. Fixed inside the engine with per-account indexes (all orders, and open orders
+  pruned lazily on read — ids only grow and an order never reopens), so the query costs O(answer). Same results, same
+  order (newest id first); no ADR, nothing to reverse. Measured on a copy of that journal: 70 % → 1.1 % of one core.
+  Not fixed: the engine still keeps every order in memory (~2 GB RSS at that size); retention is an ADR of its own.
+- Test runs cannot hang: every `Test` task has a 15-minute timeout and Jupiter tests a 2-minute default timeout. A
+  `:backend:engine:test` run once spun for 23 h; `OrderBookRaceTest` (which races an unguarded book on purpose, and a
+  corrupted map can loop forever) now uses daemon threads and counts a thread still running after 10 s as a race.
+- Servers are findable: `make dev PORT=… JOURNAL=…` refuses a busy port, `make ps` lists exchange JVMs and Gradle test
+  workers of every worktree (pid, port, age, CPU, folder), `make stop [PORT=…]` stops this folder's exchange.
