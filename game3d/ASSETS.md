@@ -1,5 +1,8 @@
 # game3d — assets and licences
 
+**Since ADR-0024 the default look uses none of the downloads below**: the world and the people are built in code
+(our own work, CC0). The Poly Haven art and the MakeHuman people are used only with `--pbr`.
+
 ## Downloaded CC0 art (ADR-0019)
 
 Not in git. `make assets` downloads every file listed in `game3d/assets.lock` (source URL, size, MD5 published by

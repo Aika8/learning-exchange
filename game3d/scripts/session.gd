@@ -5,6 +5,10 @@ extends Node
 var _fade: ColorRect
 var _fps: Label
 var _layer: CanvasLayer
+var ink_mode := 1  ## the ink post-effect: 0 off, 1 outline, 2 engraving (ADR-0024); V switches it
+var ink_limit := 2
+var _ink: MeshInstance3D
+var _ink_label: Label
 var spawn: String = "start"  ## where the harbour places the captain: start | pier | exchange
 
 
@@ -14,6 +18,7 @@ func _ready() -> void:
 	if not server.is_empty():
 		ExchangeApi.base_url = server.trim_suffix("/") + "/api/v1"
 		MarketStream.url = server.trim_suffix("/").replace("http", "ws") + "/ws"
+	_build_ink()
 	if Assets.available() and Assets.person("sailor") == null:
 		push_warning("The MakeHuman people are not in game3d/assets/models/people (make assets cannot download them): stand-in figures are shown. See game3d/ASSETS.md.")
 	_layer = CanvasLayer.new()
@@ -50,6 +55,54 @@ func _process(_delta: float) -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("toggle_fps"):
 		_fps.visible = not _fps.visible
+	elif event.is_action_pressed("toggle_ink"):
+		set_ink((ink_mode + 1) % 3)
+		_ink_label.text = ["INK_OFF", "INK_OUTLINE", "INK_ENGRAVING"][ink_mode]
+		_ink_label.modulate.a = 1.0
+		create_tween().tween_property(_ink_label, "modulate:a", 0.0, 0.6).set_delay(1.2)
+
+
+## The ink post-effect: one quad in front of every camera of the game (ADR-0024).
+func _build_ink() -> void:
+	var quad := QuadMesh.new()
+	quad.size = Vector2(2, 2)
+	var m := ShaderMaterial.new()
+	m.shader = load("res://shaders/ink.gdshader")
+	m.render_priority = 100
+	_ink = MeshInstance3D.new()
+	_ink.name = "Ink"
+	_ink.mesh = quad
+	_ink.material_override = m
+	_ink.extra_cull_margin = 16384.0
+	_ink.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+	_ink.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+	add_child(_ink)
+	_ink_label = Hud.text("", 20, Hud.BRASS)
+	_ink_label.set_anchors_preset(Control.PRESET_CENTER_TOP)
+	_ink_label.position = Vector2(-80, 60)
+	_ink_label.modulate.a = 0.0
+	_layer_ready.call_deferred()
+	if not arg("ink").is_empty():
+		ink_mode = clampi(int(arg("ink")), 0, 2)
+	set_ink(ink_mode)
+
+
+func _layer_ready() -> void:
+	_layer.add_child(_ink_label)
+
+
+func set_ink(mode: int) -> void:
+	ink_mode = mode
+	var shown := mini(mode, ink_limit)
+	_ink.visible = shown > 0
+	(_ink.material_override as ShaderMaterial).set_shader_parameter("mode", shown)
+
+
+## A scene that must stay readable in colour (the Exchange hall: bid and ask on the board) caps the effect at the
+## outline while it is open; 2 lifts the cap.
+func limit_ink(limit: int) -> void:
+	ink_limit = limit
+	set_ink(ink_mode)
 
 
 func go(scene: String) -> void:

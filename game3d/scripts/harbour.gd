@@ -144,6 +144,8 @@ func _dress() -> void:
 		Solid.post(board, 0.09, 1.2, Vector3(x, 0, 0))
 	Solid.box(board, Vector3(2.4, 1.6, 0.14), Vector3(0, 1.9, 0))
 	var label := Label3D.new()
+	label.render_priority = 110  # drawn after the ink post-effect (priority 100), so the writing stays readable
+	label.outline_render_priority = 109
 	label.text = "BOARD_TREASURY"
 	label.font_size = 40
 	label.outline_size = 8

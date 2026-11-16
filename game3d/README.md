@@ -9,12 +9,14 @@ stop-loss) → Trading on the Ladder → Sailing (the clock runs ×60, a storm) 
 glossary (G), the «Реальный мир» board. Two islands: Spark Harbour and Silk Reach.
 
 ## Run
-1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make assets` (once, ~170 MB of CC0 art from Poly Haven, MD5-checked; ADR-0019). 4. `make game3d`.
+1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make game3d`.
+The default look is stylised low-poly built in code (ADR-0024) and needs no downloads. The old PBR look: `make assets`
+(once, ~170 MB of CC0 art from Poly Haven; ADR-0019), then `godot --path game3d -- --pbr`.
 Without `make assets` the game still runs with the old procedural look.
 The MakeHuman people are **not** part of `make assets`: build them with `game3d/tools/people/build.sh` (Blender + MPFB) or
 copy `game3d/assets/models/people/` from a checkout that has them; without them dressed stand-in figures are shown.
 Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, Shift (run), mouse, Tab (fly camera), E (interact),
-Space (sail during the voyage), G (glossary), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
+Space (sail during the voyage), G (glossary), V (look: colour / ink outline / engraving), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
 
 ## Tests
 `make test-game3d` — GUT headless. `tests/unit/test_world_walk.gd` walks a grid over both islands and the hall: nobody
@@ -37,6 +39,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/game.gd` | Autoload `Game`: the day, its log, plan, Anchor, sync with the exchange, report-season watch |
 | `scripts/ui/` | `GameHud` (flow bar, lesson cards, glossary, report banner), `PlanPanel` |
 | `scripts/mover.gd`, `walker.gd`, `captain.gd` | Walking for everybody: acceleration, slopes, stairs (`Mover`); computed gait with foot IK — idle, walk, run (`Walker`); the captain with a spring-arm camera |
+| `scripts/style.gd`, `shaders/ink.gdshader` | The art style switch (low-poly by default, `--pbr`) and the ink post-effect (`--ink=0|1|2`, key V) |
 | `scripts/costume.gd` | Period dress for the MakeHuman people: re-materials their clothes and adds skinned pieces (roles: captain, sailor, trader, townsman, child) |
 | `scripts/nav.gd`, `villager.gd` | Navmesh baked from the colliders; villagers who walk it and steer round each other |
 | `scripts/solid.gd`, `kit.gd`, `houses.gd`, `decals.gd`, `hall_room.gd` | Colliders that follow shapes; one mesh per building; modular half-timbered houses; grime decals; the hall interior |
