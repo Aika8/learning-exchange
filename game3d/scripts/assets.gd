@@ -75,6 +75,7 @@ static func put(parent: Node3D, name: String, pos: Vector3, yaw: float = 0.0, sc
 	n.scale = Vector3.ONE * scale
 	n.set_meta("asset", name)
 	parent.add_child(n)
+	Solid.model(parent, n, name)
 	return n
 
 

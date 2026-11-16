@@ -240,7 +240,10 @@ static func island_mesh_hd(radius: float, depth: float, seed_value: int, bumps: 
 			_tri(st, pts[ri][m], pts[ri + 1][s], pts[ri + 1][m], Color.WHITE, Color.WHITE, Color.WHITE)
 	st.index()  # weld shared vertices so the rock reads smooth, not faceted
 	st.generate_normals()
-	return st.commit()
+	var im := ImporterMesh.new()  # LODs: far islands and the underside cost a fraction of the triangles
+	im.add_surface(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays())
+	im.generate_lods(25.0, 60.0, [])
+	return im.get_mesh()
 
 
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, ca: Color, cb: Color, cc: Color) -> void:
@@ -304,58 +307,114 @@ static func round_tree(rng: RandomNumberGenerator) -> Node3D:
 	return t
 
 
-static func house(rng: RandomNumberGenerator, roof: Color) -> Node3D:
-	var hs := Node3D.new()
-	var w := rng.randf_range(3.2, 4.6)
-	var d := rng.randf_range(3.0, 4.0)
-	var h := rng.randf_range(2.4, 3.6)
-	hs.add_child(box(Vector3(w, h, d), PLASTER.darkened(rng.randf() * 0.1), Vector3(0, h * 0.5, 0)))
-	hs.add_child(box(Vector3(w + 0.1, 0.35, d + 0.1), TIMBER, Vector3(0, 0.17, 0)))
-	var pr := PrismMesh.new()
-	pr.size = Vector3(w + 0.6, h * 0.6, d + 0.5)
-	var roof_mi := mesh_node(pr, mat(roof), Vector3(0, h + h * 0.3, 0))
-	hs.add_child(roof_mi)
-	hs.add_child(box(Vector3(0.9, 1.6, 0.1), TIMBER_DARK, Vector3(0, 0.8, d * 0.5 + 0.03)))
-	for x in [-w * 0.3, w * 0.3]:
-		var win := box(Vector3(0.7, 0.7, 0.08), Color("ffd27a"), Vector3(x, h * 0.6, d * 0.5 + 0.04))
-		win.material_override = mat(Color("ffd27a"), 0.8)
-		hs.add_child(win)
-	if rng.randf() < 0.6:
-		hs.add_child(box(Vector3(0.5, 1.2, 0.5), ROCK_DARK, Vector3(w * 0.28, h + h * 0.45, 0)))
-	return hs
-
-
-## The Wind Exchange: a round-towered windmill with four canvas blades. Returns the node; blades are child "Blades".
+## The Wind Exchange: a round-towered windmill with four canvas blades on a stone base, a gallery, framed windows
+## and a porch. Colliders follow the tapering base and tower. Returns the node; the blades are the child "Blades".
 static func windmill() -> Node3D:
 	var w := Node3D.new()
-	w.add_child(cyl(4.2, 5.4, 2.0, 12, ROCK, Vector3(0, 1.0, 0)))
-	w.add_child(cyl(3.4, 4.6, 11.0, 12, PLASTER, Vector3(0, 7.5, 0)))
-	w.add_child(cyl(3.6, 3.6, 0.5, 12, BRASS, Vector3(0, 13.0, 0)))
-	w.add_child(cyl(0.0, 4.4, 4.5, 12, ROOF_TEAL, Vector3(0, 15.4, 0)))
-	w.add_child(ball(0.45, BRASS, Vector3(0, 17.9, 0), 0.6))
-	# door and arch facing +z
-	w.add_child(box(Vector3(2.4, 3.4, 0.5), TIMBER_DARK, Vector3(0, 3.7, 4.6)))
-	w.add_child(box(Vector3(3.0, 0.35, 0.7), BRASS, Vector3(0, 5.55, 4.6)))
-	for k in 6:
-		var a := TAU * (k + 0.5) / 6.0
-		var win := box(Vector3(0.8, 1.3, 0.2), Color("ffd27a"), Vector3(sin(a) * 4.05, 9.0, cos(a) * 4.05))
-		win.material_override = mat(Color("ffd27a"), 1.2)
-		win.rotation.y = a
-		w.add_child(win)
+	w.name = "Windmill"
+	var k := Kit.new()
+	var plaster := mat(PLASTER)
+	var dark := mat(TIMBER_DARK)
+	var brass := mat(BRASS)
+	var glow := mat(Color("ffd27a"), 1.2)
+	k.mesh(mat(ROCK), _cyl_mesh(4.2, 5.4, 2.0, 32), Transform3D(Basis(), Vector3(0, 1.0, 0)))
+	k.mesh(plaster, _cyl_mesh(3.4, 4.6, 11.0, 32), Transform3D(Basis(), Vector3(0, 7.5, 0)))
+	for y: float in [2.1, 6.0, 12.6]:  # timber bands round the tower
+		var r := lerpf(4.6, 3.4, (y - 2.0) / 11.0) + 0.06
+		k.mesh(dark, _cyl_mesh(r, r + 0.03, 0.32, 32), Transform3D(Basis(), Vector3(0, y, 0)))
+	k.mesh(dark, _cyl_mesh(5.0, 4.9, 0.18, 32), Transform3D(Basis(), Vector3(0, 6.25, 0)))  # the gallery
+	for i in 24:
+		var a := TAU * i / 24.0
+		k.box(dark, Vector3(0.09, 0.9, 0.09), Vector3(sin(a) * 4.85, 6.8, cos(a) * 4.85))
+	k.mesh(dark, _cyl_mesh(4.92, 4.92, 0.08, 32), Transform3D(Basis(), Vector3(0, 7.25, 0)))
+	k.mesh(brass, _cyl_mesh(3.6, 3.6, 0.5, 32), Transform3D(Basis(), Vector3(0, 13.0, 0)))
+	k.mesh(mat(ROOF_TEAL), _cyl_mesh(0.0, 4.4, 4.5, 32), Transform3D(Basis(), Vector3(0, 15.4, 0)))
+	var knob := SphereMesh.new()
+	knob.radius = 0.45
+	knob.height = 0.9
+	k.mesh(mat(BRASS, 0.6), knob, Transform3D(Basis(), Vector3(0, 17.9, 0)))
+	# porch facing +z: stone surround, double door, lintel, two steps
+	k.box(mat(ROCK), Vector3(3.4, 4.1, 0.9), Vector3(0, 2.05, 4.5))
+	k.box(dark, Vector3(2.4, 3.2, 0.3), Vector3(0, 1.9, 4.9))
+	k.box(brass, Vector3(0.06, 3.2, 0.32), Vector3(0, 1.9, 4.91))
+	for x: float in [-0.3, 0.3]:
+		k.box(brass, Vector3(0.1, 0.1, 0.1), Vector3(x, 1.8, 5.08))
+	k.box(brass, Vector3(3.0, 0.35, 1.0), Vector3(0, 4.25, 4.55))
+	k.box(mat(Color("cdb898")), Vector3(4.2, 0.16, 1.0), Vector3(0, 0.38, 5.4))
+	for i in 6:
+		var a := TAU * (i + 0.5) / 6.0
+		var out := Vector3(sin(a), 0, cos(a))
+		var side := Vector3(cos(a), 0, -sin(a))
+		var at := out * 4.0 + Vector3(0, 9.0, 0)
+		var rot := Vector3(0, a, 0)
+		k.box(glow, Vector3(0.8, 1.3, 0.2), at, rot)
+		k.box(dark, Vector3(1.0, 0.1, 0.3), at + Vector3(0, 0.7, 0), rot)
+		k.box(dark, Vector3(1.2, 0.1, 0.42), at + Vector3(0, -0.7, 0), rot)
+		k.box(dark, Vector3(0.06, 1.3, 0.26), at, rot)
+		for sx: float in [-1.0, 1.0]:
+			k.box(dark, Vector3(0.1, 1.5, 0.3), at + side * sx * 0.45, rot)
+			k.box(mat(ROOF_TEAL), Vector3(0.4, 1.3, 0.06), at + side * sx * 0.72 + out * 0.03, rot)
+	w.add_child(k.commit("Tower"))
+	Solid.convex(w, _frustum(5.4, 4.2, 0.0, 2.0))
+	Solid.convex(w, _frustum(4.6, 3.4, 2.0, 13.0))
+	Solid.box(w, Vector3(3.4, 4.1, 0.9), Vector3(0, 2.05, 4.5))
+	Solid.box(w, Vector3(4.2, 0.16, 1.0), Vector3(0, 0.38, 5.4))
 	var hub := Node3D.new()
 	hub.name = "Blades"
 	hub.position = Vector3(0, 12.0, 4.3)
-	hub.add_child(cyl(0.6, 0.6, 1.2, 8, TIMBER_DARK, Vector3.ZERO))
+	hub.add_child(cyl(0.6, 0.6, 1.2, 12, TIMBER_DARK, Vector3.ZERO))
 	(hub.get_child(0) as Node3D).rotation.x = PI / 2
-	for k in 4:
+	for i in 4:
 		var arm := Node3D.new()
-		arm.rotation.z = TAU * k / 4.0 + 0.3
+		arm.rotation.z = TAU * i / 4.0 + 0.3
 		arm.add_child(box(Vector3(0.35, 9.0, 0.25), TIMBER, Vector3(0, 4.7, 0.5)))
-		var sail := box(Vector3(2.1, 6.8, 0.08), CANVAS, Vector3(1.2, 5.4, 0.6))
-		arm.add_child(sail)
+		arm.add_child(box(Vector3(2.1, 6.8, 0.08), CANVAS, Vector3(1.2, 5.4, 0.6)))
+		for j in 5:  # the lattice the canvas is laced to
+			arm.add_child(box(Vector3(2.2, 0.08, 0.1), TIMBER_DARK, Vector3(1.2, 2.4 + j * 1.5, 0.66)))
 		hub.add_child(arm)
 	w.add_child(hub)
 	return w
+
+
+static func _cyl_mesh(top: float, bottom: float, h: float, sides: int) -> CylinderMesh:
+	var c := CylinderMesh.new()
+	c.top_radius = top
+	c.bottom_radius = bottom
+	c.height = h
+	c.radial_segments = sides
+	c.rings = 1
+	return c
+
+
+## Corner points of a tapering round solid (for a convex collider).
+static func _frustum(bottom: float, top: float, y0: float, y1: float) -> PackedVector3Array:
+	var pts := PackedVector3Array()
+	for i in 16:
+		var a := TAU * i / 16.0
+		pts.append(Vector3(cos(a) * bottom, y0, sin(a) * bottom))
+		pts.append(Vector3(cos(a) * top, y1, sin(a) * top))
+	return pts
+
+
+## Height of an island's cap at (x, z) in the island's own space: 0 on a flat island, the hills when `bumps` > 0.
+## Follows the rings of whichever mesh is in use, so things can be stood on the ground while the world is built.
+static func cap_height(radius: float, seed_value: int, bumps: float, x: float, z: float) -> float:
+	if bumps <= 0.0:
+		return 0.0
+	var a := atan2(z, x)
+	var d := Vector2(x, z).length()
+	var hill := maxf(0.0, sin(a * 3.0 + seed_value)) * bumps
+	if not Assets.available():
+		var k := d / radius
+		return hill * k / 0.55 if k < 0.55 else hill * clampf(1.0 - (k - 0.55) / 0.37, 0.0, 1.0)
+	var outline := 1.0 + 0.12 * sin(a * 6.0 + seed_value) + 0.06 * sin(a * 17.0 + seed_value * 0.3)
+	var f := d / (radius * 0.97 * outline) * 7.8  # rings of island_mesh_hd lie at k = i / 7.8
+	var i := floorf(f)
+	var ys: Array[float] = []
+	for ring: float in [i, i + 1.0]:
+		var k := ring / 7.8
+		ys.append(hill * sin((k - 0.4) / 0.45 * PI) if k > 0.4 and k < 0.85 and ring <= 7.0 else 0.0)
+	return lerpf(ys[0], ys[1], f - i)
 
 
 ## Ship hull lofted from U-shaped cross-sections, bow at -z. Flat shaded, two timber tones.
