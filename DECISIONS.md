@@ -317,3 +317,8 @@ Build and CI
   download, so a fresh assets folder has none and the game fell back to one capsule figure for everybody. Not fixed by
   hosting them (a source decision for Aika); fixed by making the fallback honest: `Costume.stand_in` builds every role
   in the same costume, `make assets` and the game say the people are missing.
+- Characters follow concept sheets (docs/design/README.md, docs/demo/G3D-characters.md): Aika's sheets in
+  `docs/design/concepts/` are the reference; `Costume` has one function per role that reads like its sheet (11 roles).
+  The Chronicler became an owl built in code, as the world bible says ("a creature"), not a human. The sheets are
+  generated images of our own brief; they are kept in git (2.5 MB) because every session must be able to see them.
+

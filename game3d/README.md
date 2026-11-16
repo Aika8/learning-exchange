@@ -1,7 +1,7 @@
 # game3d/ — «Летопись Ветров» 3D (Chronicle of Winds 3D)
 
 Second game client: Godot 4.7, 3D, Forward+, typed GDScript (ADR-0017). Same world and rules as `game/`;
-style guide: `docs/design/game3d-style.md`. Demo with screenshots: `docs/demo/G3D.md`.
+style guide: `docs/design/game3d-style.md`; **the look follows the concept sheets: `docs/design/README.md`**. Demo with screenshots: `docs/demo/G3D.md`.
 
 M3 vertical slice (`docs/demo/M3.md`, ADR-0023): one game day — Port → Plan voyage with Mara (risk ≤ 1%, the Anchor =
 stop-loss) → Trading on the Ladder → Sailing (the clock runs ×60, a storm) → Evening chronicle with replay. Act I
