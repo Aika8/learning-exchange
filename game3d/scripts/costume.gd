@@ -61,7 +61,7 @@ func _p(bone: String) -> Vector3:
 	if built:  # a person built in code: joints of a 1.75 m adult, scaled
 		var side := -1.0 if bone.ends_with("_r") else 1.0
 		var j: Vector3 = JOINTS[bone.trim_suffix("_l").trim_suffix("_r")]
-		return Vector3(j.x * side, j.y, j.z) * k
+		return Vector3(j.x * side * (0.55 + 0.45 * g), j.y, j.z) * k
 	return sk.get_bone_global_rest(sk.find_bone(bone)).origin
 
 
@@ -73,8 +73,12 @@ static func stand_in(role: String, tint: Color = Color.WHITE) -> Node3D:
 	c.person = Node3D.new()
 	c.person.name = "Person"
 	c.person.set_meta("stand_in", true)
-	c.k = {"child": 0.72, "trader": 0.93, "olva": 0.93, "mara": 0.95, "townsman": 0.97}.get(role, 1.0)
-	c.top = 1.75 * c.k
+	var build: Array = BUILDS.get(role, [1.0, 1.0, 1.15, 0.07])
+	c.k = build[0]
+	c.g = build[1]
+	c.hk = c.k * float(build[2])
+	c.nose = build[3]
+	c.top = c._p("head").y + 0.14 * c.hk
 	if role != "chronicler":  # the owl stands and has no limbs to move
 		c.sk = c._skeleton()
 		c.person.add_child(c.sk)
@@ -104,6 +108,10 @@ func _skeleton() -> Skeleton3D:
 	return s
 
 
+## Exaggerated builds, so everybody is told apart by outline: [height, girth, head-and-hat size, nose length].
+const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1, 0.11], "sailor2": [0.9, 1.4, 1.18, 0.05], "sailor3": [0.97, 0.78, 1.12, 0.14],
+	"mara": [0.98, 1.08, 1.34, 0.09], "changer": [0.96, 1.32, 1.3, 0.06], "olva": [1.0, 0.8, 1.12, 0.1], "trader": [0.88, 1.45, 1.15, 0.05],
+	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
 	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
 	["lowerarm_r", "upperarm_r"], ["hand_r", "lowerarm_r"], ["thigh_l", "pelvis"], ["calf_l", "thigh_l"], ["foot_l", "calf_l"],
@@ -111,6 +119,9 @@ const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spin
 const JOINTS := {"head": Vector3(0, 1.61, 0.03), "neck_01": Vector3(0, 1.5, 0.01), "pelvis": Vector3(0, 0.95, 0), "spine_01": Vector3(0, 1.0, 0),
 	"spine_02": Vector3(0, 1.1, 0), "spine_03": Vector3(0, 1.2, 0), "thigh": Vector3(0.1, 0.94, 0), "calf": Vector3(0.11, 0.51, 0.01),
 	"foot": Vector3(0.11, 0.08, 0), "upperarm": Vector3(0.2, 1.42, 0), "lowerarm": Vector3(0.235, 1.15, 0.01), "hand": Vector3(0.25, 0.9, 0.04)}
+var g := 1.0  ## girth: 0.8 lanky .. 1.45 portly (built people); trunk, limbs and what hangs on them follow it
+var hk := 1.0  ## size of the head and of everything worn on it: big hats are part of the silhouette
+var nose := 0.07  ## length of the nose, metres at k = 1
 var built := false  ## true for a person built whole in code (no downloaded body under the costume)
 var _bare_arms := false  ## rolled sleeves: the stand-in shows skin on the forearm
 var _bare_calves := false
@@ -124,11 +135,13 @@ func _body(role: String) -> void:
 	var shirt: Material = _own.get("top", cloth(LINEN))
 	var legs: Material = _own.get("bot", cloth(Color("4a4034")))
 	var shoes: Material = _own.get("lea", leather(LEATHER))
-	var head := Vector3(0, top - 0.115 * k, _p("head").z)
-	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * k), head))
+	var head := Vector3(0, top - 0.115 * hk, _p("head").z)
+	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
+	if nose > 0.0:  # no face, but a nose: it belongs to the outline
+		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
 	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child"]:  # hair under the hat or kerchief
-		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara"] else Color("5a3a26"), 0.9), head + Vector3(0, 0.0, -0.012) * k, Vector3(0.106, 0.125, 0.116) * k)
-	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * k, 0.05 * k, 0.048 * k)
+		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara"] else Color("5a3a26"), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
+	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
 	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
 	for s: String in ["l", "r"]:
@@ -169,6 +182,7 @@ func _r_captain(_tint: Color) -> void:
 	_coat_sleeves(coat, cloth(GOLD), cloth(LINEN))
 	_sash(cloth(SASH), true, 0.42)
 	_pouch("r")
+	_flask("r")
 	_spyglass()
 	_boots(leather(BOOT))
 	_tricorn(felt(Color("1d2740")), cloth(GOLD))
@@ -177,12 +191,15 @@ func _r_captain(_tint: Color) -> void:
 ## Sheet 02, the tall sailor: striped shirt with rolled sleeves, red sash, baggy slops, bandana.
 func _r_sailor(tint: Color) -> void:
 	_sailor(cloth(SASH.lerp(tint, 0.1)), cloth(CANVAS_LIGHT))
+	if built:
+		_rope()
 	_bandana(cloth(SASH), true)
 
 
 ## Sheet 02, the stocky sailor: navy sash and a knitted cap.
 func _r_sailor2(_tint: Color) -> void:
 	_sailor(cloth(Color("3b4f7a")), cloth(CANVAS_LIGHT))
+	_flask("r")
 	_knit_cap(cloth(Color("2f4470")))
 
 
@@ -190,6 +207,8 @@ func _r_sailor2(_tint: Color) -> void:
 func _r_sailor3(_tint: Color) -> void:
 	_sailor(cloth(SASH), cloth(Color("8f7f5e")))
 	_waistcoat(cloth(Color("34425f")), 64.0)
+	_flask("l")
+	_spyglass()
 	_bandana(cloth(Color("b5553a")), true)
 
 
@@ -420,7 +439,7 @@ func _hide(what: String) -> void:
 ## A point on a shell from `a` up to `b`: `deg` round from the front (towards the person's left), `t` along it.
 func _on(a: Vector3, b: Vector3, r0: float, r1: float, flat: float, deg: float, t: float) -> Vector3:
 	var th := deg_to_rad(deg)
-	return a.lerp(b, t) + (Vector3.BACK * cos(th) * flat + Vector3.RIGHT * sin(th)) * lerpf(r0, r1, t)
+	return a.lerp(b, t) + (Vector3.BACK * cos(th) * flat + Vector3.RIGHT * sin(th)) * lerpf(r0, r1, t) * (g if built else 1.0)
 
 
 ## An open long coat: trunk, shoulders, standing collar, skirts down to `hem` (height), a gap of `gap` degrees at the
@@ -509,14 +528,14 @@ func _rolled_sleeves(m: Material, roll: Material) -> void:
 func _sash(m: Material, belt: bool, end: float) -> void:
 	var hip := _p("pelvis") + Vector3(0, 0.07, 0) * k
 	_shell("pelvis", m, hip - Vector3(0, 0.06, 0) * k, hip + Vector3(0, 0.06, 0) * k, 0.218 * k, 0.214 * k, 0.8)
-	var knot := hip + Vector3(0.165, -0.02, 0.085) * k
+	var knot := hip + Vector3(0.165, -0.02, 0.085) * k * (g if built else 1.0)
 	_ball("pelvis", m, knot, 0.05 * k)
 	_box("thigh_l", m, Vector3(0.075, end, 0.02) * k, knot + Vector3(0.012, -end * 0.5, 0.004) * k, Vector3(0, 0.5, 0.07))
 	_box("thigh_l", m, Vector3(0.06, end * 0.8, 0.02) * k, knot + Vector3(-0.035, -end * 0.4, 0.016) * k, Vector3(0, 0.5, -0.09))
 	if belt:
 		_shell("pelvis", leather(Color("5e3b28")), hip - Vector3(0, 0.022, 0) * k, hip + Vector3(0, 0.022, 0) * k, 0.226 * k, 0.226 * k, 0.8)
-		_box("pelvis", metal(), Vector3(0.07, 0.06, 0.014) * k, hip + Vector3(0, 0, 0.183) * k)
-		_box("pelvis", leather(Color("5e3b28")), Vector3(0.04, 0.035, 0.016) * k, hip + Vector3(0, 0, 0.184) * k)
+		_box("pelvis", metal(), Vector3(0.07, 0.06, 0.014) * k, hip + Vector3(0, 0, 0.183) * k * (g if built else 1.0))
+		_box("pelvis", leather(Color("5e3b28")), Vector3(0.04, 0.035, 0.016) * k, hip + Vector3(0, 0, 0.184) * k * (g if built else 1.0))
 
 
 ## Breeches: full in the thigh, gathered under the knee.
@@ -612,7 +631,7 @@ func _shawl(m: Material) -> void:
 	var neck := _p("neck_01")
 	var chest := _p("spine_03")
 	_shell("spine_03", m, chest - Vector3(0, 0.02, 0) * k, neck - Vector3(0, 0.02, 0) * k, 0.275 * k, 0.12 * k, 0.76)
-	var knot := chest + Vector3(0, 0.05, 0.19) * k
+	var knot := chest + Vector3(0, 0.05, 0.19 * g) * k
 	_ball("spine_03", m, knot, 0.045 * k)
 	for sx: float in [-1.0, 1.0]:
 		_box("spine_02", m, Vector3(0.07, 0.24, 0.02) * k, knot + Vector3(sx * 0.04, -0.14, 0.0) * k, Vector3(-0.1, 0, sx * 0.22))
@@ -621,12 +640,12 @@ func _shawl(m: Material) -> void:
 func _cravat() -> void:
 	var neck := _p("neck_01")
 	_ball("spine_03", cloth(LINEN), neck + Vector3(0, -0.035, 0.085) * k, 0.045 * k)
-	_box("spine_03", cloth(LINEN), Vector3(0.08, 0.13, 0.03) * k, neck + Vector3(0, -0.11, 0.105) * k, Vector3(-0.25, 0, 0))
+	_box("spine_03", cloth(LINEN), Vector3(0.08, 0.13, 0.03) * k, neck + Vector3(0, -0.11, 0.105 * g) * k, Vector3(-0.25, 0, 0))
 
 
 ## The anchor badge of the Order: a brass ring with an anchor on a chain.
 func _medallion() -> void:
-	var at := _p("spine_03") + Vector3(0, 0.03, 0.172) * k
+	var at := _p("spine_03") + Vector3(0, 0.03, 0.2 * g) * k
 	var ring := TorusMesh.new()
 	ring.inner_radius = 0.78
 	ring.outer_radius = 1.0
@@ -651,7 +670,7 @@ func _chart() -> void:
 ## A leather pouch on the belt.
 func _pouch(side: String) -> void:
 	var sx := 1.0 if side == "l" else -1.0
-	var at := _p("pelvis") + Vector3(sx * 0.16, -0.03, 0.12) * k
+	var at := _p("pelvis") + Vector3(sx * 0.16, -0.03, 0.12) * k * Vector3(g, 1, g)
 	_box("thigh_" + side, leather(Color("6b4630")), Vector3(0.1, 0.12, 0.05) * k, at, Vector3(0, sx * 0.6, 0))
 	_box("thigh_" + side, leather(Color("5e3b28")), Vector3(0.104, 0.05, 0.054) * k, at + Vector3(0, 0.04, 0) * k, Vector3(0, sx * 0.6, 0))
 	_ball("thigh_" + side, metal(), at + Vector3(sx * 0.015, 0.02, 0.028) * k, 0.01 * k)
@@ -659,16 +678,36 @@ func _pouch(side: String) -> void:
 
 ## A brass spyglass hung from the belt on the left.
 func _spyglass() -> void:
-	var a := _p("pelvis") + Vector3(0.2, 0.02, 0.06) * k
+	var a := _p("pelvis") + Vector3(0.2 * g, 0.02, 0.06 * g) * k
 	var b := a + Vector3(0.03, -0.26, 0.05) * k
 	_tube("thigh_l", metal(), a, a.lerp(b, 0.6), 0.02 * k, 0.026 * k, 1.0, true, 10)
 	_tube("thigh_l", leather(Color("5e3b28")), a.lerp(b, 0.25), a.lerp(b, 0.45), 0.027 * k, 0.028 * k, 1.0, false, 10)
 	_tube("thigh_l", metal(), a.lerp(b, 0.6), b, 0.03 * k, 0.036 * k, 1.0, true, 10)
 
 
+## A flask on a strap at the hip.
+func _flask(side: String) -> void:
+	var sx := 1.0 if side == "l" else -1.0
+	var at := _p("pelvis") + Vector3(sx * 0.19 * g, -0.08, -0.04) * k
+	_tube("thigh_" + side, leather(Color("7a5236")), at - Vector3(0, 0.07, 0) * k, at + Vector3(0, 0.05, 0) * k, 0.045 * k, 0.04 * k, 0.55, true, 7)
+	_tube("thigh_" + side, metal(), at + Vector3(0, 0.05, 0) * k, at + Vector3(0, 0.085, 0) * k, 0.014 * k, 0.014 * k, 1.0, true, 5)
+
+
+## A coil of rope worn over one shoulder and across the chest.
+func _rope() -> void:
+	var coil := TorusMesh.new()
+	coil.inner_radius = 0.86
+	coil.outer_radius = 1.0
+	coil.rings = 10
+	coil.ring_segments = 5
+	var chest := _p("spine_02") + Vector3(0, 0.06, 0) * k
+	for i in 3:
+		_add("spine_02", cloth(Color("b89a6a")), coil, Transform3D(Basis.from_euler(Vector3(PI / 2 - 0.1, 0, 0.6 + i * 0.05)).scaled_local(Vector3(0.3 * g, 1.0, 0.36) * k * (1.0 + i * 0.04)), chest))
+
+
 ## A satchel on a strap across the body.
 func _satchel() -> void:
-	var at := _p("pelvis") + Vector3(-0.2, -0.06, 0.07) * k
+	var at := _p("pelvis") + Vector3(-0.2 * g, -0.06, 0.07 * g) * k
 	_box("pelvis", leather(Color("6b4630")), Vector3(0.07, 0.17, 0.2) * k, at)
 	_box("pelvis", leather(Color("5e3b28")), Vector3(0.074, 0.07, 0.204) * k, at + Vector3(0, 0.05, 0) * k)
 	var chest := _p("spine_03")
@@ -677,78 +716,78 @@ func _satchel() -> void:
 
 ## A tricorn: a low crown and a brim turned up on three sides, a point forward, the edge in `trim`.
 func _tricorn(m: Material, trim: Material) -> void:
-	var c := Vector3(0, top - 0.03 * k, _p("head").z - 0.012 * k)
+	var c := Vector3(0, top - 0.03 * hk, _p("head").z - 0.012 * hk)
 	var turn := Basis(Vector3.UP, PI)  # a corner of the three-sided brim to the front
-	_tube("head", m, c, c + Vector3(0, 0.075, 0) * k, 0.1 * k, 0.085 * k, 1.0, true, 12)
+	_tube("head", m, c, c + Vector3(0, 0.075, 0) * hk, 0.1 * hk, 0.085 * hk, 1.0, true, 12)
 	for part: Array in [[m, 0.0, 0.085, 0.13, 0.25], [trim, 0.078, 0.094, 0.248, 0.262]]:
 		var brim := CylinderMesh.new()
-		brim.bottom_radius = float(part[3]) * k
-		brim.top_radius = float(part[4]) * k
-		brim.height = (float(part[2]) - float(part[1])) * k
+		brim.bottom_radius = float(part[3]) * hk
+		brim.top_radius = float(part[4]) * hk
+		brim.height = (float(part[2]) - float(part[1])) * hk
 		brim.radial_segments = 3
 		brim.rings = 1
 		brim.cap_top = false
 		brim.cap_bottom = part[0] == m
-		_add("head", part[0], brim, Transform3D(turn, c + Vector3(0, (float(part[1]) + float(part[2])) * 0.5 - 0.01, 0) * k))
+		_add("head", part[0], brim, Transform3D(turn, c + Vector3(0, (float(part[1]) + float(part[2])) * 0.5 - 0.01, 0) * hk))
 
 
 ## A felt hat with a wide round brim that droops a little.
 func _wide_hat(m: Material, brim: float, crown: float) -> void:
-	var c := Vector3(0, top - 0.025 * k, _p("head").z - 0.012 * k)
-	_tube("head", m, c, c + Vector3(0, crown, 0) * k, 0.105 * k, 0.085 * k, 1.0, true)
-	_tube("head", m, c - Vector3(0, 0.03, 0) * k, c + Vector3(0, 0.008, 0) * k, brim * k, 0.1 * k, 1.0, false, 18)
-	_tube("head", m, c - Vector3(0, 0.032, 0) * k, c - Vector3(0, 0.024, 0) * k, brim * k, brim * 0.99 * k, 1.0, true, 18)
+	var c := Vector3(0, top - 0.025 * hk, _p("head").z - 0.012 * hk)
+	_tube("head", m, c, c + Vector3(0, crown, 0) * hk, 0.105 * hk, 0.085 * hk, 1.0, true)
+	_tube("head", m, c - Vector3(0, 0.03, 0) * hk, c + Vector3(0, 0.008, 0) * hk, brim * hk, 0.1 * hk, 1.0, false, 18)
+	_tube("head", m, c - Vector3(0, 0.032, 0) * hk, c - Vector3(0, 0.024, 0) * hk, brim * hk, brim * 0.99 * hk, 1.0, true, 18)
 
 
 ## A scarf tied round the head under the hat, its ends hanging at the back.
 func _headscarf(m: Material) -> void:
-	var c := Vector3(0, top - 0.09 * k, _p("head").z - 0.014 * k)
-	_dome("head", m, c, Vector3(0.114, 0.085, 0.13) * k)
-	_tube("head", m, c - Vector3(0, 0.03, 0) * k, c + Vector3(0, 0.012, 0) * k, 0.118 * k, 0.116 * k, 1.13)
-	var knot := c + Vector3(0, -0.03, -0.14) * k
-	_ball("head", m, knot, 0.032 * k)
+	var c := Vector3(0, top - 0.09 * hk, _p("head").z - 0.014 * hk)
+	_dome("head", m, c, Vector3(0.114, 0.085, 0.13) * hk)
+	_tube("head", m, c - Vector3(0, 0.03, 0) * hk, c + Vector3(0, 0.012, 0) * hk, 0.118 * hk, 0.116 * hk, 1.13)
+	var knot := c + Vector3(0, -0.03, -0.14) * hk
+	_ball("head", m, knot, 0.032 * hk)
 	for sx: float in [-1.0, 1.0]:
-		_box("head", m, Vector3(0.05, 0.2, 0.014) * k, knot + Vector3(sx * 0.03, -0.1, -0.01) * k, Vector3(0.2, 0, sx * 0.2))
+		_box("head", m, Vector3(0.05, 0.2, 0.014) * hk, knot + Vector3(sx * 0.03, -0.1, -0.01) * hk, Vector3(0.2, 0, sx * 0.2))
 
 
 ## A bandana tied over the hair; the knot and its ends sit at the side (`side`) or at the back.
 func _bandana(m: Material, side: bool = false) -> void:
 	_hide("short")  # the cloth covers the hair
-	var c := Vector3(0, top - 0.085 * k, _p("head").z - 0.012 * k)
-	_dome("head", m, c, Vector3(0.112, 0.1, 0.128) * k)
-	_tube("head", m, c + Vector3(0, -0.02, 0) * k, c + Vector3(0, 0.02, 0) * k, 0.116 * k, 0.114 * k, 1.13)
-	var knot := c + (Vector3(-0.115, -0.01, -0.05) if side else Vector3(0.03, 0.0, -0.125)) * k
-	_ball("head", m, knot, 0.03 * k)
-	_box("head", m, Vector3(0.045, 0.16, 0.012) * k, knot + Vector3(-0.012, -0.085, -0.012) * k, Vector3(0.2, 0, 0.3 if side else 0.2))
-	_box("head", m, Vector3(0.04, 0.12, 0.012) * k, knot + Vector3(0.012, -0.065, -0.02) * k, Vector3(0.3, 0, -0.2))
+	var c := Vector3(0, top - 0.085 * hk, _p("head").z - 0.012 * hk)
+	_dome("head", m, c, Vector3(0.112, 0.1, 0.128) * hk)
+	_tube("head", m, c + Vector3(0, -0.02, 0) * hk, c + Vector3(0, 0.02, 0) * hk, 0.116 * hk, 0.114 * hk, 1.13)
+	var knot := c + (Vector3(-0.115, -0.01, -0.05) if side else Vector3(0.03, 0.0, -0.125)) * hk
+	_ball("head", m, knot, 0.03 * hk)
+	_box("head", m, Vector3(0.045, 0.16, 0.012) * hk, knot + Vector3(-0.012, -0.085, -0.012) * hk, Vector3(0.2, 0, 0.3 if side else 0.2))
+	_box("head", m, Vector3(0.04, 0.12, 0.012) * hk, knot + Vector3(0.012, -0.065, -0.02) * hk, Vector3(0.3, 0, -0.2))
 
 
 ## A knitted cap with a rolled edge.
 func _knit_cap(m: Material) -> void:
 	_hide("short")
-	var c := Vector3(0, top - 0.075 * k, _p("head").z - 0.014 * k)
-	_dome("head", m, c, Vector3(0.112, 0.11, 0.126) * k)
-	_tube("head", m, c - Vector3(0, 0.025, 0) * k, c + Vector3(0, 0.02, 0) * k, 0.122 * k, 0.12 * k, 1.12)
+	var c := Vector3(0, top - 0.075 * hk, _p("head").z - 0.014 * hk)
+	_dome("head", m, c, Vector3(0.112, 0.11, 0.126) * hk)
+	_tube("head", m, c - Vector3(0, 0.025, 0) * hk, c + Vector3(0, 0.02, 0) * hk, 0.122 * hk, 0.12 * hk, 1.12)
 
 
 ## A soft flat cap, wider than the head.
 func _beret(m: Material) -> void:
-	var c := Vector3(0, top - 0.045 * k, _p("head").z - 0.02 * k)
-	_dome("head", m, c, Vector3(0.15, 0.07, 0.16) * k)
-	_tube("head", m, c - Vector3(0, 0.025, 0) * k, c, 0.112 * k, 0.15 * k, 1.07)
+	var c := Vector3(0, top - 0.045 * hk, _p("head").z - 0.02 * hk)
+	_dome("head", m, c, Vector3(0.15, 0.07, 0.16) * hk)
+	_tube("head", m, c - Vector3(0, 0.025, 0) * hk, c, 0.112 * hk, 0.15 * hk, 1.07)
 
 
 ## A kerchief tied over the hair, a corner hanging behind.
 func _kerchief(m: Material) -> void:
-	var c := Vector3(0, top - 0.075 * k, _p("head").z - 0.02 * k)
-	_dome("head", m, c, Vector3(0.114, 0.105, 0.13) * k)
-	_tube("head", m, c - Vector3(0, 0.03, 0) * k, c + Vector3(0, 0.01, 0) * k, 0.118 * k, 0.116 * k, 1.12)
-	_box("head", m, Vector3(0.14, 0.15, 0.016) * k, c + Vector3(0, -0.07, -0.125) * k, Vector3(0.25, 0, 0))
+	var c := Vector3(0, top - 0.075 * hk, _p("head").z - 0.02 * hk)
+	_dome("head", m, c, Vector3(0.114, 0.105, 0.13) * hk)
+	_tube("head", m, c - Vector3(0, 0.03, 0) * hk, c + Vector3(0, 0.01, 0) * hk, 0.118 * hk, 0.116 * hk, 1.12)
+	_box("head", m, Vector3(0.14, 0.15, 0.016) * hk, c + Vector3(0, -0.07, -0.125) * hk, Vector3(0.25, 0, 0))
 
 
 ## Hair pinned up in a bun.
 func _bun() -> void:
-	_ball("head", _plain("hair", Color("5a3a26"), 0.9), Vector3(0, top - 0.02 * k, _p("head").z - 0.08 * k), 0.06 * k)
+	_ball("head", _plain("hair", Color("5a3a26"), 0.9), Vector3(0, top - 0.02 * hk, _p("head").z - 0.08 * hk), 0.06 * hk)
 
 
 # ---------------------------------------------------------------- materials
@@ -819,8 +858,8 @@ void fragment() {
 ## A tube from `a` to `b` (skeleton space), radius `r0` at `a` and `r1` at `b`, squashed front-to-back by `flat`.
 func _tube(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, caps: bool = false, sides: int = 8) -> void:
 	var c := CylinderMesh.new()
-	c.bottom_radius = r0
-	c.top_radius = r1
+	c.bottom_radius = r0 * _w(bone)
+	c.top_radius = r1 * _w(bone)
 	c.height = maxf(0.001, a.distance_to(b))
 	c.radial_segments = sides
 	c.rings = 1
@@ -833,9 +872,22 @@ func _tube(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: flo
 	_add(bone, m, c, Transform3D(Basis(x, y, z * flat), (a + b) * 0.5))
 
 
+## How much wider than the standard a piece on `bone` is for this person's girth.
+func _w(bone: String) -> float:
+	if not built or bone.begins_with("head") or bone.begins_with("neck") or bone.begins_with("foot") or bone.begins_with("hand"):
+		return 1.0
+	if bone.begins_with("thigh"):
+		return pow(g, 0.8)
+	if bone.begins_with("calf") or bone.contains("arm"):
+		return pow(g, 0.45)
+	return g
+
+
 ## An open or closed shell round the vertical line from `a` up to `b`: radius `r0` at `a`, `r1` at `b`, squashed
 ## front-to-back by `flat`, covering the angles `from`..`to` in degrees, measured from the front towards the left.
 func _shell(bone: String, m: Material, a: Vector3, b: Vector3, r0: float, r1: float, flat: float = 1.0, from: float = 0.0, to: float = 360.0, sides: int = 10) -> void:
+	r0 *= _w(bone)
+	r1 *= _w(bone)
 	var st := SurfaceTool.new()
 	st.begin(Mesh.PRIMITIVE_TRIANGLES)
 	var steps := maxi(1, int(ceil(sides * absf(to - from) / 360.0)))
