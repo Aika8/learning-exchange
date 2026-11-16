@@ -26,7 +26,7 @@ func _ready() -> void:
 	add_child(body)
 	walker = Walker.attach(body)
 	walker.ground = Walker.ground_under(self)
-	if not walker.animated():  # procedural figure: the old brass scarf marks the captain
+	if not walker.animated() and not body.has_meta("stand_in"):  # procedural figure: the old brass scarf marks the captain
 		var scarf := Proc.box(Vector3(0.75, 0.16, 0.75), Hud.BRASS, Vector3(0, 1.38, 0))
 		if Assets.available():
 			var ring := TorusMesh.new()

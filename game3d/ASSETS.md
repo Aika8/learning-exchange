@@ -87,8 +87,8 @@ No sounds or music. Nothing is taken from existing games: the Poly Haven models 
 `sailor`, `trader`, `oldman`, `child` in `assets/models/people/*.glb` are built by `game3d/tools/people/build.sh`
 (Blender 4.5 + MPFB 2 add-on + MakeHuman CC0 system assets, makehumancommunity.org). The base mesh, rig and every
 clothes, hair, eye and skin asset used are CC0; the clothes are recoloured and the pose set as rest pose by
-`restyle.py`. In the game `Costume` replaces the look of those clothes (no denim, prints or fedora) and adds period pieces. MPFB itself is GPL, its output is not. The files are git-ignored like the rest; without them the
-procedural person stands in.
+`restyle.py`. In the game `Costume` replaces the look of those clothes (no denim, prints or fedora) and adds period pieces. MPFB itself is GPL, its output is not. The files are git-ignored like the rest and **`make assets` cannot download them** (it warns, and builds them when
+`BLENDER` and `MH_ASSETS` are set). Without them `Costume.stand_in` builds each person in code in the same period costume.
 
 ## Animation
 

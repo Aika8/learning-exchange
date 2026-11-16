@@ -103,7 +103,7 @@ func _dress() -> void:
 		return
 	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2)
 	mara.name = "Mara"
-	_npc("", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8).name = "Olva"
+	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8).name = "Olva"
 	_npc("oldman", Color("3a3a5a"), HARBOUR_SPOTS["chronicler"][0], 0.6).name = "Chronicler"
 	if Assets.put(self, "treasure_chest", HARBOUR_SPOTS["debt"][0], 1.2, 1.0) == null:
 		var chest := Proc.box(Vector3(1.2, 0.7, 0.8), Proc.TIMBER_DARK, HARBOUR_SPOTS["debt"][0] + Vector3(0, 0.35, 0))

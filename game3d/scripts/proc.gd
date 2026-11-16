@@ -528,11 +528,14 @@ static func _real_ship() -> Node3D:
 ## captain, sailor, trader, townsman, child; by default the one that fits `who`); otherwise the procedural person stands in.
 static func figure(coat: Color, hat: Color, who: String = "", role: String = "") -> Node3D:
 	if not who.is_empty():
+		var dress: String = role if not role.is_empty() else {"oldman": "townsman"}.get(who, who)
 		var p := Assets.person(who)
 		if p != null:
 			if Session.arg("plain").is_empty():  # `--plain` shows the people as downloaded (before/after pictures)
-				Costume.dress(p, role if not role.is_empty() else {"oldman": "townsman"}.get(who, who), coat)
+				Costume.dress(p, dress, coat)
 			return p
+		if Session.arg("oldstandin").is_empty():  # the people are not on disk: a stand-in in the same costume
+			return Costume.stand_in(dress, coat)
 	if Assets.available():
 		return _person(coat, hat)
 	var f := Node3D.new()

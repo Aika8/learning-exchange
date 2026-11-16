@@ -14,4 +14,15 @@ while read -r sum size path url; do
   if [ "$(md5of "$dest.part")" = "$sum" ]; then mv "$dest.part" "$dest"; echo "ok   $path"
   else rm -f "$dest.part"; echo "BAD  $path" >&2; fail=1; fi
 done < assets.lock
+# The MakeHuman people are not downloadable: they are built with Blender (tools/people/build.sh) and are in no lock.
+# Without them the game shows stand-in figures built in code.
+if [ ! -f assets/models/people/sailor.glb ]; then
+  if [ -n "${BLENDER:-}" ] && [ -n "${MH_ASSETS:-}" ]; then
+    echo "building the MakeHuman people (tools/people/build.sh)"
+    tools/people/build.sh || fail=1
+  else
+    echo "NOTE the MakeHuman people are missing (game3d/assets/models/people/*.glb): the game will show stand-in figures." >&2
+    echo "     Build them: BLENDER=... MH_ASSETS=... game3d/tools/people/build.sh — or copy that folder from a checkout that has it." >&2
+  fi
+fi
 exit $fail
