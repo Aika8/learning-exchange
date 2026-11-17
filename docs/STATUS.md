@@ -12,9 +12,9 @@ Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `do
   Amber Cliff has its own language.
 
 ## G3D talk (ADR-0027, Proposed) — `docs/demo/G3D-talk.md`
-- Talking opens a comic page: frames with the game's own people posed in them, balloons with tails, captions.
-  Pages are data (`game3d/data/talks.json`), words are `game3d/i18n/talk.csv` (ru, en). Mara, Olva, the Chronicler,
-  the post keeper and every stroller talk. GUT 96.
+- Talking opens a comic page: frames with drawn portraits from Aika's expression sheets (six heroes × six
+  emotions, `docs/design/concepts/06…12`); the face changes with the line (`emotion` in `game3d/data/talks.json`).
+  Words are `game3d/i18n/talk.csv` (ru, en). People without a sheet get a plain drawn stand-in. GUT 102.
 
 ## G3D looks (ADR-0026, Proposed) — `docs/demo/G3D-looks.md`
 - Every island is drawn in its own technique: Spark Harbour in pen and ink as before, Silk Reach as printed silk

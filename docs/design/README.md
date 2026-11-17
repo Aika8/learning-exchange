@@ -35,6 +35,21 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `03-mara.jpg` | Mara of the Anchor Order | Mara on the wharf (plans the voyage) | `_r_mara` |
 | `04-townsfolk.jpg` | Money-changer, Olva, market woman, old man, child | brokers in the hall, Ольва Перо, the post keeper and strollers | `_r_changer`, `_r_olva`, `_r_trader`, `_r_townsman`, `_r_child` |
 | `05-chronicler.jpg` | The Chronicler, an owl scholar | the Chronicler on the square (evening chronicle) | `_r_chronicler` |
+| `06-comic-style.jpg` | **The approved style of the dialogue panels** and the look of six heroes there: ink outline, hatching, bright flat colour, sound words, balloons | every talk page (ADR-0027) | `scripts/ui/comic_page.gd`, `comic_frame.gd` |
+| `07-faces-captain.jpg` | The young captain, six faces | the player in every talk | `game3d/art/portraits/captain_*.jpg` |
+| `08-faces-mara.jpg` | Mara, six faces | Mara's talk | `…/mara_*.jpg` |
+| `09-faces-vetla.jpg` | Бабушка Ветла, six faces | the market woman who strolls the square (talk about her basket = an index fund) | `…/vetla_*.jpg` |
+| `10-faces-olva.jpg` | Олва Перо, six faces | Olva's talks | `…/olva_*.jpg` |
+| `11-faces-old-sailor.jpg` | The old sailor, six faces | the old sailor on the wharf | `…/sailor_*.jpg` |
+| `12-faces-merchant.jpg` | The merchant, six faces | M. Lenoir at the bureau de change on Amber Cliff | `…/merchant_*.jpg` |
+
+**Dialogue panels (sheets 06–12).** The faces on a page are these drawings, one per emotion, left to right on each
+sheet: neutral, happy, surprised, sly, worried, angry. The emotion is chosen per line in `game3d/data/talks.json`.
+`game3d/art/portraits/` holds the cut-outs (recut them with the boxes in `docs/demo/G3D-talk.md` if a sheet is
+replaced). Lettering and the marks round a head are our own. Sheets 06–12 came later than 01–05 and differ from them
+(Mara is younger with a headband, Olva wears a top hat): the 3D figures still follow 01–05 — which one wins is Aika's
+call. Speakers **without** an expression sheet are drawn by a plain stand-in (`ComicDoodle`): the Chronicler, the
+post keeper, the tall and the stocky sailor, the boy, the old man, and everybody on Amber Cliff except M. Lenoir.
 
 Not drawn yet (the game still uses designs made without a sheet): the houses kit, the Wind Exchange inside and out,
 the ship «Попутчик», the establishing view of Spark Harbour, props. When sheets for these arrive, put them here as

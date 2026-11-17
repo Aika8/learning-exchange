@@ -375,14 +375,19 @@ Build and CI
 - `--views` takes `--only=<place>` like `--audit`.
 
 ## G3D talk (ADR-0027)
-- A frame is drawn at twice its size for a few frames and then frozen; its ink line is at least 4 px there (2 on the
-  page), or it vanishes when the picture is shown smaller. `ink.gdshader` got `min_px` for that.
-- Each frame has a backdrop wall 5 m behind the people: the outline needs depth behind a silhouette.
-- Balloons: one per speaker side, the answer hangs 22 px lower; a lone speaker's balloon goes to the emptier side.
+- Portraits are cut from the expression sheets and shown on the sheets' own paper with soft edges (no keying).
+  They are loaded from the file at run time (`game3d/art/` has `.gdignore`), so nothing needs importing in CI.
+- Who got which sheet: the captain (also on Amber Cliff), Mara, Olva, the old sailor (`sailor3`), Бабушка Ветла for
+  the market woman who strolls the harbour (her talk is now about the basket, the index fund; the old fee talk is
+  gone), the merchant for M. Lenoir of the bureau de change.
+- The sheets look to the right; the second speaker of a frame is mirrored to face the first.
+- A listener is dimmed to 84%. Tails are short (38 px at most): they point, they do not cross a face.
+- Surprised and angry lines bristle the balloon and put a burst by the head; marks are polygons and "!" in our font.
 - Mara's and the post keeper's pages show once per run (`Game.met`); Olva's every time (the numbers change).
 - A stroller stops while talked to. A stroller at arm's length (2.4 m) wins over the spot they walk through.
 - `--demo`, the audit and other tool runs skip pages; the old one-line box stays for refusals and notes.
 - Hold T on a page: the gloss in the game's language, for islands that speak their own (ADR-0028).
+- The sheets were recompressed (0.5–1.3 MB each) before going into the repository.
 
 ## G3D Amber Cliff (ADR-0028)
 - The French island is Amber Cliff from the world bible (the reserve-currency island), not a new one.
