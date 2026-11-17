@@ -1,5 +1,7 @@
 // The ink post-effect (ADR-0024): one full-screen quad. mode 1 = a dark outline on depth and normal edges over the
 // flat colours; mode 2 = an engraving — paper and ink only, hatching by brightness, plus the outline.
+// Each island is drawn in its own technique (ADR-0026): 0 = ink (the above), 1 = dye — printed silk: colours
+// sorted into four dye baths, a light resist line, a weave over everything.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
 // the captain above the height `wave` — the captain still drawn the way the island they came from is drawn.
 shader_type spatial;
@@ -15,6 +17,16 @@ uniform vec3 tint = vec3(1.0);
 uniform float width = 1.3;  // line width in pixels at 1080p
 uniform float hatch_turn = 0.0;
 uniform float hatch_gap = 9.0;
+uniform int technique = 0;
+uniform vec3 ramp0 : source_color = vec3(0.07, 0.09, 0.27);  // the technique's own colours, dark to light
+uniform vec3 ramp1 : source_color = vec3(0.16, 0.42, 0.55);
+uniform vec3 ramp2 : source_color = vec3(0.86, 0.52, 0.56);
+uniform vec3 ramp3 : source_color = vec3(0.97, 0.93, 0.84);
+uniform int technique_from = 0;
+uniform vec3 ramp0_from : source_color = vec3(0.07, 0.09, 0.27);
+uniform vec3 ramp1_from : source_color = vec3(0.16, 0.42, 0.55);
+uniform vec3 ramp2_from : source_color = vec3(0.86, 0.52, 0.56);
+uniform vec3 ramp3_from : source_color = vec3(0.97, 0.93, 0.84);
 uniform vec3 ink_from : source_color = vec3(0.13, 0.1, 0.09);
 uniform vec3 paper_from : source_color = vec3(0.93, 0.87, 0.75);
 uniform vec3 tint_from = vec3(1.0);
@@ -72,11 +84,33 @@ void fragment() {
 	float edge = max(smoothstep(0.035, 0.07, dd / max(d, 0.5)), smoothstep(0.5, 0.9, dn));
 	edge *= 1.0 - smoothstep(180.0, 420.0, d);
 	vec3 col = texture(screen_tex, SCREEN_UV).rgb * mix(tint, tint_from, old);
+	// the screen is linear light: bring it to what the eye sees before choosing strokes or dye baths
+	float lum = pow(clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.45);
+	float s = VIEWPORT_SIZE.y / 1080.0;
+	int tech = old > 0.5 ? technique_from : technique;
+	vec3 sheet_colour = mix(paper, paper_from, old);
 	vec3 result;
-	if (mode == 2) {
-		// the screen is linear light: bring it to what the eye sees before choosing the strokes
-		float lum = pow(clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.45);
-		float s = VIEWPORT_SIZE.y / 1080.0;
+	if (tech == 1) {
+		// printed silk: four dye baths by brightness, a little of the thing's own colour kept, a light line
+		vec3 r0 = mix(ramp0, ramp0_from, old);
+		vec3 r1 = mix(ramp1, ramp1_from, old);
+		vec3 r2 = mix(ramp2, ramp2_from, old);
+		vec3 r3 = mix(ramp3, ramp3_from, old);
+		vec3 bath = mix(r0, r1, smoothstep(0.30, 0.33, lum));
+		bath = mix(bath, r2, smoothstep(0.50, 0.53, lum));
+		bath = mix(bath, r3, smoothstep(0.74, 0.77, lum));
+		if (mode == 2) {
+			// a two-colour print: indigo on cream
+			float tone = smoothstep(0.30, 0.33, lum) * 0.16 + smoothstep(0.50, 0.53, lum) * 0.3 + smoothstep(0.74, 0.77, lum) * 0.54;
+			result = mix(r0, sheet_colour, tone);
+			line = mix(sheet_colour, r0, smoothstep(0.5, 0.53, lum));  // the line shows on dark and on light cloth
+		} else {
+			result = mix(bath, col, 0.28);
+		}
+		vec2 thread = FRAGCOORD.xy / (2.2 * s);
+		result *= 0.95 + 0.05 * sin(thread.x * 3.14159) * sin(thread.y * 3.14159);
+		result = mix(result, line, edge * 0.95);
+	} else if (mode == 2) {
 		float turn = mix(hatch_turn, hatch_turn_from, old);
 		float gap = mix(hatch_gap, hatch_gap_from, old) * s;
 		vec2 p = mat2(vec2(cos(turn), sin(turn)), vec2(-sin(turn), cos(turn))) * FRAGCOORD.xy;
@@ -89,7 +123,7 @@ void fragment() {
 		hatch = max(hatch, step(lum, 0.4) * step(b, 0.24));   // crossed in the shadows
 		hatch = max(hatch, step(lum, 0.24) * step(c, 0.4));   // and a third in the dark
 		hatch *= 1.0 - sky;
-		vec3 sheet = mix(paper, paper_from, old) * (0.94 + 0.06 * smoothstep(0.3, 0.9, lum));
+		vec3 sheet = sheet_colour * (0.94 + 0.06 * smoothstep(0.3, 0.9, lum));
 		result = mix(sheet, line, max(hatch, edge));
 	} else {
 		result = mix(col, line, edge * 0.92);

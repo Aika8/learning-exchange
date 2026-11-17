@@ -125,6 +125,10 @@ func set_style(island_id: String) -> void:
 func _style(suffix: String, st: Dictionary) -> void:
 	for key: String in ["ink", "paper", "width", "hatch_turn", "hatch_gap"]:
 		_ink_set(key + suffix, st[key])
+	_ink_set("technique" + suffix, int(IslandStyle.TECHNIQUES[st["technique"]]))
+	var ramp: Array = st["ramp"]
+	for i in 4:
+		_ink_set("ramp%d%s" % [i, suffix], ramp[i])
 	var tint: Color = st["tint"]
 	_ink_set("tint" + suffix, Vector3(tint.r, tint.g, tint.b))
 
