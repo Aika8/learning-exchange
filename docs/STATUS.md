@@ -3,6 +3,12 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D sheets, second batch — `docs/demo/G3D-sheets.md`
+- Eleven more expression sheets: every speaker but the five strollers of Amber Cliff has drawn faces (102 portraits).
+- Props of Spark Harbour rebuilt in code from the props sheet (`scripts/props.gd`); the Chronicler recoloured to
+  the new sheet. GUT 103. Open: the harbour's layout from sheet 24 (rope bridges, islets, waterfall) is not built;
+  the audit reports a harmless nook at the north rim.
+
 ## G3D Amber Cliff (ADR-0028, Accepted) — `docs/demo/G3D-amber.md`
 - A third, bigger island, «La Falaise d'Ambre»: a French town (quay, square, bank, bureau de change, bakery, café,
   bookshop, lighthouse). Signs, prompts and talks are French in either game language; hold T for the gloss.

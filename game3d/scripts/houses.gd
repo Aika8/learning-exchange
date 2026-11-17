@@ -183,6 +183,11 @@ static func _window(k: Kit, timber: Material, shutter: Material, at: Vector3, fa
 static func _sign(rng: RandomNumberGenerator, timber: Material, at: Vector3) -> Node3D:
 	var k := Kit.new()
 	var iron := _paint(Color("2a2a2e"))
+	if not Assets.available():  # a picture signboard of sheet 25: anchor, quill, coin, sail or loaf
+		Props.signboard(k, Props.SIGNS[rng.randi() % Props.SIGNS.size()])
+		var board := k.commit("Sign")
+		board.position = at
+		return board
 	k.box(iron, Vector3(0.06, 0.06, 1.1), Vector3(0, 0.35, 0.55))
 	k.box(iron, Vector3(0.04, 0.04, 0.75), Vector3(0, 0.1, 0.32), Vector3(0.75, 0, 0))
 	for z: float in [0.45, 0.95]:

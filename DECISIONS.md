@@ -408,3 +408,13 @@ Build and CI
 - CI has no Godot, so GUT never ran there and could not notice. `make check-game3d-data` (part of `make test`, plain
   Python) now checks that every `res://` file the scripts name is present and not ignored, that the talks parse and
   have words in every language, and that every hero with a sheet has all six portraits.
+
+## G3D sheets, second batch
+- New sheets are numbered on (13–26) rather than by the number written on them ("Sheet 9", "Sheet 10", "Sheet 5"):
+  06–12 were already taken by the comic sheets. The README row quotes the sheet's own title.
+- The new Chronicler sheet replaces 05; 05 stays in the folder, marked superseded.
+- The old sailor's portraits were renamed `oldsailor_*`, so that `sailor_*` is the sheet called «Матрос».
+- Portraits keep their sheet's proportions (`ComicFaces.aspect`).
+- Props are built for the low-poly look only; `--pbr` keeps the downloaded models. Replaced props keep the size
+  of the collider they had (crate 0.9 m, chest 1.2 × 0.8 m), so nothing moved for the walkers.
+- House signboards carry pictures only (anchor, quill, coin, sail, loaf), chosen by the house's own random seed.

@@ -350,15 +350,17 @@ static func lamp_post(at: Vector3, yaw: float) -> Node3D:
 	lp.name = "LampPost"
 	lp.position = at
 	lp.rotation.y = yaw
-	lp.add_child(Proc.cyl(0.09, 0.12, 3.3, 8, Proc.TIMBER_DARK, Vector3(0, 1.65, 0)))
-	lp.add_child(Proc.box(Vector3(0.3, 0.08, 0.3), Proc.TIMBER_DARK, Vector3(0, 3.32, 0)))
-	Solid.post(lp, 0.12, 3.3, Vector3.ZERO)
+	Solid.post(lp, 0.17, 3.3, Vector3.ZERO)
 	var lantern := Assets.model("street_lamp_02")
 	if lantern != null:
+		lp.add_child(Proc.cyl(0.09, 0.12, 3.3, 8, Proc.TIMBER_DARK, Vector3(0, 1.65, 0)))
+		lp.add_child(Proc.box(Vector3(0.3, 0.08, 0.3), Proc.TIMBER_DARK, Vector3(0, 3.32, 0)))
 		lantern.position = Vector3(0, 2.2, 0.08)
 		lp.add_child(lantern)
-	else:
-		lp.add_child(Proc.ball(0.2, Color("ffcf6e"), Vector3(0, 2.7, 0.26), 4.0))
+	else:  # the lamp of sheet 25: turned post, scroll bracket, brass lantern
+		var k := Kit.new()
+		Props.lamp(k)
+		lp.add_child(k.commit("Lamp"))
 	var ll := OmniLight3D.new()
 	ll.position = Vector3(0, 2.7, 0.7)
 	ll.light_color = Color("ffc979")
@@ -483,8 +485,22 @@ static func _stall(at: Vector3, i: int) -> Node3D:
 	var stall := Node3D.new()
 	stall.name = "Stall"
 	stall.position = at
-	stall.add_child(Proc.box(Vector3(2.6, 1.0, 1.4), Proc.TIMBER, Vector3(0, 0.5, 0)))
 	Solid.box(stall, Vector3(2.6, 1.0, 1.4), Vector3(0, 0.5, 0))
+	for x: float in [-1.3, 1.3]:
+		Solid.post(stall, 0.08, 2.4, Vector3(x, 0, 0.9))
+		Solid.post(stall, 0.08, 2.8, Vector3(x, 0, -0.66))
+	if not Assets.available():  # the stall of sheet 25: plank counter, striped awning with scallops, wares on it
+		var k := Kit.new()
+		Props.stall(k, [Props.TEAL, Color("c4643f"), Color("d9a441")][i])
+		if i == 0:
+			Props.scales(k, Vector3(-0.7, 1.0, 0.1))
+			Props.ledger(k, Vector3(0.5, 1.0, 0.1))
+		else:
+			for n in 3:
+				k.box(Proc.mat([Color("e9a6b8"), Color("f3e9d2"), Color("9fd3e6")][n]), Vector3(0.5, 0.36, 0.5), Vector3(-0.8 + n * 0.8, 1.18, 0))
+		stall.add_child(k.commit("Stall"))
+		return stall
+	stall.add_child(Proc.box(Vector3(2.6, 1.0, 1.4), Proc.TIMBER, Vector3(0, 0.5, 0)))
 	var awn_color: Color = [Color("e0705f"), Color("f3d37a"), Color("5fb98a")][i]
 	var awn := Proc.box(Vector3(3.0, 0.04, 2.0), awn_color, Vector3(0, 2.36, 0.2))
 	awn.rotation.x = 0.25
@@ -494,8 +510,6 @@ static func _stall(at: Vector3, i: int) -> Node3D:
 	for x: float in [-1.3, 1.3]:
 		stall.add_child(Proc.cyl(0.06, 0.06, 2.4, 8, Proc.TIMBER_DARK, Vector3(x, 1.2, 0.9)))
 		stall.add_child(Proc.cyl(0.06, 0.06, 2.8, 8, Proc.TIMBER_DARK, Vector3(x, 1.4, -0.66)))
-		Solid.post(stall, 0.08, 2.4, Vector3(x, 0, 0.9))
-		Solid.post(stall, 0.08, 2.8, Vector3(x, 0, -0.66))
 	if Assets.available():
 		Assets.put(stall, "wooden_bucket_01", Vector3(-0.8, 1.0, 0), 0.0, 1.0)
 		Assets.put(stall, "wooden_crate_01", Vector3(0.4, 1.0, 0), 0.2, 1.0)
@@ -507,7 +521,18 @@ static func _stall(at: Vector3, i: int) -> Node3D:
 
 ## Cargo, rope, nets and rocks from Poly Haven (ADR-0019): the pier and square look worked-in. Skipped without assets.
 static func _harbour_props(h: Node3D) -> void:
-	if not Assets.available():
+	if not Assets.available():  # the worked-in wharf of sheets 24 and 25, built in code
+		for i in 6:
+			var x := 28.0 + i * 2.2
+			var z := -4.0 if i % 2 == 0 else 12.0
+			h.add_child(Props.barrel(Vector3(x, DECK_Y, z)) if i % 3 == 0 else Props.crate(Vector3(x, DECK_Y, z), i * 0.4))
+		h.add_child(Props.crate(Vector3(30.2, DECK_Y + 0.9, 12.0), 0.3, 0.8))
+		for z: float in [2.5, 5.5]:
+			h.add_child(Props.bollard(Vector3(48.7, DECK_Y, z)))
+		h.add_child(Props.rope_coil(Vector3(46.5, DECK_Y, 2.7)))
+		h.add_child(Props.anchor(MARA_POS + Vector3(1.6, 0, -1.3), -0.5))
+		h.add_child(Props.barrel(Vector3(-2.2, 0, 8.9)))
+		h.add_child(Props.crate(Vector3(4.8, 0, 9.3), 0.5))
 		return
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 41

@@ -331,15 +331,15 @@ func _r_child(_tint: Color) -> void:
 ## Sheet 05, the Chronicler: an owl in a blue robe under a cloak of pale feathers, a blue cowl with a brass clasp,
 ## round brass spectacles, a chained book and a lit lantern. Built whole in code; there is no human under it.
 func _r_chronicler(_tint: Color) -> void:
-	var feather := _plain("feather", Color("e3d2ad"), 1.0)
-	var feather_dark := _plain("feather", Color("c9b48a"), 1.0)
-	var brown := _plain("feather", Color("9a7a55"), 1.0)
-	var robe := cloth(Color("34425f"))
+	var feather := _plain("feather", Color("7a869c"), 1.0)  # sheet 26: a layered robe of slate-blue feathers
+	var feather_dark := _plain("feather", Color("5c6880"), 1.0)
+	var brown := _plain("feather", Color("a58c6c"), 1.0)
+	var robe := cloth(Color("3a4560"))
 	var base := Vector3(0, 0.0, 0)
 	var neck := Vector3(0, 1.42, 0) * k
 	_shell("", robe, base + Vector3(0, 0.12, 0) * k, neck, 0.36 * k, 0.15 * k, 0.86)  # robe
-	_shell("", cloth(CREAM), base + Vector3(0, 0.08, 0) * k, base + Vector3(0, 0.3, 0) * k, 0.375 * k, 0.33 * k, 0.86, 320.0, 400.0)
-	_box("", cloth(CREAM), Vector3(0.2, 0.7, 0.02) * k, Vector3(0, 0.55, 0.3) * k, Vector3(-0.1, 0, 0))  # pale front panel
+	_shell("", feather_dark, base + Vector3(0, 0.08, 0) * k, base + Vector3(0, 0.3, 0) * k, 0.375 * k, 0.33 * k, 0.86, 320.0, 400.0)
+	_box("", brown, Vector3(0.2, 0.5, 0.02) * k, Vector3(0, 1.05, 0.2) * k, Vector3(-0.1, 0, 0))  # the tan breast between the lapels
 	for i in 6:  # the cloak: tiers of feathers, open at the front
 		var y1 := (1.36 - i * 0.17) * k
 		var r := (0.2 + i * 0.045) * k
@@ -350,7 +350,7 @@ func _r_chronicler(_tint: Color) -> void:
 		_box("", leather(BOOT), Vector3(0.13, 0.07, 0.28) * k, Vector3(sx * 0.1, 0.035, 0.08) * k)
 		for t in 3:
 			_box("", _plain("claw", Color("2a2622"), 0.5), Vector3(0.025, 0.03, 0.08) * k, Vector3(sx * 0.1 + (t - 1) * 0.045, 0.02, 0.25) * k)
-	_shell("", cloth(Color("3d5a8a")), neck - Vector3(0, 0.16, 0) * k, neck + Vector3(0, 0.05, 0) * k, 0.26 * k, 0.15 * k, 0.9)  # cowl
+	_shell("", cloth(Color("46526c")), neck - Vector3(0, 0.16, 0) * k, neck + Vector3(0, 0.05, 0) * k, 0.26 * k, 0.15 * k, 0.9)  # cowl
 	_ball("", metal(), neck + Vector3(0, -0.1, 0.215) * k, 0.04 * k)
 	var head := neck + Vector3(0, 0.2, 0.01) * k
 	_add("", brown, _sphere(), Transform3D(Basis().scaled(Vector3(0.36, 0.36, 0.33) * k), head))
@@ -369,7 +369,9 @@ func _r_chronicler(_tint: Color) -> void:
 	_box("", metal(), Vector3(0.05, 0.012, 0.012) * k, head + Vector3(0, 0.02, 0.2) * k)
 	_tube("", _plain("claw", Color("5a5148"), 0.5), head + Vector3(0, -0.02, 0.17) * k, head + Vector3(0, -0.09, 0.21) * k, 0.03 * k, 0.0)  # beak
 	_shell("", leather(BOOT), Vector3(0, 0.9, 0) * k, Vector3(0, 0.96, 0) * k, 0.3 * k, 0.29 * k, 0.86, 40.0, 320.0)  # belt under the cloak
-	_box("", cloth(SASH), Vector3(0.09, 0.5, 0.02) * k, Vector3(0.05, 0.68, 0.33) * k, Vector3(-0.12, 0, 0))
+	_box("", leather(BOOT), Vector3(0.06, 0.32, 0.02) * k, Vector3(0.05, 0.76, 0.33) * k, Vector3(-0.12, 0, 0))  # the strap end
+	_tube("", _plain("ink", Color("1c2030"), 0.3), Vector3(-0.2, 0.74, 0.3) * k, Vector3(-0.2, 0.86, 0.3) * k, 0.045 * k, 0.045 * k)  # the ink bottle
+	_tube("", metal(), Vector3(-0.2, 0.86, 0.3) * k, Vector3(-0.2, 0.9, 0.3) * k, 0.02 * k, 0.02 * k)
 	# the chained book on the left hip, the lantern in the right hand
 	var book := Vector3(0.36, 0.72, 0.16) * k
 	_box("", leather(Color("5a3d26")), Vector3(0.08, 0.34, 0.26) * k, book, Vector3(0, 0.3, 0.1))

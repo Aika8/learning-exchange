@@ -152,15 +152,11 @@ func _dress() -> void:
 	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8, "olva").name = "Olva"
 	_npc("", Color("3a3a5a"), HARBOUR_SPOTS["chronicler"][0], 0.6, "chronicler").name = "Chronicler"
 	if Assets.put(self, "treasure_chest", HARBOUR_SPOTS["debt"][0], 1.2, 1.0) == null:
-		var chest := Proc.box(Vector3(1.2, 0.7, 0.8), Proc.TIMBER_DARK, HARBOUR_SPOTS["debt"][0] + Vector3(0, 0.35, 0))
-		add_child(chest)
-		chest.set_meta("solid", Solid.box(self, Vector3(1.2, 0.7, 0.8), chest.position))
+		add_child(Props.chest(HARBOUR_SPOTS["debt"][0], 1.2))  # grandfather's chest, as on sheet 25
 	for i in 5:
 		var p: Vector3 = HARBOUR_SPOTS["provisions"][0] + (Vector3(-1.6 + i * 1.2, 0, -1.4) if i < 3 else Vector3(-2.6 + (i - 3) * 4.4, 0, -0.2))
 		if Assets.put(self, "wooden_barrels_01" if i == 4 else "wooden_crate_01", p, i * 0.5, 1.0) == null:
-			var crate := Proc.box(Vector3(0.9, 0.9, 0.9), Proc.TIMBER, p + Vector3(0, 0.45, 0))
-			add_child(crate)
-			crate.set_meta("solid", Solid.box(self, Vector3(0.9, 0.9, 0.9), crate.position))
+			add_child(Props.barrel(p) if i == 4 else Props.crate(p, i * 0.5))
 	var g: Vector3 = HARBOUR_SPOTS["garden"][0]
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 72
@@ -184,7 +180,10 @@ func _dress() -> void:
 	board.position = HARBOUR_SPOTS["fog"][0] + Vector3(0, 0, -1.4)
 	add_child(board)
 	board.add_child(Proc.box(Vector3(2.4, 1.6, 0.12), Proc.TIMBER_DARK, Vector3(0, 1.9, 0)))
-	board.add_child(Proc.box(Vector3(2.1, 1.3, 0.14), Proc.CANVAS, Vector3(0, 1.9, 0.02)))
+	board.add_child(Proc.box(Vector3(2.1, 1.3, 0.14), Proc.TIMBER, Vector3(0, 1.9, 0.02)))
+	var pinned := Kit.new()  # sheet 25: a little roof and papers pinned to the planks
+	Props.notice_papers(pinned, 2.4, 1.9, 0.02)
+	board.add_child(pinned.commit("Papers"))
 	for x: float in [-1.0, 1.0]:
 		board.add_child(Proc.box(Vector3(0.12, 1.2, 0.12), Proc.TIMBER_DARK, Vector3(x, 0.6, 0)))
 		Solid.post(board, 0.09, 1.2, Vector3(x, 0, 0))
