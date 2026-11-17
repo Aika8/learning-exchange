@@ -27,7 +27,7 @@ trapped and walks through nothing he can see, villagers can finish their strolls
 
 ## World audit and measurements (`docs/demo/G3D-polish.md`)
 `godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`; about a minute, `--only=harbour|silk|hall` for one place), `--views=<dir>` (fixed views),
-`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--read=<dir>` (Amber Cliff's prompts and signs, then with T), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
+`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--stroll=<dir>` (a walking camera, to look for shimmer), `--read=<dir>` (Amber Cliff's prompts and signs, then with T), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
 effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 
 ## Layout

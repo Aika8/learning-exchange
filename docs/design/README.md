@@ -5,7 +5,7 @@ Read this before changing the look of anything in `game3d/` (people, buildings, 
 Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/world-bible.md`.
 
 > Islands: each island is drawn in a technique of its own, chosen by Aika (ADR-0026, 0029) — Spark Harbour in pen
-> and ink (the style below), Silk Reach as **katazome**, a Japanese stencil-resist print (sheets 27, 28), Amber Cliff
+> and ink (the style below), Silk Reach as **katazome**, a Japanese stencil-resist print in several blues, ochre and rust (sheet 28; 27 for the motifs), Amber Cliff
 > in **pen and watercolour**, a French travel sketchbook (sheets 29–34). The technique and its colours are a row in
 > `game3d/scripts/island_style.gd`. **The captain is redrawn in the technique of every port** by the island's wind
 > (ADR-0025); a test holds every technique to that. Pictures: `docs/demo/G3D-techniques.md`.
@@ -55,8 +55,8 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `24-spark-harbour.jpg` | "Sheet 9 — Spark Harbour": the establishing view (mill on a stepped terrace, houses, market square, timber wharf, moored ship, rope bridges to islets, waterfall, crystals) | Spark Harbour; **not all built**: no rope bridges, islets or waterfall yet | `scripts/archipelago.gd` |
 | `25-props.jpg` | "Sheet 10 — Props": street lamp, market stall, crate, barrel, rope coil, notice board, chest, scales, ledger, spyglass, anchor, bollard, rope railing, silk rack, five picture signboards | the props of Spark Harbour (low-poly look) | `scripts/props.gd` |
 | `26-chronicler.jpg` | "Sheet 5 — The Chronicler", a **new** version: a layered slate-blue feather robe, belts, ink bottle, chained book, lantern. **Replaces `05-chronicler.jpg`** (cream cloak, blue cape) | the Chronicler in the world | `Costume._r_chronicler` |
-| `27-silk-katazome.jpg` | Silk Reach, the main sheet: **katazome** (Japanese stencil-resist print) — indigo `#1f2f5a`, cream `#efe6d2`, a rare rust `#b5523b`; cut-out silhouettes, a light line, small repeating patterns inside big shapes | the technique of Silk Reach (ADR-0029) | `shaders/ink.gdshader` (`tech == 1`), `island_style.gd` row `silk` |
-| `28-silk-katazome-loose.jpg` | Silk Reach, the secondary sheet: the same three colours, looser | reference only | — |
+| `27-silk-katazome.jpg` | Silk Reach, strict **katazome** (Japanese stencil-resist print): indigo `#1f2f5a` and cream `#efe6d2` only, patterns everywhere. **Secondary now**: Aika found it too harsh on the eyes | reference for the motifs (waves, diamonds) | — |
+| `28-silk-katazome-loose.jpg` | Silk Reach, **the main sheet**: katazome in a looser manner — several blues (deep indigo, middle, pale), sand and ochre for rock and timber, rust for cloth and accents, cream paper, soft half-tones; patterns only on big things | the technique of Silk Reach (ADR-0029) | `shaders/ink.gdshader` (`tech == 1`), `island_style.gd` row `silk` |
 | `29-amber-view.jpg` | Amber Cliff, the establishing view, in **pen and watercolour** (a French travel sketchbook) | the technique of Amber Cliff (ADR-0029); the island's shape is **not rebuilt** to it yet | `shaders/ink.gdshader` (`tech == 2`), row `amber` |
 | `30-amber-houses.jpg` | Amber Cliff, the town-house kit: mansard roof, stone base, plaster front, geranium-red door, sea-teal shutters, iron balcony | colours of `AmberCliff.townhouse`; the kit's small house and outside stairs are not built | `scripts/amber_cliff.gd` |
 | `31-amber-street.jpg` | Amber Cliff, the street of shops | reference; the game's street is wider and plainer | — |

@@ -2,21 +2,30 @@
 
 Aika chose the techniques and drew the sheets (`docs/design/concepts/27…34`). They replace the two I had guessed.
 
-## Silk Reach — katazome (sheets 27, 28)
-Indigo `#1f2f5a` and cream `#efe6d2` with nothing between; a rare rust accent `#b5523b`; a line of the colour the
-shape is not; small patterns cut into the half-tones — waves on what faces the sky, diamonds on walls, dots on what
-leans — **laid out in world space**, so they stay on the thing when the camera moves; a cotton weave.
+## Silk Reach — katazome (sheet 28; sheet 27 for the motifs)
+The first version followed the strict sheet 27: indigo and cream only, patterns in every half-tone. Aika: "blue and
+white is too simple and hard to look at, the eyes begin to hurt, more colours are needed". It was redone after
+sheet 28: **several blues** (deep indigo `#1f2f5a`, middle `#4f6a94`, pale `#a9bcd2`), **ochre `#c79a63` and sand**
+for rock, timber and the ground, **rust `#b5523b`** for cloth and accents, **cream paper `#efe6d2`**, soft steps
+between tones. Patterns only on cloth, roofs and the cloud sea, large and faint, in world space.
 
-| Before ("printed silk") | After (katazome) |
-|---|---|
-| ![](g3d-techniques/before-silk.jpg) | ![](g3d-techniques/after-silk.jpg) |
-| ![](g3d-techniques/before-silk-houses.jpg) | ![](g3d-techniques/after-silk-houses.jpg) |
+| Before ("printed silk", my guess) | Strict katazome (sheet 27) — too harsh | Now (sheet 28) |
+|---|---|---|
+| ![](g3d-techniques/before-silk.jpg) | ![](g3d-techniques/strict-silk.jpg) | ![](g3d-techniques/after-silk.jpg) |
+| ![](g3d-techniques/before-silk-houses.jpg) | ![](g3d-techniques/strict-silk-houses.jpg) | ![](g3d-techniques/after-silk-houses.jpg) |
 
-The landing, and the second mode (V): the bare stencil, two colours and no patterns.
+The landing; and the second mode (V): the same without rust and patterns.
 
 | | |
 |---|---|
-| ![](g3d-techniques/after-silk-landing.jpg) | ![](g3d-techniques/silk-stencil.jpg) |
+| ![](g3d-techniques/after-silk-landing.jpg) | ![](g3d-techniques/silk-plain.jpg) |
+
+**On the move.** A camera walks 12 m across the island, a frame every 0.1 s (`--stroll=<dir>`). The mean change
+between neighbouring frames was 30.6 of 255 with the strict version and is 10.9 now; what is left is the motion
+itself. Recordings: [strict](g3d-techniques/walking-strict.gif), [now](g3d-techniques/walking-after.gif). Each
+pattern is faded out before its cell is smaller than about 14–30 pixels, with the angle of the surface counted in.
+
+![](g3d-techniques/silk-walking.jpg)
 
 ## Amber Cliff — pen and watercolour (sheets 29–34)
 A thin warm-grey line that trembles and presses and lifts; washes that run past the line; a lot of bare paper,
@@ -50,6 +59,7 @@ the other and ends with one style; every port tells the effect where the hero st
 ```
 godot --path game3d --resolution 1600x900 -- --views=<dir> --only=silk --ink=1      # or amber, --ink=2
 godot --path game3d --resolution 1600x900 -- --attune=<dir> --island=silk --ink=1   # or amber
+godot --path game3d --resolution 1600x900 -- --stroll=<dir> --island=silk          # a walking camera, 30 frames
 godot --path game3d --resolution 1920x1080 -- --fps=<file.json>
 ```
 
@@ -61,7 +71,8 @@ godot --path game3d --resolution 1920x1080 -- --fps=<file.json>
 
 ## Not done, not checked
 - Not played by hand.
-- Villagers on Silk Reach walk *through* the world-space pattern (it slides over them); the captain does not.
+- On Silk Reach people carry almost no pattern now (patterns are on cloth, roofs and clouds). Whether the new
+  palette is easy on the eyes over a long play is for Aika to say; frame rate was not re-measured after this rework.
 - The islands' shapes are not rebuilt to the sheets: the Japanese village, vats and banners of Silk Reach (27, 28);
   on Amber Cliff the lighthouse with the keeper's house (32), the newspaper kiosk, carousel, bicycles, flower stand
   and café chairs (33), the small house and outside stairs of the kit (30), the cliff's amber veins (29).

@@ -420,9 +420,12 @@ Build and CI
 - House signboards carry pictures only (anchor, quill, coin, sail, loaf), chosen by the house's own random seed.
 
 ## G3D techniques (ADR-0029)
-- Katazome: cream above brightness 0.50–0.53, indigo below; patterns only between 0.36 and 0.62 and nearer than
-  28–60 m; pattern cells 0.8 m (waves), 0.55 m (diamonds), 0.3 m (dots). The rust accent is taken only where red is
-  1.6 times the other channels *as seen* (after gamma): timber is not rust, a red roof and a red sash are.
+- Katazome (after sheet 28): two families of tones with soft steps — blues (deep → middle at 0.22–0.36 → pale at
+  0.42–0.58 → cream at 0.66–0.84) and earth (ochre, sand; cream only above 0.86). A thing is earth if it is warmer
+  than it is blue, or if it is the ground (facing up, above the cloud sea), lit or in shade. Cloth = upright,
+  coloured, bright, not green: warm cloth is rust, cool cloth middle blue. Patterns only on cloth (cell 1.1 m),
+  roofs (1.5 m) and the cloud sea (14 m); they lighten the tone by 55 % towards cream; faded out below 14–30 px a cell.
+- `--stroll` and the mean change between frames is the rough measure of shimmer.
 - The hero's column for patterns is 0.75 m wide and separate from the wave's column.
 - Watercolour: the wash is read 11 px aside at most (at 1080p) and averaged over four neighbours; it is thinned to
   50–95 % by brightness and by half again with distance; the line is moved up to 1.6 px by slow noise.
