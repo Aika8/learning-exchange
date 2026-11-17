@@ -112,6 +112,7 @@ func _skeleton() -> Skeleton3D:
 const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1, 0.11], "sailor2": [0.9, 1.4, 1.18, 0.05], "sailor3": [0.97, 0.78, 1.12, 0.14],
 	"mara": [0.98, 1.08, 1.34, 0.09], "changer": [0.96, 1.32, 1.3, 0.06], "olva": [1.0, 0.8, 1.12, 0.1], "trader": [0.88, 1.45, 1.15, 0.05],
 	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0],
+	"crypto_trader": [1.04, 1.0, 1.12, 0.06], "crypto_miner": [0.98, 1.2, 1.15, 0.05], "crypto_dreamer": [0.96, 0.82, 1.14, 0.06], "crypto_analyst": [1.0, 0.84, 1.12, 0.06],
 	"noir_broker": [1.06, 1.05, 1.12, 0.07], "noir_tramp": [0.93, 1.15, 1.2, 0.12], "noir_youth": [0.98, 0.74, 1.16, 0.06], "noir_lady": [1.0, 0.85, 1.14, 0.06]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
 	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
@@ -140,7 +141,7 @@ func _body(role: String) -> void:
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
 	if nose > 0.0:  # no face, but a nose: it belongs to the outline
 		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
-	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady"]:  # hair under the hat or kerchief
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst"]:  # hair under the hat or kerchief
 		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
@@ -298,6 +299,61 @@ func _r_trader(tint: Color) -> void:
 
 
 ## Sheet 04, the old man: brown wide hat, long brown coat, green waistcoat, breeches, white stockings, buckled shoes.
+## Sheet 44, the trader: a bright cyan jacket to the hip over black, dark trousers.
+func _r_crypto_trader(_tint: Color) -> void:
+	var jacket := cloth(Color("19d8f0"))
+	_recolour("top", cloth(Color("15102e")))
+	_recolour("bot", cloth(Color("2a1f4a")))
+	_recolour("lea", leather(Color("15102e")))
+	_hide("fedora")
+	_breeches(cloth(Color("2a1f4a")), 0.09)
+	_stockings(cloth(Color("2a1f4a")))
+	_open_coat(jacket, cloth(Color("8ff4ff")), _p("pelvis").y - 0.08 * k, 40.0, true)
+	_coat_sleeves(jacket, cloth(Color("8ff4ff")), cloth(Color("15102e")))
+
+
+## Sheet 44, the miner: a long dark coat, a helmet with a lamp.
+func _r_crypto_miner(_tint: Color) -> void:
+	var coat := cloth(Color("3a3a36"))
+	_recolour("top", cloth(Color("5a5648")))
+	_recolour("bot", cloth(Color("4a3a30")))
+	_recolour("lea", leather(Color("2a2622")))
+	_hide("fedora")
+	_breeches(cloth(Color("4a3a30")), 0.11)
+	_stockings(cloth(Color("4a3a30")))
+	_open_coat(coat, cloth(Color("5a5648")), _p("calf_l").y + 0.1 * k, 52.0, false)
+	_coat_sleeves(coat, cloth(Color("5a5648")), cloth(Color("3a3a36")))
+	_knit_cap(cloth(Color("b0902a")))
+	_ball("head", _plain("lamp", Color("fff0a0"), 0.2), Vector3(0, top - 0.02 * hk, 0.19 * hk), 0.05 * hk)
+
+
+## Sheet 44, the dreamer: a magenta hoodie, dark trousers, nothing on the head.
+func _r_crypto_dreamer(_tint: Color) -> void:
+	var hoodie := cloth(Color("c02a90"))
+	_recolour("top", hoodie)
+	_recolour("bot", cloth(Color("1c1530")))
+	_recolour("lea", leather(Color("c02a90")))
+	_hide("fedora")
+	_breeches(cloth(Color("1c1530")), 0.09)
+	_stockings(cloth(Color("1c1530")))
+	_shirt_sleeves(hoodie)
+	_shawl(hoodie)  # the hood, down on the shoulders
+
+
+## Sheet 44, the analyst: a dark fitted jacket with a cyan edge, olive trousers.
+func _r_crypto_analyst(_tint: Color) -> void:
+	var jacket := cloth(Color("23283a"))
+	_recolour("top", cloth(Color("23283a")))
+	_recolour("bot", cloth(Color("5a5a40")))
+	_recolour("lea", leather(Color("2a2622")))
+	_hide("fedora")
+	_breeches(cloth(Color("5a5a40")), 0.1)
+	_stockings(cloth(Color("5a5a40")))
+	_open_coat(jacket, cloth(Color("19d8f0")), _p("pelvis").y - 0.14 * k, 24.0, true)
+	_coat_sleeves(jacket, cloth(Color("19d8f0")), cloth(Color("23283a")))
+	_bun()
+
+
 const NOIR_RED := Color("c4302b")  ## the one colour of the short sellers' island (sheet 36)
 const NOIR_BLACK := Color("141417")
 

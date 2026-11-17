@@ -4,7 +4,7 @@
 class_name Audit
 extends RefCounted
 
-const PLACES := ["harbour", "silk", "amber", "shorts", "hall"]
+const PLACES := ["harbour", "silk", "amber", "shorts", "crypto", "hall"]
 const SHOTS_PER_KIND := 3
 
 
@@ -29,6 +29,11 @@ const VIEWS := {
 		["view-shorts-exchange", ShortIsle.AT + Vector3(8, 2.6, 5), ShortIsle.AT + Vector3(21, 6.5, 0)],
 		["view-shorts-houses", ShortIsle.AT + Vector3(-12, 2.2, 1.5), ShortIsle.AT + Vector3(-2, 4.5, -9)],
 		["view-shorts-slab", ShortIsle.AT + Vector3(-30, 6, 22), ShortIsle.AT + Vector3(-8, 12, -60)]],
+	"crypto": [["view-crypto", CryptoIsle.AT + Vector3(-44, 13, 26), CryptoIsle.AT + Vector3(2, 4, -4)],
+		["view-crypto-street", CryptoIsle.AT + Vector3(-25, 2.4, 0.6), CryptoIsle.AT + Vector3(20, 6, 0)],
+		["view-crypto-exchange", CryptoIsle.AT + Vector3(7, 2.6, 5.5), CryptoIsle.AT + Vector3(20, 6.5, 0)],
+		["view-crypto-towers", CryptoIsle.AT + Vector3(-11, 2.2, 1.8), CryptoIsle.AT + Vector3(-2, 6, -9)],
+		["view-crypto-coin", CryptoIsle.AT + Vector3(-1.5, 2.0, 0.5), CryptoIsle.AT + Vector3(5, 2.4, 4.5)]],
 	"hall": [["view-hall", Vector3(0, 3.4, 10.4), Vector3(0, 5, -9)], ["view-hall-side", Vector3(10, 4, 6), Vector3(-6, 2.5, -6)],
 		["view-hall-up", Vector3(0, 1.6, 9), Vector3(0, 12, -4)]],
 }
@@ -56,7 +61,7 @@ static func views(tree: SceneTree) -> void:
 ## jumps there (the first second) and settled (the next two). Writes a JSON table; run at 1920x1080.
 static func fps(tree: SceneTree) -> void:
 	var rows: Array = []
-	for place: String in ["harbour", "silk", "amber", "shorts"]:
+	for place: String in ["harbour", "silk", "amber", "shorts", "crypto"]:
 		if not Session.arg("only").is_empty() and place != Session.arg("only"):
 			continue
 		Game.island = place
@@ -297,7 +302,7 @@ static func stroll(tree: SceneTree) -> void:
 	var from := centre + Vector3(-19, 1.9, 17)
 	var to := centre + Vector3(-9, 1.9, 9)
 	var look := centre + Vector3(4, 1.6, -4)
-	if place == ShortIsle.ID or place == AmberCliff.ID:  # these two have a street: walk along it
+	if place == ShortIsle.ID or place == AmberCliff.ID or place == CryptoIsle.ID:  # these two have a street: walk along it
 		from = centre + Vector3(-22, 1.9, 0.8)
 		to = centre + Vector3(-10, 1.9, 0.4)
 		look = centre + Vector3(21, 5, 0)

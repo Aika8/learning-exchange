@@ -7,6 +7,9 @@
 //     small enough to shimmer; a thin indigo line; a cotton weave;
 // 3 = noir (ADR-0030) — paper white in the light, ink black in the shade, one flat grey between; anything truly red
 //     is the one signal red; fog fades the distance to pale paper; thin slanted rain that travels steadily;
+// 4 = pixel (ADR-0031) — synthwave pixel art: big pixels 180 rows high, twelve colours, ordered dithering between
+//     tones, neon kept as neon, a striped sun and banded night sky, a glowing grid on the ground in world space,
+//     a dithered halo round neon; nothing animated;
 // 2 = aquarelle — pen and watercolour: a thin trembling line, washes that run past it, a lot of bare paper, a
 //     violet-grey wash for shade, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
@@ -83,6 +86,32 @@ float diamonds(vec2 q) {
 float dots(vec2 q) {
 	vec2 f = fract(q + vec2(0.5 * mod(floor(q.y), 2.0), 0.0)) - 0.5;
 	return step(length(f), 0.2);
+}
+
+const int BAYER[16] = {0, 8, 2, 10, 12, 4, 14, 6, 3, 11, 1, 9, 15, 7, 13, 5};
+
+float bayer(vec2 cell) {  // an ordered-dither threshold, fixed to the big pixels
+	ivec2 i = ivec2(mod(cell, 4.0));
+	return (float(BAYER[i.y * 4 + i.x]) + 0.5) / 16.0;
+}
+
+vec3 hexc(float r, float g, float b) {  // a palette colour written as its 0–255 values
+	return pow(vec3(r, g, b) / 255.0, vec3(2.2));
+}
+
+// Is this colour a neon — bright and saturated — and which of the four? Returns black for "not neon".
+vec3 neon_of(vec3 c) {
+	vec3 seen = pow(clamp(c, 0.0, 1.0), vec3(0.45));
+	float top = max(seen.r, max(seen.g, seen.b));
+	float low = min(seen.r, min(seen.g, seen.b));
+	if (top - low < 0.42 || top < 0.6) {
+		return vec3(0.0);
+	}
+	if (seen.b > seen.r) {
+		return hexc(0.0, 240.0, 255.0);  // neon cyan
+	}
+	float gr = seen.g / max(seen.r, 0.01);
+	return gr > 0.66 ? hexc(255.0, 204.0, 0.0) : (gr > 0.4 ? hexc(255.0, 122.0, 61.0) : hexc(255.0, 46.0, 136.0));  // gold, orange, pink
 }
 
 void vertex() {
@@ -239,6 +268,113 @@ void fragment() {
 		result *= 0.965 + 0.05 * hash(floor(FRAGCOORD.xy / max(s, 1.0)));  // the tooth of the paper
 		float alive = 0.62 + 0.38 * smoothstep(0.2, 0.7, blot(FRAGCOORD.xy / (16.0 * s)));  // the pen presses and lifts
 		result = mix(result, line, edge * alive);
+	} else if (tech == 4) {
+		vec3 night = hexc(27.0, 16.0, 53.0);
+		vec3 deep = hexc(45.0, 27.0, 94.0);
+		vec3 violet = hexc(91.0, 42.0, 134.0);
+		vec3 lavender = hexc(143.0, 111.0, 208.0);
+		vec3 pale = hexc(216.0, 200.0, 255.0);
+		vec3 plum = hexc(74.0, 24.0, 70.0);
+		vec3 magenta = hexc(160.0, 32.0, 110.0);
+		vec3 pink = hexc(255.0, 46.0, 136.0);
+		vec3 orange = hexc(255.0, 122.0, 61.0);
+		vec3 gold = hexc(255.0, 204.0, 0.0);
+		vec3 cyan = hexc(0.0, 240.0, 255.0);
+		vec3 teal = hexc(31.0, 167.0, 160.0);
+		// big pixels: 180 rows whatever the window; each is the average of four samples of its cell
+		float k = max(floor(VIEWPORT_SIZE.y / 180.0), 1.0);
+		vec2 cell = floor(FRAGCOORD.xy / k);
+		vec2 mid = (cell + 0.5) * k / VIEWPORT_SIZE;
+		vec3 c = vec3(0.0);
+		for (int i = 0; i < 4; i++) {
+			c += texture(screen_tex, mid + (offs[i].xy + offs[i].yx * 0.5) * 0.3 * k / VIEWPORT_SIZE).rgb;
+		}
+		c *= 0.25;
+		vec3 at_cell = view_at(mid, INV_PROJECTION_MATRIX);
+		float cd = -at_cell.z;
+		vec3 cn = normalize(mat3(INV_VIEW_MATRIX) * (texture(normal_tex, mid).rgb * 2.0 - 1.0));
+		vec3 world = (INV_VIEW_MATRIX * vec4(at_cell, 1.0)).xyz;
+		vec3 seen = pow(clamp(c, 0.0, 1.0), vec3(0.45));
+		float cl = clamp(dot(seen, vec3(0.299, 0.587, 0.114)) * 1.35, 0.0, 1.0);
+		bool on_ground = cn.y > 0.75 && world.y > -30.0;
+		if (on_ground) {
+			cl *= 0.5;  // the ground is night: the grid is what glows on it
+		}
+		float th = mode == 2 ? 0.5 : bayer(cell);
+		// bodies: five tones by brightness, cool or warm; dithered only in the narrow zone where two tones meet,
+		// so walls are flat colour and not a field of dots
+		float x = cl * 4.0;
+		float step_i = floor(x) + step(th, smoothstep(0.36, 0.64, fract(x)));
+		bool warm = seen.r > seen.b * 1.08;
+		vec3 tone = night;
+		if (step_i >= 4.0) {
+			tone = pale;
+		} else if (step_i >= 3.0) {
+			tone = lavender;
+		} else if (step_i >= 2.0) {
+			tone = warm ? magenta : violet;
+		} else if (step_i >= 1.0) {
+			tone = warm ? plum : deep;
+		}
+		vec3 glow_here = neon_of(c);
+		bool is_neon = glow_here.r + glow_here.g + glow_here.b > 0.0;
+		if (is_neon) {
+			tone = glow_here;
+		}
+		float is_far = step(500.0, cd);
+		// the cloud sea under the islands: dark water of two violets
+		if (world.y < -30.0 && is_far < 0.5) {
+			tone = sin(world.z * 0.09 + sin(world.x * 0.03) * 2.0) > 0.55 ? violet : (th < 0.3 ? deep : night);
+		}
+		// the grid: glowing lines every two metres on the ground the hero stands on, in world space
+		if (mode != 2 && !is_neon && on_ground && hero_radius > 0.0 && abs(world.y - hero.y) < 0.8 && is_far < 0.5) {
+			float m_per_cell = cd * 2.0 / (PROJECTION_MATRIX[1][1] * 180.0);  // metres one big pixel covers here
+			float tilt = clamp(abs(dot(normalize(at_cell), normalize(mat3(VIEW_MATRIX) * cn))), 0.05, 1.0);  // how squarely we look at the ground
+			float cells = 2.0 * tilt / max(m_per_cell, 0.0001);  // big pixels between two grid lines, across the view
+			vec2 g = abs(fract(world.xz / 2.0 + 0.5) - 0.5) * 2.0;
+			float on_line = step(min(g.x, g.y), max(0.07, m_per_cell * 0.55));
+			float readable = smoothstep(2.2, 4.0, cells);  // gone before the lines would touch and swarm
+			tone = mix(tone, cd < 26.0 ? cyan : (cd < 60.0 ? teal : magenta), on_line * step(0.5, readable));
+		}
+		// the sky, drawn from where each big pixel looks: night down to magenta, a few stars, the striped sun
+		if (is_far > 0.5) {
+			vec3 dir = normalize(mat3(INV_VIEW_MATRIX) * normalize(at_cell));
+			float up = dir.y * 2.6 + 0.2;
+			float band = floor(clamp(up, 0.0, 0.999) * 4.0 + (th - 0.5) * 0.9 + 0.5);
+			tone = band >= 3.0 ? night : (band >= 2.0 ? deep : (band >= 1.0 ? violet : magenta));
+			if (dir.y < -0.02) {
+				tone = step(th, 0.5 + dir.y * 3.0) > 0.5 ? deep : night;
+			}
+			if (hash(floor(dir.xz / max(dir.y, 0.05) * 22.0)) > 0.994 && dir.y > 0.22) {
+				tone = pale;
+			}
+			vec3 sun_at = normalize(vec3(1.0, 0.15, 0.22));
+			float r_sun = 0.24;
+			vec3 off = dir - sun_at;
+			if (length(off) < r_sun && dot(dir, sun_at) > 0.0) {
+				float h = off.y / r_sun;  // −1 at the bottom of the disc, 1 at the top
+				float gap = step(fract(h * 4.5), clamp(0.15 - h * 0.45, 0.0, 0.7)) * step(h, 0.25);
+				vec3 disc = h > 0.35 ? gold : (h > -0.2 ? orange : pink);
+				tone = gap > 0.5 ? tone : disc;
+			}
+		}
+		// glow by dithering: a checkerboard halo two big pixels wide, round neon only
+		if (mode != 2 && !is_neon && mod(cell.x + cell.y, 2.0) < 0.5) {
+			for (int i = 0; i < 4; i++) {
+				vec3 near = neon_of(texture(screen_tex, mid + offs[i] * 2.0 * k / VIEWPORT_SIZE).rgb);
+				if (near.r + near.g + near.b > 0.0) {
+					tone = mix(tone, near, 0.55);
+					break;
+				}
+			}
+		}
+		// a dark edge where depth breaks, one big pixel wide
+		float ed = 0.0;
+		for (int i = 0; i < 4; i++) {
+			ed += abs(-view_at(mid + offs[i] * k / VIEWPORT_SIZE, INV_PROJECTION_MATRIX).z - cd);
+		}
+		float pixel_edge = smoothstep(0.06, 0.1, ed / max(cd, 0.5)) * (1.0 - is_far) * (1.0 - smoothstep(60.0, 120.0, cd));
+		result = (is_neon || mode == 2) ? tone : mix(tone, night, pixel_edge * 0.85);
 	} else if (tech == 3) {
 		vec3 red = mix(ramp2, ramp2_from, old);
 		vec3 white = sheet_colour;

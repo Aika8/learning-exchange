@@ -445,3 +445,15 @@ Build and CI
   (`ComicFaces.ONE_FACE`, `"one_face": true` in the cast).
 - `--stroll` walks the street on islands that have one and takes `--still`.
 - Cargo on the wharf's north rail moved east to make room for the second packet-boat post.
+
+## G3D crypto island (ADR-0031)
+- The pixel technique reads no clock: steady neon was chosen over the sheets' "broken neon".
+- Dithering only where the fraction between two tones is 0.36–0.64; the ground is drawn at half brightness so the
+  grid is what glows on it; the grid is drawn only on the ground the hero stands on and dropped below about three
+  big pixels a cell.
+- Neon = bright (above 0.6) and saturated (spread above 0.42) as seen; the island's builder decides what that is by
+  making it emissive. Pink / orange / gold by the green-to-red ratio (0.4, 0.66); anything bluer than red is cyan.
+- The sun stands low in the east (direction 1, 0.15, 0.22), so the street, which runs east, ends in it.
+- Real coin marks on sheets 41, 44, 45 are covered with a flat night-coloured box in the repository's copies.
+- The wharf has three packet-boat posts now (x = 24.6, 28.4, 33.0); each has its own spot radius so they do not overlap.
+- Demo pictures of this island are PNG scaled with nearest-neighbour: JPEG smears big pixels.

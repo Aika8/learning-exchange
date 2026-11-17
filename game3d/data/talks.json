@@ -26,7 +26,14 @@
     "noir_broker": {"name": "WHO_NOIR_BROKER", "who": "sailor", "role": "noir_broker", "coat": "141417", "face": "noir_broker", "one_face": true},
     "noir_tramp": {"name": "WHO_NOIR_TRAMP", "who": "oldman", "role": "noir_tramp", "coat": "77746f", "face": "noir_tramp", "one_face": true},
     "noir_youth": {"name": "WHO_NOIR_YOUTH", "who": "sailor", "role": "noir_youth", "coat": "242428", "face": "noir_youth", "one_face": true},
-    "noir_lady": {"name": "WHO_NOIR_LADY", "who": "trader", "role": "noir_lady", "coat": "141417", "face": "noir_lady", "one_face": true}
+    "noir_lady": {"name": "WHO_NOIR_LADY", "who": "trader", "role": "noir_lady", "coat": "141417", "face": "noir_lady", "one_face": true},
+    "crypto_trader": {"name": "WHO_CRYPTO_TRADER", "who": "sailor", "role": "crypto_trader", "coat": "19d8f0", "face": "crypto_trader", "one_face": true},
+    "crypto_miner": {"name": "WHO_CRYPTO_MINER", "who": "oldman", "role": "crypto_miner", "coat": "3a3a36", "face": "crypto_miner", "one_face": true},
+    "crypto_dreamer": {"name": "WHO_CRYPTO_DREAMER", "who": "sailor", "role": "crypto_dreamer", "coat": "c02a90", "face": "crypto_dreamer", "one_face": true},
+    "crypto_analyst": {"name": "WHO_CRYPTO_ANALYST", "who": "trader", "role": "crypto_analyst", "coat": "23283a", "face": "crypto_analyst", "one_face": true},
+    "bot_trader": {"name": "WHO_BOT_TRADER", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_trader", "one_face": true},
+    "bot_miner": {"name": "WHO_BOT_MINER", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_miner", "one_face": true},
+    "bot_info": {"name": "WHO_BOT_INFO", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_info", "one_face": true}
   },
   "backdrops": {
     "wharf": {"sky": "f3d7a8", "ground": "8a5a3c"},
@@ -35,7 +42,8 @@
     "dusk": {"sky": "6a5a8a", "ground": "4f7f52"},
     "amber": {"sky": "8fd0d8", "ground": "e3c58a"},
     "amber_in": {"sky": "f1dcae", "ground": "9a6a4a"},
-    "noir": {"sky": "8a8a8a", "ground": "1d1c20"}
+    "noir": {"sky": "8a8a8a", "ground": "1d1c20"},
+    "neon": {"sky": "5b2a86", "ground": "1b1035"}
   },
   "talks": {
     "mara_first": {"backdrop": "wharf", "pages": [
@@ -233,6 +241,49 @@
       {"panels": [
         {"shot": "two", "cast": ["noir_lady", "captain"], "lines": [["noir_lady", "TALK_SHORTS_LADY_1", "neutral"], ["captain", "TALK_SHORTS_LADY_2", "worried"]]},
         {"shot": "close", "cast": ["noir_lady"], "lines": [["noir_lady", "TALK_SHORTS_LADY_3", "neutral"]]}
+      ]}
+    ]},
+    "bot_trader": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["bot_trader", "captain"], "caption": "TALK_CRYPTO_EX_C", "mood": {"bot_trader": "neutral", "captain": "neutral"}},
+        {"shot": "two", "cast": ["bot_trader", "captain"], "lines": [["bot_trader", "TALK_CRYPTO_EX_1", "neutral"], ["captain", "TALK_CRYPTO_EX_2", "surprised"]]},
+        {"shot": "close", "cast": ["bot_trader"], "lines": [["bot_trader", "TALK_CRYPTO_EX_3", "neutral"]]}
+      ]}
+    ]},
+    "crypto_trader": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["crypto_trader", "captain"], "lines": [["crypto_trader", "TALK_CRYPTO_TRADER_1", "neutral"], ["captain", "TALK_CRYPTO_TRADER_2", "happy"]]},
+        {"shot": "close", "cast": ["crypto_trader"], "lines": [["crypto_trader", "TALK_CRYPTO_TRADER_3", "neutral"]]}
+      ]}
+    ]},
+    "crypto_miner": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["crypto_miner", "captain"], "lines": [["crypto_miner", "TALK_CRYPTO_MINER_1", "neutral"], ["captain", "TALK_CRYPTO_MINER_2", "surprised"]]},
+        {"shot": "close", "cast": ["crypto_miner"], "lines": [["crypto_miner", "TALK_CRYPTO_MINER_3", "neutral"]]}
+      ]}
+    ]},
+    "crypto_dreamer": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["crypto_dreamer", "captain"], "lines": [["crypto_dreamer", "TALK_CRYPTO_DREAMER_1", "neutral"], ["captain", "TALK_CRYPTO_DREAMER_2", "sly"]]},
+        {"shot": "close", "cast": ["crypto_dreamer"], "lines": [["crypto_dreamer", "TALK_CRYPTO_DREAMER_3", "neutral"]]}
+      ]}
+    ]},
+    "crypto_analyst": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["crypto_analyst", "captain"], "lines": [["crypto_analyst", "TALK_CRYPTO_ANALYST_1", "neutral"], ["captain", "TALK_CRYPTO_ANALYST_2", "worried"]]},
+        {"shot": "close", "cast": ["crypto_analyst"], "lines": [["crypto_analyst", "TALK_CRYPTO_ANALYST_3", "neutral"]]}
+      ]}
+    ]},
+    "bot_miner": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["bot_miner", "captain"], "lines": [["bot_miner", "TALK_BOT_MINER_1", "neutral"], ["captain", "TALK_BOT_MINER_2", "surprised"]]},
+        {"shot": "close", "cast": ["bot_miner"], "lines": [["bot_miner", "TALK_BOT_MINER_3", "neutral"]]}
+      ]}
+    ]},
+    "bot_info": {"backdrop": "neon", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["bot_info", "captain"], "lines": [["bot_info", "TALK_BOT_INFO_1", "neutral"], ["captain", "TALK_BOT_INFO_2", "sly"]]},
+        {"shot": "close", "cast": ["bot_info"], "lines": [["bot_info", "TALK_BOT_INFO_3", "neutral"]]}
       ]}
     ]}
   }

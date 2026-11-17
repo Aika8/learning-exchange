@@ -69,3 +69,32 @@ TALK_SHORTS_YOUTH_3,"Тот же. Только ему платят за плох
 TALK_SHORTS_LADY_1,"За взятое взаймы платят каждый день. Это плата за заём.","What is borrowed is paid for every day. That is the borrow fee."
 TALK_SHORTS_LADY_2,"Значит, ждать падения — недёшево?","So waiting for the fall is not cheap?"
 TALK_SHORTS_LADY_3,"Недёшево. И если заимодавец потребует товар назад, придётся выкупать по любой цене.","Not cheap. And if the lender calls the goods back, you must buy at whatever the price is."
+WHO_CRYPTO_TRADER,Трейдер,The trader
+WHO_CRYPTO_MINER,Рудокоп,The miner
+WHO_CRYPTO_DREAMER,Мечтатель,The dreamer
+WHO_CRYPTO_ANALYST,Аналитик,The analyst
+WHO_BOT_TRADER,Бот-торговец,The trading bot
+WHO_BOT_MINER,Бот-шахтёр,The mining bot
+WHO_BOT_INFO,Бот-информатор,The news bot
+TALK_CRYPTO_EX_C,"Биржа, которая не закрывается. Стену графиков ещё настраивают: внутрь пока не пускают.","The Exchange That Never Closes. The wall of charts is still being set up: nobody is let in yet."
+TALK_CRYPTO_EX_1,"Здесь торгуют монетой ветра круглые сутки, без выходных. Биржа не закрывается никогда.","Here the wind coin is traded round the clock, with no days off. The exchange never closes."
+TALK_CRYPTO_EX_2,"А когда же спать?","Then when does anyone sleep?"
+TALK_CRYPTO_EX_3,"Мы не спим — мы боты. Человек ставит заявку и стоп заранее и идёт спать. Цена его не ждёт.","We do not sleep — we are bots. A person places an order and a stop beforehand and goes to bed. The price does not wait."
+TALK_CRYPTO_TRADER_1,"За день цена тут ходит так, как в Гавани за год. Это высокая волатильность.","In a day the price here moves as much as in the Harbour in a year. That is high volatility."
+TALK_CRYPTO_TRADER_2,"Значит, и заработать можно быстро?","So one can earn fast?"
+TALK_CRYPTO_TRADER_3,"И потерять так же быстро. С заёмными парусами — с плечом — канаты рубят за минуты.","And lose just as fast. With borrowed sails — leverage — the ropes are cut in minutes."
+TALK_CRYPTO_MINER_1,"Монету ветра не чеканит Совет Казначеев. Её добывают машины. Это майнинг.","The wind coin is not minted by the Treasurers' Council. Machines dig it out. That is mining."
+TALK_CRYPTO_MINER_2,"Кто же решает, сколько её будет?","Then who decides how much of it there will be?"
+TALK_CRYPTO_MINER_3,"Никто. Правило записано заранее: монет будет ровно столько, сколько в нём сказано.","Nobody. The rule was written beforehand: there will be exactly as many coins as it says."
+TALK_CRYPTO_DREAMER_1,"Она вырастет до самой Луны! Все так говорят!","It will rise all the way to the Moon! Everybody says so!"
+TALK_CRYPTO_DREAMER_2,"Кто — все?","Who is everybody?"
+TALK_CRYPTO_DREAMER_3,"Ну… все в порту. Я боялся опоздать. Говорят, это называется страх упустить — FOMO.","Well… everybody in the port. I was afraid to be late. They say it is called the fear of missing out — FOMO."
+TALK_CRYPTO_ANALYST_1,"У мастерской есть ведомость — финансовый отчёт. У монеты её нет: ни выручки, ни прибыли.","A workshop has a ledger — a financial report. A coin has none: no revenue, no profit."
+TALK_CRYPTO_ANALYST_2,"Тогда из чего складывается цена?","Then what is the price made of?"
+TALK_CRYPTO_ANALYST_3,"Из спроса и доверия. Поэтому её так трудно оценить, и поэтому её так качает.","Of demand and trust. That is why it is so hard to value, and why it swings so."
+TALK_BOT_MINER_1,"Я копаю. Я записываю сделки. Тот, кто записал, получает плату. Это комиссия сети.","I dig. I write the trades down. Whoever writes them down is paid. That is the network fee."
+TALK_BOT_MINER_2,"И всегда одинаковую?","Always the same?"
+TALK_BOT_MINER_3,"Нет. Когда все спешат, плата растёт. Спешить — дорого.","No. When everybody hurries, the fee grows. Hurrying is dear."
+TALK_BOT_INFO_1,"Сводка. За ночь цена изменилась двадцать раз. Я не сплю. Я не устаю.","Bulletin. Overnight the price changed twenty times. I do not sleep. I do not tire."
+TALK_BOT_INFO_2,"И куда она пойдёт завтра?","And where will it go tomorrow?"
+TALK_BOT_INFO_3,"Неизвестно. Я знаю всё, что уже было. Того, что будет, не знает никто.","Unknown. I know all that has been. What will be, nobody knows."

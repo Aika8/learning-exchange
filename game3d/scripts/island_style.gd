@@ -6,7 +6,7 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3}
+const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
 ## Spark Harbour is the look of ADR-0024 as approved. Every other island has a technique of its own.
@@ -62,6 +62,19 @@ const TABLE := {
 		"sun": Color("ffffff"),  # hard light
 		"sun_energy": 1.7,
 		"accent": Color("e0453f"),
+	},
+	"crypto": {
+		"technique": "pixel",  # synthwave pixel art: big pixels, twelve colours, a striped sun, a ground grid (sheets 41–46; ADR-0031)
+		"ramp": [Color("1b1035"), Color("5b2a86"), Color("ff2e88"), Color("00f0ff")],  # night, violet, neon pink, neon cyan — the whole palette is in the shader
+		"ink": Color("1b1035"),
+		"width": 1.0,
+		"tint": Color(1.0, 1.0, 1.0),
+		"paper": Color("1b1035"),
+		"hatch_turn": 0.0,
+		"hatch_gap": 9.0,
+		"sun": Color("b9a6ff"),  # a violet dusk
+		"sun_energy": 0.85,
+		"accent": Color("00f0ff"),
 	},
 }
 

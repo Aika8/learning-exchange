@@ -17,7 +17,9 @@ const HARBOUR_SPOTS := {
 	"fog": [Vector3(15, 0, -4), "PROMPT_FOG", 3.2],
 	"ferry": [FERRY_POST + Vector3(0, 0, 1.3), "PROMPT_FERRY", 2.4],
 	"ferry_shorts": [SHORTS_POST + Vector3(0, 0, 1.3), "PROMPT_FERRY_SHORTS", 2.0],
+	"ferry_crypto": [CRYPTO_POST + Vector3(0, 0, 1.3), "PROMPT_FERRY_CRYPTO", 1.8],
 }
+const CRYPTO_POST := Vector3(24.6, Archipelago.DECK_Y, -3.9)  ## the signpost of the packet boat to the crypto island
 const SHORTS_POST := Vector3(28.4, Archipelago.DECK_Y, -3.9)  ## the signpost of the packet boat to the short sellers' island
 const FERRY_POST := Vector3(33.0, Archipelago.DECK_Y, -3.9)  ## the signpost of the packet boat to Amber Cliff
 const SILK_POST := Archipelago.SILK + Vector3(-12, 0, 8)
@@ -69,6 +71,18 @@ func _shorts() -> bool:
 	return Game.island == ShortIsle.ID
 
 
+func _crypto() -> bool:
+	return Game.island == CryptoIsle.ID
+
+
+## The crypto island (ADR-0031): a place and a style for now. id → [position, prompt key, radius].
+static func crypto_spots() -> Dictionary:
+	var out := {"ship": [CryptoIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0]}
+	for id: String in CryptoIsle.BOTS:
+		out[id] = [CryptoIsle.spot(id), "PROMPT_OPEN_EXCHANGE" if id == "bot_trader" else "PROMPT_TALK", 2.4]
+	return out
+
+
 ## The short sellers' island (ADR-0030): a place and a style for now. id → [position, prompt key, radius].
 static func shorts_spots() -> Dictionary:
 	return {"ship": [ShortIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0],
@@ -89,6 +103,8 @@ func _spots() -> Dictionary:
 		return amber_spots()
 	if _shorts():
 		return shorts_spots()
+	if _crypto():
+		return crypto_spots()
 	return SILK_SPOTS if _silk() else HARBOUR_SPOTS
 
 
@@ -111,6 +127,8 @@ func _ready() -> void:
 		ship.position = AmberCliff.DOCK + Vector3(0, 1.2, 0)
 	if _shorts():
 		ship.position = ShortIsle.DOCK + Vector3(0, 1.2, 0)
+	if _crypto():
+		ship.position = CryptoIsle.DOCK + Vector3(0, 1.2, 0)
 	ship.rotation.y = PI / 2
 	add_child(ship)
 	_captain = Captain.new()
@@ -148,6 +166,9 @@ func _dress() -> void:
 	if _shorts():
 		_dress_shorts()
 		return
+	if _crypto():
+		_dress_crypto()
+		return
 	if _silk():
 		var post_y := Archipelago.silk_ground(SILK_POST - Archipelago.SILK)
 		var keeper := _npc("trader", Color("9a6ab0"), SILK_POST + Vector3(0, post_y, -1.6), 0.0)
@@ -178,6 +199,16 @@ func _dress() -> void:
 	tip.rotation.z = PI / 4
 	down.add_child(tip)
 	Solid.post(down, 0.1, 2.6, Vector3.ZERO)
+	var coin := Node3D.new()  # …and the one to the crypto island: a gold wind coin on a dark board
+	coin.name = "CryptoPost"
+	coin.position = CRYPTO_POST
+	add_child(coin)
+	coin.add_child(Proc.box(Vector3(0.14, 2.6, 0.14), Proc.TIMBER_DARK, Vector3(0, 1.3, 0)))
+	coin.add_child(Proc.box(Vector3(1.3, 0.7, 0.08), Color("241a4a"), Vector3(0, 2.3, 0)))
+	var disc := Proc.cyl(0.26, 0.26, 0.06, 12, CryptoIsle.GOLD, Vector3(0, 2.3, 0.07))
+	disc.rotation.x = PI / 2
+	coin.add_child(disc)
+	Solid.post(coin, 0.1, 2.6, Vector3.ZERO)
 	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2, "mara")
 	mara.name = "Mara"
 	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8, "olva").name = "Olva"
@@ -255,6 +286,19 @@ func _dress_amber() -> void:
 		_villagers[-1].set_meta("talk", "amber_" + id)
 
 
+## The crypto island: the miner by his machine and three people in the street (sheet 44). The robots are built
+## with the island; each is a spot to talk at.
+func _dress_crypto() -> void:
+	var cast := ComicScript.read().cast
+	var m: Dictionary = cast["crypto_miner"]
+	_npc(str(m["who"]), Color(str(m["coat"])), CryptoIsle.AT + Vector3(-14.4, 0, -4.2), 1.2, str(m["role"])).name = "Miner"
+	var homes := {"crypto_trader": [Vector3(-2, 0, 0.5), 6.0], "crypto_dreamer": [Vector3(8, 0, -0.5), 5.0], "crypto_analyst": [Vector3(-18, 0, 1.0), 5.0]}
+	for id: String in homes:
+		var c: Dictionary = cast[id]
+		_villager(str(c["who"]), Color(str(c["coat"])), CryptoIsle.AT + (homes[id][0] as Vector3), homes[id][1], str(c["role"]))
+		_villagers[-1].set_meta("talk", id)
+
+
 ## The short sellers' island: the broker by the exchange door, three islanders in the street (sheet 36).
 func _dress_shorts() -> void:
 	var cast := ComicScript.read().cast
@@ -302,7 +346,7 @@ func _build_ui() -> void:
 	top.offset_top = 22
 	root.add_child(top)
 	var titles := VBoxContainer.new()
-	var title := Hud.text("SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
+	var title := Hud.text("CRYPTO_TITLE" if _crypto() else "SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
 	title.add_theme_font_override("font", Hud.serif())
 	titles.add_child(title)
 	_title = title
@@ -380,7 +424,7 @@ func _process(delta: float) -> void:
 		blades.rotation.z += delta * 0.5
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
-		ship.position.y = (ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+		ship.position.y = (CryptoIsle.DOCK.y if _crypto() else ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
 	for w in _idlers:
 		w.step(delta, 0.0)
 	if _flying:
@@ -397,7 +441,7 @@ func _process(delta: float) -> void:
 	if _target.is_empty():
 		_dialog.visible = false
 	_report_timer -= delta
-	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts():
+	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts() and not _crypto():
 		_report_timer = 2.0
 		Game.watch_report()
 
@@ -521,9 +565,11 @@ func interact() -> void:
 		var role: String = _talker.role if not _talker.role.is_empty() else {"oldman": "townsman"}.get(_talker.who, _talker.who)
 		await talk(str(_talker.get_meta("talk", "stroll_" + role)))
 		return
-	if _amber() or _shorts():
+	if _amber() or _shorts() or _crypto():
 		if _target == "ship":  # the packet boat home: no trading day is needed for this passage
 			_sail_to("harbour")
+		elif _crypto():
+			await talk(_target)  # a robot: the spot is named like its talk
 		elif not _target.is_empty():
 			await talk(Game.island + "_" + _target)
 		return
@@ -541,6 +587,8 @@ func interact() -> void:
 			_sail_to(AmberCliff.ID)
 		"ferry_shorts":
 			_sail_to(ShortIsle.ID)
+		"ferry_crypto":
+			_sail_to(CryptoIsle.ID)
 		"mara":
 			await _meet("mara_first")
 			open_plan()
