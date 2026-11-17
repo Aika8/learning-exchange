@@ -3,6 +3,11 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D techniques (ADR-0029, Proposed) — `docs/demo/G3D-techniques.md`
+- Silk Reach is drawn as katazome (indigo, cream, a rare rust; patterns in world space), Amber Cliff in pen and
+  watercolour, from Aika's sheets 27–34. The captain is redrawn in the technique of every port; a test holds every
+  technique to it. GUT 105. Open: the islands' shapes do not follow those sheets yet.
+
 ## G3D sheets, second batch — `docs/demo/G3D-sheets.md`
 - Eleven more expression sheets: every speaker but the five strollers of Amber Cliff has drawn faces (102 portraits).
 - Props of Spark Harbour rebuilt in code from the props sheet (`scripts/props.gd`); the Chronicler recoloured to

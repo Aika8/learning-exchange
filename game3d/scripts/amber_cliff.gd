@@ -14,9 +14,10 @@ const PIER_FROM := AT + Vector3(-62.0, DECK_Y, -2.4)
 const PIER_TO := AT + Vector3(-33.0, DECK_Y, 2.4)  ## its island end lies well inside the walkable cap
 const DOCK := AT + Vector3(-57.0, 0, 8.5)  ## where the packet boat is moored
 const SPAWN := AT + Vector3(-50.0, 0.5, 0)
-const WALLS: Array[Color] = [Color("f2e3c2"), Color("efd3a4"), Color("e9c1a3"), Color("f4ead8"), Color("d9c9a8"), Color("f0d9b5")]
-const SHUTTERS: Array[Color] = [Color("3f7f8c"), Color("6a8f5a"), Color("8c3b3b"), Color("3b5a8c"), Color("c98a3a")]
-const SLATE := Color("55647a")
+const WALLS: Array[Color] = [Color("efe2c8"), Color("e6cf9f"), Color("f2e3c2"), Color("f4ead8"), Color("d2a05d"), Color("f0d9b5")]  ## sheet 30: sand, ochre, plaster
+const SHUTTERS: Array[Color] = [Color("2f7f7a"), Color("3a6f6a"), Color("2f7f7a"), Color("4a607a"), Color("2a9d8f")]  ## sea teal, mostly
+const DOOR := Color("c83e3c")  ## geranium
+const SLATE := Color("4a607a")
 const TRIM := Color("f6efdc")
 const IRON := Color("24272e")
 
@@ -195,7 +196,7 @@ static func townhouse(rng: RandomNumberGenerator, wall: Color, shutter: Color, f
 	var front := d * 0.5
 	if shop.is_empty():
 		k.box(trim, Vector3(1.4, 2.6, 0.1), Vector3(0, 1.3, front + 0.01))
-		k.box(paint, Vector3(1.1, 2.3, 0.1), Vector3(0, 1.15, front + 0.05))
+		k.box(_mat(DOOR), Vector3(1.1, 2.3, 0.1), Vector3(0, 1.15, front + 0.05))
 		k.box(_mat(Color("d9a441")), Vector3(0.07, 0.07, 0.07), Vector3(0.38, 1.15, front + 0.12))
 		for sx: float in [-1.0, 1.0]:
 			if w > 5.0:

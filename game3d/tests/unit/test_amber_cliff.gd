@@ -43,7 +43,7 @@ func test_signs_and_prompts_are_french_in_either_game_language() -> void:
 		Locale.set_locale(code)
 		var scene := await _amber()
 		assert_eq(Session.style_id, "amber")
-		assert_eq(Session.ink_param("technique"), IslandStyle.TECHNIQUES["claire"])
+		assert_eq(Session.ink_param("technique"), IslandStyle.TECHNIQUES["aquarelle"])
 		var signs: Array = scene.get("_signs")
 		assert_gt(signs.size(), 10, "the town is full of words")
 		var read: Array[String] = []

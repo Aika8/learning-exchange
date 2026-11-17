@@ -6,7 +6,7 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-const TECHNIQUES := {"ink": 0, "dye": 1, "claire": 2}
+const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
 ## Spark Harbour is the look of ADR-0024 as approved. Every other island has a technique of its own.
@@ -25,27 +25,27 @@ const TABLE := {
 		"accent": Color("ffcf6e"),  # the colour of this island's wind
 	},
 	"silk": {
-		"technique": "dye",  # printed silk: four dye baths, a light resist line, a weave
-		"ramp": [Color("1b2057"), Color("2f7f96"), Color("e58f9c"), Color("fbf1dc")],  # indigo, teal, rose, cream
-		"ink": Color("fff6e6"),  # the wax line stays the colour of the cloth
-		"width": 1.7,
+		"technique": "katazome",  # a Japanese stencil-resist print (sheets 27, 28; ADR-0029)
+		"ramp": [Color("1f2f5a"), Color("1f2f5a"), Color("b5523b"), Color("efe6d2")],  # indigo, —, the rust accent, cream
+		"ink": Color("efe6d2"),  # the line is light; on cream the effect turns it indigo
+		"width": 1.6,
 		"tint": Color(1.0, 1.0, 1.0),
-		"paper": Color("f6ecd8"),
+		"paper": Color("efe6d2"),
 		"hatch_turn": 0.0,
 		"hatch_gap": 9.0,
 		"sun": Color("ffeede"),
 		"sun_energy": 1.25,
-		"accent": Color("c9a4ff"),
+		"accent": Color("e58a6a"),  # the wind of the dye works: rust
 	},
 	"amber": {
-		"technique": "claire",  # the album page: one even black line, flat colour, a watercolour wash (ADR-0028)
-		"ramp": [Color("8f86c9"), Color("ffffff"), Color("fbe6b8"), Color("58b7c9")],  # shade tint, —, horizon, zenith
-		"ink": Color("0d0d10"),
-		"width": 1.9,
+		"technique": "aquarelle",  # pen and watercolour, a French travel sketchbook (sheets 29–34; ADR-0029)
+		"ramp": [Color("5f6282"), Color("ffffff"), Color("ffffff"), Color("a8ded9")],  # the shade wash, —, —, the sky's azure
+		"ink": Color("3a332e"),  # a warm grey pen
+		"width": 1.15,
 		"tint": Color(1.0, 1.0, 1.0),
-		"paper": Color("fbf6ea"),
+		"paper": Color("fbf7ee"),
 		"hatch_turn": 0.0,
-		"hatch_gap": 5.0,
+		"hatch_gap": 6.0,
 		"sun": Color("fff3d6"),
 		"sun_energy": 1.5,
 		"accent": Color("ffb347"),
