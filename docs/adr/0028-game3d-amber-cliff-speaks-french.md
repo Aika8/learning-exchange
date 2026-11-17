@@ -1,6 +1,6 @@
 # 0028. Amber Cliff is a French-speaking island: its own language, its own technique, a gloss on demand
 
-- Status: Proposed
+- Status: Accepted (2026-11-17)
 - Date: 2026-11-17
 - Pattern(s): Message catalogue per island (`IslandTongue`), Strategy by data (a third technique in `IslandStyle`)
 

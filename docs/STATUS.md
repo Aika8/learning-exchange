@@ -3,7 +3,7 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
-## G3D Amber Cliff (ADR-0028, Proposed) — `docs/demo/G3D-amber.md`
+## G3D Amber Cliff (ADR-0028, Accepted) — `docs/demo/G3D-amber.md`
 - A third, bigger island, «La Falaise d'Ambre»: a French town (quay, square, bank, bureau de change, bakery, café,
   bookshop, lighthouse). Signs, prompts and talks are French in either game language; hold T for the gloss.
   Drawn as a ligne-claire album page. Reached by the packet boat from the wharf. Each place teaches one finance idea.
@@ -11,12 +11,12 @@ Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `do
 - Open: the French needs a reader; no concept sheets for the town and its people; the bible does not yet say that
   Amber Cliff has its own language.
 
-## G3D talk (ADR-0027, Proposed) — `docs/demo/G3D-talk.md`
+## G3D talk (ADR-0027, Accepted) — `docs/demo/G3D-talk.md`
 - Talking opens a comic page: frames with drawn portraits from Aika's expression sheets (six heroes × six
   emotions, `docs/design/concepts/06…12`); the face changes with the line (`emotion` in `game3d/data/talks.json`).
   Words are `game3d/i18n/talk.csv` (ru, en). People without a sheet get a plain drawn stand-in. GUT 102.
 
-## G3D looks (ADR-0026, Proposed) — `docs/demo/G3D-looks.md`
+## G3D looks (ADR-0026, Accepted) — `docs/demo/G3D-looks.md`
 - Every island is drawn in its own technique: Spark Harbour in pen and ink as before, Silk Reach as printed silk
   (four dye baths, a light line, a weave). The wind restyles the captain from one technique into the other. GUT 88.
 
@@ -72,7 +72,7 @@ Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `do
 - iOS simulator / Maestro still not run (no Xcode); mobile checked in Expo web at 375×812.
 
 ## ADRs (all)
-Accepted: 0001–0012, 0013 (M4), 0014, 0015, 0016, 0018–0023. Superseded: 0017 (by 0019). Proposed: none.
+Accepted: 0001–0012, 0013 (M4), 0014, 0015, 0016, 0018–0028. Superseded: 0017 (by 0019). Proposed: none.
 
 ## Risks (M4)
 - The advice guard is regex-based: strict, may also drop harmless model text (template answers instead).
