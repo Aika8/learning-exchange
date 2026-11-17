@@ -47,7 +47,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/nav.gd`, `villager.gd` | Navmesh baked from the colliders; villagers who walk it and steer round each other |
 | `scripts/solid.gd`, `kit.gd`, `houses.gd`, `decals.gd`, `hall_room.gd` | Colliders that follow shapes; one mesh per building; modular half-timbered houses; grime decals; the hall interior |
 | `scripts/world_probe.gd`, `audit.gd` | The world audit (`WorldProbe`) and its runs |
-| `data/talks.json`, `i18n/talk.csv`, `scripts/core/comic_script.gd`, `comic_reader.gd`, `scripts/comic_shot.gd`, `scripts/ui/comic_page.gd`, `comic_frame.gd` | Talks as comic pages (ADR-0027): the data and words, the reader, the frame pictures, the page |
+| `data/talks.json`, `i18n/talk.csv`, `art/portraits/`, `scripts/core/comic_script.gd`, `comic_reader.gd`, `scripts/ui/comic_page.gd`, `comic_frame.gd`, `comic_faces.gd`, `comic_doodle.gd` | Talks as comic pages (ADR-0027): the data and words, the drawn faces (one per hero and emotion), the reader, the page, the stand-in for people without a sheet |
 | `scripts/amber_cliff.gd`, `scripts/core/island_tongue.gd`, `i18n/amber.csv` | Amber Cliff, the French-speaking island (ADR-0028): the town, the island's tongue, its words (`fr,ru,en`) |
 | `scripts/chronicle.gd`, `scripts/demo.gd` | Evening chronicle scene; the self-run demo for screenshots |
 | `scripts/main_menu.gd`, `harbour.gd`, `captain.gd`, `hall.gd`, `board.gd`, `voyage.gd` | Scenes (`scenes/*.tscn` are a root node + script) |
