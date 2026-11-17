@@ -2,6 +2,11 @@
 
 Updated: 2026-11-17, G3D walk fixes. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`.
 
+## G3D talk (ADR-0027, Proposed) — `docs/demo/G3D-talk.md`
+- Talking opens a comic page: frames with the game's own people posed in them, balloons with tails, captions.
+  Pages are data (`game3d/data/talks.json`), words are `game3d/i18n/talk.csv` (ru, en). Mara, Olva, the Chronicler,
+  the post keeper and every stroller talk. GUT 96.
+
 ## G3D looks (ADR-0026, Proposed) — `docs/demo/G3D-looks.md`
 - Every island is drawn in its own technique: Spark Harbour in pen and ink as before, Silk Reach as printed silk
   (four dye baths, a light line, a weave). The wind restyles the captain from one technique into the other. GUT 88.

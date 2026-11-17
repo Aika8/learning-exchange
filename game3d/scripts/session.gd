@@ -49,6 +49,8 @@ func _ready() -> void:
 		Audit.gait.call_deferred(get_tree())
 	elif not arg("attune").is_empty():
 		Audit.attune.call_deferred(get_tree())
+	elif not arg("talk").is_empty():
+		Audit.talk.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:
@@ -95,10 +97,25 @@ func _build_ink() -> void:
 	if not arg("ink").is_empty():
 		ink_mode = clampi(int(arg("ink")), 0, 2)
 	set_ink(ink_mode)
+	for t: Translation in Locale.load_catalogue(ComicScript.WORDS).values():  # the words of the talks (ADR-0027)
+		TranslationServer.add_translation(t)
 
 
 func _layer_ready() -> void:
 	_layer.add_child(_ink_label)
+
+
+## Another quad with the effect as it is now, for a picture drawn in a world of its own (a comic frame, ADR-0027):
+## its own copy of the numbers, a line at least `line_px` wide, never off.
+func ink_copy(line_px: float = 1.0) -> MeshInstance3D:
+	var copy := _ink.duplicate() as MeshInstance3D
+	var m := (_ink.material_override as ShaderMaterial).duplicate() as ShaderMaterial
+	m.set_shader_parameter("min_px", line_px)
+	m.set_shader_parameter("column_radius", 0.0)
+	m.set_shader_parameter("mode", clampi(ink_mode, 1, 2))
+	copy.material_override = m
+	copy.visible = true
+	return copy
 
 
 func set_ink(mode: int) -> void:
@@ -194,7 +211,7 @@ static func arg(key: String) -> String:
 
 ## True for the audit, views and gait runs: no mouse capture, the scripts drive the scene.
 static func tooling() -> bool:
-	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune")).is_empty() or arg("fps").length() > 1
+	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune") + arg("talk")).is_empty() or arg("fps").length() > 1
 
 
 static func active() -> bool:

@@ -22,6 +22,7 @@ var plan: VoyagePlan
 var approved := false
 var provisions := false
 var island := "harbour"  ## harbour | silk — where the ship is
+var met: Dictionary = {}  ## talks already had this run (the first meeting is a comic page, ADR-0027)
 var attuned := "harbour"  ## the island whose style the captain is drawn in; its wind restyles a newcomer (ADR-0025)
 var anchor_id := -1
 var anchor: Dictionary = {}

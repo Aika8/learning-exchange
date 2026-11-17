@@ -15,6 +15,7 @@ uniform vec3 ink : source_color = vec3(0.13, 0.1, 0.09);
 uniform vec3 paper : source_color = vec3(0.93, 0.87, 0.75);
 uniform vec3 tint = vec3(1.0);
 uniform float width = 1.3;  // line width in pixels at 1080p
+uniform float min_px = 1.0;  // and never thinner than this (small pictures: comic frames)
 uniform float hatch_turn = 0.0;
 uniform float hatch_gap = 9.0;
 uniform int technique = 0;
@@ -71,7 +72,7 @@ void fragment() {
 	}
 	float w = mix(width, width_from, old);
 	vec3 line = mix(ink, ink_from, old);
-	vec2 px = w * (VIEWPORT_SIZE.y / 1080.0) / VIEWPORT_SIZE;
+	vec2 px = max(w * (VIEWPORT_SIZE.y / 1080.0), min_px) / VIEWPORT_SIZE;
 	vec3 n = texture(normal_tex, SCREEN_UV).rgb * 2.0 - 1.0;
 	float dd = 0.0;
 	float dn = 0.0;

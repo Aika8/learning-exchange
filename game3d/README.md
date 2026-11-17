@@ -26,7 +26,7 @@ trapped and walks through nothing he can see, villagers can finish their strolls
 
 ## World audit and measurements (`docs/demo/G3D-polish.md`)
 `godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`; about a minute, `--only=harbour|silk|hall` for one place), `--views=<dir>` (fixed views),
-`--gait=<dir>` (idle, walk, run, a doorstep), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
+`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
 effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 
 ## Layout
@@ -46,6 +46,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/nav.gd`, `villager.gd` | Navmesh baked from the colliders; villagers who walk it and steer round each other |
 | `scripts/solid.gd`, `kit.gd`, `houses.gd`, `decals.gd`, `hall_room.gd` | Colliders that follow shapes; one mesh per building; modular half-timbered houses; grime decals; the hall interior |
 | `scripts/world_probe.gd`, `audit.gd` | The world audit (`WorldProbe`) and its runs |
+| `data/talks.json`, `i18n/talk.csv`, `scripts/core/comic_script.gd`, `comic_reader.gd`, `scripts/comic_shot.gd`, `scripts/ui/comic_page.gd`, `comic_frame.gd` | Talks as comic pages (ADR-0027): the data and words, the reader, the frame pictures, the page |
 | `scripts/chronicle.gd`, `scripts/demo.gd` | Evening chronicle scene; the self-run demo for screenshots |
 | `scripts/main_menu.gd`, `harbour.gd`, `captain.gd`, `hall.gd`, `board.gd`, `voyage.gd` | Scenes (`scenes/*.tscn` are a root node + script) |
 
