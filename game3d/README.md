@@ -6,7 +6,8 @@ style guide: `docs/design/game3d-style.md`; **the look follows the concept sheet
 M3 vertical slice (`docs/demo/M3.md`, ADR-0023): one game day — Port → Plan voyage with Mara (risk ≤ 1%, the Anchor =
 stop-loss) → Trading on the Ladder → Sailing (the clock runs ×60, a storm) → Evening chronicle with replay. Act I
 (debt, provisions, garden, fog), spread/fees/liquidity, the Anchor and a gap, the Forge report season, the captain's
-glossary (G), the «Реальный мир» board. Two islands: Spark Harbour and Silk Reach.
+glossary (G), the «Реальный мир» board. Islands: Spark Harbour, Silk Reach, and Amber Cliff — «La Falaise d'Ambre», where
+everything is in French (hold T for the translation; `docs/demo/G3D-amber.md`, ADR-0028).
 
 ## Run
 1. Godot 4.7 on PATH (`brew install --cask godot`). 2. `make dev`. 3. `make game3d`.
@@ -16,7 +17,7 @@ Without `make assets` the game still runs with the old procedural look.
 The MakeHuman people are **not** part of `make assets`: build them with `game3d/tools/people/build.sh` (Blender + MPFB) or
 copy `game3d/assets/models/people/` from a checkout that has them; without them dressed stand-in figures are shown.
 Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, Shift (run), mouse, Tab (fly camera), E (interact),
-Space (sail during the voyage), G (glossary), V (look: colour / ink outline / engraving), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
+Space (sail during the voyage), G (glossary), T (hold on Amber Cliff: translation), V (look: colour / ink outline / engraving), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
 
 ## Tests
 `make test-game3d` — GUT headless. `tests/unit/test_world_walk.gd` walks a grid over both islands and the hall: nobody
@@ -26,7 +27,7 @@ trapped and walks through nothing he can see, villagers can finish their strolls
 
 ## World audit and measurements (`docs/demo/G3D-polish.md`)
 `godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`; about a minute, `--only=harbour|silk|hall` for one place), `--views=<dir>` (fixed views),
-`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
+`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--read=<dir>` (Amber Cliff's prompts and signs, then with T), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
 effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 
 ## Layout
@@ -47,6 +48,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/solid.gd`, `kit.gd`, `houses.gd`, `decals.gd`, `hall_room.gd` | Colliders that follow shapes; one mesh per building; modular half-timbered houses; grime decals; the hall interior |
 | `scripts/world_probe.gd`, `audit.gd` | The world audit (`WorldProbe`) and its runs |
 | `data/talks.json`, `i18n/talk.csv`, `scripts/core/comic_script.gd`, `comic_reader.gd`, `scripts/comic_shot.gd`, `scripts/ui/comic_page.gd`, `comic_frame.gd` | Talks as comic pages (ADR-0027): the data and words, the reader, the frame pictures, the page |
+| `scripts/amber_cliff.gd`, `scripts/core/island_tongue.gd`, `i18n/amber.csv` | Amber Cliff, the French-speaking island (ADR-0028): the town, the island's tongue, its words (`fr,ru,en`) |
 | `scripts/chronicle.gd`, `scripts/demo.gd` | Evening chronicle scene; the self-run demo for screenshots |
 | `scripts/main_menu.gd`, `harbour.gd`, `captain.gd`, `hall.gd`, `board.gd`, `voyage.gd` | Scenes (`scenes/*.tscn` are a root node + script) |
 

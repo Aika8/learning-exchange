@@ -4,7 +4,7 @@
 class_name Audit
 extends RefCounted
 
-const PLACES := ["harbour", "silk", "hall"]
+const PLACES := ["harbour", "silk", "amber", "hall"]
 const SHOTS_PER_KIND := 3
 
 
@@ -18,6 +18,12 @@ const VIEWS := {
 		["view-silk-houses", Archipelago.SILK + Vector3(3, 3, 10), Archipelago.SILK + Vector3(14, 2, 2)],
 		["view-silk-pier", Archipelago.SILK + Vector3(-24, 5, 26), Archipelago.SILK + Vector3(-28, 0.5, 14)],
 		["view-silk-landing", Archipelago.SILK + Vector3(-9, 6, 25), Archipelago.SILK + Vector3(-16, 0.4, 14)]],
+	"amber": [["view-amber", AmberCliff.AT + Vector3(-44, 16, 30), AmberCliff.AT + Vector3(-2, 2, -2)],
+		["view-amber-square", AmberCliff.AT + Vector3(-3, 3.2, 12.5), AmberCliff.AT + Vector3(4, 4.5, -19)],
+		["view-amber-street", AmberCliff.AT + Vector3(-41, 2.6, 0.6), AmberCliff.AT + Vector3(0, 4, 0)],
+		["view-amber-shops", AmberCliff.AT + Vector3(2, 2.4, 2), AmberCliff.AT + Vector3(17, 3.2, -11)],
+		["view-amber-cafe", AmberCliff.AT + Vector3(3, 2.6, 1), AmberCliff.AT + Vector3(17, 2.6, 11)],
+		["view-amber-lighthouse", AmberCliff.AT + Vector3(12, 5, 5), AmberCliff.AT + Vector3(36, 9, 0)]],
 	"hall": [["view-hall", Vector3(0, 3.4, 10.4), Vector3(0, 5, -9)], ["view-hall-side", Vector3(10, 4, 6), Vector3(-6, 2.5, -6)],
 		["view-hall-up", Vector3(0, 1.6, 9), Vector3(0, 12, -4)]],
 }
@@ -45,8 +51,11 @@ static func views(tree: SceneTree) -> void:
 ## jumps there (the first second) and settled (the next two). Writes a JSON table; run at 1920x1080.
 static func fps(tree: SceneTree) -> void:
 	var rows: Array = []
-	for place: String in ["harbour", "silk"]:
+	for place: String in ["harbour", "silk", "amber"]:
+		if not Session.arg("only").is_empty() and place != Session.arg("only"):
+			continue
 		Game.island = place
+		Game.attuned = place
 		tree.change_scene_to_file("res://scenes/harbour.tscn")
 		await Session.wait(3.0)
 		await _await_drawn(tree)
@@ -214,6 +223,8 @@ static func talk(tree: SceneTree) -> void:
 		while page.is_open():
 			await Session.wait(0.35)
 			if page.reader().page_full():
+				for f in page.frames():
+					f.show_gloss(not Session.arg("gloss").is_empty())  # as with T held
 				await Session.wait(0.3)
 				scene.get_viewport().get_texture().get_image().save_png(dir.path_join("%s-%d.png" % [id, n]))
 				print("talk: ", id, " page ", n, " fps=", Engine.get_frames_per_second())
@@ -222,12 +233,50 @@ static func talk(tree: SceneTree) -> void:
 	tree.quit()
 
 
+## `--read=<dir>`: Amber Cliff as the player meets it (ADR-0028) — the captain at a shop door with the prompt in
+## French, then with T held (the prompt and the nearest sign in the game's language). `--lang=en` for English.
+static func read(tree: SceneTree) -> void:
+	var dir := Session.arg("read")
+	DirAccess.make_dir_recursive_absolute(dir)
+	if not Session.arg("lang").is_empty():
+		Locale.set_locale(Session.arg("lang"))
+	Game.island = AmberCliff.ID
+	Game.attuned = AmberCliff.ID
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(2.0)
+	var scene := tree.current_scene as Node3D
+	var captain: Captain = scene.get("_captain")
+	for shop: String in ["bakery", "change", "bank"]:
+		var at := AmberCliff.door(shop)
+		captain.global_position = at[1] + Vector3(0, 0.3, 0)
+		captain.velocity = Vector3.ZERO
+		var away := (at[1] - at[0]).normalized()
+		captain.yaw = atan2(away.x, away.z)  # the camera behind the captain, looking at the door
+		captain.pitch = -0.12
+		captain.body.rotation.y = captain.yaw + PI
+		await Session.wait(1.0)
+		scene.get_viewport().get_texture().get_image().save_png(dir.path_join(shop + "-fr.png"))
+		var key := InputEventKey.new()
+		key.keycode = KEY_T
+		key.physical_keycode = KEY_T
+		key.pressed = true
+		Input.parse_input_event(key)
+		await Session.wait(0.5)
+		scene.get_viewport().get_texture().get_image().save_png(dir.path_join(shop + "-gloss.png"))
+		key = key.duplicate()
+		key.pressed = false
+		Input.parse_input_event(key)
+		print("read: ", shop, " prompt=", (scene.get("_prompt") as Label).text)
+	tree.quit()
+
+
 ## `--attune=<dir>`: the captain lands on Silk Reach still drawn the Spark Harbour way and the island's wind
 ## restyles them (ADR-0025). Saves a frame every 0.1 s as frame-NN.png; add `--ink=2` for the engraving.
 static func attune(tree: SceneTree) -> void:
 	var dir := Session.arg("attune")
 	DirAccess.make_dir_recursive_absolute(dir)
-	Game.island = "silk"
+	var to := "silk" if Session.arg("island").is_empty() else Session.arg("island")
+	Game.island = to
 	Game.attuned = "harbour"
 	tree.change_scene_to_file("res://scenes/harbour.tscn")
 	await Session.wait(2.0)
@@ -243,7 +292,7 @@ static func attune(tree: SceneTree) -> void:
 	for c in scene.find_children("*", "CanvasLayer", true, false):
 		(c as CanvasLayer).visible = false
 	await _await_drawn(tree)
-	Session.attune(captain, "harbour", "silk", 2.0, 0.5)
+	Session.attune(captain, "harbour", to, 2.0, 0.5)
 	for i in 32:
 		await Session.wait(0.1)
 		scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%02d.png" % i))
@@ -258,7 +307,8 @@ static func run(tree: SceneTree) -> void:
 	for place: String in PLACES:
 		if not Session.arg("only").is_empty() and Session.arg("only") != place:
 			continue
-		Game.island = "silk" if place == "silk" else "harbour"
+		Game.island = "harbour" if place == "hall" else place
+		Game.attuned = Game.island
 		Session.spawn = "start"
 		tree.change_scene_to_file("res://scenes/%s.tscn" % ("hall" if place == "hall" else "harbour"))
 		for i in 30:

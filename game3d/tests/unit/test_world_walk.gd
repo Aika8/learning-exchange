@@ -33,6 +33,7 @@ func _assert_clean(probe: WorldProbe, kinds: Array[String]) -> void:
 
 func after_each() -> void:
 	Game.island = "harbour"
+	Game.attuned = "harbour"
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
 
@@ -82,7 +83,7 @@ func _spawns(island: String) -> Array[Vector3]:
 ## From every spawn point the captain reaches the whole island and can always walk back: no pocket to get caught
 ## in, no wall or rail that is only a picture. Then 6000 steps of a player pushing into every corner.
 func test_the_captain_is_never_trapped_and_walks_through_nothing() -> void:
-	for island: String in ["harbour", "silk"]:
+	for island: String in ["harbour", "silk", "amber"]:
 		var scene := await _place(island)
 		var probe := await _probe(scene, Archipelago.walk_areas(island))
 		probe.lattice = 1.0
@@ -138,7 +139,7 @@ func test_nobody_freezes_on_the_wharf() -> void:
 
 ## Every villager can finish its strolls: the navmesh never sends one where its body does not fit.
 func test_villagers_can_finish_their_strolls() -> void:
-	for island: String in ["harbour", "silk"]:
+	for island: String in ["harbour", "silk", "amber"]:
 		var scene := await _place(island)
 		for i in 30:
 			if Nav.ready(scene):
@@ -153,7 +154,7 @@ func test_villagers_can_finish_their_strolls() -> void:
 
 
 func test_spawn_points_and_spots_are_free() -> void:
-	for island: String in ["harbour", "silk"]:
+	for island: String in ["harbour", "silk", "amber"]:
 		var scene := await _place(island)
 		var probe := await _probe(scene, Archipelago.walk_areas(island))
 		for spawn: String in ["start", "pier", "exchange"]:
@@ -168,7 +169,7 @@ func test_spawn_points_and_spots_are_free() -> void:
 
 
 func test_everything_solid_has_a_collider_that_follows_its_shape() -> void:
-	for island: String in ["harbour", "silk"]:
+	for island: String in ["harbour", "silk", "amber"]:
 		var scene := await _place(island)
 		var probe := await _probe(scene, Archipelago.walk_areas(island))
 		probe.scan_objects()

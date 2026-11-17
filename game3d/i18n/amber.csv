@@ -1,0 +1,83 @@
+keys,fr,ru,en
+AMB_TITLE,La Falaise d'Ambre,Янтарный Утёс,Amber Cliff
+AMB_PROMPT_TALK,E — parler,E — поговорить,E — talk
+AMB_PROMPT_CHANGE,E — le bureau de change,E — обменный пункт,E — the bureau de change
+AMB_PROMPT_BANK,E — la banque,E — банк,E — the bank
+AMB_PROMPT_BAKERY,E — la boulangerie,E — пекарня,E — the bakery
+AMB_PROMPT_CAFE,E — le café,E — кафе,E — the café
+AMB_PROMPT_BOOKS,E — la librairie,E — книжная лавка,E — the bookshop
+AMB_PROMPT_LIGHTHOUSE,E — le phare,E — маяк,E — the lighthouse
+AMB_PROMPT_SHIP,E — rentrer au Port des Étincelles,E — вернуться в Гавань Искр,E — back to Spark Harbour
+AMB_SIGN_BANK,BANQUE D'AMBRE,Янтарный банк,Bank of Amber
+AMB_SIGN_CHANGE,BUREAU DE CHANGE,Обмен валюты,Currency exchange
+AMB_SIGN_RATES,ACHAT · VENTE,Покупка · Продажа,We buy · We sell
+AMB_SIGN_BAKERY,BOULANGERIE,Пекарня,Bakery
+AMB_SIGN_CAFE,CAFÉ DU PHARE,Кафе «У маяка»,Lighthouse Café
+AMB_SIGN_BOOKS,LIBRAIRIE,Книжная лавка,Bookshop
+AMB_SIGN_FLOWERS,FLEURS,Цветы,Flowers
+AMB_SIGN_SQUARE,Place du Marché,Рыночная площадь,Market Square
+AMB_SIGN_STREET,Rue de l'Épargne,Улица Сбережений,Savings Street
+AMB_SIGN_QUAY,Quai du Levant,Восточная набережная,East Quay
+AMB_SIGN_LIGHTHOUSE,LE PHARE,Маяк,The lighthouse
+AMB_SIGN_KIOSK,LE COURS DE L'AMBRE,Курс янтаря,The amber rate
+AMB_SIGN_HOTEL,HÔTEL DES VOYAGEURS,Гостиница путешественников,Travellers' Hotel
+AMB_SIGN_FERRY,La Falaise d'Ambre,Янтарный Утёс,Amber Cliff
+AMB_WHO_CAPTAIN,Le capitaine,Капитан,The captain
+AMB_WHO_CHANGEUR,"M. Lenoir, changeur","Г-н Ленуар, меняла","Mr Lenoir, money-changer"
+AMB_WHO_BANQUIERE,"Mme Sorel, banquière","Г-жа Сорель, банкир","Mrs Sorel, banker"
+AMB_WHO_BOULANGERE,"Colette, boulangère","Колетт, булочница","Colette, baker"
+AMB_WHO_GARCON,"Lucien, serveur","Люсьен, официант","Lucien, waiter"
+AMB_WHO_LIBRAIRE,"Anatole, libraire","Анатоль, книготорговец","Anatole, bookseller"
+AMB_WHO_GARDIENNE,"Maëlle, gardienne du phare","Маэль, смотрительница маяка","Maëlle, lighthouse keeper"
+AMB_WHO_MARIN,"Yann, marin","Янн, моряк","Yann, sailor"
+AMB_WHO_FLEURISTE,"Rose, fleuriste","Роза, цветочница","Rose, florist"
+AMB_WHO_ENFANT,Léo,Лео,Léo
+AMB_WHO_MONSIEUR,M. Hector,Г-н Эктор,Mr Hector
+AMB_WHO_ETUDIANTE,"Inès, étudiante","Инес, студентка","Inès, student"
+AMB_CHANGE_C,"Au bureau de change, on échange des étincelles contre de l'ambre.",В обменном пункте меняют искры на янтарь.,"At the bureau de change, sparks are exchanged for amber."
+AMB_CHANGE_1,"Bonjour, capitaine ! Vous voulez changer de l'argent ?","Здравствуйте, капитан! Хотите обменять деньги?","Good morning, captain! Would you like to change money?"
+AMB_CHANGE_2,"Bonjour ! C'est quoi, « le cours de l'ambre » ?",Здравствуйте! А что такое «курс янтаря»?,Good morning! What is « the amber rate »?
+AMB_CHANGE_3,C'est le taux de change : le prix d'un ambre en étincelles.,Это обменный курс: цена одного янтаря в искрах.,It is the exchange rate: the price of one amber in sparks.
+AMB_CHANGE_4,"J'achète à un prix et je vends à un autre. La différence, c'est l'écart.","Покупаю по одной цене, продаю по другой. Разница — это спред.",I buy at one price and sell at another. The difference is the spread.
+AMB_CHANGE_5,"Donc l'écart, c'est votre salaire ?",То есть спред — это ваш заработок?,So the spread is your pay?
+AMB_CHANGE_6,Exactement. Et l'ambre est une monnaie de réserve : tout le monde l'accepte.,Именно. А янтарь — резервная валюта: его принимают все.,Exactly. And amber is a reserve currency: everybody accepts it.
+AMB_BANK_C,La Banque d'Ambre garde l'épargne de l'île depuis trois cents ans.,Янтарный банк хранит сбережения острова уже триста лет.,The Bank of Amber has kept the island's savings for three hundred years.
+AMB_BANK_1,Bienvenue. Vous voulez ouvrir un compte d'épargne ?,Добро пожаловать. Хотите открыть сберегательный счёт?,Welcome. Would you like to open a savings account?
+AMB_BANK_2,Peut-être. Quel est le taux d'intérêt ?,Возможно. Какая процентная ставка?,Perhaps. What is the interest rate?
+AMB_BANK_3,Quatorze pour cent par an. Et les intérêts gagnent aussi des intérêts.,Четырнадцать процентов в год. И на проценты тоже идут проценты.,Fourteen per cent a year. And the interest earns interest too.
+AMB_BANK_4,"Ah ! Les intérêts composés. Chez nous, on dit « le jardin du Quai ».",А! Сложный процент. У нас говорят «сад Причала».,Ah! Compound interest. At home we call it « the garden of the Pier ».
+AMB_BANK_5,Un joli nom. Mais attention au brouillard : il faut comparer le taux et l'inflation.,Красивое название. Но помните про туман: ставку надо сравнивать с инфляцией.,A pretty name. But mind the fog: the rate must be compared with inflation.
+AMB_BAKERY_1,Bonjour ! Une baguette ? C'est deux étincelles.,Здравствуйте! Багет? Две искры.,Hello! A baguette? That is two sparks.
+AMB_BAKERY_2,"Deux ? L'année dernière, c'était une étincelle et demie !",Две? В прошлом году было полторы!,Two? Last year it was one and a half!
+AMB_BAKERY_3,"Eh oui. La farine coûte plus cher, alors les prix montent. C'est l'inflation.","Увы. Мука дорожает, вот цены и растут. Это инфляция.","Yes. Flour costs more, so prices go up. That is inflation."
+AMB_BAKERY_4,"Avec la même pièce, on achète moins de pain. C'est le pouvoir d'achat qui baisse.",На ту же монету купишь меньше хлеба. Это падает покупательная способность.,The same coin buys less bread. Purchasing power goes down.
+AMB_BAKERY_5,"Chez nous, on appelle ça « le brouillard ».",У нас это называют «туман».,At home we call that « the fog ».
+AMB_CAFE_C,"Sur la terrasse du Café du Phare, on parle d'argent sans se presser.",На террасе кафе «У маяка» о деньгах говорят не спеша.,"On the terrace of the Lighthouse Café, people talk about money without hurry."
+AMB_CAFE_1,"Un café, capitaine ? Asseyez-vous. Vous partez bientôt ?","Кофе, капитан? Присаживайтесь. Скоро отплываете?","A coffee, captain? Sit down. Are you leaving soon?"
+AMB_CAFE_2,"Oui, mais d'abord je mets de côté six mois de dépenses.","Да, но сначала я откладываю расходы на шесть месяцев.","Yes, but first I put aside six months of expenses."
+AMB_CAFE_3,"Une épargne de précaution ! Mon père disait : « d'abord les provisions, ensuite le voyage ».","Подушка безопасности! Отец говорил: «сначала провизия, потом рейс».","An emergency fund! My father used to say: « provisions first, then the voyage »."
+AMB_CAFE_4,"Revenus, dépenses, épargne : c'est un budget. L'addition, c'est pour plus tard.","Доходы, расходы, сбережения — это бюджет. А счёт подождёт.","Income, expenses, savings: that is a budget. The bill can wait."
+AMB_BOOKS_1,"Vous cherchez un livre ? J'ai des cartes, des romans et des carnets de bord.","Ищете книгу? У меня есть карты, романы и судовые журналы.","Looking for a book? I have charts, novels and logbooks."
+AMB_BOOKS_2,"Un carnet de bord. J'écris chaque voyage : le plan, le résultat, la leçon.","Судовой журнал. Я записываю каждый рейс: план, итог, урок.","A logbook. I write down every voyage: the plan, the result, the lesson."
+AMB_BOOKS_3,Un journal de transactions ! Ceux qui écrivent font moins souvent deux fois la même erreur.,"Журнал сделок! Кто записывает, реже повторяет одну ошибку дважды.",A trade journal! Those who write make the same mistake twice less often.
+AMB_BOOKS_4,Le Chroniqueur de mon port dit la même chose.,Летописец в моей гавани говорит то же самое.,The Chronicler of my harbour says the same.
+AMB_LIGHT_C,"Du haut de la falaise, le phare surveille le ciel et la mer de nuages.",С вершины утёса маяк следит за небом и морем облаков.,From the top of the cliff the lighthouse watches the sky and the sea of clouds.
+AMB_LIGHT_1,Regardez le baromètre. Il descend : la tempête arrive.,Посмотрите на барометр. Он падает: идёт буря.,Look at the barometer. It is falling: a storm is coming.
+AMB_LIGHT_2,"Une tempête, c'est quoi pour les prix ?",А что буря значит для цен?,What does a storm mean for prices?
+AMB_LIGHT_3,De grandes vagues : les prix bougent beaucoup. On appelle ça la volatilité.,Большие волны: цены сильно ходят. Это называют волатильностью.,Big waves: prices move a lot. That is called volatility.
+AMB_LIGHT_4,"Alors je jette l'ancre avant de partir : un ordre stop, pour limiter la perte.","Тогда я бросаю якорь до выхода: стоп-заявку, чтобы ограничить убыток.","Then I drop the anchor before sailing: a stop order, to limit the loss."
+AMB_LIGHT_5,"Bien dit. Le risque, on le choisit avant la tempête, pas pendant.","Хорошо сказано. Риск выбирают до бури, а не во время.","Well said. Risk is chosen before the storm, not during it."
+AMB_MARIN_1,"Vous sentez le vent ? Aujourd'hui, il y a plus d'acheteurs que de vendeurs.","Чувствуете ветер? Сегодня покупателей больше, чем продавцов.",Do you feel the wind? Today there are more buyers than sellers.
+AMB_MARIN_2,"Le vent, c'est le flux d'ordres. L'offre et la demande, quoi !","Ветер — это поток заявок. Спрос и предложение, одним словом!","The wind is the flow of orders. Supply and demand, in short!"
+AMB_FLEUR_1,"Des fleurs, capitaine ? En hiver, elles sont rares, donc elles sont chères.","Цветы, капитан? Зимой их мало, поэтому они дорогие.","Flowers, captain? In winter they are scarce, so they are dear."
+AMB_FLEUR_2,Et en été ?,А летом?,And in summer?
+AMB_FLEUR_3,"Il y en a partout, alors le prix baisse. C'est la saisonnalité.","Их полно, и цена падает. Это сезонность.","They are everywhere, so the price falls. That is seasonality."
+AMB_ENFANT_1,Regarde ma tirelire ! J'économise pour un petit bateau.,"Смотри, моя копилка! Я коплю на кораблик.",Look at my piggy bank! I am saving for a little boat.
+AMB_ENFANT_2,Bravo ! Tu mets une pièce chaque semaine ?,Молодец! Кладёшь по монетке каждую неделю?,Well done! Do you put a coin in every week?
+AMB_ENFANT_3,"Oui ! Maman dit : « petit à petit, l'oiseau fait son nid ».",Да! Мама говорит: «птичка по зёрнышку клюёт».,"Yes! Mum says: « little by little, the bird builds its nest »."
+AMB_MONSIEUR_1,J'ai prêté de l'argent à la guilde. Elle m'a donné une obligation.,Я дал гильдии в долг. Она выдала мне облигацию.,I lent money to the guild. It gave me a bond.
+AMB_MONSIEUR_2,Une reconnaissance de dette ?,Долговую расписку?,An IOU?
+AMB_MONSIEUR_3,"Oui. Chaque année, je reçois le coupon. À la fin, la guilde me rembourse.",Да. Каждый год я получаю купон. В конце гильдия возвращает долг.,Yes. Every year I receive the coupon. At the end the guild pays me back.
+AMB_ETUDIANTE_1,J'étudie les marchés. Vous connaissez le Panier de Vetla ?,Я изучаю рынки. Знаете Корзину Ветлы?,I study markets. Do you know Vetla's Basket?
+AMB_ETUDIANTE_2,"Oui. Un peu de tout, dans un seul panier.",Да. Всего понемногу в одной корзине.,"Yes. A little of everything, in one basket."
+AMB_ETUDIANTE_3,C'est un fonds indiciel. On ne met pas tous ses œufs dans le même panier : c'est la diversification.,Это индексный фонд. Не кладут все яйца в одну корзину — это диверсификация.,It is an index fund. One does not put all one's eggs in one basket: that is diversification.

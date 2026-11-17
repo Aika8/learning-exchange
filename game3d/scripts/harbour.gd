@@ -15,7 +15,9 @@ const HARBOUR_SPOTS := {
 	"provisions": [Vector3(37, Archipelago.DECK_Y, 10.4), "PROMPT_PROVISIONS", 3.2],
 	"garden": [Vector3(-14, 0, 12), "PROMPT_GARDEN", 4.0],
 	"fog": [Vector3(15, 0, -4), "PROMPT_FOG", 3.2],
+	"ferry": [FERRY_POST + Vector3(0, 0, 1.3), "PROMPT_FERRY", 2.4],
 }
+const FERRY_POST := Vector3(33.0, Archipelago.DECK_Y, -3.9)  ## the signpost of the packet boat to Amber Cliff
 const SILK_POST := Archipelago.SILK + Vector3(-12, 0, 8)
 const SILK_SPOTS := {
 	"post": [SILK_POST, "PROMPT_POST", 5.0],
@@ -47,14 +49,38 @@ var _nav: NavigationRegion3D
 var _report_timer := 0.0
 var _comic: ComicPage
 var _talker: Villager
+var _glossing := false  ## T is held: the island's words are shown in the game's language (ADR-0028)
+var _gloss: Label
+var _signs: Array[Label3D] = []
+var _title: Label
 
 
 func _silk() -> bool:
 	return Game.island == "silk"
 
 
+func _amber() -> bool:
+	return Game.island == AmberCliff.ID
+
+
+## Amber Cliff (ADR-0028): each keeper teaches one idea, in French. id → [position, prompt key, radius].
+static func amber_spots() -> Dictionary:
+	var out := {"ship": [AmberCliff.PIER_FROM + Vector3(6.0, 0, 2.4), "AMB_PROMPT_SHIP", 5.0],
+		"lighthouse": [AmberCliff.lighthouse_spot()[1], "AMB_PROMPT_LIGHTHOUSE", 3.0]}
+	for id: String in ["change", "bank", "bakery", "cafe", "books"]:
+		out[id] = [AmberCliff.door(id)[1], "AMB_PROMPT_" + id.to_upper(), 3.0]
+	return out
+
+
 func _spots() -> Dictionary:
+	if _amber():
+		return amber_spots()
 	return SILK_SPOTS if _silk() else HARBOUR_SPOTS
+
+
+## The words of `key` as the island the captain stands on says them; with T held, in the game's language.
+func _shown(key: String) -> String:
+	return tr(key) if _glossing else IslandTongue.shown(key, Game.island)
 
 
 func _ready() -> void:
@@ -62,9 +88,13 @@ func _ready() -> void:
 	_parts = Archipelago.build(self)
 	_dress()
 	_nav = Nav.bake(self, Archipelago.walk_areas(Game.island))
+	for l in find_children("Sign", "Label3D", true, false):
+		_signs.append(l)
 	var ship := Proc.ship()
 	ship.name = "Wayfarer"
 	ship.position = (Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)) if _silk() else Archipelago.PIER_END + Vector3(0, 1.2, 5.5)  # the wind vane clears the heads of people on the pier
+	if _amber():
+		ship.position = AmberCliff.DOCK + Vector3(0, 1.2, 0)
 	ship.rotation.y = PI / 2
 	add_child(ship)
 	_captain = Captain.new()
@@ -95,6 +125,9 @@ func _ready() -> void:
 ## People and Act I props. Each NPC is a MakeHuman character when downloaded (ADR-0019). Everything stands on the
 ## ground and has a collider; the strollers walk the navmesh (Villager).
 func _dress() -> void:
+	if _amber():
+		_dress_amber()
+		return
 	if _silk():
 		var post_y := Archipelago.silk_ground(SILK_POST - Archipelago.SILK)
 		var keeper := _npc("trader", Color("9a6ab0"), SILK_POST + Vector3(0, post_y, -1.6), 0.0)
@@ -106,6 +139,14 @@ func _dress() -> void:
 		_villager("child", Color("6a9ab0"), Archipelago.SILK + Vector3(2, 0, 4), 9.0)
 		_villager("sailor", Color("4e6fa8"), Archipelago.SILK + Vector3(-12, 0, 12), 8.0, "sailor2")
 		return
+	var post := Node3D.new()  # the packet boat to Amber Cliff: a signpost on the wharf (ADR-0028)
+	post.name = "FerryPost"
+	post.position = FERRY_POST
+	add_child(post)
+	post.add_child(Proc.box(Vector3(0.14, 2.6, 0.14), Proc.TIMBER_DARK, Vector3(0, 1.3, 0)))
+	post.add_child(Proc.box(Vector3(2.3, 0.5, 0.08), Color("2b4f8c"), Vector3(0, 2.4, 0)))
+	post.add_child(AmberCliff.word_sign("AMB_SIGN_FERRY", Vector3(0, 2.4, 0.05), 0.0, 40, AmberCliff.TRIM))
+	Solid.post(post, 0.1, 2.6, Vector3.ZERO)
 	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2, "mara")
 	mara.name = "Mara"
 	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8, "olva").name = "Olva"
@@ -164,6 +205,26 @@ func _dress() -> void:
 		_villager(who[i], Color("8a6a4a"), homes[i][0], homes[i][1], roles[i])
 
 
+## Amber Cliff: a keeper at every door and five people strolling, each with a talk of their own (data/talks.json).
+func _dress_amber() -> void:
+	var cast := ComicScript.read().cast
+	var keepers := {"change": "changeur", "bank": "banquiere", "bakery": "boulangere", "cafe": "garcon", "books": "libraire"}
+	for shop: String in keepers:
+		var c: Dictionary = cast[keepers[shop]]
+		var at := AmberCliff.door(shop)
+		var n := _npc(str(c["who"]), Color(str(c["coat"])), at[0], atan2(at[1].x - at[0].x, at[1].z - at[0].z), str(c["role"]))
+		n.name = "Keeper_" + shop
+	var light := AmberCliff.lighthouse_spot()
+	var g: Dictionary = cast["gardienne"]
+	_npc(str(g["who"]), Color(str(g["coat"])), light[0], atan2(light[1].x - light[0].x, light[1].z - light[0].z), str(g["role"])).name = "Keeper_lighthouse"
+	var homes := {"marin": [Vector3(-26, 0, 0), 6.0], "fleuriste": [Vector3(-4, 0, 6), 5.0], "enfant": [Vector3(5, 0, -5), 8.0],
+		"monsieur": [Vector3(-22, 0, 1), 8.0], "etudiante": [Vector3(24, 0, 0), 6.0]}
+	for id: String in homes:
+		var c: Dictionary = cast[id]
+		_villager(str(c["who"]), Color(str(c["coat"])), AmberCliff.AT + (homes[id][0] as Vector3), homes[id][1], str(c["role"]))
+		_villagers[-1].set_meta("talk", "amber_" + id)
+
+
 func _npc(who: String, coat: Color, pos: Vector3, yaw: float, role: String = "") -> Node3D:
 	var n := Proc.figure(coat, Color("2a3550"), who, role)
 	n.position = pos
@@ -201,6 +262,10 @@ func _build_ui() -> void:
 	var title := Hud.text("SILK_TITLE" if _silk() else "HARBOUR_TITLE", 36, Hud.BRASS)
 	title.add_theme_font_override("font", Hud.serif())
 	titles.add_child(title)
+	_title = title
+	if _amber():  # the island names itself in its own tongue
+		title.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+		title.text = _shown("AMB_TITLE")
 	_account = Hud.text("", 15, Hud.TEXT)
 	titles.add_child(_account)
 	top.add_child(titles)
@@ -218,7 +283,16 @@ func _build_ui() -> void:
 	_prompt.offset_left = -500
 	_prompt.offset_right = 500
 	root.add_child(_prompt)
-	_help = Hud.text("HARBOUR_HELP", 15, Hud.MUTED)
+	_prompt.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	_gloss = Hud.text("", 20, Hud.BRASS)  # the nearest sign, read aloud in the game's language while T is held
+	_gloss.auto_translate_mode = Node.AUTO_TRANSLATE_MODE_DISABLED
+	_gloss.set_anchors_preset(Control.PRESET_CENTER_BOTTOM)
+	_gloss.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gloss.offset_top = -210
+	_gloss.offset_left = -500
+	_gloss.offset_right = 500
+	root.add_child(_gloss)
+	_help = Hud.text("AMBER_HELP" if _amber() else "HARBOUR_HELP", 15, Hud.MUTED)
 	_help.set_anchors_preset(Control.PRESET_BOTTOM_LEFT)
 	_help.offset_left = 28
 	_help.offset_top = -44
@@ -263,19 +337,36 @@ func _process(delta: float) -> void:
 		blades.rotation.z += delta * 0.5
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
-		ship.position.y = (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+		ship.position.y = (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y)) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
 	for w in _idlers:
 		w.step(delta, 0.0)
 	if _flying:
 		_fly_move(delta)
 	_target = _nearest()
-	_prompt.text = ("PROMPT_TALK" if _target.begins_with("talk:") else _spots()[_target][1]) if not _target.is_empty() else ""
+	var prompt: String = ("PROMPT_TALK" if _target.begins_with("talk:") else _spots()[_target][1]) if not _target.is_empty() else ""
+	if _amber() and prompt == "PROMPT_TALK":
+		prompt = "AMB_PROMPT_TALK"
+	_prompt.text = _shown(prompt) if not prompt.is_empty() else ""
+	if _amber():
+		_glossing = Input.is_key_pressed(KEY_T) and not _comic.is_open()
+		_title.text = _shown("AMB_TITLE")
+		_gloss.text = _read_sign() if _glossing else ""
 	if _target.is_empty():
 		_dialog.visible = false
 	_report_timer -= delta
-	if _report_timer <= 0.0 and not _silk():
+	if _report_timer <= 0.0 and not _silk() and not _amber():
 		_report_timer = 2.0
 		Game.watch_report()
+
+
+## The nearest sign the captain can read from here, as "French — the game's language".
+func _read_sign() -> String:
+	var p := _captain.global_position
+	var best: Label3D
+	for l: Label3D in _signs:
+		if l.global_position.distance_to(p) < 16.0 and (best == null or l.global_position.distance_to(p) < best.global_position.distance_to(p)):
+			best = l
+	return "%s — %s" % [best.text, tr(str(best.get_meta("key")))] if best != null else ""
 
 
 func _nearest() -> String:
@@ -385,7 +476,13 @@ func interact() -> void:
 		_talker.set_physics_process(false)  # stands and listens
 		_talker.walker.step(0.2, 0.0)
 		var role: String = _talker.role if not _talker.role.is_empty() else {"oldman": "townsman"}.get(_talker.who, _talker.who)
-		await talk("stroll_" + role)
+		await talk(str(_talker.get_meta("talk", "stroll_" + role)))
+		return
+	if _amber():
+		if _target == "ship":  # the packet boat home: no trading day is needed for this passage
+			_sail_to("harbour")
+		elif not _target.is_empty():
+			await talk("amber_" + _target)
 		return
 	match _target:
 		"exchange":
@@ -397,6 +494,8 @@ func interact() -> void:
 			if Game.move(GameFlow.State.SAILING):
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				Session.go("voyage")
+		"ferry":
+			_sail_to(AmberCliff.ID)
 		"mara":
 			await _meet("mara_first")
 			open_plan()
@@ -433,6 +532,14 @@ func interact() -> void:
 		"post":
 			await _meet("keeper_first")
 			await open_post()
+
+
+## The packet boat between Spark Harbour and Amber Cliff: a fade, and the captain is on the other pier.
+func _sail_to(island: String) -> void:
+	Game.island = island
+	Session.spawn = "pier"
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	Session.go("harbour")
 
 
 func _rates() -> Dictionary:

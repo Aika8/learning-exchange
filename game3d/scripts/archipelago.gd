@@ -27,6 +27,8 @@ const SILK_PIER_TO := SILK + Vector3(-13.0, DECK_Y, 16.0)  ## its island end lie
 
 ## Where people can stand on an island: the flat cap (a wobbly disc) and the pier (a rectangle).
 static func walk_areas(island_id: String) -> Array[Dictionary]:
+	if island_id == AmberCliff.ID:
+		return AmberCliff.walk_areas()
 	if island_id == "silk":
 		return [{"name": "silk", "kind": "disc", "centre": SILK, "radius": SILK_RADIUS, "seed": SILK_SEED},
 			{"name": "silk-pier", "kind": "rect", "from": SILK_PIER_FROM, "to": SILK_PIER_TO}]
@@ -37,6 +39,8 @@ static func walk_areas(island_id: String) -> Array[Dictionary]:
 
 ## Where the captain appears: [position, camera yaw]. `spawn` is Session.spawn (start | pier | exchange).
 static func spawn_point(island_id: String, spawn: String) -> Array:
+	if island_id == AmberCliff.ID:
+		return [AmberCliff.SPAWN, -PI / 2]  # by the packet boat, looking up the street
 	if island_id == "silk":
 		return [SILK_DOCK + Vector3(8, 0.5, 0), -2.3]  # every arrival at Silk Reach is by ship
 	match spawn:
@@ -243,6 +247,10 @@ static func build(root: Node3D, detail: bool = true) -> Dictionary:
 	silk.position = SILK
 	root.add_child(silk)
 	parts["silk"] = silk
+	var amber := AmberCliff.build(Game.island == AmberCliff.ID)  # the town only when the captain is there
+	amber.position = AmberCliff.AT
+	root.add_child(amber)
+	parts["amber"] = amber
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 2026
 	var far: Array[Node3D] = []

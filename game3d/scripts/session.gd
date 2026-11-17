@@ -51,6 +51,8 @@ func _ready() -> void:
 		Audit.attune.call_deferred(get_tree())
 	elif not arg("talk").is_empty():
 		Audit.talk.call_deferred(get_tree())
+	elif not arg("read").is_empty():
+		Audit.read.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:
@@ -97,8 +99,10 @@ func _build_ink() -> void:
 	if not arg("ink").is_empty():
 		ink_mode = clampi(int(arg("ink")), 0, 2)
 	set_ink(ink_mode)
-	for t: Translation in Locale.load_catalogue(ComicScript.WORDS).values():  # the words of the talks (ADR-0027)
-		TranslationServer.add_translation(t)
+	for cat: Dictionary in ComicScript.catalogues():  # the words of the talks and of the islands' tongues (ADR-0027, 0028)
+		for locale: String in cat:
+			if locale in Locale.LOCALES:  # an island's tongue is not a game language
+				TranslationServer.add_translation(cat[locale])
 
 
 func _layer_ready() -> void:
@@ -211,7 +215,7 @@ static func arg(key: String) -> String:
 
 ## True for the audit, views and gait runs: no mouse capture, the scripts drive the scene.
 static func tooling() -> bool:
-	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune") + arg("talk")).is_empty() or arg("fps").length() > 1
+	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune") + arg("talk") + arg("read")).is_empty() or arg("fps").length() > 1
 
 
 static func active() -> bool:
