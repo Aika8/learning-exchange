@@ -5,6 +5,8 @@
 //     for rock and timber, rust for cloth, cream paper, soft half-tones; large faint patterns only on cloth, roofs
 //     and the cloud sea, laid out in world space (on the hero: in the hero's own space) and faded before they are
 //     small enough to shimmer; a thin indigo line; a cotton weave;
+// 3 = noir (ADR-0030) — paper white in the light, ink black in the shade, one flat grey between; anything truly red
+//     is the one signal red; fog fades the distance to pale paper; thin slanted rain that travels steadily;
 // 2 = aquarelle — pen and watercolour: a thin trembling line, washes that run past it, a lot of bare paper, a
 //     violet-grey wash for shade, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
@@ -237,6 +239,40 @@ void fragment() {
 		result *= 0.965 + 0.05 * hash(floor(FRAGCOORD.xy / max(s, 1.0)));  // the tooth of the paper
 		float alive = 0.62 + 0.38 * smoothstep(0.2, 0.7, blot(FRAGCOORD.xy / (16.0 * s)));  // the pen presses and lifts
 		result = mix(result, line, edge * alive);
+	} else if (tech == 3) {
+		vec3 red = mix(ramp2, ramp2_from, old);
+		vec3 white = sheet_colour;
+		float far = smoothstep(500.0, 900.0, d);
+		vec3 seen = pow(clamp(col, 0.0, 1.0), vec3(0.45));  // as the eye sees it
+		float is_red = step(1.6 * max(seen.g, seen.b), seen.r) * step(0.2, seen.r - min(seen.g, seen.b));
+		// hard light: white, one grey, black — and in the strict print (mode 2) no grey at all
+		vec3 tone = mix(line, white * 0.56, smoothstep(0.40, 0.43, lum));
+		tone = mix(tone, white, smoothstep(0.60, 0.63, lum));
+		// the ground never goes black: its shadows are the largest dark shapes on screen and they move with every step
+		float ground = step(0.75, normalize(mat3(INV_VIEW_MATRIX) * n).y);
+		tone = mix(tone, max(tone, white * 0.5), ground);
+		if (mode == 2) {
+			tone = mix(line, white, smoothstep(0.52, 0.55, lum));
+		}
+		tone = mix(tone, red, is_red);
+		// the line is what the shape is not
+		float dark_here = (1.0 - smoothstep(0.40, 0.43, lum)) * (mode == 2 ? 1.0 : 1.0 - ground);
+		tone = mix(tone, mix(line, white, dark_here * (1.0 - is_red)), edge);
+		// fog: the distance goes pale, so the sky and far towers are light and black is kept for what is near
+		float fog = smoothstep(22.0, 150.0, d) * (mode == 2 ? 0.45 : 0.8);
+		vec3 pale = white * mix(0.86, 0.97, clamp(SCREEN_UV.y * 1.4, 0.0, 1.0));
+		result = mix(tone, mix(pale, red, is_red * 0.45), fog);
+		result = mix(result, pale, far);
+		if (mode != 2) {  // slanted rain: thin grey streaks that slide along their slant, never jump
+			vec2 r = FRAGCOORD.xy / s;
+			float across = r.x + r.y * 0.36;
+			float lane = floor(across / 38.0);
+			float h = hash(vec2(lane, 7.0));
+			float along = fract((r.y - TIME * (430.0 + 150.0 * h)) / 460.0 + h);
+			float streak = step(along, 0.2) * smoothstep(0.045, 0.02, abs(fract(across / 38.0) - 0.5)) * step(h, 0.55);
+			result = mix(result, white * 0.5, streak * 0.3);
+		}
+		result *= 0.975 + 0.04 * hash(floor(FRAGCOORD.xy / max(s, 1.0)));
 	} else if (mode == 2) {
 		float turn = mix(hatch_turn, hatch_turn_from, old);
 		float gap = mix(hatch_gap, hatch_gap_from, old) * s;

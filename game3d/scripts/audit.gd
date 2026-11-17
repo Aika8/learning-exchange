@@ -4,7 +4,7 @@
 class_name Audit
 extends RefCounted
 
-const PLACES := ["harbour", "silk", "amber", "hall"]
+const PLACES := ["harbour", "silk", "amber", "shorts", "hall"]
 const SHOTS_PER_KIND := 3
 
 
@@ -24,6 +24,11 @@ const VIEWS := {
 		["view-amber-shops", AmberCliff.AT + Vector3(2, 2.4, 2), AmberCliff.AT + Vector3(17, 3.2, -11)],
 		["view-amber-cafe", AmberCliff.AT + Vector3(3, 2.6, 1), AmberCliff.AT + Vector3(17, 2.6, 11)],
 		["view-amber-lighthouse", AmberCliff.AT + Vector3(12, 5, 5), AmberCliff.AT + Vector3(36, 9, 0)]],
+	"shorts": [["view-shorts", ShortIsle.AT + Vector3(-46, 15, 30), ShortIsle.AT + Vector3(0, 3, -6)],
+		["view-shorts-street", ShortIsle.AT + Vector3(-27, 2.4, 0.5), ShortIsle.AT + Vector3(20, 6, 0)],
+		["view-shorts-exchange", ShortIsle.AT + Vector3(8, 2.6, 5), ShortIsle.AT + Vector3(21, 6.5, 0)],
+		["view-shorts-houses", ShortIsle.AT + Vector3(-12, 2.2, 1.5), ShortIsle.AT + Vector3(-2, 4.5, -9)],
+		["view-shorts-slab", ShortIsle.AT + Vector3(-30, 6, 22), ShortIsle.AT + Vector3(-8, 12, -60)]],
 	"hall": [["view-hall", Vector3(0, 3.4, 10.4), Vector3(0, 5, -9)], ["view-hall-side", Vector3(10, 4, 6), Vector3(-6, 2.5, -6)],
 		["view-hall-up", Vector3(0, 1.6, 9), Vector3(0, 12, -4)]],
 }
@@ -51,7 +56,7 @@ static func views(tree: SceneTree) -> void:
 ## jumps there (the first second) and settled (the next two). Writes a JSON table; run at 1920x1080.
 static func fps(tree: SceneTree) -> void:
 	var rows: Array = []
-	for place: String in ["harbour", "silk", "amber"]:
+	for place: String in ["harbour", "silk", "amber", "shorts"]:
 		if not Session.arg("only").is_empty() and place != Session.arg("only"):
 			continue
 		Game.island = place
@@ -271,7 +276,8 @@ static func read(tree: SceneTree) -> void:
 
 
 ## `--stroll=<dir>`: the picture on the move — the camera walks 12 m across an island at walking pace and a frame is
-## saved every 0.1 s (frame-NN.png), to look for patterns that shimmer. `--island=silk` (default) or another.
+## saved every 0.1 s (frame-NN.png), to look for patterns that shimmer. `--island=silk` (default) or another;
+## `--still` keeps the camera in place.
 static func stroll(tree: SceneTree) -> void:
 	var dir := Session.arg("stroll")
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -290,9 +296,16 @@ static func stroll(tree: SceneTree) -> void:
 		(c as CanvasLayer).visible = false
 	var from := centre + Vector3(-19, 1.9, 17)
 	var to := centre + Vector3(-9, 1.9, 9)
+	var look := centre + Vector3(4, 1.6, -4)
+	if place == ShortIsle.ID or place == AmberCliff.ID:  # these two have a street: walk along it
+		from = centre + Vector3(-22, 1.9, 0.8)
+		to = centre + Vector3(-10, 1.9, 0.4)
+		look = centre + Vector3(21, 5, 0)
+	if not Session.arg("still").is_empty():  # `--still`: the camera stands; whatever changes then is the picture itself
+		to = from
 	for i in 30:
 		cam.position = from.lerp(to, i / 29.0)
-		cam.look_at(centre + Vector3(4, 1.6, -4))
+		cam.look_at(look)
 		await _await_drawn(tree)
 		await tree.process_frame
 		scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%02d.png" % i))

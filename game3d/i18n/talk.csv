@@ -50,3 +50,22 @@ TALK_TOWNSMAN_3,"Процент на процент.","Interest on interest."
 TALK_TRADER_1,"Раз в сезон я кладу в корзину понемногу всего, что растёт на островах.","Once a season I put a little of everything the islands grow into my basket."
 TALK_TRADER_2,"Корзина Ветлы! Так это и есть индексный фонд?","Vetla's Basket! So that is what an index fund is?"
 TALK_TRADER_3,"Он самый, милый. Я не угадываю, какой остров вырастет. Я держу все сразу.","The very one, dear. I do not guess which island will grow. I hold them all at once."
+WHO_NOIR_BROKER,Маклер,The broker
+WHO_NOIR_TRAMP,Старик с повязкой,The old man with the armband
+WHO_NOIR_YOUTH,Бледный юноша,The pale youth
+WHO_NOIR_LADY,Дама в красном шарфе,The woman in the red scarf
+TALK_SHORTS_EX_C,"Биржа падающих цен стоит на самом краю. Табло чинят: внутрь пока не пускают.","The Exchange of Falling Prices stands on the very edge. The board is being mended: nobody is let in yet."
+TALK_SHORTS_EX_1,"На этом острове зарабатывают, когда цена падает.","On this island people earn when a price falls."
+TALK_SHORTS_EX_2,"Как можно продать то, чего у тебя нет?","How can you sell what you do not have?"
+TALK_SHORTS_EX_3,"Берёшь товар взаймы, продаёшь, потом выкупаешь дешевле и возвращаешь. Это короткая продажа — шорт.","You borrow the goods, sell them, buy them back cheaper and return them. That is a short sale — a short."
+TALK_SHORTS_EX_4,"А если цена вырастет?","And if the price rises?"
+TALK_SHORTS_EX_5,"Тогда выкупать дороже. Цена может расти сколько угодно — убыток шорта ничем не ограничен.","Then you buy back dearer. A price can rise without end — the loss of a short has no limit."
+TALK_SHORTS_TRAMP_1,"Я три года ждал падения. Оно пришло на четвёртый.","I waited three years for the fall. It came in the fourth."
+TALK_SHORTS_TRAMP_2,"И вы были правы?","And you were right?"
+TALK_SHORTS_TRAMP_3,"Прав. Только деньги кончились на третьем. Быть правым слишком рано — то же, что ошибиться.","Right. Only the money ran out in the third. To be right too early is the same as to be wrong."
+TALK_SHORTS_YOUTH_1,"Я читаю ведомости мастерских — финансовые отчёты. Ищу, где бумага красивее дела.","I read the workshops' ledgers — financial reports. I look for where the paper is prettier than the business."
+TALK_SHORTS_YOUTH_2,"То есть шортист — тот же аналитик?","So a short seller is an analyst too?"
+TALK_SHORTS_YOUTH_3,"Тот же. Только ему платят за плохие новости. Поэтому нас и не любят.","The same. Only he is paid for bad news. That is why we are not liked."
+TALK_SHORTS_LADY_1,"За взятое взаймы платят каждый день. Это плата за заём.","What is borrowed is paid for every day. That is the borrow fee."
+TALK_SHORTS_LADY_2,"Значит, ждать падения — недёшево?","So waiting for the fall is not cheap?"
+TALK_SHORTS_LADY_3,"Недёшево. И если заимодавец потребует товар назад, придётся выкупать по любой цене.","Not cheap. And if the lender calls the goods back, you must buy at whatever the price is."

@@ -6,7 +6,7 @@ style guide: `docs/design/game3d-style.md`; **the look follows the concept sheet
 M3 vertical slice (`docs/demo/M3.md`, ADR-0023): one game day — Port → Plan voyage with Mara (risk ≤ 1%, the Anchor =
 stop-loss) → Trading on the Ladder → Sailing (the clock runs ×60, a storm) → Evening chronicle with replay. Act I
 (debt, provisions, garden, fog), spread/fees/liquidity, the Anchor and a gap, the Forge report season, the captain's
-glossary (G), the «Реальный мир» board. Islands: Spark Harbour, Silk Reach, and Amber Cliff — «La Falaise d'Ambre», where
+glossary (G), the «Реальный мир» board. Islands: Spark Harbour, Silk Reach, the short sellers' island (a noir town; a place and a style for now, ADR-0030), and Amber Cliff — «La Falaise d'Ambre», where
 everything is in French (hold T for the translation; `docs/demo/G3D-amber.md`, ADR-0028).
 
 ## Run
@@ -50,6 +50,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/world_probe.gd`, `audit.gd` | The world audit (`WorldProbe`) and its runs |
 | `data/talks.json`, `i18n/talk.csv`, `art/portraits/`, `scripts/core/comic_script.gd`, `comic_reader.gd`, `scripts/ui/comic_page.gd`, `comic_frame.gd`, `comic_faces.gd`, `comic_doodle.gd` | Talks as comic pages (ADR-0027): the data and words, the drawn faces (one per hero and emotion), the reader, the page, the stand-in for people without a sheet |
 | `scripts/amber_cliff.gd`, `scripts/core/island_tongue.gd`, `i18n/amber.csv` | Amber Cliff, the French-speaking island (ADR-0028): the town, the island's tongue, its words (`fr,ru,en`) |
+| `scripts/short_isle.gd` | The short sellers' island (ADR-0030): the slab, crooked houses and towers, the Exchange of Falling Prices, its props |
 | `scripts/props.gd` | The props of the props sheet built in code: lamp, stall, crate, barrel, chest, rope coil, bollard, anchor, signboards |
 | `scripts/chronicle.gd`, `scripts/demo.gd` | Evening chronicle scene; the self-run demo for screenshots |
 | `scripts/main_menu.gd`, `harbour.gd`, `captain.gd`, `hall.gd`, `board.gd`, `voyage.gd` | Scenes (`scenes/*.tscn` are a root node + script) |

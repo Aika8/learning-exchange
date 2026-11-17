@@ -183,6 +183,10 @@ static func outline(area: Dictionary) -> PackedVector3Array:
 	var count := 96
 	for i in count:
 		var ang := TAU * i / count
-		var r: float = float(area["radius"]) if area["kind"] == "circle" else Proc.cap_radius(area["radius"], area["seed"], ang)
+		var r: float = float(area["radius"])
+		if area["kind"] != "circle":  # the island's edge has narrow teeth: the fence keeps to the lowest of three samples
+			r = Proc.cap_radius(area["radius"], area["seed"], ang)
+			for near: float in [-0.5, 0.5]:
+				r = minf(r, Proc.cap_radius(area["radius"], area["seed"], ang + near * TAU / count))
 		ring.append(c + Vector3(cos(ang), 0, sin(ang)) * r)
 	return ring

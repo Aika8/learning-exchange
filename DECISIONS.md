@@ -432,3 +432,16 @@ Build and CI
 - A newer call of `Session.attune` takes over from an older one still running (a counter), so leaving a port in the
   middle of the wind cannot leave the next port in the wrong style.
 - Amber Cliff's house colours follow sheet 30; nothing else of its geometry changed.
+
+## G3D short sellers' island (ADR-0030)
+- Noir tones: white above brightness 0.60–0.63, one grey (56 %) down to 0.40–0.43, ink below; the ground is never
+  darker than 50 % grey; fog from 22 to 150 m takes 80 % of the tone. Rain: lanes 38 px wide at 1080p, 55 % of them
+  wet, a streak a fifth of 460 px long, 430–580 px a second, 30 % opacity.
+- A house leans as one piece with its collider (the collider is a child of the leaning body); the mill's stone foot
+  stands upright and has the cylinder a walker meets. The ground storey is as wide as its collider.
+- `Solid.outline`: the fence round an island keeps to the lowest of three samples of the edge, so it cannot bulge
+  out through a narrow tooth of `Proc.cap_radius` (the audit's "escape" at Spark Harbour's north rim).
+- Islanders' comic portraits are their figures cut from sheet 36, one picture for every emotion
+  (`ComicFaces.ONE_FACE`, `"one_face": true` in the cast).
+- `--stroll` walks the street on islands that have one and takes `--still`.
+- Cargo on the wharf's north rail moved east to make room for the second packet-boat post.

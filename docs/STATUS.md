@@ -3,6 +3,11 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D short sellers' island (ADR-0030, Proposed) — `docs/demo/G3D-shorts.md`
+- A fourth island: a tilted town of crooked houses and leaning towers with the Exchange of Falling Prices, drawn as
+  noir (black, white, one red; fog, slanted rain). A place and a style: no shorting mechanics (they wait for intent
+  03). Four islanders talk; the captain is redrawn in noir on landing. Audit 0, GUT 109, 118 fps average at 1080p.
+
 ## G3D techniques (ADR-0029, Proposed) — `docs/demo/G3D-techniques.md`
 - Silk Reach is drawn as katazome (indigo, cream, a rare rust; patterns in world space), Amber Cliff in pen and
   watercolour, from Aika's sheets 27–34. The captain is redrawn in the technique of every port; a test holds every

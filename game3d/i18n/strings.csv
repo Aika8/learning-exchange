@@ -298,3 +298,6 @@ INK_ENGRAVING,Стиль: гравюра,Style: engraving
 PROMPT_TALK,E — поговорить,E — talk
 PROMPT_FERRY,E — пакетбот на Янтарный Утёс,E — the packet boat to Amber Cliff
 AMBER_HELP,WASD — идти · Shift — бег · мышь — обзор · V — стиль · E — действие · T (держать) — перевод,WASD — walk · Shift — run · mouse — look · V — style · E — interact · T (hold) — translation
+PROMPT_FERRY_SHORTS,E — пакетбот на Остров шортистов,E — the packet boat to the Short Sellers' Island
+PROMPT_FALLING_EXCHANGE,E — Биржа падающих цен,E — the Exchange of Falling Prices
+SHORTS_TITLE,Остров шортистов,Short Sellers' Island
