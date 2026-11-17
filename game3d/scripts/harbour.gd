@@ -45,6 +45,8 @@ var _villagers: Array[Villager] = []
 var _idlers: Array[Walker] = []
 var _nav: NavigationRegion3D
 var _report_timer := 0.0
+var _comic: ComicPage
+var _talker: Villager
 
 
 func _silk() -> bool:
@@ -242,6 +244,9 @@ func _build_ui() -> void:
 	_plan.approved.connect(_on_plan_approved)
 	_plan.cancelled.connect(_close_plan)
 	_build_post(root)
+	_comic = ComicPage.new()
+	root.add_child(_comic)
+	_comic.finished.connect(_on_talk_over)
 	Locale.locale_changed.connect(_on_locale)
 	_on_locale("")
 
@@ -264,7 +269,7 @@ func _process(delta: float) -> void:
 	if _flying:
 		_fly_move(delta)
 	_target = _nearest()
-	_prompt.text = _spots()[_target][1] if not _target.is_empty() else ""
+	_prompt.text = ("PROMPT_TALK" if _target.begins_with("talk:") else _spots()[_target][1]) if not _target.is_empty() else ""
 	if _target.is_empty():
 		_dialog.visible = false
 	_report_timer -= delta
@@ -274,9 +279,12 @@ func _process(delta: float) -> void:
 
 
 func _nearest() -> String:
-	if _flying or _hud.is_modal() or _plan.visible:
+	if _flying or _hud.is_modal() or _plan.visible or _comic.is_open():
 		return ""
 	var p := _captain.global_position
+	for i in _villagers.size():  # a stroller at arm's length comes before the place they walk through
+		if _villagers[i].global_position.distance_to(p) < 2.4:
+			return "talk:%d" % i
 	var spots := _spots()
 	for id: String in spots:
 		var pos: Vector3 = spots[id][0]
@@ -305,7 +313,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _ui_open() -> bool:
-	return _plan.visible or _post.visible or _hud.is_modal()
+	return _plan.visible or _post.visible or _hud.is_modal() or _comic.is_open()
 
 
 func _on_modal(open: bool) -> void:
@@ -341,7 +349,44 @@ func _say(text: String) -> void:
 	_dialog.visible = true
 
 
+## Opens talk `id` as a comic page (ADR-0027) and waits until it is closed. Tool runs have nobody to read it.
+func talk(id: String, vars: Dictionary = {}) -> void:
+	if Session.active() or Session.tooling() or not _comic.open(id, vars):
+		return
+	_dialog.visible = false
+	_captain.controlled = false
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	await _comic.finished
+
+
+func _on_talk_over(_id: String) -> void:
+	_captain.controlled = not _flying and not _plan.visible and not _post.visible
+	if _talker != null:
+		_talker.set_physics_process(true)
+		_talker = null
+	if not Session.tooling():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+## The first meeting with somebody is a page; later they get straight to business.
+func _meet(id: String) -> void:
+	if not Game.met.has(id):
+		Game.met[id] = true
+		await talk(id)
+
+
+func comic() -> ComicPage:
+	return _comic
+
+
 func interact() -> void:
+	if _target.begins_with("talk:"):
+		_talker = _villagers[int(_target.substr(5))]
+		_talker.set_physics_process(false)  # stands and listens
+		_talker.walker.step(0.2, 0.0)
+		var role: String = _talker.role if not _talker.role.is_empty() else {"oldman": "townsman"}.get(_talker.who, _talker.who)
+		await talk("stroll_" + role)
+		return
 	match _target:
 		"exchange":
 			if Game.approved and Game.flow.state != GameFlow.State.TRADING:
@@ -353,11 +398,14 @@ func interact() -> void:
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				Session.go("voyage")
 		"mara":
+			await _meet("mara_first")
 			open_plan()
 		"olva":
 			_olva()
 		"chronicler":
-			if Game.move(GameFlow.State.CHRONICLE):
+			if not Game.flow.can(GameFlow.State.CHRONICLE, Game.ctx()):
+				await talk("chronicler_day")
+			elif Game.move(GameFlow.State.CHRONICLE):
 				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 				Session.go("chronicle")
 		"debt":
@@ -383,6 +431,7 @@ func interact() -> void:
 			Game.lesson("FOG", [{"bps": infl}, {"bps": dep}, {"bps": Lessons.real_rate_bps(dep, infl)}, {"m": 10000000},
 				{"m": Lessons.after_fog(10000000, infl, 5)}])
 		"post":
+			await _meet("keeper_first")
 			await open_post()
 
 
@@ -431,12 +480,15 @@ func _olva() -> void:
 	if co.get("consensus") is Dictionary:
 		var c: Dictionary = co["consensus"]
 		_say(tr("OLVA_CONSENSUS") % [Money.format(int(c["eps"]), 2, loc), Money.format(int(c["revenue"]), 2, loc)])
+		await talk("olva_consensus", {"eps": Money.format(int(c["eps"]), 2, loc), "revenue": Money.format(int(c["revenue"]), 2, loc)})
 		Game.lesson("CONSENSUS", [{"p": int(c["eps"])}])
 	elif co.get("lastReport") is Dictionary:
 		var r: Dictionary = co["lastReport"]
 		_say(tr("OLVA_LAST") % [str(int(r["season"])), Money.format(int(r["eps"]), 2, loc), Money.format(int(r["consensusEps"]), 2, loc)])
+		await talk("olva_last", {"season": str(int(r["season"])), "eps": Money.format(int(r["eps"]), 2, loc), "consensus": Money.format(int(r["consensusEps"]), 2, loc)})
 	else:
 		_say(tr("OLVA_WAIT"))
+		await talk("olva_wait")
 
 
 func _on_report(kind: String, data: Dictionary) -> void:

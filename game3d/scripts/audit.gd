@@ -191,6 +191,37 @@ static func gait(tree: SceneTree) -> void:
 	tree.quit()
 
 
+## `--talk=<dir>`: every talk as it is read, one picture per full page (ADR-0027). `--only=<talk id>` for one,
+## `--island=silk` for the pages as Silk Reach draws them, `--lang=en`.
+static func talk(tree: SceneTree) -> void:
+	var dir := Session.arg("talk")
+	DirAccess.make_dir_recursive_absolute(dir)
+	if not Session.arg("island").is_empty():
+		Game.island = Session.arg("island")
+		Game.attuned = Game.island
+	if not Session.arg("lang").is_empty():
+		Locale.set_locale(Session.arg("lang"))
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(2.0)
+	var scene := tree.current_scene as Node3D
+	var page: ComicPage = scene.call("comic")
+	var sample := {"eps": "1,25", "revenue": "48 000,00", "season": "3", "consensus": "1,10"}
+	for id: String in ComicScript.read().talks:
+		if not Session.arg("only").is_empty() and id != Session.arg("only"):
+			continue
+		page.open(id, sample)
+		var n := 1
+		while page.is_open():
+			await Session.wait(0.35)
+			if page.reader().page_full():
+				await Session.wait(0.3)
+				scene.get_viewport().get_texture().get_image().save_png(dir.path_join("%s-%d.png" % [id, n]))
+				print("talk: ", id, " page ", n, " fps=", Engine.get_frames_per_second())
+				n += 1
+			page.step()
+	tree.quit()
+
+
 ## `--attune=<dir>`: the captain lands on Silk Reach still drawn the Spark Harbour way and the island's wind
 ## restyles them (ADR-0025). Saves a frame every 0.1 s as frame-NN.png; add `--ink=2` for the engraving.
 static func attune(tree: SceneTree) -> void:

@@ -1,0 +1,51 @@
+keys,ru,en
+WHO_CAPTAIN,Капитан,Captain
+WHO_MARA,Мара Якорная,Mara of the Anchor
+WHO_OLVA,Ольва Перо,Olva Quill
+WHO_CHRONICLER,Летописец,The Chronicler
+WHO_KEEPER,Хозяйка рынка,The post keeper
+WHO_SAILOR,Матрос,Sailor
+WHO_SAILOR2,Боцман,Boatswain
+WHO_SAILOR3,Старый матрос,Old sailor
+WHO_CHILD,Мальчишка,A boy
+WHO_TOWNSMAN,Старик,Old man
+WHO_TRADER,Торговка,Market woman
+COMIC_NEXT,E / Enter — дальше · Esc — закрыть,E / Enter — next · Esc — close
+COMIC_PAGE,стр. {page} из {pages},page {page} of {pages}
+TALK_MARA_FIRST_C,"Причал Гавани Искр. Орден Якоря не пускает в небо без плана.","The wharf of Spark Harbour. The Anchor Order lets nobody sail without a plan."
+TALK_MARA_FIRST_1,"Стой, капитан. Куда плывёшь, что везёшь и где бросишь Якорь?","Hold on, captain. Where to, what cargo, and where do you drop the Anchor?"
+TALK_MARA_FIRST_2,"Якорь?","The Anchor?"
+TALK_MARA_FIRST_3,"Стоп-лосс. Цена, на которой ты выходишь из рейса, если ветер против тебя.","A stop-loss. The price at which you leave the trade if the wind turns against you."
+TALK_MARA_FIRST_4,"Правило одного процента: за один рейс ты рискуешь не больше 1% казны.","The one-per-cent rule: on one voyage you risk no more than 1% of your capital."
+TALK_MARA_FIRST_5,"Значит, размер груза считают от Якоря, а не наоборот…","So the size of the cargo is worked out from the Anchor, not the other way round…"
+TALK_MARA_FIRST_6,"Верно. Размер позиции = риск ÷ расстояние до стопа. Показывай план.","Right. Position size = risk ÷ distance to the stop. Show me your plan."
+TALK_OLVA_CONSENSUS_1,"Счётчики Гильдии посчитали ожидания по Кузне. Это консенсус-прогноз.","The Guild Counters have their expectations for the Forge. That is the consensus forecast."
+TALK_OLVA_CONSENSUS_2,"Прибыль на акцию (EPS) {eps}, выручка {revenue}.","Earnings per share (EPS) {eps}, revenue {revenue}."
+TALK_OLVA_CONSENSUS_3,"А если ведомость выйдет хорошей, но хуже этого числа?","And if the report is good, but below that number?"
+TALK_OLVA_CONSENSUS_4,"Цена может упасть. Рынок торгует сюрприз — разницу с ожиданием.","The price may fall. The market trades the surprise — the gap to what was expected."
+TALK_OLVA_LAST_1,"Сезон {season}: EPS {eps} при консенсусе {consensus}.","Season {season}: EPS {eps} against a consensus of {consensus}."
+TALK_OLVA_LAST_2,"Новых ожиданий пока нет. Загляни перед следующей ведомостью.","No new expectations yet. Come back before the next report."
+TALK_OLVA_WAIT_1,"Ожиданий пока нет: мастерская ещё не назвала день ведомости.","No expectations yet: the workshop has not named its report day."
+TALK_OLVA_WAIT_2,"Зайду позже.","I will come back."
+TALK_CHRONICLER_DAY_C,"Летописец записывает всё, что случилось в небе. Разбор — вечером.","The Chronicler writes down all that happens in the sky. The review is in the evening."
+TALK_CHRONICLER_DAY_1,"День ещё не кончен, капитан. Мне пока нечего разбирать.","The day is not over, captain. I have nothing to review yet."
+TALK_CHRONICLER_DAY_2,"А что будет в разборе?","What will be in the review?"
+TALK_CHRONICLER_DAY_3,"Твой журнал сделок: что ты решил, что вышло и чему это учит. Без советов.","Your trade journal: what you decided, what came of it, what it teaches. No advice."
+TALK_KEEPER_1,"Шёлковый рынок, капитан. Покупателей у нас мало — это называют низкой ликвидностью.","The silk market, captain. We have few buyers — that is called low liquidity."
+TALK_KEEPER_2,"То есть весь трюм по лучшей цене не продать?","So I cannot sell the whole hold at the best price?"
+TALK_KEEPER_3,"Первые тюки — по лучшей. Дальше идёшь вниз по ступеням стакана. Смотри сам.","The first bales, yes. After that you walk down the steps of the order book. See for yourself."
+TALK_SAILOR_1,"Чуешь? Попутный ветер. На Бирже сегодня больше покупателей, чем продавцов.","Feel that? A fair wind. More buyers than sellers at the Exchange today."
+TALK_SAILOR_2,"Ветер у нас — это поток заявок. Куда он дует, туда и цена.","Wind, here, is the flow of orders. The price goes where it blows."
+TALK_SAILOR2_1,"Барометр падает. По-учёному — растёт волатильность.","The Barometer is falling. The learned word is: volatility is rising."
+TALK_SAILOR2_2,"Буря — это плохо?","Is a storm bad?"
+TALK_SAILOR2_3,"Буря — это просто большие волны. Плохо — выйти в неё с лишним грузом.","A storm is only big waves. Bad is sailing into one with too much cargo."
+TALK_SAILOR3_1,"Сорок лет хожу мимо Пропасти. Между лучшей покупкой и лучшей продажей — спред.","Forty years I have walked past the Gap. Between the best bid and the best ask lies the spread."
+TALK_SAILOR3_2,"Чем шире Пропасть, тем дороже прыжок. Рыночная заявка платит её целиком.","The wider the Gap, the dearer the jump. A market order pays all of it."
+TALK_CHILD_1,"Капитан! А почему монеты в сундуке тускнеют?","Captain! Why do the coins in the chest go dull?"
+TALK_CHILD_2,"Это туман — инфляция. На ту же монету через год купишь меньше.","That is the fog — inflation. The same coin buys less a year from now."
+TALK_CHILD_3,"Значит, сундук — не самое надёжное место…","So the chest is not the safest place after all…"
+TALK_TOWNSMAN_1,"Я посадил сад на Тихом Причале ещё мальчишкой. Это вклад со сложным процентом.","I planted a garden at the Quiet Pier as a boy. It is a deposit with compound interest."
+TALK_TOWNSMAN_2,"Каждый год растут и деревья, и то, что выросло в прошлом году.","Every year the trees grow, and so does what grew the year before."
+TALK_TOWNSMAN_3,"Процент на процент.","Interest on interest."
+TALK_TRADER_1,"Биржа берёт пошлину с каждой сделки. Это комиссия.","The Exchange takes a toll on every trade. That is the fee."
+TALK_TRADER_2,"Мелочь? Сложи за год. Частые сделки кормят Биржу, а не капитана.","A trifle? Add it up over a year. Frequent trades feed the Exchange, not the captain."
