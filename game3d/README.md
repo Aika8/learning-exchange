@@ -20,10 +20,12 @@ Space (sail during the voyage), G (glossary), V (look: colour / ink outline / en
 
 ## Tests
 `make test-game3d` — GUT headless. `tests/unit/test_world_walk.gd` walks a grid over both islands and the hall: nobody
-falls, spawns and spots are free, colliders follow the shapes, villagers stay on the ground.
+falls, spawns and spots are free, colliders follow the shapes, villagers stay on the ground; the captain is never
+trapped and walks through nothing he can see, villagers can finish their strolls (`docs/demo/G3D-walk.md`).
+3D physics is Jolt (`project.godot`): Godot Physics froze walkers on wide flat floors.
 
 ## World audit and measurements (`docs/demo/G3D-polish.md`)
-`godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`), `--views=<dir>` (fixed views),
+`godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`; about a minute, `--only=harbour|silk|hall` for one place), `--views=<dir>` (fixed views),
 `--gait=<dir>` (idle, walk, run, a doorstep), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
 effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 

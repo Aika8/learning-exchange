@@ -72,6 +72,86 @@ func test_nobody_falls_in_the_exchange_hall() -> void:
 	probe.done()
 
 
+func _spawns(island: String) -> Array[Vector3]:
+	var out: Array[Vector3] = []
+	for spawn: String in ["start", "pier", "exchange"]:
+		out.append(Archipelago.spawn_point(island, spawn)[0])
+	return out
+
+
+## From every spawn point the captain reaches the whole island and can always walk back: no pocket to get caught
+## in, no wall or rail that is only a picture. Then 6000 steps of a player pushing into every corner.
+func test_the_captain_is_never_trapped_and_walks_through_nothing() -> void:
+	for island: String in ["harbour", "silk"]:
+		var scene := await _place(island)
+		var probe := await _probe(scene, Archipelago.walk_areas(island))
+		probe.lattice = 1.0
+		probe.scan_routes(_spawns(island))
+		assert_gt(probe.nodes.size(), 1000, island)
+		assert_gt(probe.main.size(), probe.nodes.size() * 0.97, "%s: the island is reached from where the captain lands" % island)
+		probe.fuzz(_spawns(island), 6000)
+		_assert_clean(probe, ["trap", "walk-through", "tunnel", "escape"])
+		probe.done()
+		scene.free()
+
+
+## The rope rails of the decks are solid, and the side of the wharf people walk in by has none.
+func test_a_rail_stops_the_captain_and_the_way_onto_the_wharf_is_open() -> void:
+	var scene := await _place("harbour")
+	var probe := await _probe(scene, Archipelago.walk_areas("harbour"))
+	var z := Archipelago.WHARF_FROM.z
+	assert_false(probe._reach(probe.body, Vector3(27, Archipelago.DECK_Y, z + 1.5), Vector3(27, 0, z - 1.5), "wharf"), "the rail on the side holds")
+	assert_eq(probe.count("walk-through") + probe.count("tunnel"), 0, "stopped by the rail's collider before the body is in it")
+	var x := Archipelago.WHARF_FROM.x
+	assert_true(probe._reach(probe.body, Vector3(x - 1.5, 0, 4), Vector3(x + 1.5, Archipelago.DECK_Y, 4), "wharf"), "from the grass onto the deck")
+	assert_true(probe._reach(probe.body, Vector3(x + 1.5, Archipelago.DECK_Y, 4), Vector3(x - 1.5, 0, 4), "wharf"), "and back")
+	_assert_clean(probe, ["walk-through", "tunnel"])
+	probe.done()
+
+
+## The wharf deck has no sticky patches: from 500 places on it a walker gets going. (Godot's own 3D physics froze
+## a capsule on this wide flat box in places — the sailor's home was one; the project runs on Jolt.)
+func test_nobody_freezes_on_the_wharf() -> void:
+	var scene := await _place("harbour")
+	var probe := await _probe(scene, Archipelago.walk_areas("harbour"))
+	var body := probe.body
+	var frozen := 0
+	var tried := 0
+	for i in 500:
+		var from := Vector3(24.6 + (i % 25) * 0.6, Archipelago.DECK_Y, -3.5 + (i / 25) * 0.75)
+		if not probe.fits(from):
+			continue
+		tried += 1
+		var moved := 0.0
+		for turn: float in [0.0, PI]:
+			body.global_position = from + Vector3(0, 0.005, 0)
+			body.velocity = Vector3.ZERO
+			var a := i * 2.399 + turn
+			for f in 20:
+				Mover.step(body, Vector3(cos(a), 0, sin(a)), WorldProbe.DT)
+			moved = maxf(moved, body.global_position.distance_to(from))
+		frozen += 1 if moved < 0.3 else 0
+	assert_gt(tried, 400)
+	assert_eq(frozen, 0, "walkers frozen on the flat deck")
+	probe.done()
+
+
+## Every villager can finish its strolls: the navmesh never sends one where its body does not fit.
+func test_villagers_can_finish_their_strolls() -> void:
+	for island: String in ["harbour", "silk"]:
+		var scene := await _place(island)
+		for i in 30:
+			if Nav.ready(scene):
+				break
+			await wait_physics_frames(2)
+		var probe := await _probe(scene, Archipelago.walk_areas(island))
+		probe.scan_villagers(8)
+		assert_gt(probe.routes, 8, island)
+		_assert_clean(probe, ["npc-stuck", "walk-through", "tunnel"])
+		probe.done()
+		scene.free()
+
+
 func test_spawn_points_and_spots_are_free() -> void:
 	for island: String in ["harbour", "silk"]:
 		var scene := await _place(island)

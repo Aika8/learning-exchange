@@ -1,6 +1,12 @@
 # Status
 
-Updated: 2026-11-16, G3D polish after M4. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`.
+Updated: 2026-11-17, G3D walk fixes. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`.
+
+## G3D walk fixes — `docs/demo/G3D-walk.md`
+- The audit now finds traps, walls and rails you can walk through, and villager strolls that cannot be finished.
+  Found and fixed: rails without colliders (the wharf was entered through one), a pier at Silk Reach that did not
+  reach the walkable ground (the captain could not leave it), frozen patches on the wharf deck (physics is Jolt now),
+  the ship's vane over the pier. Audit 0 findings, GUT 83, 120 fps at 1080p.
 
 ## G3D style (ADR-0024, Proposed) — `docs/demo/G3D-style.md`
 - Default look is stylised low-poly built in code; people are faceless silhouettes from the concept sheets on a

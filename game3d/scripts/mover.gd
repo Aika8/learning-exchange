@@ -54,7 +54,9 @@ static func step(body: CharacterBody3D, wish: Vector3, delta: float, speed: floa
 ## Stairs: when something low blocks the way, try the same move from STEP higher and land on what is there.
 static func _climb(body: CharacterBody3D, flat: Vector3, delta: float) -> float:
 	var from := body.global_transform
-	var ahead := flat.normalized() * maxf(flat.length() * delta, 0.12)
+	# far enough ahead that the round foot of the capsule lands on the tread, not on its edge, one step before
+	# the body would hit the riser and lose its speed
+	var ahead := flat.normalized() * maxf(flat.length() * delta, 0.2)
 	var hit := KinematicCollision3D.new()
 	if not body.test_move(from, ahead, hit) or hit.get_normal().y > 0.7:
 		return 0.0  # nothing in the way, or a slope the slide handles
