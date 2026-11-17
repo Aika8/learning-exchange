@@ -7,7 +7,7 @@ Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/
 > Islands: each island is drawn in a technique of its own, chosen by Aika (ADR-0026, 0029) — Spark Harbour in pen
 > and ink (the style below), Silk Reach as **katazome**, a Japanese stencil-resist print in several blues, ochre and rust (sheet 28; 27 for the motifs), Amber Cliff
 > in **pen and watercolour**, a French travel sketchbook (sheets 29–34), the short sellers' island as **noir** —
-> black, white and one red (sheets 35–40; ADR-0030), the crypto island as **synthwave pixel art** (sheets 41–46;
+> black, white and one red (sheets 35–40; ADR-0030), the crypto island as **synthwave pixel art, softened** — sharp edges, texels fixed to the world, no dithering (sheets 41–46;
 > ADR-0031). **No real brands**: where a sheet showed a real coin's mark or ticker, the copy here has it covered and
 > the game uses its own wind coin. The technique and its colours are a row in
 > `game3d/scripts/island_style.gd`. **The captain is redrawn in the technique of every port** by the island's wind

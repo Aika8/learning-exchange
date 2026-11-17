@@ -282,7 +282,7 @@ static func read(tree: SceneTree) -> void:
 
 ## `--stroll=<dir>`: the picture on the move — the camera walks 12 m across an island at walking pace and a frame is
 ## saved every 0.1 s (frame-NN.png), to look for patterns that shimmer. `--island=silk` (default) or another;
-## `--still` keeps the camera in place.
+## `--still` keeps the camera in place, `--turn` keeps it in place and turns it.
 static func stroll(tree: SceneTree) -> void:
 	var dir := Session.arg("stroll")
 	DirAccess.make_dir_recursive_absolute(dir)
@@ -308,9 +308,14 @@ static func stroll(tree: SceneTree) -> void:
 		look = centre + Vector3(21, 5, 0)
 	if not Session.arg("still").is_empty():  # `--still`: the camera stands; whatever changes then is the picture itself
 		to = from
+	var turning := not Session.arg("turn").is_empty()  # `--turn`: the camera stands and looks round, 2° a frame
+	if turning:
+		to = from
 	for i in 30:
 		cam.position = from.lerp(to, i / 29.0)
 		cam.look_at(look)
+		if turning:
+			cam.rotate_y(deg_to_rad(-30.0 + i * 2.0))
 		await _await_drawn(tree)
 		await tree.process_frame
 		scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%02d.png" % i))

@@ -457,3 +457,11 @@ Build and CI
 - Real coin marks on sheets 41, 44, 45 are covered with a flat night-coloured box in the repository's copies.
 - The wharf has three packet-boat posts now (x = 24.6, 28.4, 33.0); each has its own spot radius so they do not overlap.
 - Demo pictures of this island are PNG scaled with nearest-neighbour: JPEG smears big pixels.
+
+## G3D crypto island, softer (ADR-0031 revised)
+- Texel 14 cm; a texel's paint is taken from its centre only if that centre is on the same surface (depth within
+  0.12 m + 2 % of the distance), else the pixel keeps its own colour.
+- Grid lines: half-width max(4.5 cm, 0.9 px); faded between 16 and 7 pixels a cell. Halo: 5 px reach (at 1080p),
+  45 % strength, on every other half-texel.
+- Sky cells: 1/240 rad. Stars: 0.15 % of cells above 0.2 rad.
+- `--stroll` takes `--turn` (stand and turn 2° a frame).
