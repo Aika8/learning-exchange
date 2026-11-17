@@ -2,7 +2,11 @@
 
 Updated: 2026-11-17, G3D walk fixes. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`.
 
-## G3D island styles (ADR-0025, Proposed) — `docs/demo/G3D-islands.md`
+## G3D looks (ADR-0026, Proposed) — `docs/demo/G3D-looks.md`
+- Every island is drawn in its own technique: Spark Harbour in pen and ink as before, Silk Reach as printed silk
+  (four dye baths, a light line, a weave). The wind restyles the captain from one technique into the other. GUT 88.
+
+## G3D island styles (ADR-0025, Accepted) — `docs/demo/G3D-islands.md`
 - Each island draws a slight variant of the ink style (`IslandStyle`: line, tint, paper, hatching, sun). A captain
   who arrives from another island is restyled by the island's wind: a swirl and a wave from boots to hat. GUT 88.
 

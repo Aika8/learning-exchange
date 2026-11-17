@@ -28,7 +28,10 @@ static func views(tree: SceneTree) -> void:
 	var dir := Session.arg("views")
 	DirAccess.make_dir_recursive_absolute(dir)
 	for place: String in PLACES:
-		Game.island = "silk" if place == "silk" else "harbour"
+		if not Session.arg("only").is_empty() and place != Session.arg("only"):
+			continue
+		Game.island = "harbour" if place == "hall" else place
+		Game.attuned = Game.island
 		tree.change_scene_to_file("res://scenes/%s.tscn" % ("hall" if place == "hall" else "harbour"))
 		await Session.wait(2.5)
 		var scene := tree.current_scene as Node3D

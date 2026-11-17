@@ -1,6 +1,6 @@
 # 0025. Give every island its own variant of the ink style, and let the island's wind restyle the captain
 
-- Status: Proposed
+- Status: Accepted (2026-11-17); the bounds of decision 1 are amended by ADR-0026
 - Date: 2026-11-17
 - Pattern(s): Flyweight-like table of value objects (`IslandStyle`: one small immutable set of numbers per island, shared
   by everything that draws), Strategy stays where ADR-0024 put it (`Style`)

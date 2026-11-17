@@ -4,8 +4,9 @@ Read this before changing the look of anything in `game3d/` (people, buildings, 
 `docs/design/concepts/` are Aika's approved designs: **the game follows the sheets, not the other way round.**
 Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/world-bible.md`.
 
-> Islands: each island draws a slight variant of this style — line colour and width, tint, hatching, light. The
-> numbers are in `game3d/scripts/island_style.gd` (ADR-0025); a new island gets a row there, close to home.
+> Islands: each island is drawn in a technique of its own — Spark Harbour in pen and ink (the style below), Silk
+> Reach as printed silk. The technique and its colours are a row in `game3d/scripts/island_style.gd` (ADR-0025,
+> ADR-0026); shapes, people and the sheets are the same everywhere. Pictures: `docs/demo/G3D-looks.md`.
 
 ## Art style (ADR-0024)
 Stylised low-poly: flat colours of the palette, meshes built in code, soft light; people read by **silhouette** (hat,

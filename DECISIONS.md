@@ -367,3 +367,9 @@ Build and CI
   the deck in the engraving.
 - The audit tools never start the wind on their own (`Session.tooling()`), so pictures and probes are repeatable.
 
+
+## G3D looks (ADR-0026)
+- Silk Reach is "printed silk": brightness thresholds 0.30 / 0.50 / 0.74 (after gamma) choose the dye bath; 28% of the
+  object's own colour is kept so a roof and the grass of equal brightness still differ.
+- In the print mode (V twice) the line is dark on light cloth and light on dark cloth, or it would vanish.
+- `--views` takes `--only=<place>` like `--audit`.
