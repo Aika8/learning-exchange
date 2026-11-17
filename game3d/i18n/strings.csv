@@ -301,3 +301,6 @@ AMBER_HELP,WASD — идти · Shift — бег · мышь — обзор · V
 PROMPT_FERRY_SHORTS,E — пакетбот на Остров шортистов,E — the packet boat to the Short Sellers' Island
 PROMPT_FALLING_EXCHANGE,E — Биржа падающих цен,E — the Exchange of Falling Prices
 SHORTS_TITLE,Остров шортистов,Short Sellers' Island
+PROMPT_FERRY_CRYPTO,E — пакетбот на Остров крипты,E — the packet boat to the Crypto Island
+PROMPT_OPEN_EXCHANGE,E — Биржа, которая не закрывается,E — the Exchange That Never Closes
+CRYPTO_TITLE,Остров крипты,Crypto Island

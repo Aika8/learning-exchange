@@ -7,7 +7,9 @@ Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/
 > Islands: each island is drawn in a technique of its own, chosen by Aika (ADR-0026, 0029) — Spark Harbour in pen
 > and ink (the style below), Silk Reach as **katazome**, a Japanese stencil-resist print in several blues, ochre and rust (sheet 28; 27 for the motifs), Amber Cliff
 > in **pen and watercolour**, a French travel sketchbook (sheets 29–34), the short sellers' island as **noir** —
-> black, white and one red (sheets 35–40; ADR-0030). The technique and its colours are a row in
+> black, white and one red (sheets 35–40; ADR-0030), the crypto island as **synthwave pixel art** (sheets 41–46;
+> ADR-0031). **No real brands**: where a sheet showed a real coin's mark or ticker, the copy here has it covered and
+> the game uses its own wind coin. The technique and its colours are a row in
 > `game3d/scripts/island_style.gd`. **The captain is redrawn in the technique of every port** by the island's wind
 > (ADR-0025); a test holds every technique to that. Pictures: `docs/demo/G3D-techniques.md`.
 >
@@ -70,6 +72,12 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `38-shorts-houses.jpg` | The crooked house kit: skewed plinth and walls, sagging roof, bent chimney, hanging balcony, broken stairs, red doors and windows; small, mansard and tall houses | the island's houses and towers | `ShortIsle.crooked_house` |
 | `39-shorts-exchange.jpg` | The Exchange of Falling Prices: a leaning mill with broken blades outside; inside, crooked beams, a gallery and a great red board | the exchange outside; **the inside is not built** (no trading there yet) | `ShortIsle._exchange` |
 | `40-shorts-props.jpg` | Props: street lamp with a red lantern, umbrella stand, card table, ticker machine, crooked signpost, lopsided scales, black ship's lantern | lamp, signpost, ship's lantern, umbrella stand and ticker are built; the card table and scales are not | `ShortIsle` |
+| `41-crypto-view.jpg` | The crypto island, the establishing view: a night town of neon towers, a ground grid, a striped sun, a pier; **synthwave pixel art**. *Two real coin marks on the original are covered in this copy* | the island and its technique (ADR-0031) | `scripts/crypto_isle.gd`, `shaders/ink.gdshader` (`tech == 4`), row `crypto` |
+| `42-crypto-houses.jpg` | The building kit: tower blocks, neon bands and signs, glass walls, antennas, stairs; small house, tall tower, office | the island's towers; outside stairs are not built | `CryptoIsle.tower` |
+| `43-crypto-exchange.jpg` | The exchange: outside, a tower "always open" with neon blades; inside, a wall of charts, glowing gears, holograms | the exchange outside; **the inside is not built** (no trading there yet) | `CryptoIsle._exchange` |
+| `44-crypto-people.jpg` | People and bots: trader, miner, dreamer, analyst; trading bot, mining bot, news bot. *A real coin mark is covered in this copy* | the islanders and the three robots; their figures are also their comic portraits (one face each) | `Costume._r_crypto_*`, `CryptoIsle.bot`, `game3d/art/portraits/crypto_*`, `bot_*` |
+| `45-crypto-props.jpg` | Props: mining machine, ticker board, vending machine, wallet chest, neon palm, **the coin monument — our own wind coin**, a broken neon sign. *Real tickers on the board are covered in this copy* | palm, monument, mining machine, vending machine, ticker board (a chart, no letters) are built; the chest and the neon sign are not | `CryptoIsle` |
+| `46-crypto-technique.jpg` | Samples of the technique: how pixels are drawn, dithered glow, the perspective grid, the striped sun, water, pixel shadows | what the pixel shader is tuned by | `shaders/ink.gdshader` (`tech == 4`) |
 
 **Dialogue panels (sheets 06–23).** The faces on a page are these drawings, one per emotion, left to right on each
 sheet: neutral, happy, surprised, sly, worried, angry. The emotion is chosen per line in `game3d/data/talks.json`.
