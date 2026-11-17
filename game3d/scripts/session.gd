@@ -7,6 +7,8 @@ var _fps: Label
 var _layer: CanvasLayer
 var ink_mode := 1  ## the ink post-effect: 0 off, 1 outline, 2 engraving (ADR-0024); V switches it
 var ink_limit := 2
+var style_id := IslandStyle.HOME  ## the island whose variant of the style the ink effect draws (ADR-0025)
+var _attuned: Node3D  ## the body the island's wind is restyling right now
 var _ink: MeshInstance3D
 var _ink_label: Label
 var spawn: String = "start"  ## where the harbour places the captain: start | pier | exchange
@@ -45,9 +47,17 @@ func _ready() -> void:
 		Audit.people.call_deferred(get_tree())
 	elif not arg("gait").is_empty():
 		Audit.gait.call_deferred(get_tree())
+	elif not arg("attune").is_empty():
+		Audit.attune.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:
+	if _attuned != null:
+		if is_instance_valid(_attuned):
+			_ink_set("column", _attuned.global_position)
+		else:  # the scene was left in the middle of it
+			_attuned = null
+			_ink_set("column_radius", 0.0)
 	if _fps.visible:
 		_fps.text = tr("FPS") % str(Engine.get_frames_per_second())
 
@@ -98,6 +108,60 @@ func set_ink(mode: int) -> void:
 	(_ink.material_override as ShaderMaterial).set_shader_parameter("mode", shown)
 
 
+func _ink_set(key: String, value: Variant) -> void:
+	(_ink.material_override as ShaderMaterial).set_shader_parameter(key, value)
+
+
+func ink_param(key: String) -> Variant:
+	return (_ink.material_override as ShaderMaterial).get_shader_parameter(key)
+
+
+## Draws the world in the variant of the style that belongs to `island_id` (ADR-0025).
+func set_style(island_id: String) -> void:
+	style_id = island_id
+	_style("", IslandStyle.of(island_id))
+
+
+func _style(suffix: String, st: Dictionary) -> void:
+	for key: String in ["ink", "paper", "width", "hatch_turn", "hatch_gap"]:
+		_ink_set(key + suffix, st[key])
+	var tint: Color = st["tint"]
+	_ink_set("tint" + suffix, Vector3(tint.r, tint.g, tint.b))
+
+
+func attuning() -> bool:
+	return _attuned != null
+
+
+## The island's wind takes `body` (the captain) in: until now it is drawn the way island `from_id` is drawn; after
+## `delay` seconds a swirl gathers round it and a wave runs from feet to hat in `seconds`, redrawing it the way
+## `to_id` is drawn. Then `Game.attuned` is `to_id`. Await it or let it run.
+func attune(body: Node3D, from_id: String, to_id: String, seconds: float = 2.0, delay: float = 0.9) -> void:
+	set_style(to_id)
+	_style("_from", IslandStyle.of(from_id))
+	var accent: Color = IslandStyle.of(to_id)["accent"]
+	_attuned = body
+	_ink_set("column", body.global_position)
+	_ink_set("column_radius", 0.95)
+	_ink_set("wave", -1.0e6)  # nothing redrawn yet: the wave is far below
+	_ink_set("glow", accent)
+	_ink_set("glow_amount", 0.0)
+	if delay > 0.0:
+		await get_tree().create_timer(delay).timeout
+	if is_instance_valid(body):
+		WindSwirl.around(body, accent, seconds)
+		_ink_set("glow_amount", 1.0)
+		var t := 0.0
+		while t < 1.0 and is_instance_valid(body):
+			_ink_set("wave", body.global_position.y - 0.1 + WindSwirl.wave_at(t) * 2.8)
+			await get_tree().process_frame
+			t += get_process_delta_time() / seconds
+	_attuned = null
+	_ink_set("column_radius", 0.0)
+	_ink_set("glow_amount", 0.0)
+	Game.attuned = to_id
+
+
 ## A scene that must stay readable in colour (the Exchange hall: bid and ask on the board) caps the effect at the
 ## outline while it is open; 2 lifts the cap.
 func limit_ink(limit: int) -> void:
@@ -126,7 +190,7 @@ static func arg(key: String) -> String:
 
 ## True for the audit, views and gait runs: no mouse capture, the scripts drive the scene.
 static func tooling() -> bool:
-	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people")).is_empty() or arg("fps").length() > 1
+	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune")).is_empty() or arg("fps").length() > 1
 
 
 static func active() -> bool:

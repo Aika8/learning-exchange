@@ -1,6 +1,6 @@
 # 0024. Draw the 3D game as stylised low-poly with an ink outline and an engraving mode
 
-- Status: Proposed
+- Status: Accepted (2026-11-17: Aika approved the style; the code landed in PR #23)
 - Date: 2026-11-16
 - Pattern(s): Strategy (the art style is chosen in one place, `Style`; the world builders ask it), Builder (people are
   built in code by `Costume`)

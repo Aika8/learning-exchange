@@ -356,3 +356,14 @@ Build and CI
 - The Silk Reach pier ends 4.5 m further inland: its end must lie inside the walkable cap of both looks
   (`Proc.cap_radius` gives the low-poly island a different outline), or the fence round the cap closes the pier.
 
+## G3D island styles (ADR-0025, docs/demo/G3D-islands.md)
+- Spark Harbour keeps the ADR-0024 look number for number; other islands are rows in `IslandStyle` that differ a
+  little, and a test bounds how much (tint 10%, line width 30%, light 15%).
+- The captain owns no style. The ink effect draws with two styles and picks by position: a 0.95 m column round the
+  captain, above the wave. A crate inside the column is redrawn with them; accepted.
+- The wind waits 0.9 s after the scene opens (the fade is 0.5 s), then takes 2 s; the captain keeps control. Leaving
+  the scene in the middle ends it at once with the new style.
+- The ground under the captain is left out of the column (from 6 cm above the feet), or a disc of old style lay on
+  the deck in the engraving.
+- The audit tools never start the wind on their own (`Session.tooling()`), so pictures and probes are repeatable.
+

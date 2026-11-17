@@ -71,6 +71,9 @@ func _ready() -> void:
 	_captain.position = at[0]
 	_captain.respawn = at[0]
 	_captain.yaw = at[1]
+	Session.set_style(Game.island)
+	if Game.attuned != Game.island and not Session.tooling():
+		Session.attune(_captain, Game.attuned, Game.island)  # the island's wind takes the newcomer in (ADR-0025)
 	_fly = Camera3D.new()
 	_fly.fov = 65
 	add_child(_fly)

@@ -1,5 +1,7 @@
 // The ink post-effect (ADR-0024): one full-screen quad. mode 1 = a dark outline on depth and normal edges over the
 // flat colours; mode 2 = an engraving — paper and ink only, hatching by brightness, plus the outline.
+// It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
+// the captain above the height `wave` — the captain still drawn the way the island they came from is drawn.
 shader_type spatial;
 render_mode unshaded, cull_disabled, depth_test_disabled, depth_draw_never, fog_disabled, shadows_disabled;
 
@@ -9,49 +11,89 @@ uniform sampler2D normal_tex : hint_normal_roughness_texture, filter_nearest, re
 uniform int mode = 1;
 uniform vec3 ink : source_color = vec3(0.13, 0.1, 0.09);
 uniform vec3 paper : source_color = vec3(0.93, 0.87, 0.75);
+uniform vec3 tint = vec3(1.0);
 uniform float width = 1.3;  // line width in pixels at 1080p
+uniform float hatch_turn = 0.0;
+uniform float hatch_gap = 9.0;
+uniform vec3 ink_from : source_color = vec3(0.13, 0.1, 0.09);
+uniform vec3 paper_from : source_color = vec3(0.93, 0.87, 0.75);
+uniform vec3 tint_from = vec3(1.0);
+uniform float width_from = 1.3;
+uniform float hatch_turn_from = 0.0;
+uniform float hatch_gap_from = 9.0;
+uniform vec3 column = vec3(0.0);  // the captain's feet, world space
+uniform float column_radius = 0.0;  // 0 = one style only
+uniform float wave = 0.0;  // world height the new style has reached
+uniform vec3 glow : source_color = vec3(1.0, 0.8, 0.4);
+uniform float glow_amount = 0.0;
 
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
 }
 
-float eye_depth(vec2 uv, mat4 inv_projection) {
+vec3 view_at(vec2 uv, mat4 inv_projection) {
 	vec4 v = inv_projection * vec4(uv * 2.0 - 1.0, texture(depth_tex, uv).r, 1.0);
-	return -v.z / v.w;
+	return v.xyz / v.w;
 }
 
 void fragment() {
-	vec2 px = width * (VIEWPORT_SIZE.y / 1080.0) / VIEWPORT_SIZE;
-	float d = eye_depth(SCREEN_UV, INV_PROJECTION_MATRIX);
+	vec2 offs[4] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0));
+	vec3 here = view_at(SCREEN_UV, INV_PROJECTION_MATRIX);
+	float d = -here.z;
+	// which style: by the nearest thing within the widest line, so a silhouette line belongs to the body in front
+	float old = 0.0;
+	float band = 0.0;
+	if (column_radius > 0.0) {
+		vec3 nearest = here;
+		vec2 reach = max(width, width_from) * (VIEWPORT_SIZE.y / 1080.0) / VIEWPORT_SIZE;
+		for (int i = 0; i < 4; i++) {
+			vec3 v = view_at(SCREEN_UV + offs[i] * reach, INV_PROJECTION_MATRIX);
+			if (v.z > nearest.z) {
+				nearest = v;
+			}
+		}
+		vec3 world = (INV_VIEW_MATRIX * vec4(nearest, 1.0)).xyz;
+		float inside = step(length(world.xz - column.xz), column_radius) * step(column.y + 0.06, world.y) * step(world.y, column.y + 2.7);
+		old = inside * step(wave, world.y);
+		band = inside * exp(-pow((world.y - wave) / 0.1, 2.0));
+	}
+	float w = mix(width, width_from, old);
+	vec3 line = mix(ink, ink_from, old);
+	vec2 px = w * (VIEWPORT_SIZE.y / 1080.0) / VIEWPORT_SIZE;
 	vec3 n = texture(normal_tex, SCREEN_UV).rgb * 2.0 - 1.0;
 	float dd = 0.0;
 	float dn = 0.0;
-	vec2 offs[4] = vec2[](vec2(1.0, 0.0), vec2(-1.0, 0.0), vec2(0.0, 1.0), vec2(0.0, -1.0));
 	for (int i = 0; i < 4; i++) {
 		vec2 uv = SCREEN_UV + offs[i] * px;
-		dd += abs(eye_depth(uv, INV_PROJECTION_MATRIX) - d);
+		dd += abs(-view_at(uv, INV_PROJECTION_MATRIX).z - d);
 		dn += 1.0 - dot(texture(normal_tex, uv).rgb * 2.0 - 1.0, n);
 	}
 	// a depth step counts relative to the distance, so far islands do not turn black
 	float edge = max(smoothstep(0.035, 0.07, dd / max(d, 0.5)), smoothstep(0.5, 0.9, dn));
 	edge *= 1.0 - smoothstep(180.0, 420.0, d);
-	vec3 col = texture(screen_tex, SCREEN_UV).rgb;
+	vec3 col = texture(screen_tex, SCREEN_UV).rgb * mix(tint, tint_from, old);
+	vec3 result;
 	if (mode == 2) {
 		// the screen is linear light: bring it to what the eye sees before choosing the strokes
 		float lum = pow(clamp(dot(col, vec3(0.299, 0.587, 0.114)), 0.0, 1.0), 0.45);
 		float s = VIEWPORT_SIZE.y / 1080.0;
-		float a = fract((FRAGCOORD.x + FRAGCOORD.y) / (9.0 * s));
-		float b = fract((FRAGCOORD.x - FRAGCOORD.y) / (9.0 * s));
-		float c = fract(FRAGCOORD.y / (6.0 * s));
+		float turn = mix(hatch_turn, hatch_turn_from, old);
+		float gap = mix(hatch_gap, hatch_gap_from, old) * s;
+		vec2 p = mat2(vec2(cos(turn), sin(turn)), vec2(-sin(turn), cos(turn))) * FRAGCOORD.xy;
+		float a = fract((p.x + p.y) / gap);
+		float b = fract((p.x - p.y) / gap);
+		float c = fract(p.y / (gap * 0.667));
 		float sky = smoothstep(600.0, 900.0, d);  // the sky stays clean paper
 		float hatch = 0.0;
 		hatch = max(hatch, step(lum, 0.58) * step(a, 0.22));  // one set of strokes in the half-tones
 		hatch = max(hatch, step(lum, 0.4) * step(b, 0.24));   // crossed in the shadows
 		hatch = max(hatch, step(lum, 0.24) * step(c, 0.4));   // and a third in the dark
 		hatch *= 1.0 - sky;
-		vec3 sheet = paper * (0.94 + 0.06 * smoothstep(0.3, 0.9, lum));
-		ALBEDO = mix(sheet, ink, max(hatch, edge));
+		vec3 sheet = mix(paper, paper_from, old) * (0.94 + 0.06 * smoothstep(0.3, 0.9, lum));
+		result = mix(sheet, line, max(hatch, edge));
 	} else {
-		ALBEDO = mix(col, ink, edge * 0.92);
+		result = mix(col, line, edge * 0.92);
 	}
+	// the wave itself: the line it passes over lights up, the surface a little
+	ALBEDO = mix(result, glow * 1.6, clamp(band * glow_amount * (0.35 + 0.65 * edge), 0.0, 1.0));
 }

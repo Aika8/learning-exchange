@@ -2,13 +2,17 @@
 
 Updated: 2026-11-17, G3D walk fixes. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`.
 
+## G3D island styles (ADR-0025, Proposed) — `docs/demo/G3D-islands.md`
+- Each island draws a slight variant of the ink style (`IslandStyle`: line, tint, paper, hatching, sun). A captain
+  who arrives from another island is restyled by the island's wind: a swirl and a wave from boots to hat. GUT 88.
+
 ## G3D walk fixes — `docs/demo/G3D-walk.md`
 - The audit now finds traps, walls and rails you can walk through, and villager strolls that cannot be finished.
   Found and fixed: rails without colliders (the wharf was entered through one), a pier at Silk Reach that did not
   reach the walkable ground (the captain could not leave it), frozen patches on the wharf deck (physics is Jolt now),
   the ship's vane over the pier. Audit 0 findings, GUT 83, 120 fps at 1080p.
 
-## G3D style (ADR-0024, Proposed) — `docs/demo/G3D-style.md`
+## G3D style (ADR-0024, Accepted) — `docs/demo/G3D-style.md`
 - Default look is stylised low-poly built in code; people are faceless silhouettes from the concept sheets on a
   code-made skeleton with the same gait; ink outline by default, engraving on V; `--pbr` keeps the old look.
 - 118 fps average at 1080p on the laptop (display cap 120), GUT 79, world audit 0 problems.
