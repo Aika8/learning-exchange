@@ -13,16 +13,27 @@ traded there; how crypto works in the game waits for her answers to intent 03 (q
 |---|---|
 | ![](g3d-crypto/crypto-towers.png) | ![](g3d-crypto/crypto-coin.png) |
 
-## The technique: synthwave pixel art
-- **Big pixels**: 180 rows whatever the window (320×180 at 16:9); each is the average of four samples of its cell.
-- **Twelve colours**: night `#1b1035`, deep violet, violet, lavender, pale; plum and magenta for warm things; neon
-  pink, orange, gold, cyan; teal. Bodies are sorted by brightness into five tones; anything bright and saturated
-  stays a neon.
-- **Ordered dithering** only in the narrow zone where two tones meet, so walls are flat colour.
-- **The sky** is drawn by the effect: bands from night down to magenta, a few fixed stars, a striped sun.
-- **The grid**: lines every two metres on the ground, in world space, cyan near and teal further off.
-- **Glow by dithering**: a checkerboard halo two big pixels wide round neon only.
-- V gives the plain version: no dithering, no grid, no halo.
+## The technique: synthwave, with pixels that belong to the world
+The first version cut the whole screen into big pixels (320×180) with dithering. Aika: "too pixelated, hard to look
+at, it swarms in the eyes". Now:
+- **object edges are sharp**; the chunky part is the paint on surfaces, in squares 14 cm wide **fixed to the world**
+  — they stay on the wall when the camera walks or turns;
+- **no dithering** over the picture: five flat tones by brightness; the only checkerboard is a small halo round neon;
+- the same twelve synthwave colours, the striped sun, the grid (lines at least a pixel wide, fading out before they crowd);
+- the sky is drawn in cells of direction, so it turns with the world;
+- nothing is animated. V gives the plain version (no grid, halo or outline).
+
+| Before | After |
+|---|---|
+| ![](g3d-crypto/before/crypto-street.png) | ![](g3d-crypto/crypto-street.png) |
+| ![](g3d-crypto/before/crypto.png) | ![](g3d-crypto/crypto.png) |
+| ![](g3d-crypto/before/crypto-coin.png) | ![](g3d-crypto/crypto-coin.png) |
+
+The same frame of a turning camera, enlarged (before, after):
+
+![](g3d-crypto/zoom-before-after.jpg)
+
+Plain version (V):
 
 ![](g3d-crypto/street-plain.png)
 
@@ -35,17 +46,21 @@ The sheets show ₿, another real coin's mark and the tickers BTC and ETH. The p
 - a test fails if `₿`, `BTC`, `ETH`, "bitcoin" or "ethereum" (ru or en) appears in the talks, the strings or the
   island's code.
 
-## Easy on the eyes — what was done and measured
-- **Nothing blinks.** The technique uses no clock at all (a test checks that): neon is steady, the grid does not
-  scroll, the sun does not move. With the camera standing still the picture changes by **0.7 of 255** between
-  frames — the people walking.
-- **Glow only at sources.** Neon is what the island's builder made emissive and saturated: bands, door frames,
-  some windows, palms, screens. Share of bright pixels in the fixed views: 7 %, 14 %, 11 %, 17 %, 17 %.
-- **On the move** (`--stroll --island=crypto`, 12 m along the street, a frame every 0.1 s): **19.1 of 255** — less
-  than the noir island (29.7), more than the watercolour one (11.4). What changes is the stepping of big-pixel
-  edges and of the grid lines; the grid is dropped before its lines come closer than about three big pixels.
-  Recording: [walking.gif](g3d-crypto/walking.gif). Whether it is comfortable is for Aika's eyes.
-- The screen is dark (it is night), but not black: the darkest tone is `#1b1035`.
+## On the move and on the turn
+Recordings, a frame every 0.1 s — walking 12 m along the street: [before](g3d-crypto/before/walking.gif),
+[after](g3d-crypto/walking.gif); standing and turning 2° a frame: [before](g3d-crypto/before/turning.gif),
+[after](g3d-crypto/turning.gif).
+
+| Mean change between frames, of 255 | Before | After |
+|---|---|---|
+| camera standing still | 0.70 | 0.66 |
+| walking | 19.1 | 16.9 |
+| turning | 28.5 | 24.6 |
+
+The numbers fall only a little, and that is honest: this measure counts every pixel that changes, and most of the
+change is bright neon sliding across a dark screen, which a turn must do. What the rework removed is of another
+kind — squares that jump from cell to cell and dots that swarm — and the measure hardly sees it; the enlarged
+frames and the recordings do. **Whether it is comfortable now is for Aika's eyes.**
 
 ![](g3d-crypto/walking.png)
 
@@ -61,7 +76,7 @@ The sheets show ₿, another real coin's mark and the tickers BTC and ETH. The p
 ![](g3d-crypto/harbour-posts.jpg)
 
 ## The captain is redrawn in pixels on landing
-![](g3d-crypto/captain-pixel.png)
+![](g3d-crypto/captain-pixel.jpg)
 
 Recording: [captain-pixel.gif](g3d-crypto/captain-pixel.gif).
 
@@ -99,17 +114,18 @@ godot --path game3d --resolution 1600x900 -- --audit=<dir> --only=crypto
 - World audit of the island: 0 findings (8149 of 8212 lattice cells reached from the pier; 36 villager strolls).
   Found and fixed on the way: a palm planted inside the mining machine, the coin's collider wider than the coin,
   a machine low enough to be climbed and fallen from.
-- GUT 113 green (4 new in `test_crypto_isle.gd`; the walk tests and the captain contract cover the fifth island).
-- Frame rate at 1920×1080: average 118 (display cap 120), 1 %-low 57–69, worst frame 19.4 ms.
+- GUT 113 green after the rework (4 in `test_crypto_isle.gd`, which now also checks that the technique lays nothing
+  out on a screen grid and does not dither the picture; the walk tests and the captain contract cover the fifth island).
+- Frame rate at 1920×1080 after the rework: average 292–349, 1 %-low 243–279, worst frame 4.2 ms (this run was not
+  capped by the display). The rework is cheaper than the first version: about 8 texture reads a pixel, not 14.
 
 ## Not done, not checked
 - Not played by hand.
-- **1 %-low was 57 in one of six views** — under 60. The same measure on other islands today ranged 55–100
-  between runs of the same code; this technique is the heaviest so far (about 14 texture reads a pixel).
 - No trading, no hall: the inside of the exchange (the wall of charts, the gears) is not built.
 - Not built from the sheets: outside stairs, the wallet chest, the broken neon sign, the flying ships, the
   crystals' own colours (the island's crystals are the usual ones, drawn cyan by the technique).
 - Costumes are approximations (no puffer jacket shape, no gas mask, no visor); the people and bots have one face each.
-- The wind sign on the coin is three strokes with hooks; at 180 rows it reads only from close by.
+- The wind sign on the coin is three strokes with hooks: a simple sign, not the curl of the sheet.
+- The world audit was not re-run after the rework: only the drawing changed.
 - The miner has no talk spot. The island has only a working name.
 - The other four islands were not re-audited: nothing of theirs changed.

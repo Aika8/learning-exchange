@@ -20,28 +20,32 @@ Limits set from outside:
   swarm when the camera moves.
 
 Forces:
-- Pixelating a moving 3D picture in screen space makes edges jump from cell to cell; that cannot be removed, only
-  kept calm.
+- Pixelating a moving 3D picture in screen space makes edges jump from cell to cell; that cannot be removed.
 - The effect can hold only a few colours per island as data (four `ramp` slots), and this technique wants twelve.
 - Every technique must redraw the captain (ADR-0029).
 
 ## Decision
-1. **A fifth technique, `pixel`** (technique 4), row `crypto` in `IslandStyle`:
-   - the picture is cut into **big pixels**, 180 rows high whatever the window; each takes the average of four
-     samples of its cell, not one (a single sample sparkles when the camera moves);
-   - **twelve colours**. Bodies are sorted by brightness into a five-step ramp — cool (night, deep violet, violet,
-     lavender, pale) or warm (night, plum, magenta, lavender, pale) — with **ordered dithering** between
-     neighbouring steps, on a pattern fixed to the big pixels. Anything bright *and* saturated is a **neon**: pink,
-     orange, gold or cyan, whichever is nearest;
-   - the **sky** is drawn by the effect from the direction of each pixel: bands from night down to magenta at the
-     horizon, a few fixed stars, and a **striped sun** low in the east, gold to pink, with gaps that widen downward;
-   - the **grid**: glowing lines every two metres on ground that faces up, laid out in world space, cyan near and
-     magenta far, faded out before a cell is smaller than a few big pixels;
-   - **glow by dithering**: a checkerboard halo two big pixels wide round neon things only;
-   - **nothing is animated by the effect**: no flicker, no pulsing. V gives the plain version: no dithering, no
-     grid, no halo.
-   The twelve colours are constants of the technique in the shader (the row gives the four the other code needs:
-   the night, the line, the wind's accent). That bends "the look is a row of data"; a palette is the technique.
+1. **A fifth technique, `pixel`** (technique 4), row `crypto` in `IslandStyle`. *(Revised while still Proposed.
+   The first version cut the whole screen into big pixels, 180 rows high, with ordered dithering between tones.
+   Aika: "too pixelated, hard to look at, it swarms in the eyes". Screen-space pixels step and crawl whenever the
+   camera moves; that cannot be tuned away, so the pixels left the screen.)*
+   - **texels that belong to the world**: the edges of things are drawn at full sharpness; what is chunky is the
+     paint on surfaces — squares 14 cm wide, found by snapping each pixel's place in the world to a grid on the
+     plane its surface faces and reading the picture at that square's centre. They stay on the wall when the
+     camera walks or turns. On the hero they are measured from the hero;
+   - **twelve colours in flat tones**: five steps by brightness, cool or warm, with hard edges and **no
+     dithering**. Anything bright and saturated is a neon — pink, orange, gold or cyan — judged at the pixel
+     itself, so neon has clean edges;
+   - the **sky** in cells of direction (a quarter of a degree; they turn with the world, not with the screen):
+     bands from night to magenta, a few stars, the **striped sun**;
+   - the **grid**: lines every two metres on the ground in world space, at least a pixel wide, fading out
+     smoothly before they crowd;
+   - **glow**: a small checkerboard halo round neon only — the one place with dithering; its squares are world
+     texels too;
+   - a thin dark outline as on the other islands; **nothing is animated**. V gives the plain version: no grid,
+     no halo, no outline.
+   The twelve colours are constants of the technique in the shader. That bends "the look is a row of data"; a
+   palette is the technique.
 2. **The island `crypto`** («Остров крипты», working name), built by `CryptoIsle`, reached by a third packet-boat
    post: a pier, a street of block towers with neon bands, glass walls and antennas, neon palms, and at its end the
    **Exchange That Never Closes**, a tower with four neon blades. Its door is a talk, not a trading hall.
@@ -61,7 +65,8 @@ Forces:
 | Alternative | Why not (now) |
 |---|---|
 | Render the whole game at 320×180 for this island | The HUD and comic pages would be pixelated too; switching the render size on arrival is a bigger change |
-| One sample per big pixel | Cheapest, and sparkles on every thin edge when the camera moves |
+| Big pixels over the whole screen (320×180, the first version; or 640×360) | They step and crawl with every camera move at any size; tried, and it hurt |
+| Pixelated textures on the meshes | The meshes have no textures or UVs; the effect can do the same from depth |
 | Bloom for the glow | Not pixel art; a soft blur over hard pixels; costs a pass |
 | Animated neon (flicker, scrolling grid) | The sheets' "broken neon" is charming and exactly what tires the eyes |
 | Palette as twelve uniforms from the table | Twelve more uniforms twice over (the captain's column) for one island |
@@ -72,10 +77,10 @@ Forces:
 - The pixel portraits from the sheet fit the comic pages as they are.
 
 ## Risks and costs
-- Edges of big pixels still step as the camera moves. We measure it and Aika judges it.
+- A texel whose centre is hidden behind something keeps its own pixel's colour: a thin seam at some edges.
+- With clean edges and flat tones the look is closer to a neon poster than to strict pixel art. Aika judges it.
 - Night: most of the screen is dark violet. It is not black, and neon is rare by construction; still, a long stay
   may tire. One number (the ramp's floor) lifts it.
-- Dithered surfaces crawl a little when their brightness changes under a moving camera.
 - The islanders' costumes are approximations in the old garments (no puffer jacket, no gas mask).
 - The island's name and its place in the world bible are open (the Outskirts of Storms fit "unregulated").
 

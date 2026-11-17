@@ -5,7 +5,7 @@ Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `do
 
 ## G3D crypto island (ADR-0031, Proposed) — `docs/demo/G3D-crypto.md`
 - A fifth island: a night town of neon towers with the Exchange That Never Closes, drawn as synthwave pixel art
-  (180 rows of big pixels, twelve colours, a striped sun, a ground grid, nothing animated). A place and a style: no
+  (twelve colours in flat tones, texels fixed to the world, sharp edges, a striped sun, a ground grid, nothing animated; reworked after Aika found screen pixels hard on the eyes). A place and a style: no
   crypto mechanics (they wait for intent 03). Four islanders and three robots; the game's own wind coin, no real
   coin's mark or name (a test guards it). Audit 0, GUT 113, 118 fps average at 1080p (1 %-low 57–69).
 

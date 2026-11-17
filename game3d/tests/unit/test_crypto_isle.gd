@@ -28,7 +28,9 @@ func test_the_island_is_pixel_art_and_the_captain_is_redrawn_on_landing() -> voi
 	assert_true(shader.contains("tech == %d" % IslandStyle.TECHNIQUES["pixel"]))
 	var branch := shader.substr(shader.find("tech == 4"), shader.find("tech == 3") - shader.find("tech == 4"))
 	assert_false(branch.contains("TIME"), "nothing in the pixel technique is animated: no blinking neon")
-	assert_true(branch.contains("VIEWPORT_SIZE.y / 180.0"), "big pixels, 180 rows whatever the window")
+	assert_false(branch.contains("FRAGCOORD"), "nothing is laid out on a screen grid: texels belong to the world and do not crawl")
+	assert_false(branch.contains("bayer("), "no dithering over the picture")
+	assert_true(branch.contains("floor(local / TEXEL)"), "the paint is snapped to texels in world space")
 	Game.island = CryptoIsle.ID
 	Game.attuned = "harbour"
 	var scene: Node3D = HARBOUR.instantiate()
