@@ -109,19 +109,6 @@ func _layer_ready() -> void:
 	_layer.add_child(_ink_label)
 
 
-## Another quad with the effect as it is now, for a picture drawn in a world of its own (a comic frame, ADR-0027):
-## its own copy of the numbers, a line at least `line_px` wide, never off.
-func ink_copy(line_px: float = 1.0) -> MeshInstance3D:
-	var copy := _ink.duplicate() as MeshInstance3D
-	var m := (_ink.material_override as ShaderMaterial).duplicate() as ShaderMaterial
-	m.set_shader_parameter("min_px", line_px)
-	m.set_shader_parameter("column_radius", 0.0)
-	m.set_shader_parameter("mode", clampi(ink_mode, 1, 2))
-	copy.material_override = m
-	copy.visible = true
-	return copy
-
-
 func set_ink(mode: int) -> void:
 	ink_mode = mode
 	var shown := mini(mode, ink_limit)

@@ -1,4 +1,4 @@
-## Pattern: Data-driven script — a talk is data (pages → panels → balloons), loaded and checked here; the words are
+## Pattern: Data-driven script — a talk is data (pages → panels → balloons, each with the face it is said with), loaded and checked here; the words are
 ## i18n keys. See docs/adr/0027-game3d-talk-as-comic-pages.md
 class_name ComicScript
 extends RefCounted
@@ -6,7 +6,8 @@ extends RefCounted
 const PATH := "res://data/talks.json"
 const WORDS := "res://i18n/talk.csv"
 const SHOTS: Array[String] = ["close", "two", "wide", "low"]
-const POSES: Array[String] = ["stand", "talk", "point", "think", "shrug", "bow"]
+const EMOTIONS: Array[String] = ["neutral", "happy", "surprised", "sly", "worried", "angry"]  ## the faces of the expression sheets
+const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "sailor", "merchant"]  ## heroes who have a sheet
 const MAX_PANELS := 4
 const MAX_LINES := 2
 const MAX_CHARS := 150  ## a balloon longer than this covers the picture
@@ -67,6 +68,12 @@ func problems(catalogues: Array) -> Array[String]:
 	var out: Array[String] = []
 	if talks.is_empty():
 		out.append("no talks")
+	for c: String in cast:
+		var face := str(cast[c].get("face", ""))
+		if not face.is_empty() and not face in FACES:
+			out.append("%s: no expression sheet called %s" % [c, face])
+		elif face.is_empty() and not cast[c].has("look"):
+			out.append("%s: neither a sheet nor a look to draw" % c)
 	for id: String in talks:
 		var t: Dictionary = talks[id]
 		if not backdrops.has(t.get("backdrop", "")):
@@ -87,9 +94,9 @@ func problems(catalogues: Array) -> Array[String]:
 				for w: String in who:
 					if not cast.has(w):
 						out.append("%s: %s is not in the cast" % [id, w])
-				for w: String in panel.get("pose", {}):
-					if not w in who or not panel["pose"][w] in POSES:
-						out.append("%s: pose for %s" % [id, w])
+				for w: String in panel.get("mood", {}):
+					if not w in who or not panel["mood"][w] in EMOTIONS:
+						out.append("%s: mood of %s" % [id, w])
 				var lines: Array = panel.get("lines", [])
 				if lines.size() > MAX_LINES:
 					out.append("%s: more than %d balloons in a panel" % [id, MAX_LINES])
@@ -98,6 +105,10 @@ func problems(catalogues: Array) -> Array[String]:
 				for line: Array in lines:
 					if not cast.has(line[0]):
 						out.append("%s: speaker %s is not in the cast" % [id, line[0]])
+					elif not line[0] in who:
+						out.append("%s: %s speaks but is not in the frame" % [id, line[0]])
+					if line.size() > 2 and not line[2] in EMOTIONS:
+						out.append("%s: unknown emotion %s" % [id, line[2]])
 	var spoken: Dictionary = {}  # key → the tongue of the talk it is said in
 	for id: String in talks:
 		var tongue := str(talks[id].get("speak", ""))

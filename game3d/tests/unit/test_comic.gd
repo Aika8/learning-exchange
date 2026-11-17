@@ -43,11 +43,11 @@ func test_bad_data_is_reported() -> void:
 	s.cast = {"a": {"name": "WHO_A"}}
 	s.backdrops = {}
 	s.talks = {"t": {"backdrop": "nowhere", "pages": [{"panels": [
-		{"shot": "sideways", "cast": ["a", "b"], "lines": [["c", "K1"], ["a", "K2"], ["a", "K3"]]}, {"shot": "close", "cast": ["a"]}]}]}}
+		{"shot": "sideways", "cast": ["a", "b"], "lines": [["c", "K1"], ["a", "K2", "bored"], ["a", "K3"]]}, {"shot": "close", "cast": ["a"]}]}]}}
 	var long := Translation.new()
 	long.add_message("K1", "x".repeat(ComicScript.MAX_CHARS + 1))
 	var found := "\n".join(s.problems([{"ru": long}]))
-	for part: String in ["unknown backdrop", "unknown shot", "b is not in the cast", "speaker c", "more than 2 balloons", "silent panel",
+	for part: String in ["unknown backdrop", "unknown shot", "b is not in the cast", "speaker c", "more than 2 balloons", "silent panel", "unknown emotion bored", "a: neither a sheet nor a look",
 			"K2: no text", "K1: ru text is"]:
 		assert_string_contains(found, part)
 
@@ -71,15 +71,56 @@ func test_the_reader_shows_a_balloon_a_step() -> void:
 	assert_false(r.step(), "the talk is over")
 
 
-func test_a_person_takes_a_pose() -> void:
-	var f := Costume.stand_in("mara")
-	add_child_autofree(f)
-	assert_true(ComicShot.pose(f, "point"))
-	var sk: Skeleton3D = f.find_children("*", "Skeleton3D", true, false)[0]
-	assert_ne(sk.get_bone_pose_rotation(sk.find_bone("upperarm_r")), Quaternion.IDENTITY)
-	for name: String in ComicScript.POSES:
-		assert_true(ComicShot.POSE.has(name), name)
-	assert_gt(ComicShot.head_height(f), 1.2)
+func test_every_hero_with_a_sheet_has_every_face() -> void:
+	assert_eq(ComicScript.EMOTIONS, ComicFaces.EMOTIONS)
+	assert_eq(ComicScript.FACES, ComicFaces.FACES)
+	for face: String in ComicFaces.FACES:
+		for emotion: String in ComicFaces.EMOTIONS:
+			assert_true(FileAccess.file_exists(ComicFaces.path(face, emotion)), "%s %s" % [face, emotion])
+			assert_not_null(ComicFaces.texture(face, emotion), "%s %s loads" % [face, emotion])
+	assert_null(ComicFaces.texture("captain", "bored"))
+	for emotion: String in ComicFaces.EMOTIONS:
+		assert_true(ComicDoodle.FEEL.has(emotion), "the stand-in can feel " + emotion)
+	var s := ComicScript.read()
+	for hero: String in ["captain", "mara", "olva", "sailor3", "trader", "changeur"]:
+		assert_true(ComicFaces.has(str(s.cast[hero].get("face", ""))), hero + " is drawn from a sheet")
+
+
+func test_the_face_changes_with_the_line() -> void:
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("mara_first"))
+	await wait_process_frames(2)
+	var frames := page.frames()
+	assert_eq(frames[1].shown(), -1, "the second frame is not drawn yet")
+	page.step()  # Mara's first line, cross
+	assert_eq(frames[1].feeling["mara"], "angry")
+	assert_eq((frames[1].actors["mara"]["node"] as TextureRect).texture, ComicFaces.texture("mara", "angry"))
+	page.step()  # the captain asks, surprised; Mara has not answered yet
+	assert_eq(frames[2].feeling["captain"], "surprised")
+	assert_eq(frames[2].speaker(), "captain")
+	var before: String = frames[2].feeling["mara"]
+	page.step()  # she answers
+	assert_eq(frames[2].speaker(), "mara")
+	assert_eq(frames[2].feeling["mara"], "neutral")
+	assert_ne(before, "", "a listener has a face too")
+	assert_true((frames[2].actors["captain"]["node"] as TextureRect).flip_h, "the two look at each other")
+	assert_true(frames[2].balloons[1].has("emotion"))
+
+
+func test_people_without_a_sheet_get_a_drawn_stand_in() -> void:
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("chronicler_day"))
+	await wait_process_frames(2)
+	page.step()
+	var frame := page.frames()[1]
+	var owl: ComicDoodle = frame.actors["chronicler"]["node"]
+	assert_eq(owl.look.get("kind"), "owl")
+	assert_eq(owl.emotion, "neutral")
+	page.step()
+	page.step()
+	assert_eq((page.frames()[2].actors["chronicler"]["node"] as ComicDoodle).emotion, "sly")
 
 
 func test_talking_to_a_stroller_opens_a_page_and_gives_the_captain_back() -> void:

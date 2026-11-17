@@ -9,7 +9,7 @@ WHO_SAILOR2,Боцман,Boatswain
 WHO_SAILOR3,Старый матрос,Old sailor
 WHO_CHILD,Мальчишка,A boy
 WHO_TOWNSMAN,Старик,Old man
-WHO_TRADER,Торговка,Market woman
+WHO_VETLA,Бабушка Ветла,Granny Vetla
 COMIC_NEXT,E / Enter — дальше · Esc — закрыть,E / Enter — next · Esc — close
 COMIC_PAGE,стр. {page} из {pages},page {page} of {pages}
 TALK_MARA_FIRST_C,"Причал Гавани Искр. Орден Якоря не пускает в небо без плана.","The wharf of Spark Harbour. The Anchor Order lets nobody sail without a plan."
@@ -47,5 +47,6 @@ TALK_CHILD_3,"Значит, сундук — не самое надёжное м
 TALK_TOWNSMAN_1,"Я посадил сад на Тихом Причале ещё мальчишкой. Это вклад со сложным процентом.","I planted a garden at the Quiet Pier as a boy. It is a deposit with compound interest."
 TALK_TOWNSMAN_2,"Каждый год растут и деревья, и то, что выросло в прошлом году.","Every year the trees grow, and so does what grew the year before."
 TALK_TOWNSMAN_3,"Процент на процент.","Interest on interest."
-TALK_TRADER_1,"Биржа берёт пошлину с каждой сделки. Это комиссия.","The Exchange takes a toll on every trade. That is the fee."
-TALK_TRADER_2,"Мелочь? Сложи за год. Частые сделки кормят Биржу, а не капитана.","A trifle? Add it up over a year. Frequent trades feed the Exchange, not the captain."
+TALK_TRADER_1,"Раз в сезон я кладу в корзину понемногу всего, что растёт на островах.","Once a season I put a little of everything the islands grow into my basket."
+TALK_TRADER_2,"Корзина Ветлы! Так это и есть индексный фонд?","Vetla's Basket! So that is what an index fund is?"
+TALK_TRADER_3,"Он самый, милый. Я не угадываю, какой остров вырастет. Я держу все сразу.","The very one, dear. I do not guess which island will grow. I hold them all at once."
