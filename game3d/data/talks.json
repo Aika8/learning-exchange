@@ -1,0 +1,205 @@
+{
+  "cast": {
+    "captain": {"name": "WHO_CAPTAIN", "who": "sailor", "role": "captain", "coat": "2f5d8a", "face": "captain"},
+    "mara": {"name": "WHO_MARA", "who": "trader", "role": "mara", "coat": "7a4e8a", "face": "mara"},
+    "olva": {"name": "WHO_OLVA", "who": "trader", "role": "olva", "coat": "5a7a4a", "face": "olva"},
+    "chronicler": {"name": "WHO_CHRONICLER", "who": "", "role": "chronicler", "coat": "3a3a5a", "look": {"kind": "owl"}},
+    "keeper": {"name": "WHO_KEEPER", "who": "trader", "role": "trader", "coat": "9a6ab0", "look": {"skin": "e8b98f", "hair": "6a4a3a", "hat": "scarf", "hat_colour": "f6efdc", "outfit": "apron"}},
+    "sailor": {"name": "WHO_SAILOR", "who": "sailor", "role": "sailor", "coat": "8a6a4a", "look": {"skin": "e2a77c", "hair": "5e3b28", "hat": "bandana", "hat_colour": "a8322a", "outfit": "stripes", "coat": "f3ead6"}},
+    "sailor2": {"name": "WHO_SAILOR2", "who": "sailor", "role": "sailor2", "coat": "4e6fa8", "look": {"skin": "d99a6c", "hair": "3a2a22", "hat": "knit", "hat_colour": "2f4470", "outfit": "stripes", "coat": "f3ead6", "beard": true}},
+    "sailor3": {"name": "WHO_SAILOR3", "who": "sailor", "role": "sailor3", "coat": "8a6a4a", "face": "sailor"},
+    "child": {"name": "WHO_CHILD", "who": "child", "role": "child", "coat": "6a9ab0", "look": {"kind": "child", "skin": "f1c9a5", "hair": "8a5a3c", "hat": "cap", "hat_colour": "3d6ea8", "coat": "f3ead6"}},
+    "townsman": {"name": "WHO_TOWNSMAN", "who": "oldman", "role": "townsman", "coat": "8a6a4a", "look": {"skin": "e8c3a0", "hair": "d9d4c8", "hat": "brim", "hat_colour": "6e4a3b", "beard": true, "coat": "8a5a3c"}},
+    "trader": {"name": "WHO_VETLA", "who": "trader", "role": "trader", "coat": "8a6a4a", "face": "vetla"},
+    "amb_captain": {"name": "AMB_WHO_CAPTAIN", "who": "sailor", "role": "captain", "coat": "2f5d8a", "face": "captain"},
+    "changeur": {"name": "AMB_WHO_CHANGEUR", "who": "trader", "role": "changer", "coat": "7a5a2a", "face": "merchant"},
+    "banquiere": {"name": "AMB_WHO_BANQUIERE", "who": "trader", "role": "olva", "coat": "5a3a5a", "look": {"skin": "f1c9a5", "hair": "4a3a3a", "hairstyle": "bun", "glasses": true, "coat": "5a3a5a"}},
+    "boulangere": {"name": "AMB_WHO_BOULANGERE", "who": "trader", "role": "trader", "coat": "c98a5a", "look": {"skin": "f0bf98", "hair": "b0703a", "hat": "scarf", "hat_colour": "f6efdc", "outfit": "apron", "coat": "c98a5a"}},
+    "garcon": {"name": "AMB_WHO_GARCON", "who": "sailor", "role": "sailor3", "coat": "2a2a3a", "look": {"skin": "e8b98f", "hair": "2a2a2a", "coat": "2a2a3a"}},
+    "libraire": {"name": "AMB_WHO_LIBRAIRE", "who": "oldman", "role": "townsman", "coat": "4a6a5a", "look": {"skin": "e8c3a0", "hair": "c9c4b8", "hat": "beret", "hat_colour": "4a6a5a", "glasses": true, "beard": true, "coat": "4a6a5a"}},
+    "gardienne": {"name": "AMB_WHO_GARDIENNE", "who": "sailor", "role": "sailor2", "coat": "b0483a", "look": {"skin": "d99a6c", "hair": "7a3a2a", "hairstyle": "long", "hat": "knit", "hat_colour": "b0483a", "coat": "3b5a8c"}},
+    "marin": {"name": "AMB_WHO_MARIN", "who": "sailor", "role": "sailor", "coat": "3a6a9a", "look": {"skin": "e2a77c", "hair": "c9a14a", "hat": "beret", "hat_colour": "22324f", "outfit": "stripes", "coat": "f3ead6"}},
+    "fleuriste": {"name": "AMB_WHO_FLEURISTE", "who": "trader", "role": "trader", "coat": "b05a8a", "look": {"skin": "f1c9a5", "hair": "a8322a", "hairstyle": "long", "hat": "brim", "hat_colour": "e0c070", "outfit": "apron", "coat": "b05a8a"}},
+    "enfant": {"name": "AMB_WHO_ENFANT", "who": "child", "role": "child", "coat": "d9a441", "look": {"kind": "child", "skin": "f1c9a5", "hair": "3a2a22", "hat": "cap", "hat_colour": "d9a441", "coat": "f3ead6"}},
+    "monsieur": {"name": "AMB_WHO_MONSIEUR", "who": "oldman", "role": "townsman", "coat": "6a5a4a", "look": {"skin": "e8c3a0", "hair": "e6e2d8", "hat": "brim", "hat_colour": "3a3a44", "glasses": true, "coat": "6a5a4a"}},
+    "etudiante": {"name": "AMB_WHO_ETUDIANTE", "who": "trader", "role": "olva", "coat": "3a7a8a", "look": {"skin": "e8b98f", "hair": "2a2a3a", "hairstyle": "bun", "glasses": true, "coat": "3a7a8a"}}
+  },
+  "backdrops": {
+    "wharf": {"sky": "f3d7a8", "ground": "8a5a3c"},
+    "square": {"sky": "f0dcb4", "ground": "7fb069"},
+    "silk": {"sky": "5f7fb0", "ground": "c9b2e8"},
+    "dusk": {"sky": "6a5a8a", "ground": "4f7f52"},
+    "amber": {"sky": "8fd0d8", "ground": "e3c58a"},
+    "amber_in": {"sky": "f1dcae", "ground": "9a6a4a"}
+  },
+  "talks": {
+    "mara_first": {"backdrop": "wharf", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["mara", "captain"], "caption": "TALK_MARA_FIRST_C", "mood": {"mara": "neutral", "captain": "neutral"}},
+        {"shot": "close", "cast": ["mara"], "lines": [["mara", "TALK_MARA_FIRST_1", "angry"]]},
+        {"shot": "two", "cast": ["mara", "captain"], "lines": [["captain", "TALK_MARA_FIRST_2", "surprised"], ["mara", "TALK_MARA_FIRST_3", "neutral"]]}
+      ]},
+      {"panels": [
+        {"shot": "low", "cast": ["mara"], "lines": [["mara", "TALK_MARA_FIRST_4", "sly"]]},
+        {"shot": "close", "cast": ["captain"], "lines": [["captain", "TALK_MARA_FIRST_5", "worried"]]},
+        {"shot": "two", "cast": ["mara", "captain"], "lines": [["mara", "TALK_MARA_FIRST_6", "happy"]], "mood": {"captain": "happy"}}
+      ]}
+    ]},
+    "olva_consensus": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["olva", "captain"], "lines": [["olva", "TALK_OLVA_CONSENSUS_1", "happy"]], "mood": {"captain": "happy"}},
+        {"shot": "close", "cast": ["olva"], "lines": [["olva", "TALK_OLVA_CONSENSUS_2", "neutral"]]},
+        {"shot": "two", "cast": ["olva", "captain"], "lines": [["captain", "TALK_OLVA_CONSENSUS_3", "worried"], ["olva", "TALK_OLVA_CONSENSUS_4", "sly"]]}
+      ]}
+    ]},
+    "olva_last": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["olva", "captain"], "lines": [["olva", "TALK_OLVA_LAST_1", "neutral"]], "mood": {"captain": "neutral"}},
+        {"shot": "close", "cast": ["olva"], "lines": [["olva", "TALK_OLVA_LAST_2", "worried"]]}
+      ]}
+    ]},
+    "olva_wait": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["olva", "captain"], "lines": [["olva", "TALK_OLVA_WAIT_1", "worried"], ["captain", "TALK_OLVA_WAIT_2", "neutral"]]}
+      ]}
+    ]},
+    "chronicler_day": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["chronicler", "captain"], "caption": "TALK_CHRONICLER_DAY_C", "mood": {"chronicler": "neutral", "captain": "neutral"}},
+        {"shot": "close", "cast": ["chronicler"], "lines": [["chronicler", "TALK_CHRONICLER_DAY_1", "neutral"]]},
+        {"shot": "two", "cast": ["chronicler", "captain"], "lines": [["captain", "TALK_CHRONICLER_DAY_2", "surprised"], ["chronicler", "TALK_CHRONICLER_DAY_3", "sly"]]}
+      ]}
+    ]},
+    "keeper_first": {"backdrop": "silk", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["keeper", "captain"], "lines": [["keeper", "TALK_KEEPER_1", "happy"]], "mood": {"captain": "happy"}},
+        {"shot": "close", "cast": ["captain"], "lines": [["captain", "TALK_KEEPER_2", "surprised"]]},
+        {"shot": "low", "cast": ["keeper"], "lines": [["keeper", "TALK_KEEPER_3", "sly"]]}
+      ]}
+    ]},
+    "stroll_sailor": {"backdrop": "wharf", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["sailor", "captain"], "lines": [["sailor", "TALK_SAILOR_1", "happy"]], "mood": {"captain": "happy"}},
+        {"shot": "close", "cast": ["sailor"], "lines": [["sailor", "TALK_SAILOR_2", "sly"]]}
+      ]}
+    ]},
+    "stroll_sailor2": {"backdrop": "silk", "pages": [
+      {"panels": [
+        {"shot": "low", "cast": ["sailor2"], "lines": [["sailor2", "TALK_SAILOR2_1", "worried"]]},
+        {"shot": "two", "cast": ["sailor2", "captain"], "lines": [["captain", "TALK_SAILOR2_2", "worried"], ["sailor2", "TALK_SAILOR2_3", "happy"]]}
+      ]}
+    ]},
+    "stroll_sailor3": {"backdrop": "wharf", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["sailor3", "captain"], "lines": [["sailor3", "TALK_SAILOR3_1", "neutral"]], "mood": {"captain": "neutral"}},
+        {"shot": "close", "cast": ["sailor3"], "lines": [["sailor3", "TALK_SAILOR3_2", "sly"]]}
+      ]}
+    ]},
+    "stroll_child": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["child", "captain"], "lines": [["child", "TALK_CHILD_1", "surprised"]], "mood": {"captain": "neutral"}},
+        {"shot": "close", "cast": ["captain"], "lines": [["captain", "TALK_CHILD_2", "neutral"]]},
+        {"shot": "close", "cast": ["child"], "lines": [["child", "TALK_CHILD_3", "worried"]]}
+      ]}
+    ]},
+    "stroll_townsman": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "close", "cast": ["townsman"], "lines": [["townsman", "TALK_TOWNSMAN_1", "happy"]]},
+        {"shot": "two", "cast": ["townsman", "captain"], "lines": [["townsman", "TALK_TOWNSMAN_2", "sly"], ["captain", "TALK_TOWNSMAN_3", "surprised"]]}
+      ]}
+    ]},
+    "stroll_trader": {"backdrop": "square", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["trader", "captain"], "lines": [["trader", "TALK_TRADER_1", "happy"], ["captain", "TALK_TRADER_2", "surprised"]]},
+        {"shot": "close", "cast": ["trader"], "lines": [["trader", "TALK_TRADER_3", "sly"]]}
+      ]}
+    ]},
+    "amber_change": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["changeur", "amb_captain"], "caption": "AMB_CHANGE_C", "mood": {"changeur": "neutral", "amb_captain": "neutral"}},
+        {"shot": "two", "cast": ["changeur", "amb_captain"], "lines": [["changeur", "AMB_CHANGE_1", "happy"], ["amb_captain", "AMB_CHANGE_2", "surprised"]]},
+        {"shot": "close", "cast": ["changeur"], "lines": [["changeur", "AMB_CHANGE_3", "neutral"]]}
+      ]},
+      {"panels": [
+        {"shot": "low", "cast": ["changeur"], "lines": [["changeur", "AMB_CHANGE_4", "sly"]]},
+        {"shot": "close", "cast": ["amb_captain"], "lines": [["amb_captain", "AMB_CHANGE_5", "sly"]]},
+        {"shot": "two", "cast": ["changeur", "amb_captain"], "lines": [["changeur", "AMB_CHANGE_6", "happy"]], "mood": {"amb_captain": "happy"}}
+      ]}
+    ]},
+    "amber_bank": {"backdrop": "amber_in", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["banquiere", "amb_captain"], "caption": "AMB_BANK_C", "mood": {"banquiere": "neutral", "amb_captain": "neutral"}},
+        {"shot": "two", "cast": ["banquiere", "amb_captain"], "lines": [["banquiere", "AMB_BANK_1", "happy"], ["amb_captain", "AMB_BANK_2", "neutral"]]},
+        {"shot": "close", "cast": ["banquiere"], "lines": [["banquiere", "AMB_BANK_3", "sly"]]}
+      ]},
+      {"panels": [
+        {"shot": "close", "cast": ["amb_captain"], "lines": [["amb_captain", "AMB_BANK_4", "surprised"]]},
+        {"shot": "low", "cast": ["banquiere"], "lines": [["banquiere", "AMB_BANK_5", "worried"]]}
+      ]}
+    ]},
+    "amber_bakery": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["boulangere", "amb_captain"], "lines": [["boulangere", "AMB_BAKERY_1", "happy"], ["amb_captain", "AMB_BAKERY_2", "surprised"]]},
+        {"shot": "close", "cast": ["boulangere"], "lines": [["boulangere", "AMB_BAKERY_3", "worried"]]},
+        {"shot": "low", "cast": ["boulangere"], "lines": [["boulangere", "AMB_BAKERY_4", "worried"]]},
+        {"shot": "close", "cast": ["amb_captain"], "lines": [["amb_captain", "AMB_BAKERY_5", "sly"]]}
+      ]}
+    ]},
+    "amber_cafe": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["garcon", "amb_captain"], "caption": "AMB_CAFE_C", "mood": {"garcon": "neutral", "amb_captain": "neutral"}},
+        {"shot": "two", "cast": ["garcon", "amb_captain"], "lines": [["garcon", "AMB_CAFE_1", "happy"], ["amb_captain", "AMB_CAFE_2", "neutral"]]},
+        {"shot": "close", "cast": ["garcon"], "lines": [["garcon", "AMB_CAFE_3", "surprised"]]},
+        {"shot": "low", "cast": ["garcon"], "lines": [["garcon", "AMB_CAFE_4", "sly"]]}
+      ]}
+    ]},
+    "amber_books": {"backdrop": "amber_in", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["libraire", "amb_captain"], "lines": [["libraire", "AMB_BOOKS_1", "happy"], ["amb_captain", "AMB_BOOKS_2", "neutral"]]},
+        {"shot": "close", "cast": ["libraire"], "lines": [["libraire", "AMB_BOOKS_3", "surprised"]]},
+        {"shot": "close", "cast": ["amb_captain"], "lines": [["amb_captain", "AMB_BOOKS_4", "happy"]]}
+      ]}
+    ]},
+    "amber_lighthouse": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["gardienne", "amb_captain"], "caption": "AMB_LIGHT_C", "mood": {"gardienne": "neutral", "amb_captain": "neutral"}},
+        {"shot": "low", "cast": ["gardienne"], "lines": [["gardienne", "AMB_LIGHT_1", "worried"]]},
+        {"shot": "two", "cast": ["gardienne", "amb_captain"], "lines": [["amb_captain", "AMB_LIGHT_2", "worried"], ["gardienne", "AMB_LIGHT_3", "neutral"]]}
+      ]},
+      {"panels": [
+        {"shot": "close", "cast": ["amb_captain"], "lines": [["amb_captain", "AMB_LIGHT_4", "sly"]]},
+        {"shot": "close", "cast": ["gardienne"], "lines": [["gardienne", "AMB_LIGHT_5", "happy"]]}
+      ]}
+    ]},
+    "amber_marin": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["marin", "amb_captain"], "lines": [["marin", "AMB_MARIN_1", "happy"]], "mood": {"amb_captain": "happy"}},
+        {"shot": "close", "cast": ["marin"], "lines": [["marin", "AMB_MARIN_2", "sly"]]}
+      ]}
+    ]},
+    "amber_fleuriste": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["fleuriste", "amb_captain"], "lines": [["fleuriste", "AMB_FLEUR_1", "happy"], ["amb_captain", "AMB_FLEUR_2", "surprised"]]},
+        {"shot": "close", "cast": ["fleuriste"], "lines": [["fleuriste", "AMB_FLEUR_3", "sly"]]}
+      ]}
+    ]},
+    "amber_enfant": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["enfant", "amb_captain"], "lines": [["enfant", "AMB_ENFANT_1", "happy"], ["amb_captain", "AMB_ENFANT_2", "happy"]]},
+        {"shot": "close", "cast": ["enfant"], "lines": [["enfant", "AMB_ENFANT_3", "sly"]]}
+      ]}
+    ]},
+    "amber_monsieur": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "close", "cast": ["monsieur"], "lines": [["monsieur", "AMB_MONSIEUR_1", "neutral"]]},
+        {"shot": "two", "cast": ["monsieur", "amb_captain"], "lines": [["amb_captain", "AMB_MONSIEUR_2", "surprised"], ["monsieur", "AMB_MONSIEUR_3", "happy"]]}
+      ]}
+    ]},
+    "amber_etudiante": {"backdrop": "amber", "speak": "fr", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["etudiante", "amb_captain"], "lines": [["etudiante", "AMB_ETUDIANTE_1", "happy"], ["amb_captain", "AMB_ETUDIANTE_2", "neutral"]]},
+        {"shot": "close", "cast": ["etudiante"], "lines": [["etudiante", "AMB_ETUDIANTE_3", "sly"]]}
+      ]}
+    ]}
+  }
+}

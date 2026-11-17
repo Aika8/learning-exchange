@@ -1,9 +1,9 @@
-.PHONY: ps stop test test-backend test-web test-mobile test-game test-game3d game game3d assets dev reset repl web mobile mobile-web gen-api e2e clean
+.PHONY: ps stop test test-backend test-web test-mobile check-game3d-data test-game test-game3d game game3d assets dev reset repl web mobile mobile-web gen-api e2e clean
 
 # Run every test in the repo: backend (Gradle), both clients (unit tests, i18n keys, type check) and the game.
 # Works in a clean clone: client dependencies are installed with `npm ci` first. Without Godot the game tests are
 # skipped with a note (CI has no Godot). E2E is separate: `make e2e`.
-test: test-backend test-web test-mobile test-game test-game3d
+test: test-backend test-web test-mobile check-game3d-data test-game test-game3d
 
 test-backend:
 	./gradlew test
@@ -28,6 +28,10 @@ test-game:
 	fi
 
 # 3D game client (ADR-0017): GUT unit tests headless.
+# The game's data files are in the repository and whole. No Godot needed, so CI runs it.
+check-game3d-data:
+	python3 game3d/tools/check_data.py
+
 test-game3d:
 	@if command -v godot >/dev/null 2>&1; then \
 		cd game3d && godot --headless --path . --import >/dev/null 2>&1; godot --headless --path . -s addons/gut/gut_cmdln.gd; \

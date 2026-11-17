@@ -1,5 +1,6 @@
 # CI: `make test` on every push and pull request — backend, web and mobile unit tests and type checks.
-# No Godot here (the game's GUT tests are skipped by the Makefile) and no E2E (they need a running backend and a browser).
+# No Godot here (the game's GUT tests are skipped by the Makefile; `check-game3d-data` still checks that the game's
+# data files are in the repository and whole) and no E2E (they need a running backend and a browser).
 # See DECISIONS.md, "M2a".
 name: ci
 

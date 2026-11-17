@@ -4,6 +4,8 @@ build/
 
 # Local event journal (ADR-0005)
 data/
+# …but the game's own data is source (talks of the comic pages, ADR-0027)
+!game3d/data/
 # JS
 node_modules/
 dist/

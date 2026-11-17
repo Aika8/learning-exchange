@@ -401,3 +401,10 @@ Build and CI
   haze into the sky wash from 120 m. French spacing before ? ! : ; uses a no-break space.
 - Islanders reuse harbour costume roles with other coat colours (no sheet for them yet).
 - The world audit now counts each building of Amber Cliff as its own object (`WorldProbe._units`).
+
+## game3d data in git (fix after #27–#29)
+- `game3d/data/talks.json` was never committed: the root `.gitignore` rule `data/` (the local journal) also matched
+  `game3d/data/`, and `git add -A` skips ignored files without a word. `!game3d/data/` un-ignores it.
+- CI has no Godot, so GUT never ran there and could not notice. `make check-game3d-data` (part of `make test`, plain
+  Python) now checks that every `res://` file the scripts name is present and not ignored, that the talks parse and
+  have words in every language, and that every hero with a sheet has all six portraits.
