@@ -42,6 +42,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/game.gd` | Autoload `Game`: the day, its log, plan, Anchor, sync with the exchange, report-season watch |
 | `scripts/ui/` | `GameHud` (flow bar, lesson cards, glossary, report banner), `PlanPanel` |
 | `scripts/mover.gd`, `walker.gd`, `captain.gd` | Walking for everybody: acceleration, slopes, stairs (`Mover`); computed gait with foot IK — idle, walk, run (`Walker`); the captain with a spring-arm camera |
+| `scripts/island_style.gd` | The technique of each island as data: pen and ink, katazome, pen and watercolour (ADR-0026, 0029) |
 | `scripts/style.gd`, `shaders/ink.gdshader` | The art style switch (low-poly by default, `--pbr`) and the ink post-effect (`--ink=0|1|2`, key V) |
 | `scripts/costume.gd` | Period dress for the MakeHuman people: re-materials their clothes and adds skinned pieces (roles: captain, sailor, trader, townsman, child) |
 | `scripts/nav.gd`, `villager.gd` | Navmesh baked from the colliders; villagers who walk it and steer round each other |

@@ -9,6 +9,8 @@ var ink_mode := 1  ## the ink post-effect: 0 off, 1 outline, 2 engraving (ADR-00
 var ink_limit := 2
 var style_id := IslandStyle.HOME  ## the island whose variant of the style the ink effect draws (ADR-0025)
 var _attuned: Node3D  ## the body the island's wind is restyling right now
+var _attune_run := 0
+var hero: Node3D  ## the captain of the scene on screen: a technique that needs object space measures from them (ADR-0029)
 var _ink: MeshInstance3D
 var _ink_label: Label
 var spawn: String = "start"  ## where the harbour places the captain: start | pier | exchange
@@ -56,6 +58,10 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
+	var here := is_instance_valid(hero) and hero.is_inside_tree()
+	_ink_set("hero_radius", 0.75 if here else 0.0)
+	if here:
+		_ink_set("hero", hero.global_position)
 	if _attuned != null:
 		if is_instance_valid(_attuned):
 			_ink_set("column", _attuned.global_position)
@@ -149,6 +155,8 @@ func attuning() -> bool:
 ## `delay` seconds a swirl gathers round it and a wave runs from feet to hat in `seconds`, redrawing it the way
 ## `to_id` is drawn. Then `Game.attuned` is `to_id`. Await it or let it run.
 func attune(body: Node3D, from_id: String, to_id: String, seconds: float = 2.0, delay: float = 0.9) -> void:
+	_attune_run += 1
+	var run := _attune_run  # a newer call takes over: an older one must not finish for it
 	set_style(to_id)
 	_style("_from", IslandStyle.of(from_id))
 	var accent: Color = IslandStyle.of(to_id)["accent"]
@@ -160,14 +168,18 @@ func attune(body: Node3D, from_id: String, to_id: String, seconds: float = 2.0, 
 	_ink_set("glow_amount", 0.0)
 	if delay > 0.0:
 		await get_tree().create_timer(delay).timeout
+	if run != _attune_run:
+		return
 	if is_instance_valid(body):
 		WindSwirl.around(body, accent, seconds)
 		_ink_set("glow_amount", 1.0)
 		var t := 0.0
-		while t < 1.0 and is_instance_valid(body):
+		while t < 1.0 and is_instance_valid(body) and run == _attune_run:
 			_ink_set("wave", body.global_position.y - 0.1 + WindSwirl.wave_at(t) * 2.8)
 			await get_tree().process_frame
 			t += get_process_delta_time() / seconds
+	if run != _attune_run:
+		return
 	_attuned = null
 	_ink_set("column_radius", 0.0)
 	_ink_set("glow_amount", 0.0)
