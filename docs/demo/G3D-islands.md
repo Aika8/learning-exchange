@@ -54,8 +54,8 @@ Record it again: `godot --path game3d --resolution 1280x720 -- --attune=<dir>` (
 ## Numbers
 - GUT 83 → 88.
 - fps at 1080p, harbour and Silk Reach views: 115–119 average. The 1%-low was 55–91 in these runs; the same runs
-  with the previous shader gave the same 56–76, and the morning's runs of the same code gave 88–102, so the dips
-  are the laptop's state, not this change. The floor of 60 is therefore not shown to hold in the 1%-low today.
+  with the previous shader gave the same 56–76, measured in the same minutes, so the dips are not this
+  change; two hours earlier, before it, the lows were 88–102 (the laptop's state differs between runs). The floor of 60 is therefore not shown to hold in the 1%-low today.
 
 ## Not done, not checked
 - Not played by hand: the sail from one island to the other with the wind at the end was only run by the tool.
