@@ -25,12 +25,12 @@ const TABLE := {
 		"accent": Color("ffcf6e"),  # the colour of this island's wind
 	},
 	"silk": {
-		"technique": "katazome",  # a Japanese stencil-resist print (sheets 27, 28; ADR-0029)
-		"ramp": [Color("1f2f5a"), Color("1f2f5a"), Color("b5523b"), Color("efe6d2")],  # indigo, —, the rust accent, cream
-		"ink": Color("efe6d2"),  # the line is light; on cream the effect turns it indigo
-		"width": 1.6,
+		"technique": "katazome",  # a Japanese stencil-resist print, in the looser manner of sheet 28 (ADR-0029)
+		"ramp": [Color("4f6a94"), Color("a9bcd2"), Color("b5523b"), Color("c79a63")],  # mid blue, pale blue, rust, ochre
+		"ink": Color("1f2f5a"),  # the deep indigo: the darkest tone and the line
+		"width": 1.2,
 		"tint": Color(1.0, 1.0, 1.0),
-		"paper": Color("efe6d2"),
+		"paper": Color("efe6d2"),  # cream: the lightest tone and the sky
 		"hatch_turn": 0.0,
 		"hatch_gap": 9.0,
 		"sun": Color("ffeede"),

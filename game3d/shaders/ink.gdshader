@@ -1,9 +1,10 @@
 // The ink post-effect (ADR-0024): one full-screen quad. mode 1 = a dark outline on depth and normal edges over the
 // flat colours; mode 2 = an engraving — paper and ink only, hatching by brightness, plus the outline.
 // Each island is drawn in its own technique (ADR-0026, ADR-0029): 0 = ink (the above);
-// 1 = katazome — a Japanese stencil-resist print: indigo and cream with nothing between, a rare rust accent, small
-//     patterns cut into the half-tones and laid out in world space (on the hero: in the hero's own space), a line
-//     of the opposite colour, a cotton weave;
+// 1 = katazome — a Japanese stencil-resist print in the looser manner of sheet 28: several blues, sand and ochre
+//     for rock and timber, rust for cloth, cream paper, soft half-tones; large faint patterns only on cloth, roofs
+//     and the cloud sea, laid out in world space (on the hero: in the hero's own space) and faded before they are
+//     small enough to shimmer; a thin indigo line; a cotton weave;
 // 2 = aquarelle — pen and watercolour: a thin trembling line, washes that run past it, a lot of bare paper, a
 //     violet-grey wash for shade, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
@@ -140,37 +141,71 @@ void fragment() {
 	vec3 sheet_colour = mix(paper, paper_from, old);
 	vec3 result;
 	if (tech == 1) {
-		vec3 indigo = mix(ramp0, ramp0_from, old);
+		// Katazome in the looser manner of sheet 28: several blues, a sand and an ochre for rock and timber, rust
+		// for cloth and accents, cream paper; soft half-tones; patterns only on big things, large and faint.
+		vec3 deep = line;  // the deep indigo is also the line
+		vec3 mid_blue = mix(ramp0, ramp0_from, old);
+		vec3 pale_blue = mix(ramp1, ramp1_from, old);
 		vec3 rust = mix(ramp2, ramp2_from, old);
-		vec3 cream = mix(ramp3, ramp3_from, old);
-		float far = smoothstep(500.0, 900.0, d);  // the sky is indigo; the cloud sea, being bright, is cream
-		float light = smoothstep(0.50, 0.53, lum) * (1.0 - far);
-		// where on the thing: world space, on the plane the surface faces; on the hero, the hero's own space
+		vec3 ochre = mix(ramp3, ramp3_from, old);
+		vec3 cream = sheet_colour;
+		vec3 sand = mix(ochre, cream, 0.6);
+		float far = smoothstep(500.0, 900.0, d);
 		vec3 world = (INV_VIEW_MATRIX * vec4(here, 1.0)).xyz;
+		vec3 anchored = world;
 		if (hero_radius > 0.0 && length(world.xz - hero.xz) < hero_radius && world.y > hero.y + 0.05 && world.y < hero.y + 2.7) {
-			world -= hero;
+			anchored -= hero;  // on the hero the pattern is measured from the hero
 		}
 		vec3 wn = normalize(mat3(INV_VIEW_MATRIX) * n);
-		float motif;
-		if (abs(wn.y) > 0.75) {
-			motif = seigaiha(world.xz / 0.8);  // waves on what faces the sky
-		} else if (abs(wn.y) > 0.3) {
-			motif = dots((abs(wn.x) > abs(wn.z) ? world.zy : world.xy) / 0.3);  // dots on what leans
-		} else {
-			motif = diamonds((abs(wn.x) > abs(wn.z) ? world.zy : world.xy) / 0.55);  // diamonds on walls
+		vec3 seen = pow(clamp(col, 0.0, 1.0), vec3(0.45));  // as the eye sees it
+		float chroma = max(seen.r, max(seen.g, seen.b)) - min(seen.r, min(seen.g, seen.b));
+		// which family of dyes: earth (rock, timber, the grass of the ground) or blue (everything else)
+		float earthy = smoothstep(0.02, 0.1, seen.r - seen.b) * step(seen.g, seen.r * 1.02);
+		float leafy = step(seen.r, seen.g) * step(seen.b, seen.g) * step(0.08, chroma);
+		float ground = step(0.75, wn.y) * step(-30.0, world.y) * leafy;  // the grass underfoot is sand, lit or in shade
+		float in_shade = step(0.75, wn.y) * step(-30.0, world.y) * (1.0 - smoothstep(0.3, 0.5, lum));
+		float warm = clamp(earthy + ground + in_shade, 0.0, 1.0);
+		// soft half-tones: four tones a family, with wide, gentle steps between them
+		vec3 blue = mix(deep, mid_blue, smoothstep(0.22, 0.36, lum));
+		blue = mix(blue, pale_blue, smoothstep(0.42, 0.58, lum));
+		blue = mix(blue, cream, smoothstep(0.66, 0.84, lum));
+		vec3 earth = mix(deep, ochre * 0.72, smoothstep(0.16, 0.30, lum));
+		earth = mix(earth, ochre, smoothstep(0.34, 0.50, lum));
+		earth = mix(earth, sand, smoothstep(0.54, 0.70, lum));
+		earth = mix(earth, cream, smoothstep(0.86, 0.99, lum));
+		result = mix(blue, earth, warm);
+		// cloth, and anything truly red, is dyed rust; cool cloth stays blue
+		float red = step(1.6 * max(seen.g, seen.b), seen.r) * step(0.2, seen.r - min(seen.g, seen.b));
+		float upright = 1.0 - smoothstep(0.2, 0.35, abs(wn.y));
+		float cloth = upright * smoothstep(0.16, 0.26, chroma) * smoothstep(0.5, 0.62, lum) * (1.0 - leafy);
+		float cloth_warm = cloth * step(seen.b, seen.r);
+		result = mix(result, mix(rust, rust * 0.7, 1.0 - smoothstep(0.3, 0.6, lum)), clamp(red + cloth_warm, 0.0, 1.0) * float(mode != 2));
+		result = mix(result, mid_blue, cloth * (1.0 - step(seen.b, seen.r)) * float(mode != 2));
+		// the sky is paper with a little blue let in at the top; the cloud sea below is pale blue and cream
+		vec3 sky = mix(cream, pale_blue, clamp(1.0 - SCREEN_UV.y * 2.2, 0.0, 1.0) * 0.55);
+		result = mix(result, sky, far);
+		// patterns: only on cloth, on roofs and on the cloud sea; large; faded before they get small enough to shimmer
+		float px_world = d * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);  // metres a pixel covers here
+		float facing = clamp(abs(n.z), 0.0, 1.0);
+		float roof = smoothstep(0.3, 0.4, abs(wn.y)) * (1.0 - smoothstep(0.7, 0.8, abs(wn.y))) * (1.0 - leafy);
+		float clouds = step(0.8, wn.y) * step(world.y, -30.0);
+		float cell = clouds > 0.5 ? 14.0 : (roof > 0.5 ? 1.5 : 1.1);
+		float readable = smoothstep(14.0, 30.0, cell * facing / max(px_world, 0.0001));
+		float motif = 0.0;
+		if (clouds > 0.5) {
+			motif = seigaiha(world.xz / cell);
+		} else if (roof > 0.5) {
+			motif = seigaiha((abs(wn.x) > abs(wn.z) ? anchored.zy : anchored.xy) / cell);
+		} else if (cloth > 0.0) {
+			motif = diamonds((abs(wn.x) > abs(wn.z) ? anchored.zy : anchored.xy) / cell);
 		}
-		// the pattern is cut only into the half-tones, near enough to be read, never in the bare stencil (mode 2)
-		float half_tone = smoothstep(0.34, 0.38, lum) * (1.0 - smoothstep(0.60, 0.64, lum));
-		float cut = motif * half_tone * (1.0 - smoothstep(28.0, 60.0, d)) * (1.0 - far) * float(mode != 2);
-		float is_cream = abs(light - cut);
-		result = mix(indigo, cream, is_cream);
-		vec3 seen = pow(clamp(col, 0.0, 1.0), vec3(0.45));  // as the eye sees it: timber is not red, a red roof is
-		float warm = step(1.6 * max(seen.g, seen.b), seen.r) * step(0.2, seen.r - min(seen.g, seen.b)) * step(0.36, lum);
-		result = mix(result, rust, warm * (1.0 - cut) * (1.0 - far) * float(mode != 2));  // the rare rust accent
-		line = mix(cream, indigo, is_cream);  // the line is the colour the shape is not
+		float cut = motif * readable * clamp(clouds + roof + cloth, 0.0, 1.0) * (1.0 - far) * float(mode != 2);
+		result = mix(result, mix(result, cream, 0.55), cut);  // the stencil lets some of the paper through, no more
+		// the line: deep indigo, thin and not quite solid; on the deepest blue it turns light
+		float dark_here = 1.0 - smoothstep(0.2, 0.34, lum);
 		vec2 thread = FRAGCOORD.xy / (2.2 * s);
-		result *= 0.95 + 0.05 * sin(thread.x * 3.14159) * sin(thread.y * 3.14159);
-		result = mix(result, line, edge * 0.95);
+		result *= 0.965 + 0.035 * sin(thread.x * 3.14159) * sin(thread.y * 3.14159);
+		result = mix(result, mix(deep, pale_blue, dark_here), edge * 0.8);
 	} else if (tech == 2) {
 		vec3 shade_tint = mix(ramp0, ramp0_from, old);
 		vec3 sky_tint = mix(ramp3, ramp3_from, old);

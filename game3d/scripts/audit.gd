@@ -270,6 +270,36 @@ static func read(tree: SceneTree) -> void:
 	tree.quit()
 
 
+## `--stroll=<dir>`: the picture on the move — the camera walks 12 m across an island at walking pace and a frame is
+## saved every 0.1 s (frame-NN.png), to look for patterns that shimmer. `--island=silk` (default) or another.
+static func stroll(tree: SceneTree) -> void:
+	var dir := Session.arg("stroll")
+	DirAccess.make_dir_recursive_absolute(dir)
+	var place := "silk" if Session.arg("island").is_empty() else Session.arg("island")
+	Game.island = place
+	Game.attuned = place
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(2.0)
+	var scene := tree.current_scene as Node3D
+	var centre: Vector3 = Archipelago.walk_areas(place)[0]["centre"]
+	var cam := Camera3D.new()
+	cam.fov = 60
+	scene.add_child(cam)
+	cam.current = true
+	for c in scene.find_children("*", "CanvasLayer", true, false):
+		(c as CanvasLayer).visible = false
+	var from := centre + Vector3(-19, 1.9, 17)
+	var to := centre + Vector3(-9, 1.9, 9)
+	for i in 30:
+		cam.position = from.lerp(to, i / 29.0)
+		cam.look_at(centre + Vector3(4, 1.6, -4))
+		await _await_drawn(tree)
+		await tree.process_frame
+		scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%02d.png" % i))
+	print("stroll: ", place, " 30 frames")
+	tree.quit()
+
+
 ## `--attune=<dir>`: the captain lands on Silk Reach still drawn the Spark Harbour way and the island's wind
 ## restyles them (ADR-0025). Saves a frame every 0.1 s as frame-NN.png; add `--ink=2` for the engraving.
 static func attune(tree: SceneTree) -> void:

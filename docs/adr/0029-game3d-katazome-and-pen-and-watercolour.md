@@ -28,13 +28,17 @@ Forces:
 - 60 fps.
 
 ## Decision
-1. **`katazome`** replaces `dye` (technique 1). Brightness sorts the picture into cream and indigo, with nothing
-   in between; a strongly warm, saturated colour becomes the rust accent; the sky is indigo and the cloud sea cream.
-   In the middle brightnesses a small pattern is cut into the shape: waves (seigaiha) on what faces up, diamonds
-   on walls, dots elsewhere. **The pattern is laid out in world space**, on the plane the surface faces (found
-   from the depth and the normal), so it stays on the thing when the camera moves. The line is the opposite colour
-   of what it lies on: light on indigo, indigo on cream. A cotton weave lies over all. Mode 2 is the bare stencil:
-   two colours, no patterns.
+1. **`katazome`** replaces `dye` (technique 1), in the looser manner of sheet 28. *(Revised while still Proposed:
+   the first version followed sheet 27 — indigo and cream only, patterns in every half-tone. Aika: "blue and white
+   is too simple and hard to look at, the eyes begin to hurt, more colours are needed". Sheet 28 is now the main
+   one.)* The picture is sorted into two families of dyes with soft steps between their tones: **blues** (deep
+   indigo, a middle blue, a pale blue) and **earth** (ochre and sand, for rock, timber and the ground, lit or in
+   shade), both ending in cream paper. Cloth and anything truly red is **rust**. The sky is paper with a little
+   blue at the top. **Patterns are few, large and faint**: only on cloth, on roofs and on the cloud sea; they let
+   some paper through and nothing more; they are **laid out in world space**, on the plane the surface faces, so
+   they stay on the thing; and each fades out before it is small enough on screen to shimmer (its size in pixels
+   is worked out from the distance and the angle). The line is a thin deep indigo. A cotton weave lies over all.
+   Mode 2 leaves out the rust and the patterns.
 2. **`aquarelle`** replaces `claire` (technique 2). The colour is taken from a point nudged by slow noise, so the
    wash runs past the line; it is thinned towards the paper, most of all in the light and far away, so much of the
    sheet stays white; shade is a violet-grey wash, not black; pigment gathers unevenly; the paper has grain. The
@@ -68,8 +72,10 @@ Forces:
 - Villagers on Silk Reach walk through the world-space pattern (it slides over them). The hero does not. We
   notice in play; the cure would be a per-person anchor.
 - World position from depth loses precision far away; the pattern is faded out with distance to hide it.
-- A two-colour picture hides anything that is told apart only by hue. The trading post must still read: checked on
-  the pictures in `docs/demo/G3D-techniques.md`.
+- Which family a thing belongs to is guessed from its colour and from which way it faces (the effect sees no
+  materials): a grey-green thing may land in the wrong family. We notice on the pictures.
+- "Easy on the eyes" is measured only roughly: the mean change between frames of a walking camera
+  (`--stroll`) fell from 30.6 to 10.9 of 255. Aika's eyes are the real test.
 - The watercolour takes four more samples of the picture per pixel; watched with `--fps`.
 - The line of the watercolour is still an edge filter, not a hand: it trembles, it does not draw.
 
