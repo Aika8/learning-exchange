@@ -1,6 +1,6 @@
 # 0027. Talking to people opens a comic page; the page is data
 
-- Status: Proposed
+- Status: Accepted (2026-11-17)
 - Date: 2026-11-17
 - Pattern(s): Data-driven script + Iterator (`ComicScript`, `ComicReader`), Flyweight (`ComicFaces`: one picture per hero and emotion, shared by every frame)
 - Revised 2026-11-17 while still Proposed: portraits are drawn 2D faces from Aika's expression sheets, not the 3D figures

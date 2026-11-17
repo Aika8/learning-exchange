@@ -1,6 +1,6 @@
 # 0026. Every island is drawn in its own technique, not a variant of one
 
-- Status: Proposed
+- Status: Accepted (2026-11-17)
 - Date: 2026-11-17
 - Pattern(s): Strategy chosen by data (`IslandStyle` names a technique; the one post-effect implements them)
 - Amends: ADR-0025, decision 1 only (the bounds "tint within 10%, line within 30%" are dropped)
