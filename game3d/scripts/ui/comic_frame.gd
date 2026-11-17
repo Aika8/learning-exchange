@@ -64,14 +64,16 @@ func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dicti
 	back.show_behind_parent = true
 	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(back)
-	var h := size.y * float(HEIGHT.get(panel.get("shot", "two"), 0.8))
-	var w := h * ComicFaces.ASPECT
-	if who_list.size() == 2 and w > size.x * 0.48:
-		w = size.x * 0.48
-		h = w / ComicFaces.ASPECT
+	var tall := size.y * float(HEIGHT.get(panel.get("shot", "two"), 0.8))
 	for i in who_list.size():
 		var who: String = who_list[i]
 		var c: Dictionary = cast[who]
+		var shape := ComicFaces.aspect(str(c.get("face", ""))) if ComicFaces.has(str(c.get("face", ""))) else ComicFaces.ASPECT
+		var h := tall
+		var w := h * shape
+		if who_list.size() == 2 and w > size.x * 0.48:
+			w = size.x * 0.48
+			h = w / shape
 		var cx := size.x * (0.3 if who_list.size() == 1 else (0.25 if i == 0 else 0.75))
 		cx = clampf(cx, w * 0.5 + 4.0, size.x - w * 0.5 - 4.0)
 		var rect := Rect2(Vector2(cx - w * 0.5, size.y - h + (h * 0.07 if panel.get("shot", "") == "low" else 0.0)), Vector2(w, h))
@@ -126,7 +128,7 @@ func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dicti
 		var base := Vector2(clampf(head.x, rect.position.x + 26, rect.end.x - 26), rect.end.y)
 		if who_list.size() == 1:
 			base.x = rect.position.x + 30 if side > 0 else rect.end.x - 30
-		var to_mouth := head + Vector2(0, h * 0.22) - base
+		var to_mouth := head + Vector2(0, tall * 0.2) - base
 		var tip := base + to_mouth.normalized() * minf(to_mouth.length() * 0.5, 38.0)  # a short tail: it points, it does not cross a face
 		tip.y = maxf(tip.y, base.y + 12)
 		balloons.append({"who": who, "rect": rect, "tip": tip, "base": base, "text": text, "gloss": page.gloss(lines[n][1]), "name": name,

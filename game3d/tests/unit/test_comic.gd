@@ -82,7 +82,7 @@ func test_every_hero_with_a_sheet_has_every_face() -> void:
 	for emotion: String in ComicFaces.EMOTIONS:
 		assert_true(ComicDoodle.FEEL.has(emotion), "the stand-in can feel " + emotion)
 	var s := ComicScript.read()
-	for hero: String in ["captain", "mara", "olva", "sailor3", "trader", "changeur"]:
+	for hero: String in ["captain", "mara", "olva", "sailor", "sailor2", "sailor3", "trader", "changeur", "chronicler", "keeper", "child", "townsman", "libraire"]:
 		assert_true(ComicFaces.has(str(s.cast[hero].get("face", ""))), hero + " is drawn from a sheet")
 
 
@@ -109,18 +109,35 @@ func test_the_face_changes_with_the_line() -> void:
 
 
 func test_people_without_a_sheet_get_a_drawn_stand_in() -> void:
+	var s := ComicScript.read()
+	var without: Array[String] = []
+	for id: String in s.cast:
+		if not s.cast[id].has("face"):
+			without.append(id)
+	without.sort()
+	assert_eq(without, ["enfant", "etudiante", "fleuriste", "marin", "monsieur"] as Array[String], "only the strollers of Amber Cliff wait for a sheet")
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("amber_enfant"))
+	await wait_process_frames(2)
+	var frame := page.frames()[0]
+	var boy: ComicDoodle = frame.actors["enfant"]["node"]
+	assert_eq(boy.emotion, "happy", "the stand-in feels what the line says")
+	assert_true(frame.actors["amb_captain"]["node"] is TextureRect)
+
+
+func test_a_portrait_keeps_the_proportions_of_its_sheet() -> void:
 	var page := ComicPage.new()
 	add_child_autofree(page)
 	assert_true(page.open("chronicler_day"))
 	await wait_process_frames(2)
 	page.step()
 	var frame := page.frames()[1]
-	var owl: ComicDoodle = frame.actors["chronicler"]["node"]
-	assert_eq(owl.look.get("kind"), "owl")
-	assert_eq(owl.emotion, "neutral")
-	page.step()
-	page.step()
-	assert_eq((page.frames()[2].actors["chronicler"]["node"] as ComicDoodle).emotion, "sly")
+	var owl: Dictionary = frame.actors["chronicler"]
+	assert_true(owl["node"] is TextureRect, "the Chronicler is drawn from a sheet now")
+	var rect: Rect2 = owl["rect"]
+	assert_almost_eq(rect.size.x / rect.size.y, ComicFaces.aspect("chronicler"), 0.01)
+	assert_ne(ComicFaces.aspect("chronicler"), ComicFaces.aspect("sailor2"), "sheets are cut to their own shape")
 
 
 func test_talking_to_a_stroller_opens_a_page_and_gives_the_captain_back() -> void:

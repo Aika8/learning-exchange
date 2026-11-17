@@ -34,26 +34,40 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `02-sailors.jpg` | Tall, stocky and old sailor | strollers on the wharf and on Silk Reach | `_r_sailor`, `_r_sailor2`, `_r_sailor3` |
 | `03-mara.jpg` | Mara of the Anchor Order | Mara on the wharf (plans the voyage) | `_r_mara` |
 | `04-townsfolk.jpg` | Money-changer, Olva, market woman, old man, child | brokers in the hall, Ольва Перо, the post keeper and strollers | `_r_changer`, `_r_olva`, `_r_trader`, `_r_townsman`, `_r_child` |
-| `05-chronicler.jpg` | The Chronicler, an owl scholar | the Chronicler on the square (evening chronicle) | `_r_chronicler` |
+| `05-chronicler.jpg` | The Chronicler, an owl scholar — **superseded by `26-chronicler.jpg`**, kept for history | — | — |
 | `06-comic-style.jpg` | **The approved style of the dialogue panels** and the look of six heroes there: ink outline, hatching, bright flat colour, sound words, balloons | every talk page (ADR-0027) | `scripts/ui/comic_page.gd`, `comic_frame.gd` |
 | `07-faces-captain.jpg` | The young captain, six faces | the player in every talk | `game3d/art/portraits/captain_*.jpg` |
 | `08-faces-mara.jpg` | Mara, six faces | Mara's talk | `…/mara_*.jpg` |
 | `09-faces-vetla.jpg` | Бабушка Ветла, six faces | the market woman who strolls the square (talk about her basket = an index fund) | `…/vetla_*.jpg` |
 | `10-faces-olva.jpg` | Олва Перо, six faces | Olva's talks | `…/olva_*.jpg` |
-| `11-faces-old-sailor.jpg` | The old sailor, six faces | the old sailor on the wharf | `…/sailor_*.jpg` |
+| `11-faces-old-sailor.jpg` | The old sailor, six faces | the old sailor on the wharf | `…/oldsailor_*.jpg` |
 | `12-faces-merchant.jpg` | The merchant, six faces | M. Lenoir at the bureau de change on Amber Cliff | `…/merchant_*.jpg` |
+| `13-faces-chronicler.jpg` | Хронист (the Chronicler), six faces | the Chronicler's talks | `…/chronicler_*.jpg` |
+| `14-faces-keeper.jpg` | Хранительница лавки, six faces | the post keeper on Silk Reach | `…/keeper_*.jpg` |
+| `15-faces-sailor.jpg` | Матрос, six faces | the tall sailor on the wharf | `…/sailor_*.jpg` |
+| `16-faces-second-sailor.jpg` | Второй матрос, six faces | the stocky sailor (boatswain) on Silk Reach | `…/sailor2_*.jpg` |
+| `17-faces-ship-boy.jpg` | Юнга, six faces | the boy on the square | `…/child_*.jpg` |
+| `18-faces-townsman.jpg` | Горожанин, six faces | the old man on the square | `…/townsman_*.jpg` |
+| `19-faces-banquiere.jpg` | La banquière, six faces | Mme Sorel, Banque d'Ambre | `…/banquiere_*.jpg` |
+| `20-faces-boulangere.jpg` | La boulangère, six faces | Colette, the bakery | `…/boulangere_*.jpg` |
+| `21-faces-garcon.jpg` | Le garçon, six faces | Lucien, Café du Phare | `…/garcon_*.jpg` |
+| `22-faces-libraire.jpg` | Le libraire, six faces | Anatole, the bookshop | `…/libraire_*.jpg` |
+| `23-faces-gardienne.jpg` | La gardienne, six faces | Maëlle, the lighthouse | `…/gardienne_*.jpg` |
+| `24-spark-harbour.jpg` | "Sheet 9 — Spark Harbour": the establishing view (mill on a stepped terrace, houses, market square, timber wharf, moored ship, rope bridges to islets, waterfall, crystals) | Spark Harbour; **not all built**: no rope bridges, islets or waterfall yet | `scripts/archipelago.gd` |
+| `25-props.jpg` | "Sheet 10 — Props": street lamp, market stall, crate, barrel, rope coil, notice board, chest, scales, ledger, spyglass, anchor, bollard, rope railing, silk rack, five picture signboards | the props of Spark Harbour (low-poly look) | `scripts/props.gd` |
+| `26-chronicler.jpg` | "Sheet 5 — The Chronicler", a **new** version: a layered slate-blue feather robe, belts, ink bottle, chained book, lantern. **Replaces `05-chronicler.jpg`** (cream cloak, blue cape) | the Chronicler in the world | `Costume._r_chronicler` |
 
-**Dialogue panels (sheets 06–12).** The faces on a page are these drawings, one per emotion, left to right on each
+**Dialogue panels (sheets 06–23).** The faces on a page are these drawings, one per emotion, left to right on each
 sheet: neutral, happy, surprised, sly, worried, angry. The emotion is chosen per line in `game3d/data/talks.json`.
 `game3d/art/portraits/` holds the cut-outs (recut them with the boxes in `docs/demo/G3D-talk.md` if a sheet is
 replaced). Lettering and the marks round a head are our own. Sheets 06–12 came later than 01–05 and differ from them
 (Mara is younger with a headband, Olva wears a top hat): the 3D figures still follow 01–05 — which one wins is Aika's
-call. Speakers **without** an expression sheet are drawn by a plain stand-in (`ComicDoodle`): the Chronicler, the
-post keeper, the tall and the stocky sailor, the boy, the old man, and everybody on Amber Cliff except M. Lenoir.
+call. Speakers **without** an expression sheet are drawn by a plain stand-in (`ComicDoodle`): only the five strollers
+of Amber Cliff now — Yann the sailor, Rose the florist, the boy Léo, M. Hector and Inès the student.
 
-Not drawn yet (the game still uses designs made without a sheet): the houses kit, the Wind Exchange inside and out,
-the ship «Попутчик», the establishing view of Spark Harbour, props. When sheets for these arrive, put them here as
-`06-…jpg` and so on, add a row above, and rebuild the thing to match.
+Sheets 24 and 25 cover the establishing view and the props. Still not drawn (the brief's sheets 6–8): the houses
+kit, the Wind Exchange inside and out, the ship «Попутчик»; and nothing yet for Silk Reach, Amber Cliff's town or its
+five strollers. When sheets arrive, put them here with the next number, add a row above, and rebuild to match.
 
 ## How a sheet becomes a character (`game3d/scripts/costume.gd`)
 - A role is one function `_r_<role>` that reads like the sheet: recolour the person's own clothes, then put garments on.
