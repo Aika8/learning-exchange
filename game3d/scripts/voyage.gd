@@ -42,7 +42,7 @@ func _ready() -> void:
 	if Game.plan != null:
 		_instrument = Game.plan.instrument
 	_home = Game.island == "silk"
-	var a := Archipelago.PIER_END + Vector3(4, 1.2, 4.5)
+	var a := Archipelago.PIER_END + Vector3(4, 1.2, 5.5)
 	var b := Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)
 	_model = VoyageModel.new(b, Vector3(200, 14, 60), a) if _home else VoyageModel.new(a, Vector3(200, 14, 60), b)
 	_ship = Proc.ship()

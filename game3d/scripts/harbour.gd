@@ -62,7 +62,7 @@ func _ready() -> void:
 	_nav = Nav.bake(self, Archipelago.walk_areas(Game.island))
 	var ship := Proc.ship()
 	ship.name = "Wayfarer"
-	ship.position = (Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)) if _silk() else Archipelago.PIER_END + Vector3(0, 1.2, 4.5)
+	ship.position = (Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)) if _silk() else Archipelago.PIER_END + Vector3(0, 1.2, 5.5)  # the wind vane clears the heads of people on the pier
 	ship.rotation.y = PI / 2
 	add_child(ship)
 	_captain = Captain.new()

@@ -62,3 +62,7 @@ mesh_lod/lod_change/threshold_pixels=6.0
 global_illumination/gi/use_half_resolution=true
 environment/volumetric_fog/volume_size=48
 environment/volumetric_fog/volume_depth=48
+
+[physics]
+
+3d/physics_engine="Jolt Physics"

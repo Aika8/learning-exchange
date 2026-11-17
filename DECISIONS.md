@@ -340,3 +340,19 @@ Build and CI
   corrupted map can loop forever) now uses daemon threads and counts a thread still running after 10 s as a race.
 - Servers are findable: `make dev PORT=… JOURNAL=…` refuses a busy port, `make ps` lists exchange JVMs and Gradle test
   workers of every worktree (pid, port, age, CPU, folder), `make stop [PORT=…]` stops this folder's exchange.
+
+## G3D walk fixes (docs/demo/G3D-walk.md)
+- The world audit got route scans: a 0.5 m lattice walked cell to cell (what is reached from a spawn and has no way
+  back is a `trap`), a ray against the visible triangles on every step (`walk-through`), a 40 000-step random player
+  (`fuzz`) and every villager's strolls walked ahead of time (`npc-stuck`). A clean old audit had missed all four.
+- 3D physics is Jolt (built into Godot 4.7), not Godot Physics: a capsule froze in patches on the wide flat box of the
+  wharf deck. Considered: cutting decks into small boxes (does not remove the cause), a nudge in `Mover` when a
+  floored body does not move (hides it). Cost of Jolt: `Mover._climb` looks 0.2 m ahead (was 0.12 m), nothing else
+  changed; two GUT tests fail without it.
+- A rail you see stops you: each railed side of a deck has a collider, and a side people walk in by has no rail
+  (the wharf's island side lost its rail). The invisible walls round the walk areas stay for the open sides.
+- Decks and terraces (`flat` meta) are ground for the probe however high they stand over the grass; before, a pier
+  0.5 m over a slope counted as a prop and its cells were skipped.
+- The Silk Reach pier ends 4.5 m further inland: its end must lie inside the walkable cap of both looks
+  (`Proc.cap_radius` gives the low-poly island a different outline), or the fence round the cap closes the pier.
+

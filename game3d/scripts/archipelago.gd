@@ -22,7 +22,7 @@ const WHARF_TO := Vector3(40.5, DECK_Y, 12.6)
 const PIER_FROM := Vector3(40.0, DECK_Y, 2.0)  ## the pier the ship moors at
 const PIER_TO := Vector3(49.4, DECK_Y, 6.0)
 const SILK_PIER_FROM := SILK + Vector3(-36.8, DECK_Y, 12.0)
-const SILK_PIER_TO := SILK + Vector3(-17.5, DECK_Y, 16.0)
+const SILK_PIER_TO := SILK + Vector3(-13.0, DECK_Y, 16.0)  ## its island end lies well inside the walkable cap of both looks
 
 
 ## Where people can stand on an island: the flat cap (a wobbly disc) and the pier (a rectangle).
@@ -315,7 +315,7 @@ static func _spark_harbour(detail: bool) -> Node3D:
 		t.position = pos
 		h.add_child(t)
 		Solid.model(h, t, "procedural")
-	h.add_child(_deck("Wharf", WHARF_FROM, WHARF_TO, [true, false, true, true], Vector3(WHARF_FROM.x, 0, 4)))
+	h.add_child(_deck("Wharf", WHARF_FROM, WHARF_TO, [true, false, true, false], Vector3(WHARF_FROM.x, 0, 4)))
 	h.add_child(_deck("Pier", PIER_FROM, PIER_TO, [true, true, false, false], Vector3(PIER_FROM.x, 0, 4)))
 	if detail:
 		for p: Vector3 in [Vector3(4.6, 0, -4.4), Vector3(-4.6, 0, -4.4), Vector3(16, 0, 4.4), Vector3(27, DECK_Y, 6.6), Vector3(46, DECK_Y, 5.6)]:
@@ -416,7 +416,8 @@ static func _road(points: Array, width: float) -> MeshInstance3D:
 
 
 ## A timber deck over the void between `from` and `to` (island space): planks, edge beams, piles with braces,
-## rope rails on the sides marked in `rails` [−z, +x, +z, −x], and one collider for the whole floor.
+## rope rails on the sides marked in `rails` [−z, +x, +z, −x] (each with its own collider: a side people walk in
+## by has no rail), and one collider for the whole floor.
 static func _deck(name: String, from: Vector3, to: Vector3, rails: Array, shore: Vector3) -> Node3D:
 	var dk := Node3D.new()
 	dk.name = name
@@ -464,6 +465,7 @@ static func _deck(name: String, from: Vector3, to: Vector3, rails: Array, shore:
 		var yaw := atan2(-(b.z - a.z), b.x - a.x)
 		for y: float in [0.55, 0.95]:
 			k.box(rope, Vector3(a.distance_to(b), 0.05, 0.05), (a + b) * 0.5 + Vector3(0, y, 0), Vector3(0, yaw, 0))
+		Solid.box(dk, Vector3(a.distance_to(b) + 0.14, 1.05, 0.14), (a + b) * 0.5 + Vector3(0, 0.52, 0), yaw)  # a rail you see stops you
 	dk.add_child(k.commit("Deck"))
 	return dk
 

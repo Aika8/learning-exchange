@@ -13,10 +13,11 @@ const VIEWS := {
 	"harbour": [["view-square", Vector3(3, 7, 24), Vector3(-2, 1.5, 0)], ["view-houses", Vector3(-4, 3.2, 3), Vector3(-15, 2.2, 3)],
 		["view-house-close", Vector3(-8.5, 2.4, 1.5), Vector3(-14, 2.2, -2)], ["view-wharf", Vector3(27, 8, 27), Vector3(34, 0.5, 3)],
 		["view-pier", Vector3(52, 5, -3), Vector3(40, 0.5, 4)], ["view-exchange", Vector3(7, 3, -1), Vector3(0, 5, -15)],
-		["view-top", Vector3(12, 62, 6), Vector3(12, 0, 4)]],
+		["view-top", Vector3(12, 62, 6), Vector3(12, 0, 4)], ["view-wharf-gate", Vector3(15, 4.5, 11), Vector3(24, 0.6, 4)]],
 	"silk": [["view-silk", Archipelago.SILK + Vector3(-22, 9, 24), Archipelago.SILK + Vector3(2, 1, -2)],
 		["view-silk-houses", Archipelago.SILK + Vector3(3, 3, 10), Archipelago.SILK + Vector3(14, 2, 2)],
-		["view-silk-pier", Archipelago.SILK + Vector3(-24, 5, 26), Archipelago.SILK + Vector3(-28, 0.5, 14)]],
+		["view-silk-pier", Archipelago.SILK + Vector3(-24, 5, 26), Archipelago.SILK + Vector3(-28, 0.5, 14)],
+		["view-silk-landing", Archipelago.SILK + Vector3(-9, 6, 25), Archipelago.SILK + Vector3(-16, 0.4, 14)]],
 	"hall": [["view-hall", Vector3(0, 3.4, 10.4), Vector3(0, 5, -9)], ["view-hall-side", Vector3(10, 4, 6), Vector3(-6, 2.5, -6)],
 		["view-hall-up", Vector3(0, 1.6, 9), Vector3(0, 12, -4)]],
 }
@@ -192,6 +193,8 @@ static func run(tree: SceneTree) -> void:
 	DirAccess.make_dir_recursive_absolute(dir)
 	var report: Dictionary = {}
 	for place: String in PLACES:
+		if not Session.arg("only").is_empty() and Session.arg("only") != place:
+			continue
 		Game.island = "silk" if place == "silk" else "harbour"
 		Session.spawn = "start"
 		tree.change_scene_to_file("res://scenes/%s.tscn" % ("hall" if place == "hall" else "harbour"))
@@ -201,6 +204,18 @@ static func run(tree: SceneTree) -> void:
 		var probe := WorldProbe.new(scene, areas(place))
 		await probe.run_all()
 		spots(probe, place)
+		if place != "hall":  # nobody walks in the hall: the camera orbits there
+			var spawns: Array[Vector3] = []
+			for sp: String in ["start", "pier", "exchange"]:
+				spawns.append(Archipelago.spawn_point(place, sp)[0])
+			var t0 := Time.get_ticks_msec()
+			probe.scan_routes(spawns)
+			probe.fuzz(spawns, 40000)
+			probe.scan_villagers()
+			print("audit: %s routes: cells=%d main=%d unreachable=%d villager routes=%d (%d s)" % [place, probe.nodes.size(), probe.main.size(), probe.unreachable, probe.routes, (Time.get_ticks_msec() - t0) / 1000])
+		if OS.has_environment("PROBE_DEBUG"):
+			for i in probe.issues:
+				print("issue ", i["kind"], " ", (i["at"] as Vector3).snapped(Vector3.ONE * 0.01), " ", i["what"])
 		probe.done()
 		var clusters := probe.clusters()
 		var counts: Dictionary = {}
