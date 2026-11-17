@@ -129,8 +129,9 @@ static func sky(root: Node3D, hall: bool = false) -> WorldEnvironment:
 
 	var sun := DirectionalLight3D.new()
 	sun.name = "Sun"
-	sun.light_color = Color("ffe1b0")
-	sun.light_energy = 1.35 if not hall else 0.0
+	var look := IslandStyle.of(Game.island)  # each island has its own light, a little (ADR-0025)
+	sun.light_color = look["sun"]
+	sun.light_energy = look["sun_energy"] if not hall else 0.0
 	sun.rotation_degrees = Vector3(-34, -128, 0)
 	sun.shadow_enabled = not hall
 	sun.shadow_blur = 1.0
@@ -612,5 +613,6 @@ static func weather(root: Node3D, storm: float, night: float = 0.0) -> void:
 	env.adjustment_brightness = lerpf(1.0, 0.75, storm) * lerpf(1.0, 0.45, night)
 	if env.sky and env.sky.sky_material is PanoramaSkyMaterial:
 		(env.sky.sky_material as PanoramaSkyMaterial).energy_multiplier = lerpf(0.85, 0.35, storm) * lerpf(1.0, 0.25, night)
-	sun.light_energy = lerpf(1.35, 0.25, storm) * lerpf(1.0, 0.12, night)
-	sun.light_color = Color("ffe1b0").lerp(Color("9fb4d8"), night)
+	var look := IslandStyle.of(Game.island)
+	sun.light_energy = lerpf(look["sun_energy"], 0.25, storm) * lerpf(1.0, 0.12, night)
+	sun.light_color = (look["sun"] as Color).lerp(Color("9fb4d8"), night)

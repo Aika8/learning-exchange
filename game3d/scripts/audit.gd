@@ -188,6 +188,35 @@ static func gait(tree: SceneTree) -> void:
 	tree.quit()
 
 
+## `--attune=<dir>`: the captain lands on Silk Reach still drawn the Spark Harbour way and the island's wind
+## restyles them (ADR-0025). Saves a frame every 0.1 s as frame-NN.png; add `--ink=2` for the engraving.
+static func attune(tree: SceneTree) -> void:
+	var dir := Session.arg("attune")
+	DirAccess.make_dir_recursive_absolute(dir)
+	Game.island = "silk"
+	Game.attuned = "harbour"
+	tree.change_scene_to_file("res://scenes/harbour.tscn")
+	await Session.wait(2.0)
+	var scene := tree.current_scene as Node3D
+	var captain: Captain = scene.get("_captain")
+	captain.body.rotation.y = atan2(3.6, 0.7)  # facing the camera, which looks along the pier
+	var cam := Camera3D.new()
+	cam.fov = 40
+	scene.add_child(cam)
+	cam.position = captain.global_position + Vector3(3.6, 1.5, 0.7)
+	cam.look_at(captain.global_position + Vector3(0, 1.05, 0))
+	cam.current = true
+	for c in scene.find_children("*", "CanvasLayer", true, false):
+		(c as CanvasLayer).visible = false
+	await _await_drawn(tree)
+	Session.attune(captain, "harbour", "silk", 2.0, 0.5)
+	for i in 32:
+		await Session.wait(0.1)
+		scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%02d.png" % i))
+	print("attune: attuned=", Game.attuned, " style=", Session.style_id)
+	tree.quit()
+
+
 static func run(tree: SceneTree) -> void:
 	var dir := Session.arg("audit")
 	DirAccess.make_dir_recursive_absolute(dir)
