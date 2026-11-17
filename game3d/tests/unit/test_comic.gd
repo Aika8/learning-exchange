@@ -18,23 +18,24 @@ func test_the_talk_data_is_whole() -> void:
 	var words := Locale.load_catalogue(ComicScript.WORDS)
 	assert_has(words, "ru")
 	assert_has(words, "en")
-	assert_eq(s.problems(words), [] as Array[String])
+	assert_eq(s.problems(ComicScript.catalogues()), [] as Array[String])
 	for role: String in ["sailor", "sailor2", "sailor3", "child", "townsman", "trader"]:
 		assert_true(s.has("stroll_" + role), "every stroller has something to say: " + role)
 
 
 func test_slots_are_the_same_in_every_language() -> void:
-	var words := Locale.load_catalogue(ComicScript.WORDS)
 	var re := RegEx.create_from_string("\\{[a-z]+\\}")
-	for key: StringName in (words["ru"] as Translation).get_message_list():
-		var found: Array = []
-		for locale: String in words:
-			var slots: Array = []
-			for m in re.search_all(str((words[locale] as Translation).get_message(key))):
-				slots.append(m.get_string())
-			slots.sort()
-			found.append(slots)
-		assert_eq(found[0], found[1], "slots differ in " + key)
+	for words: Dictionary in ComicScript.catalogues():
+		for key: StringName in (words["ru"] as Translation).get_message_list():
+			var found: Array = []
+			for locale: String in words:
+				var slots: Array = []
+				for m in re.search_all(str((words[locale] as Translation).get_message(key))):
+					slots.append(m.get_string())
+				slots.sort()
+				found.append(slots)
+			for other: Array in found:
+				assert_eq(other, found[0], "slots differ in " + key)
 
 
 func test_bad_data_is_reported() -> void:
@@ -45,9 +46,9 @@ func test_bad_data_is_reported() -> void:
 		{"shot": "sideways", "cast": ["a", "b"], "lines": [["c", "K1"], ["a", "K2"], ["a", "K3"]]}, {"shot": "close", "cast": ["a"]}]}]}}
 	var long := Translation.new()
 	long.add_message("K1", "x".repeat(ComicScript.MAX_CHARS + 1))
-	var found := "\n".join(s.problems({"ru": long}))
+	var found := "\n".join(s.problems([{"ru": long}]))
 	for part: String in ["unknown backdrop", "unknown shot", "b is not in the cast", "speaker c", "more than 2 balloons", "silent panel",
-			"K2: no ru text", "K1: ru text is"]:
+			"K2: no text", "K1: ru text is"]:
 		assert_string_contains(found, part)
 
 

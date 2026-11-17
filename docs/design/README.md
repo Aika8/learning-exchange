@@ -5,8 +5,14 @@ Read this before changing the look of anything in `game3d/` (people, buildings, 
 Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/world-bible.md`.
 
 > Islands: each island is drawn in a technique of its own — Spark Harbour in pen and ink (the style below), Silk
-> Reach as printed silk. The technique and its colours are a row in `game3d/scripts/island_style.gd` (ADR-0025,
-> ADR-0026); shapes, people and the sheets are the same everywhere. Pictures: `docs/demo/G3D-looks.md`.
+> Reach as printed silk, Amber Cliff as a French-Belgian album page (one even line, flat colour, a watercolour sky).
+> The technique and its colours are a row in `game3d/scripts/island_style.gd` (ADR-0025, 0026, 0028); people and
+> the sheets are the same everywhere. Pictures: `docs/demo/G3D-looks.md`, `docs/demo/G3D-amber.md`.
+>
+> Amber Cliff has **no concept sheet yet**: its town houses (pale plaster, shutters, slate mansard roofs, striped
+> awnings), lighthouse and layout were built from the brief in ADR-0028, and its people wear the harbour costumes.
+> When sheets arrive, rebuild to match. It is also the one place where **signs carry words** (French): reading them
+> is the point of the island.
 
 ## Art style (ADR-0024)
 Stylised low-poly: flat colours of the palette, meshes built in code, soft light; people read by **silhouette** (hat,

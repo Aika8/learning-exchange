@@ -38,3 +38,4 @@ superseding ADR explaining why reality differed.
 | [0025](0025-game3d-island-style-variants-and-attunement.md) | game3d: each island a slight variant of the ink style (`IslandStyle`); the island's wind restyles the captain on arrival | Value objects in a table | Accepted; bounds amended by 0026 |
 | [0026](0026-game3d-island-techniques.md) | game3d: every island drawn in its own technique (ink, dyed silk, …), chosen by its `IslandStyle` row | Strategy chosen by data | Proposed |
 | [0027](0027-game3d-talk-as-comic-pages.md) | game3d: talking opens a comic page — frames, portraits of the game's own people, balloons; pages and words are data | Data-driven script, Iterator, Builder | Proposed |
+| [0028](0028-game3d-amber-cliff-speaks-french.md) | game3d: Amber Cliff — a French-speaking island (catalogue per island, gloss on T), drawn in a ligne-claire technique | Message catalogue per island, Strategy by data | Proposed |

@@ -1,6 +1,15 @@
 # Status
 
-Updated: 2026-11-17, G3D walk fixes. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`.
+Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
+`docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
+
+## G3D Amber Cliff (ADR-0028, Proposed) — `docs/demo/G3D-amber.md`
+- A third, bigger island, «La Falaise d'Ambre»: a French town (quay, square, bank, bureau de change, bakery, café,
+  bookshop, lighthouse). Signs, prompts and talks are French in either game language; hold T for the gloss.
+  Drawn as a ligne-claire album page. Reached by the packet boat from the wharf. Each place teaches one finance idea.
+- Audit 0 findings on the island, GUT 100, 117–119 fps average at 1080p (1 %-low 59–97 across the islands).
+- Open: the French needs a reader; no concept sheets for the town and its people; the bible does not yet say that
+  Amber Cliff has its own language.
 
 ## G3D talk (ADR-0027, Proposed) — `docs/demo/G3D-talk.md`
 - Talking opens a comic page: frames with the game's own people posed in them, balloons with tails, captions.

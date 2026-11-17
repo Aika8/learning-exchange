@@ -2,6 +2,8 @@
 // flat colours; mode 2 = an engraving — paper and ink only, hatching by brightness, plus the outline.
 // Each island is drawn in its own technique (ADR-0026): 0 = ink (the above), 1 = dye — printed silk: colours
 // sorted into four dye baths, a light resist line, a weave over everything.
+// 2 = claire — the French-Belgian album page (ADR-0028): one even black line, flat colour with a single soft shade,
+// a watercolour wash over the sky and far things, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
 // the captain above the height `wave` — the captain still drawn the way the island they came from is drawn.
 shader_type spatial;
@@ -39,6 +41,17 @@ uniform float column_radius = 0.0;  // 0 = one style only
 uniform float wave = 0.0;  // world height the new style has reached
 uniform vec3 glow : source_color = vec3(1.0, 0.8, 0.4);
 uniform float glow_amount = 0.0;
+
+float hash(vec2 p) {
+	return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453);
+}
+
+float blot(vec2 p) {  // soft value noise: the uneven pools of a watercolour wash
+	vec2 i = floor(p);
+	vec2 f = fract(p);
+	f = f * f * (3.0 - 2.0 * f);
+	return mix(mix(hash(i), hash(i + vec2(1.0, 0.0)), f.x), mix(hash(i + vec2(0.0, 1.0)), hash(i + vec2(1.0, 1.0)), f.x), f.y);
+}
 
 void vertex() {
 	POSITION = vec4(VERTEX.xy, 1.0, 1.0);
@@ -111,6 +124,32 @@ void fragment() {
 		vec2 thread = FRAGCOORD.xy / (2.2 * s);
 		result *= 0.95 + 0.05 * sin(thread.x * 3.14159) * sin(thread.y * 3.14159);
 		result = mix(result, line, edge * 0.95);
+	} else if (tech == 2) {
+		vec3 shade_tint = mix(ramp0, ramp0_from, old);
+		vec3 horizon = mix(ramp2, ramp2_from, old);
+		vec3 zenith = mix(ramp3, ramp3_from, old);
+		float far = smoothstep(500.0, 900.0, d);
+		// flat colour: brightness in a few even steps, and the shade lifted and tinted instead of darkened
+		float level = (floor(lum * 5.0) + 0.6) / 5.0;
+		vec3 flat_colour = col * clamp(pow(level / max(lum, 0.05), 2.2), 0.6, 1.6);
+		float lit = smoothstep(0.46, 0.52, lum);
+		flat_colour = mix(mix(flat_colour * 1.25, shade_tint * (0.2 + 0.8 * lum), 0.4), flat_colour, lit);
+		flat_colour = mix(vec3(dot(flat_colour, vec3(0.333))), flat_colour, 1.15);  // a little more colour, as in print
+		// the sky and what is far: a wash, darker at the top, pooled unevenly
+		vec2 q = FRAGCOORD.xy / (90.0 * s);
+		float pool = blot(q) * 0.6 + blot(q * 2.3 + 7.0) * 0.4;
+		vec3 wash = mix(horizon, zenith, clamp(1.0 - SCREEN_UV.y * 1.25 + (pool - 0.5) * 0.35, 0.0, 1.0));
+		wash *= 0.93 + 0.1 * pool;
+		float haze = smoothstep(120.0, 500.0, d) * 0.55;
+		result = mix(mix(flat_colour, wash, haze), wash, far);
+		float grain = hash(floor(FRAGCOORD.xy / max(s, 1.0)));
+		if (mode == 2) {
+			// the album in black and white: paper, the line, fine one-way strokes in the shade
+			float stroke = step(fract((FRAGCOORD.x + FRAGCOORD.y) / (5.0 * s)), 0.3) * (1.0 - lit) * (1.0 - far);
+			result = mix(sheet_colour, line, stroke * 0.85);
+		}
+		result *= 0.97 + 0.05 * grain;
+		result = mix(result, line, edge);
 	} else if (mode == 2) {
 		float turn = mix(hatch_turn, hatch_turn_from, old);
 		float gap = mix(hatch_gap, hatch_gap_from, old) * s;

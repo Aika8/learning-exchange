@@ -74,7 +74,7 @@ static func build(panel: Dictionary, cast: Dictionary, backdrop: Dictionary, siz
 		"close":
 			cam.fov = 30
 			cam.position = mid + Vector3(0.35, 0.02, maxf(2.0, 0.42 / (tan(deg_to_rad(15.0)) * aspect)))
-			cam.look_at_from_position(cam.position, mid + Vector3(0, 0.1, 0))
+			cam.look_at_from_position(cam.position, mid + Vector3(0, -0.06, 0))
 		"low":
 			cam.fov = 42
 			cam.position = Vector3(0.7, 0.5, maxf(2.1, 0.75 / (tan(deg_to_rad(21.0)) * aspect)))

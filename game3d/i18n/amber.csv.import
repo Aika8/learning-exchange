@@ -1,0 +1,19 @@
+[remap]
+
+importer="csv_translation"
+type="Translation"
+uid="uid://bb0br2w6codp"
+
+[deps]
+
+files=["res://i18n/amber.fr.translation", "res://i18n/amber.ru.translation", "res://i18n/amber.en.translation"]
+
+source_file="res://i18n/amber.csv"
+dest_files=["res://i18n/amber.fr.translation", "res://i18n/amber.ru.translation", "res://i18n/amber.en.translation"]
+
+[params]
+
+compress=1
+delimiter=0
+unescape_keys=false
+unescape_translations=true

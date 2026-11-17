@@ -30,6 +30,18 @@ func has(id: String) -> bool:
 	return talks.has(id)
 
 
+## The locale talk `id` is spoken in ("" = the game's language).
+func tongue(id: String) -> String:
+	return str(talks.get(id, {}).get("speak", ""))
+
+
+## The catalogues the talks take their words from.
+static func catalogues() -> Array:
+	var out: Array = [Locale.load_catalogue(WORDS)]
+	out.append_array(IslandTongue.catalogues().values())
+	return out
+
+
 func reader(id: String) -> ComicReader:
 	return ComicReader.new(talks[id])
 
@@ -49,8 +61,9 @@ func keys() -> PackedStringArray:
 	return out
 
 
-## What is wrong with the data; `words` is locale → Translation (every key must have text in each).
-func problems(words: Dictionary) -> Array[String]:
+## What is wrong with the data. `catalogues`: each a {locale → Translation}; a key must have text in every locale
+## of the catalogue it lives in, and a talk spoken in an island's tongue needs that tongue's column.
+func problems(catalogues: Array) -> Array[String]:
 	var out: Array[String] = []
 	if talks.is_empty():
 		out.append("no talks")
@@ -85,9 +98,29 @@ func problems(words: Dictionary) -> Array[String]:
 				for line: Array in lines:
 					if not cast.has(line[0]):
 						out.append("%s: speaker %s is not in the cast" % [id, line[0]])
+	var spoken: Dictionary = {}  # key → the tongue of the talk it is said in
+	for id: String in talks:
+		var tongue := str(talks[id].get("speak", ""))
+		for page: Dictionary in talks[id].get("pages", []):
+			for panel: Dictionary in page.get("panels", []):
+				for line: Array in panel.get("lines", []):
+					spoken[str(line[1])] = tongue
+				if panel.has("caption"):
+					spoken[str(panel["caption"])] = tongue
 	for key in keys():
-		for locale: String in words:
-			var text := str((words[locale] as Translation).get_message(key))
+		var home: Dictionary = {}
+		for cat: Dictionary in catalogues:
+			for locale: String in cat:
+				if not str((cat[locale] as Translation).get_message(key)).is_empty():
+					home = cat
+		if home.is_empty():
+			out.append("%s: no text" % key)
+			continue
+		var tongue := str(spoken.get(key, ""))
+		if not tongue.is_empty() and not home.has(tongue):
+			out.append("%s: no %s text" % [key, tongue])
+		for locale: String in home:
+			var text := str((home[locale] as Translation).get_message(key))
 			if text.is_empty():
 				out.append("%s: no %s text" % [key, locale])
 			elif text.length() > MAX_CHARS:

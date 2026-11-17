@@ -20,7 +20,7 @@ const LAYOUTS := {
 }
 
 var script_data: ComicScript
-var speak := ""  ## locale the people speak here ("" = the game's language); the game's language is then the gloss
+var speak := ""  ## the locale this talk is spoken in ("" = the game's language); the game's language is then the gloss
 var id := ""
 var _reader: ComicReader
 var _vars: Dictionary = {}
@@ -29,7 +29,6 @@ var _frames: Array[ComicFrame] = []
 var _hint: Label
 var _count: Label
 var _page := -1
-var _spoken: Dictionary = {}  ## locale → Translation, for islands that speak their own language
 
 
 func _init() -> void:
@@ -73,6 +72,7 @@ func open(talk_id: String, vars: Dictionary = {}) -> bool:
 	if not script_data.has(talk_id):
 		return false
 	id = talk_id
+	speak = script_data.tongue(talk_id)
 	_vars = vars
 	_reader = script_data.reader(talk_id)
 	_page = -1
@@ -96,16 +96,10 @@ func step() -> void:
 		_paint()
 
 
-## The words of `key` as they are spoken on this island, with the slots filled.
+## The words of `key` as they are spoken in this talk, with the slots filled.
 func say(key: String) -> String:
-	var text := tr(key)
-	if not speak.is_empty():
-		if not _spoken.has(speak):
-			_spoken[speak] = TranslationServer.get_translation_object(speak)
-		var t: Translation = _spoken[speak]
-		if t != null and not str(t.get_message(key)).is_empty():
-			text = str(t.get_message(key))
-	return text.format(_vars)
+	var text := IslandTongue.say(key, speak)
+	return (text if not text.is_empty() else tr(key)).format(_vars)
 
 
 ## The same words in the game's language, when the island speaks another one.

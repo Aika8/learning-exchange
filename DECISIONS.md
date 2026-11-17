@@ -383,3 +383,16 @@ Build and CI
 - A stroller stops while talked to. A stroller at arm's length (2.4 m) wins over the spot they walk through.
 - `--demo`, the audit and other tool runs skip pages; the old one-line box stays for refusals and notes.
 - Hold T on a page: the gloss in the game's language, for islands that speak their own (ADR-0028).
+
+## G3D Amber Cliff (ADR-0028)
+- The French island is Amber Cliff from the world bible (the reserve-currency island), not a new one.
+- French stays out of the game's language switch; `IslandTongue` picks the `fr` column by island. Only `ru` and `en`
+  of `amber.csv` are given to Godot's translation server.
+- T is "hold", not a toggle: let go and it is French again. On a comic page T glosses every balloon.
+- The sign read aloud with T is the nearest one within 16 m.
+- The packet boat is a fade between the two piers; it does not touch the day loop (`GameFlow`) or the clock.
+- The town is built only while the captain is on the island; from elsewhere it is rock, lighthouse and plain blocks.
+- `claire`: brightness in five even steps, shade (below 0.46–0.52) lifted and tinted violet instead of darkened,
+  haze into the sky wash from 120 m. French spacing before ? ! : ; uses a no-break space.
+- Islanders reuse harbour costume roles with other coat colours (no sheet for them yet).
+- The world audit now counts each building of Amber Cliff as its own object (`WorldProbe._units`).
