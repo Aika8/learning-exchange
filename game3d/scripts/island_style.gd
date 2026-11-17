@@ -6,7 +6,7 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2}
+const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
 ## Spark Harbour is the look of ADR-0024 as approved. Every other island has a technique of its own.
@@ -49,6 +49,19 @@ const TABLE := {
 		"sun": Color("fff3d6"),
 		"sun_energy": 1.5,
 		"accent": Color("ffb347"),
+	},
+	"shorts": {
+		"technique": "noir",  # black, white and one red; fog and slanted rain (sheets 35–40; ADR-0030)
+		"ramp": [Color("000000"), Color("000000"), Color("c4302b"), Color("000000")],  # —, —, the signal red, —
+		"ink": Color("0d0d10"),
+		"width": 1.4,
+		"tint": Color(1.0, 1.0, 1.0),
+		"paper": Color("f4efe6"),
+		"hatch_turn": 0.0,
+		"hatch_gap": 9.0,
+		"sun": Color("ffffff"),  # hard light
+		"sun_energy": 1.7,
+		"accent": Color("e0453f"),
 	},
 }
 

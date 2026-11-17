@@ -22,7 +22,11 @@
     "fleuriste": {"name": "AMB_WHO_FLEURISTE", "who": "trader", "role": "trader", "coat": "b05a8a", "look": {"skin": "f1c9a5", "hair": "a8322a", "hairstyle": "long", "hat": "brim", "hat_colour": "e0c070", "outfit": "apron", "coat": "b05a8a"}},
     "enfant": {"name": "AMB_WHO_ENFANT", "who": "child", "role": "child", "coat": "d9a441", "look": {"kind": "child", "skin": "f1c9a5", "hair": "3a2a22", "hat": "cap", "hat_colour": "d9a441", "coat": "f3ead6"}},
     "monsieur": {"name": "AMB_WHO_MONSIEUR", "who": "oldman", "role": "townsman", "coat": "6a5a4a", "look": {"skin": "e8c3a0", "hair": "e6e2d8", "hat": "brim", "hat_colour": "3a3a44", "glasses": true, "coat": "6a5a4a"}},
-    "etudiante": {"name": "AMB_WHO_ETUDIANTE", "who": "trader", "role": "olva", "coat": "3a7a8a", "look": {"skin": "e8b98f", "hair": "2a2a3a", "hairstyle": "bun", "glasses": true, "coat": "3a7a8a"}}
+    "etudiante": {"name": "AMB_WHO_ETUDIANTE", "who": "trader", "role": "olva", "coat": "3a7a8a", "look": {"skin": "e8b98f", "hair": "2a2a3a", "hairstyle": "bun", "glasses": true, "coat": "3a7a8a"}},
+    "noir_broker": {"name": "WHO_NOIR_BROKER", "who": "sailor", "role": "noir_broker", "coat": "141417", "face": "noir_broker", "one_face": true},
+    "noir_tramp": {"name": "WHO_NOIR_TRAMP", "who": "oldman", "role": "noir_tramp", "coat": "77746f", "face": "noir_tramp", "one_face": true},
+    "noir_youth": {"name": "WHO_NOIR_YOUTH", "who": "sailor", "role": "noir_youth", "coat": "242428", "face": "noir_youth", "one_face": true},
+    "noir_lady": {"name": "WHO_NOIR_LADY", "who": "trader", "role": "noir_lady", "coat": "141417", "face": "noir_lady", "one_face": true}
   },
   "backdrops": {
     "wharf": {"sky": "f3d7a8", "ground": "8a5a3c"},
@@ -30,7 +34,8 @@
     "silk": {"sky": "5f7fb0", "ground": "c9b2e8"},
     "dusk": {"sky": "6a5a8a", "ground": "4f7f52"},
     "amber": {"sky": "8fd0d8", "ground": "e3c58a"},
-    "amber_in": {"sky": "f1dcae", "ground": "9a6a4a"}
+    "amber_in": {"sky": "f1dcae", "ground": "9a6a4a"},
+    "noir": {"sky": "8a8a8a", "ground": "1d1c20"}
   },
   "talks": {
     "mara_first": {"backdrop": "wharf", "pages": [
@@ -199,6 +204,35 @@
       {"panels": [
         {"shot": "two", "cast": ["etudiante", "amb_captain"], "lines": [["etudiante", "AMB_ETUDIANTE_1", "happy"], ["amb_captain", "AMB_ETUDIANTE_2", "neutral"]]},
         {"shot": "close", "cast": ["etudiante"], "lines": [["etudiante", "AMB_ETUDIANTE_3", "sly"]]}
+      ]}
+    ]},
+    "shorts_exchange": {"backdrop": "noir", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["noir_broker", "captain"], "caption": "TALK_SHORTS_EX_C", "mood": {"noir_broker": "neutral", "captain": "neutral"}},
+        {"shot": "two", "cast": ["noir_broker", "captain"], "lines": [["noir_broker", "TALK_SHORTS_EX_1", "neutral"], ["captain", "TALK_SHORTS_EX_2", "surprised"]]},
+        {"shot": "close", "cast": ["noir_broker"], "lines": [["noir_broker", "TALK_SHORTS_EX_3", "neutral"]]}
+      ]},
+      {"panels": [
+        {"shot": "close", "cast": ["captain"], "lines": [["captain", "TALK_SHORTS_EX_4", "worried"]]},
+        {"shot": "low", "cast": ["noir_broker"], "lines": [["noir_broker", "TALK_SHORTS_EX_5", "neutral"]]}
+      ]}
+    ]},
+    "shorts_tramp": {"backdrop": "noir", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["noir_tramp", "captain"], "lines": [["noir_tramp", "TALK_SHORTS_TRAMP_1", "neutral"], ["captain", "TALK_SHORTS_TRAMP_2", "surprised"]]},
+        {"shot": "close", "cast": ["noir_tramp"], "lines": [["noir_tramp", "TALK_SHORTS_TRAMP_3", "neutral"]]}
+      ]}
+    ]},
+    "shorts_youth": {"backdrop": "noir", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["noir_youth", "captain"], "lines": [["noir_youth", "TALK_SHORTS_YOUTH_1", "neutral"], ["captain", "TALK_SHORTS_YOUTH_2", "surprised"]]},
+        {"shot": "close", "cast": ["noir_youth"], "lines": [["noir_youth", "TALK_SHORTS_YOUTH_3", "neutral"]]}
+      ]}
+    ]},
+    "shorts_lady": {"backdrop": "noir", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["noir_lady", "captain"], "lines": [["noir_lady", "TALK_SHORTS_LADY_1", "neutral"], ["captain", "TALK_SHORTS_LADY_2", "worried"]]},
+        {"shot": "close", "cast": ["noir_lady"], "lines": [["noir_lady", "TALK_SHORTS_LADY_3", "neutral"]]}
       ]}
     ]}
   }

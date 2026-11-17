@@ -8,7 +8,7 @@ const WORDS := "res://i18n/talk.csv"
 const SHOTS: Array[String] = ["close", "two", "wide", "low"]
 const EMOTIONS: Array[String] = ["neutral", "happy", "surprised", "sly", "worried", "angry"]  ## the faces of the expression sheets
 const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "merchant", "chronicler", "keeper", "sailor", "sailor2", "child", "townsman",
-	"banquiere", "boulangere", "garcon", "libraire", "gardienne"]  ## heroes who have a sheet
+	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady"]  ## heroes who have a sheet
 const MAX_PANELS := 4
 const MAX_LINES := 2
 const MAX_CHARS := 150  ## a balloon longer than this covers the picture

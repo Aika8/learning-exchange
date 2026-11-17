@@ -7,7 +7,9 @@ extends RefCounted
 const DIR := "res://art/portraits"
 const EMOTIONS: Array[String] = ["neutral", "happy", "surprised", "sly", "worried", "angry"]
 const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "merchant", "chronicler", "keeper", "sailor", "sailor2", "child", "townsman",
-	"banquiere", "boulangere", "garcon", "libraire", "gardienne"]  ## heroes with a sheet
+	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady"]  ## heroes with a sheet
+## Heroes drawn once, with no expression sheet yet: their one picture stands for every emotion.
+const ONE_FACE: Array[String] = ["noir_broker", "noir_tramp", "noir_youth", "noir_lady"]
 const ASPECT := 0.55  ## width / height of a portrait when nothing better is known (the stand-in)
 
 static var _cache: Dictionary = {}
@@ -23,6 +25,8 @@ static func path(face: String, emotion: String) -> String:
 
 ## The portrait of `face` feeling `emotion`; null when there is no such picture.
 static func texture(face: String, emotion: String) -> Texture2D:
+	if face in ONE_FACE:
+		emotion = "neutral"
 	var key := face + "/" + emotion
 	if not _cache.has(key):
 		var img := Image.new()

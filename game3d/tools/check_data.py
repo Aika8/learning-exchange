@@ -72,7 +72,8 @@ if talks_path.is_file():
                 if not text.strip():
                     problems.append(f"{key}: no {lang} text")
     for face in sorted({c["face"] for c in data["cast"].values() if c.get("face")}):
-        for emotion in EMOTIONS:
+        one = any(c.get("face") == face and c.get("one_face") for c in data["cast"].values())
+        for emotion in (["neutral"] if one else EMOTIONS):
             rel = f"art/portraits/{face}_{emotion}.jpg"
             portraits.append(rel)
             if not (GAME / rel).is_file():

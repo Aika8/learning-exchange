@@ -16,7 +16,9 @@ const HARBOUR_SPOTS := {
 	"garden": [Vector3(-14, 0, 12), "PROMPT_GARDEN", 4.0],
 	"fog": [Vector3(15, 0, -4), "PROMPT_FOG", 3.2],
 	"ferry": [FERRY_POST + Vector3(0, 0, 1.3), "PROMPT_FERRY", 2.4],
+	"ferry_shorts": [SHORTS_POST + Vector3(0, 0, 1.3), "PROMPT_FERRY_SHORTS", 2.0],
 }
+const SHORTS_POST := Vector3(28.4, Archipelago.DECK_Y, -3.9)  ## the signpost of the packet boat to the short sellers' island
 const FERRY_POST := Vector3(33.0, Archipelago.DECK_Y, -3.9)  ## the signpost of the packet boat to Amber Cliff
 const SILK_POST := Archipelago.SILK + Vector3(-12, 0, 8)
 const SILK_SPOTS := {
@@ -63,6 +65,16 @@ func _amber() -> bool:
 	return Game.island == AmberCliff.ID
 
 
+func _shorts() -> bool:
+	return Game.island == ShortIsle.ID
+
+
+## The short sellers' island (ADR-0030): a place and a style for now. id → [position, prompt key, radius].
+static func shorts_spots() -> Dictionary:
+	return {"ship": [ShortIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0],
+		"exchange": [ShortIsle.door()[1], "PROMPT_FALLING_EXCHANGE", 3.0]}
+
+
 ## Amber Cliff (ADR-0028): each keeper teaches one idea, in French. id → [position, prompt key, radius].
 static func amber_spots() -> Dictionary:
 	var out := {"ship": [AmberCliff.PIER_FROM + Vector3(6.0, 0, 2.4), "AMB_PROMPT_SHIP", 5.0],
@@ -75,6 +87,8 @@ static func amber_spots() -> Dictionary:
 func _spots() -> Dictionary:
 	if _amber():
 		return amber_spots()
+	if _shorts():
+		return shorts_spots()
 	return SILK_SPOTS if _silk() else HARBOUR_SPOTS
 
 
@@ -95,6 +109,8 @@ func _ready() -> void:
 	ship.position = (Archipelago.SILK_DOCK + Vector3(-4, 1.2, 4)) if _silk() else Archipelago.PIER_END + Vector3(0, 1.2, 5.5)  # the wind vane clears the heads of people on the pier
 	if _amber():
 		ship.position = AmberCliff.DOCK + Vector3(0, 1.2, 0)
+	if _shorts():
+		ship.position = ShortIsle.DOCK + Vector3(0, 1.2, 0)
 	ship.rotation.y = PI / 2
 	add_child(ship)
 	_captain = Captain.new()
@@ -129,6 +145,9 @@ func _dress() -> void:
 	if _amber():
 		_dress_amber()
 		return
+	if _shorts():
+		_dress_shorts()
+		return
 	if _silk():
 		var post_y := Archipelago.silk_ground(SILK_POST - Archipelago.SILK)
 		var keeper := _npc("trader", Color("9a6ab0"), SILK_POST + Vector3(0, post_y, -1.6), 0.0)
@@ -148,6 +167,17 @@ func _dress() -> void:
 	post.add_child(Proc.box(Vector3(2.3, 0.5, 0.08), Color("2b4f8c"), Vector3(0, 2.4, 0)))
 	post.add_child(AmberCliff.word_sign("AMB_SIGN_FERRY", Vector3(0, 2.4, 0.05), 0.0, 40, AmberCliff.TRIM))
 	Solid.post(post, 0.1, 2.6, Vector3.ZERO)
+	var down := Node3D.new()  # …and the one to the short sellers' island: a red board with an arrow that points down
+	down.name = "ShortsPost"
+	down.position = SHORTS_POST
+	add_child(down)
+	down.add_child(Proc.box(Vector3(0.14, 2.6, 0.14), Proc.TIMBER_DARK, Vector3(0, 1.3, 0)))
+	down.add_child(Proc.box(Vector3(1.5, 0.6, 0.08), ShortIsle.RED, Vector3(0, 2.35, 0)))
+	down.add_child(Proc.box(Vector3(0.1, 0.3, 0.1), Color("f4efe6"), Vector3(0, 2.42, 0.05)))
+	var tip := Proc.box(Vector3(0.24, 0.24, 0.1), Color("f4efe6"), Vector3(0, 2.24, 0.05))
+	tip.rotation.z = PI / 4
+	down.add_child(tip)
+	Solid.post(down, 0.1, 2.6, Vector3.ZERO)
 	var mara := _npc("trader", Color("7a4e8a"), Archipelago.MARA_POS, -PI / 2, "mara")
 	mara.name = "Mara"
 	_npc("trader", Color("5a7a4a"), HARBOUR_SPOTS["olva"][0], PI * 0.8, "olva").name = "Olva"
@@ -225,6 +255,19 @@ func _dress_amber() -> void:
 		_villagers[-1].set_meta("talk", "amber_" + id)
 
 
+## The short sellers' island: the broker by the exchange door, three islanders in the street (sheet 36).
+func _dress_shorts() -> void:
+	var cast := ComicScript.read().cast
+	var at := ShortIsle.door()
+	var b: Dictionary = cast["noir_broker"]
+	_npc(str(b["who"]), Color(str(b["coat"])), at[0], atan2(at[1].x - at[0].x, at[1].z - at[0].z), str(b["role"])).name = "Keeper_exchange"
+	var homes := {"noir_tramp": [Vector3(-20, 0, 0.5), 6.0], "noir_youth": [Vector3(-6, 0, -1), 6.0], "noir_lady": [Vector3(8, 0, 1), 6.0]}
+	for id: String in homes:
+		var c: Dictionary = cast[id]
+		_villager(str(c["who"]), Color(str(c["coat"])), ShortIsle.AT + (homes[id][0] as Vector3), homes[id][1], str(c["role"]))
+		_villagers[-1].set_meta("talk", "shorts_" + id.trim_prefix("noir_"))
+
+
 func _npc(who: String, coat: Color, pos: Vector3, yaw: float, role: String = "") -> Node3D:
 	var n := Proc.figure(coat, Color("2a3550"), who, role)
 	n.position = pos
@@ -259,7 +302,7 @@ func _build_ui() -> void:
 	top.offset_top = 22
 	root.add_child(top)
 	var titles := VBoxContainer.new()
-	var title := Hud.text("SILK_TITLE" if _silk() else "HARBOUR_TITLE", 36, Hud.BRASS)
+	var title := Hud.text("SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
 	title.add_theme_font_override("font", Hud.serif())
 	titles.add_child(title)
 	_title = title
@@ -337,7 +380,7 @@ func _process(delta: float) -> void:
 		blades.rotation.z += delta * 0.5
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
-		ship.position.y = (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y)) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+		ship.position.y = (ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
 	for w in _idlers:
 		w.step(delta, 0.0)
 	if _flying:
@@ -354,7 +397,7 @@ func _process(delta: float) -> void:
 	if _target.is_empty():
 		_dialog.visible = false
 	_report_timer -= delta
-	if _report_timer <= 0.0 and not _silk() and not _amber():
+	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts():
 		_report_timer = 2.0
 		Game.watch_report()
 
@@ -478,11 +521,11 @@ func interact() -> void:
 		var role: String = _talker.role if not _talker.role.is_empty() else {"oldman": "townsman"}.get(_talker.who, _talker.who)
 		await talk(str(_talker.get_meta("talk", "stroll_" + role)))
 		return
-	if _amber():
+	if _amber() or _shorts():
 		if _target == "ship":  # the packet boat home: no trading day is needed for this passage
 			_sail_to("harbour")
 		elif not _target.is_empty():
-			await talk("amber_" + _target)
+			await talk(Game.island + "_" + _target)
 		return
 	match _target:
 		"exchange":
@@ -496,6 +539,8 @@ func interact() -> void:
 				Session.go("voyage")
 		"ferry":
 			_sail_to(AmberCliff.ID)
+		"ferry_shorts":
+			_sail_to(ShortIsle.ID)
 		"mara":
 			await _meet("mara_first")
 			open_plan()

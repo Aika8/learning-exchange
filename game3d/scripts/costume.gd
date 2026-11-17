@@ -111,7 +111,8 @@ func _skeleton() -> Skeleton3D:
 ## Exaggerated builds, so everybody is told apart by outline: [height, girth, head-and-hat size, nose length].
 const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1, 0.11], "sailor2": [0.9, 1.4, 1.18, 0.05], "sailor3": [0.97, 0.78, 1.12, 0.14],
 	"mara": [0.98, 1.08, 1.34, 0.09], "changer": [0.96, 1.32, 1.3, 0.06], "olva": [1.0, 0.8, 1.12, 0.1], "trader": [0.88, 1.45, 1.15, 0.05],
-	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0]}
+	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0],
+	"noir_broker": [1.06, 1.05, 1.12, 0.07], "noir_tramp": [0.93, 1.15, 1.2, 0.12], "noir_youth": [0.98, 0.74, 1.16, 0.06], "noir_lady": [1.0, 0.85, 1.14, 0.06]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
 	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
 	["lowerarm_r", "upperarm_r"], ["hand_r", "lowerarm_r"], ["thigh_l", "pelvis"], ["calf_l", "thigh_l"], ["foot_l", "calf_l"],
@@ -139,8 +140,8 @@ func _body(role: String) -> void:
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
 	if nose > 0.0:  # no face, but a nose: it belongs to the outline
 		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
-	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child"]:  # hair under the hat or kerchief
-		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara"] else Color("5a3a26"), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady"]:  # hair under the hat or kerchief
+		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
 	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
@@ -297,6 +298,67 @@ func _r_trader(tint: Color) -> void:
 
 
 ## Sheet 04, the old man: brown wide hat, long brown coat, green waistcoat, breeches, white stockings, buckled shoes.
+const NOIR_RED := Color("c4302b")  ## the one colour of the short sellers' island (sheet 36)
+const NOIR_BLACK := Color("141417")
+
+
+## Sheet 36, the broker: a black trench coat to the calf, a dark hat pulled low, a white shirt and a red tie.
+func _r_noir_broker(_tint: Color) -> void:
+	var coat := cloth(NOIR_BLACK)
+	_recolour("top", cloth(Color("e8e4dc")))
+	_recolour("bot", cloth(Color("2a2a2e")))
+	_recolour("lea", leather(Color("101012")))
+	_hide("fedora")
+	_breeches(cloth(Color("2a2a2e")), 0.1)
+	_stockings(cloth(Color("2a2a2e")))
+	_open_coat(coat, cloth(Color("26262a")), _p("calf_l").y - 0.06 * k, 38.0, true)
+	_coat_sleeves(coat, cloth(Color("26262a")), cloth(Color("e8e4dc")))
+	_box("spine_03", cloth(NOIR_RED), Vector3(0.05, 0.3, 0.02) * k, _p("spine_03") + Vector3(0, 0.02, 0.19) * k, Vector3(-0.08, 0, 0))
+	_wide_hat(felt(Color("0f0f12")), 0.15, 0.11)
+
+
+## Sheet 36, the old man: a long grey coat gone at the hem, a crushed hat, a red band on the left arm.
+func _r_noir_tramp(_tint: Color) -> void:
+	var coat := cloth(Color("77746f"))
+	_recolour("top", cloth(Color("5c5a56")))
+	_recolour("bot", cloth(Color("4a4844")))
+	_recolour("lea", leather(Color("2a2622")))
+	_hide("fedora")
+	_breeches(cloth(Color("4a4844")), 0.11)
+	_stockings(cloth(Color("4a4844")))
+	_open_coat(coat, cloth(Color("5c5a56")), _p("calf_l").y - 0.02 * k, 58.0, false)
+	_coat_sleeves(coat, cloth(Color("5c5a56")), cloth(Color("8a8782")))
+	_tube("upperarm_l", cloth(NOIR_RED), _p("upperarm_l") + Vector3(0, -0.1, 0) * k, _p("upperarm_l") + Vector3(0, -0.18, 0) * k, 0.07 * k, 0.07 * k)
+	_wide_hat(felt(Color("3a3835")), 0.13, 0.12)
+
+
+## Sheet 36, the pale youth: no hat, a short dark jacket over a red shirt, narrow dark trousers.
+func _r_noir_youth(_tint: Color) -> void:
+	_recolour("top", cloth(NOIR_RED))
+	_recolour("bot", cloth(NOIR_BLACK))
+	_recolour("lea", leather(Color("101012")))
+	_hide("fedora")
+	_breeches(cloth(NOIR_BLACK), 0.085)
+	_stockings(cloth(NOIR_BLACK))
+	_waistcoat(cloth(Color("242428")), 62.0)
+	_shirt_sleeves(cloth(Color("242428")))
+
+
+## Sheet 36, the woman: a belted black coat over a long skirt, a hat with a wide brim, a long red scarf.
+func _r_noir_lady(_tint: Color) -> void:
+	var coat := cloth(NOIR_BLACK)
+	_recolour("top", cloth(NOIR_BLACK))
+	_recolour("bot", cloth(Color("1c1c20")))
+	_recolour("lea", leather(Color("101012")))
+	var hem := _p("foot_l").y + 0.3 * k
+	_long_skirt(cloth(Color("1c1c20")), cloth(Color("2a2a2e")), hem, 0.3, false)
+	_open_coat(coat, cloth(Color("2a2a2e")), hem + 0.1 * k, 30.0, true)
+	_coat_sleeves(coat, cloth(Color("2a2a2e")), cloth(NOIR_BLACK))
+	_shawl(cloth(NOIR_RED))
+	_box("spine_02", cloth(NOIR_RED), Vector3(0.09, 0.55, 0.02) * k, _p("spine_02") + Vector3(0.06, -0.08, 0.2) * k, Vector3(-0.06, 0, 0.05))
+	_wide_hat(felt(Color("0f0f12")), 0.2, 0.09)
+
+
 func _r_townsman(tint: Color) -> void:
 	var coat := cloth(Color("7a4f33").lerp(tint, 0.1))
 	_recolour("top", coat if not built else cloth(Color("5d6b4a")))  # his own bulky jacket is the coat

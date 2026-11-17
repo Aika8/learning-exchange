@@ -74,7 +74,12 @@ func test_the_reader_shows_a_balloon_a_step() -> void:
 func test_every_hero_with_a_sheet_has_every_face() -> void:
 	assert_eq(ComicScript.EMOTIONS, ComicFaces.EMOTIONS)
 	assert_eq(ComicScript.FACES, ComicFaces.FACES)
+	for face: String in ComicFaces.ONE_FACE:
+		assert_true(FileAccess.file_exists(ComicFaces.path(face, "neutral")), face)
+		assert_eq(ComicFaces.texture(face, "angry"), ComicFaces.texture(face, "neutral"), face + " has one face for every emotion")
 	for face: String in ComicFaces.FACES:
+		if face in ComicFaces.ONE_FACE:
+			continue
 		for emotion: String in ComicFaces.EMOTIONS:
 			assert_true(FileAccess.file_exists(ComicFaces.path(face, emotion)), "%s %s" % [face, emotion])
 			assert_not_null(ComicFaces.texture(face, emotion), "%s %s loads" % [face, emotion])

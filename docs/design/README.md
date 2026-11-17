@@ -6,7 +6,8 @@ Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/
 
 > Islands: each island is drawn in a technique of its own, chosen by Aika (ADR-0026, 0029) — Spark Harbour in pen
 > and ink (the style below), Silk Reach as **katazome**, a Japanese stencil-resist print in several blues, ochre and rust (sheet 28; 27 for the motifs), Amber Cliff
-> in **pen and watercolour**, a French travel sketchbook (sheets 29–34). The technique and its colours are a row in
+> in **pen and watercolour**, a French travel sketchbook (sheets 29–34), the short sellers' island as **noir** —
+> black, white and one red (sheets 35–40; ADR-0030). The technique and its colours are a row in
 > `game3d/scripts/island_style.gd`. **The captain is redrawn in the technique of every port** by the island's wind
 > (ADR-0025); a test holds every technique to that. Pictures: `docs/demo/G3D-techniques.md`.
 >
@@ -63,6 +64,12 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `32-amber-lighthouse.jpg` | Amber Cliff, the lighthouse with the keeper's quarters | **not rebuilt**: the game's lighthouse has amber bands and no house | — |
 | `33-amber-props.jpg` | Amber Cliff, props: café table and chairs, flower stand, newspaper kiosk, bicycle, lamp, fountain, carousel, market parasol | **not rebuilt** | — |
 | `34-amber-technique.jpg` | Amber Cliff, **samples of the technique** with its palette: wall, slate roof, foliage, water, sky, shade | what the watercolour shader is tuned by | `shaders/ink.gdshader` (`tech == 2`) |
+| `35-shorts-view.jpg` | The short sellers' island, the establishing view: a tilted slab, leaning towers, red etherite, a pier; **noir** — ink black, paper white, one red `#c4302b` | the island and its technique (ADR-0030) | `scripts/short_isle.gd`, `shaders/ink.gdshader` (`tech == 3`), row `shorts` |
+| `36-shorts-people.jpg` | Its people: the broker in a trench coat, the old man with a red armband, the pale youth, the woman with a red scarf | the four islanders; their busts are also their comic portraits (one face each, no expression sheet yet) | `Costume._r_noir_*`, `game3d/art/portraits/noir_*_neutral.jpg` |
+| `37-shorts-technique.jpg` | Samples of the technique: hard light, deep shade, slanted rain, fog, the signal red, contrast | what the noir shader is tuned by | `shaders/ink.gdshader` (`tech == 3`) |
+| `38-shorts-houses.jpg` | The crooked house kit: skewed plinth and walls, sagging roof, bent chimney, hanging balcony, broken stairs, red doors and windows; small, mansard and tall houses | the island's houses and towers | `ShortIsle.crooked_house` |
+| `39-shorts-exchange.jpg` | The Exchange of Falling Prices: a leaning mill with broken blades outside; inside, crooked beams, a gallery and a great red board | the exchange outside; **the inside is not built** (no trading there yet) | `ShortIsle._exchange` |
+| `40-shorts-props.jpg` | Props: street lamp with a red lantern, umbrella stand, card table, ticker machine, crooked signpost, lopsided scales, black ship's lantern | lamp, signpost, ship's lantern, umbrella stand and ticker are built; the card table and scales are not | `ShortIsle` |
 
 **Dialogue panels (sheets 06–23).** The faces on a page are these drawings, one per emotion, left to right on each
 sheet: neutral, happy, surprised, sly, worried, angry. The emotion is chosen per line in `game3d/data/talks.json`.
