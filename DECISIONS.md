@@ -635,3 +635,6 @@ Build and CI
 - The model test now asserts that `Figurehead`, `WingL`, `WingR`, `Name` and `Carving` are absent on the pinnace.
 - Frame rate in the harbour after the change (1920×1080, `--fps --only=harbour`): the captain 118.0 / 1 % low 64.1;
   the ship views 117.5–118.9 / lows 59.5–74.6.
+- The pinnace's hull (mesh `ship_pinnace_hull`) gets `Wayfarer._hull_after_effect`: a shader with the white bottom
+  below model height 0.6 m toned to `#291c14` × the texture's lightness, roughness 0.9 there (ADR-0036 amendment 3).
+  Harbour fps after it: the captain 117.6 / 1 % low 59.5; ship views 117.2–118.2 / lows 59.5–79.0.

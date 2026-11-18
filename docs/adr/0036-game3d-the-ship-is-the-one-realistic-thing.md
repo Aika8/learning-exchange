@@ -136,3 +136,9 @@ fans of the wing sails, the gilded wind spirit, the gilt name board and the lant
 - The ship built in code (no pinnace downloaded) keeps all of its parts: there they are of one level with the rest.
 - The sheets' name and wing sails wait for a version in the model's quality (PBR textures, real geometry, cloth like
   her own sails); that is a new decision, not a fix.
+
+## Amendment 3, 2026-11-18: the white bottom is toned down to the planking
+The pinnace's hull texture paints her bottom white, as real ships were below the waterline. In the sky, seen from
+below, it read as a flat white slab under the hull. The hull is drawn by `shaders/ship_model_hull.gdshader`: her own
+texture, normals and roughness, with everything below 0.6 m of the model (a soft edge) toned to the planking's dark
+brown, keeping the grain, and matt (the smooth paint mirrored the sky).
