@@ -52,6 +52,9 @@ PLACES = {
     "deco": ("the race island: a banked track round a rock, a streamlined tower, grandstands with flags, red gates, "
              "small racing sky-skiffs, sunburst sky", "art-deco poster: aerodynamic shapes, metal stripes, sun rays",
              ["52-race-view", "53-race-buildings", "58-race-technique"]),
+    "fair": ("the pyramid island: a pastel fairground under a gold-ribbed glass dome — carousel, big wheel, ticket booths, "
+             "a staircase pyramid of booths with a golden pavilion on top, balloons and bunting", "glossy pastel toy, soft "
+             "even light", ["73-pyramid-view", "75-pyramid-rides", "79-pyramid-technique"]),
     "oil": ("the index island, a Dutch Golden Age canal town: stepped brick gables, a canal with an arched bridge, "
             "lindens, the exchange with a clock tower", "soft oil painting light, warm evening",
             ["59-dutch-view", "60-dutch-houses", "62-dutch-canal", "66-dutch-technique"]),
@@ -98,6 +101,16 @@ PEOPLE = {
     "deco_crew": ("the crew member: young, teal cap and teal striped coverall, a pressure gauge and a clipboard", ["56-race-people"]),
     "deco_marshal": ("the marshal: combed fair hair, navy jacket and tie, red-and-white armband, tan breeches, black riding boots, red and yellow flags", ["56-race-people"]),
     "deco_lady": ("the spectator: a blonde woman in a peach cloche hat, peach long coat with navy panels, silk neck scarf, binoculars", ["56-race-people"]),
+    "pyr_host": ("the host: a wooden-toy man with a curled moustache, an iridescent pastel tailcoat, a lilac bow tie, a pastel top hat, a cane", ["76-pyramid-people"]),
+    "pyr_barker": ("the barker: a wooden-toy man in a pink-and-mint striped jacket and a patchwork cap, shouting into a megaphone", ["76-pyramid-people"]),
+    "pyr_happy": ("the lucky ticket holder: a beaming wooden-toy man in a rainbow-striped jacket, fanning a handful of tickets", ["76-pyramid-people"]),
+    "pyr_worried": ("the worried man: a wooden-toy man in a long lilac coat, counting a few coins in his palm", ["76-pyramid-people"]),
+    "pyr_sweeper": ("the sweeper: a sad old wooden-toy woman all in grey, kerchief and apron, with a broom", ["76-pyramid-people"]),
+    "toy_gentleman": ("a rich gentleman as a pastel toy: mint frock coat, butter waistcoat, a tall powder-blue hat", ["50-index-people"]),
+    "toy_lady": ("an elegant lady as a pastel toy: a wide pink gown, a lavender bonnet", ["50-index-people"]),
+    "toy_grandpa": ("a retired man as a pastel toy: powder-blue jacket, flat cap", ["50-index-people"]),
+    "toy_granny": ("a retired woman as a pastel toy: lavender shawl over a mint dress", ["50-index-people"]),
+    "toy_child": ("a child in a pastel sailor suit", ["50-index-people"]),
     "oil_merchant": ("the merchant: greying goatee, black wide-brimmed hat, large white ruff, black doublet and cape, a ledger", ["63-dutch-people"]),
     "oil_lady": ("the young woman: lace cap, wide white lace collar and cuffs, dark velvet bodice, red skirt, a fan", ["63-dutch-people"]),
     "oil_market": ("the market woman: weathered, white cap, olive shawl, grey-green bodice, grey apron and skirt", ["63-dutch-people"]),

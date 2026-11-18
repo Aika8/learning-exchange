@@ -609,3 +609,22 @@ Build and CI
   person) or 25 % / 75 % (two) across and 42 % down: where the prompts place the people.
 - `make check-game3d-data` checks that every picture names an existing talk, page and panel, and every tail a person
   in that panel with both shares in 0…1.
+
+## G3D the pyramid island (ADR-0038)
+- `PyramidIsle` at (−60, 10, 430), between the short sellers' island and Amber Cliff; rock radius 40, walkable
+  disc 31, dome 35 × 24 m. The pier runs in through a door left in the dome's lowest row at −x.
+- The stage is `PyramidIsle.stage(Game.pyramid_stage())`: `--stage=N` on the command line wins (captures), else
+  `Game.visits["pyramid"]`, which `harbour._ready` raises on each landing (not in tool runs). It is not saved
+  between runs, like `Game.met`.
+- `PyramidIsle.look(stage)` is the data each stage changes: crowd, balloons, bare fronts, ride speed, cracks,
+  broken panes, shut booths, dropped tickets. Strangers in the crowd are the kept `toy_*` roles; the five islanders
+  of sheet 76 are `pyr_*` (stage 3 sends the happy ticket holder away, stage 4 the host and the worried man too).
+- Glass: one unshaded transparent mesh, alpha 0.16, no shadow; its depth is not written, so the ink line ignores it.
+  Broken = a third of the panes not built, chosen by a fixed seed.
+- Rides turn in `harbour._process` through the group `pyramid_spin` (meta `spin`, `axis`); the carousel's collider is
+  a round post, so turning it moves nothing the captain walks against.
+- Portraits of the five islanders are cut from sheet 76 as cards (`"card": true`: the sheet has a photo background,
+  no paper to flood).
+- Talks: the host (each newcomer brings two), the barker (a doubled golden ticket, no risk, a trade secret), the happy
+  ticket holder (never took it out), the worried coin counter (the till opens tomorrow), the sweeper (fairs come and
+  go), and a stranger (so many people cannot be wrong). The captain names the sign each time; nobody advises.

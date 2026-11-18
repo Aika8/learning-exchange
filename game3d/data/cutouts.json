@@ -156,5 +156,25 @@
  },
  "vetla": {
   "mouth": 0.5
+ },
+ "pyr_host": {
+  "card": true,
+  "mouth": 0.3
+ },
+ "pyr_barker": {
+  "card": true,
+  "mouth": 0.3
+ },
+ "pyr_happy": {
+  "card": true,
+  "mouth": 0.3
+ },
+ "pyr_worried": {
+  "card": true,
+  "mouth": 0.3
+ },
+ "pyr_sweeper": {
+  "card": true,
+  "mouth": 0.3
  }
 }

@@ -4,7 +4,7 @@
 class_name Audit
 extends RefCounted
 
-const PLACES := ["harbour", "silk", "amber", "shorts", "crypto", "index", "race", "hall"]
+const PLACES := ["harbour", "silk", "amber", "shorts", "crypto", "index", "race", "pyramid", "hall"]
 const SHOTS_PER_KIND := 3
 
 
@@ -54,6 +54,12 @@ const VIEWS := {
 		["view-race-stand", RaceIsle.AT + Vector3(-12, 2.6, -6), RaceIsle.AT + Vector3(2, 4, -24)],
 		["view-race-track", RaceIsle.AT + Vector3(20, 3.0, 20), RaceIsle.AT + Vector3(36, 8, 32)],
 		["view-race-pier", RaceIsle.AT + Vector3(-70, 6, 16), RaceIsle.AT + Vector3(-44, 3, 0)]],
+	"pyramid": [["view-pyramid", PyramidIsle.AT + Vector3(-80, 26, 34), PyramidIsle.AT + Vector3(0, 6, 0)],
+		["view-pyramid-avenue", PyramidIsle.AT + Vector3(-29, 2.4, 0), PyramidIsle.AT + Vector3(6, 6, 0)],
+		["view-pyramid-rides", PyramidIsle.AT + Vector3(-18, 2.6, -2), PyramidIsle.AT + Vector3(0, 6, -14)],
+		["view-pyramid-carousel", PyramidIsle.AT + Vector3(-20, 2.4, 4), PyramidIsle.AT + Vector3(-8, 3, 13)],
+		["view-pyramid-backs", PyramidIsle.AT + Vector3(8, 2.6, 28), PyramidIsle.AT + Vector3(17, 3, 19)],
+		["view-pyramid-pier", PyramidIsle.AT + Vector3(-70, 6, 16), PyramidIsle.AT + Vector3(-36, 3, 0)]],
 	"hall": [["view-hall", Vector3(0, 3.4, 10.4), Vector3(0, 5, -9)], ["view-hall-side", Vector3(10, 4, 6), Vector3(-6, 2.5, -6)],
 		["view-hall-up", Vector3(0, 1.6, 9), Vector3(0, 12, -4)]],
 }
@@ -81,7 +87,7 @@ static func views(tree: SceneTree) -> void:
 ## jumps there (the first second) and settled (the next two). Writes a JSON table; run at 1920x1080.
 static func fps(tree: SceneTree) -> void:
 	var rows: Array = []
-	for place: String in ["harbour", "silk", "amber", "shorts", "crypto", "index", "race"]:
+	for place: String in ["harbour", "silk", "amber", "shorts", "crypto", "index", "race", "pyramid"]:
 		if not Session.arg("only").is_empty() and place != Session.arg("only"):
 			continue
 		Game.island = place
@@ -245,7 +251,7 @@ static func talk(tree: SceneTree) -> void:
 	var scene := tree.current_scene as Node3D
 	var page: ComicPage = scene.call("comic")
 	var sample := {"eps": "1,25", "revenue": "48 000,00", "season": "3", "consensus": "1,10"}
-	var homes := {"amber": ["amber_"], "shorts": ["shorts_"], "crypto": ["crypto_", "bot_"], "index": ["index_"], "race": ["race_"]}
+	var homes := {"amber": ["amber_"], "shorts": ["shorts_"], "crypto": ["crypto_", "bot_"], "index": ["index_"], "race": ["race_"], "pyramid": ["pyramid_"]}
 	for id: String in ComicScript.read().talks:
 		if not Session.arg("only").is_empty() and id != Session.arg("only"):
 			continue
@@ -332,7 +338,7 @@ static func stroll(tree: SceneTree) -> void:
 	var from := centre + Vector3(-19, 1.9, 17)
 	var to := centre + Vector3(-9, 1.9, 9)
 	var look := centre + Vector3(4, 1.6, -4)
-	if place == ShortIsle.ID or place == AmberCliff.ID or place == CryptoIsle.ID or place == IndexIsle.ID or place == RaceIsle.ID:  # these two have a street: walk along it
+	if place == ShortIsle.ID or place == AmberCliff.ID or place == CryptoIsle.ID or place == IndexIsle.ID or place == RaceIsle.ID or place == PyramidIsle.ID:  # these two have a street: walk along it
 		from = centre + Vector3(-22, 1.9, 0.8)
 		to = centre + Vector3(-10, 1.9, 0.4)
 		look = centre + Vector3(21, 5, 0)

@@ -53,7 +53,8 @@ func test_the_toy_technique_is_kept_for_another_island() -> void:
 	assert_eq(IslandStyle.TECHNIQUES["toy"], 5)
 	assert_gt(FileAccess.get_file_as_string("res://shaders/ink.gdshader").find("tech == 5"), 0)
 	for id: String in IslandStyle.TABLE:
-		assert_ne(IslandStyle.TABLE[id]["technique"], "toy", id + ": no island is a toy town until Aika places it")
+		if id != PyramidIsle.ID:  # Aika gave it to the pyramid island (ADR-0038)
+			assert_ne(IslandStyle.TABLE[id]["technique"], "toy", id + ": no other island is a toy town")
 	for role: String in ["toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child"]:
 		assert_true(Costume.new().has_method("_r_" + role), role)
 		assert_true(FileAccess.file_exists(ComicFaces.path(role, "neutral")), role)
