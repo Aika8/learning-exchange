@@ -11,7 +11,8 @@ const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "
 	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady",
 	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info",
 	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child",
-	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady"]  ## heroes who have a sheet
+	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady",
+	"oil_merchant", "oil_lady", "oil_market", "oil_father", "oil_child", "oil_grandpa", "oil_granny"]  ## heroes who have a sheet
 const MAX_PANELS := 4
 const MAX_LINES := 2
 const MAX_CHARS := 150  ## a balloon longer than this covers the picture

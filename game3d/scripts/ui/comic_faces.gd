@@ -10,12 +10,14 @@ const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "
 	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady",
 	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info",
 	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child",
-	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady"]  ## heroes with a sheet
+	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady",
+	"oil_merchant", "oil_lady", "oil_market", "oil_father", "oil_child", "oil_grandpa", "oil_granny"]  ## heroes with a sheet
 ## Heroes drawn once, with no expression sheet yet: their one picture stands for every emotion.
 const ONE_FACE: Array[String] = ["noir_broker", "noir_tramp", "noir_youth", "noir_lady",
 	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info",
 	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child",
-	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady"]
+	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady",
+	"oil_merchant", "oil_lady", "oil_market", "oil_father", "oil_child", "oil_grandpa", "oil_granny"]
 const ASPECT := 0.55  ## width / height of a portrait when nothing better is known (the stand-in)
 
 static var _cache: Dictionary = {}

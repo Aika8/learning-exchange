@@ -114,6 +114,8 @@ const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1,
 	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0],
 	"crypto_trader": [1.04, 1.0, 1.12, 0.06], "crypto_miner": [0.98, 1.2, 1.15, 0.05], "crypto_dreamer": [0.96, 0.82, 1.14, 0.06], "crypto_analyst": [1.0, 0.84, 1.12, 0.06],
 	"toy_gentleman": [1.0, 1.45, 1.2, 0.05], "toy_lady": [0.98, 0.85, 1.18, 0.04], "toy_grandpa": [0.95, 0.95, 1.2, 0.07], "toy_granny": [0.86, 1.1, 1.22, 0.05], "toy_child": [0.66, 0.92, 1.36, 0.04],
+	"oil_merchant": [1.02, 1.4, 1.16, 0.07], "oil_lady": [0.97, 0.84, 1.14, 0.04], "oil_market": [0.94, 1.25, 1.16, 0.06], "oil_father": [1.04, 0.92, 1.1, 0.06],
+	"oil_child": [0.6, 0.95, 1.36, 0.03], "oil_grandpa": [0.93, 0.9, 1.16, 0.09], "oil_granny": [0.86, 1.05, 1.18, 0.06],
 	"deco_aviator": [1.05, 1.12, 1.12, 0.07], "deco_mechanic": [1.03, 1.35, 1.14, 0.08], "deco_crew": [0.96, 0.84, 1.14, 0.05], "deco_marshal": [1.06, 0.98, 1.08, 0.07], "deco_lady": [0.99, 0.82, 1.16, 0.04],
 	"noir_broker": [1.06, 1.05, 1.12, 0.07], "noir_tramp": [0.93, 1.15, 1.2, 0.12], "noir_youth": [0.98, 0.74, 1.16, 0.06], "noir_lady": [1.0, 0.85, 1.14, 0.06]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
@@ -143,8 +145,8 @@ func _body(role: String) -> void:
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
 	if nose > 0.0:  # no face, but a nose: it belongs to the outline
 		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
-	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child", "deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady"]:  # hair under the hat or kerchief
-		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp", "toy_grandpa", "toy_granny"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child", "deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady", "oil_merchant", "oil_father", "oil_grandpa"]:  # hair under the hat or kerchief
+		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp", "toy_grandpa", "toy_granny", "oil_merchant", "oil_grandpa"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
 	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
@@ -419,6 +421,103 @@ func _r_toy_child(_tint: Color) -> void:
 	_shirt_sleeves(cloth(Color("aed6f1")))
 	_shawl(cloth(Color("1a5b5c")))  # the sailor collar
 	_knit_cap(cloth(Color("aed6f1")))
+
+
+const OIL_BLACK := Color("1e1c1c")  ## the dark cloth of the index island (sheet 63)
+const OIL_WHITE := Color("efe9da")
+
+
+## Sheet 63, the merchant: black doublet and cloak, a white ruff and cuffs, a tall black hat.
+func _r_oil_merchant(_tint: Color) -> void:
+	var coat := cloth(OIL_BLACK)
+	_recolour("top", cloth(Color("2a2725")))
+	_recolour("bot", cloth(OIL_BLACK))
+	_recolour("lea", leather(Color("141212")))
+	_hide("fedora")
+	_breeches(cloth(OIL_BLACK), 0.16)
+	_stockings(cloth(Color("242120")))
+	_open_coat(coat, cloth(Color("2e2a28")), _p("calf_l").y + 0.14 * k, 46.0, true)
+	_coat_sleeves(coat, cloth(OIL_WHITE), cloth(OIL_WHITE))
+	_shawl(cloth(OIL_WHITE))  # the ruff
+	_wide_hat(felt(Color("141212")), 0.17, 0.2)
+
+
+## Sheet 63, the young woman: a dark velvet jacket over a brick-red skirt, a wide lace collar, a lace cap.
+func _r_oil_lady(_tint: Color) -> void:
+	_recolour("top", cloth(Color("2a1f1e")))
+	_recolour("bot", cloth(Color("8c3a2a")))
+	_recolour("lea", leather(Color("241c1a")))
+	_hide("fedora")
+	_long_skirt(cloth(Color("8c3a2a")), cloth(Color("3a2420")), _p("foot_l").y + 0.06 * k, 0.42, false)
+	_shirt_sleeves(cloth(Color("2a1f1e")))
+	_shawl(cloth(OIL_WHITE))  # the lace collar
+	_kerchief(cloth(OIL_WHITE))
+
+
+## Sheet 63, the market woman: a grey-green dress and apron, an olive shawl, a white cap, rolled sleeves.
+func _r_oil_market(_tint: Color) -> void:
+	_recolour("top", cloth(Color("4a4c40")))
+	_recolour("bot", cloth(Color("4a4c40")))
+	_recolour("lea", leather(Color("2e2620")))
+	_hide("fedora")
+	_long_skirt(cloth(Color("4a4c40")), cloth(Color("3a3c32")), _p("foot_l").y + 0.08 * k, 0.4, false)
+	_apron(cloth(Color("6a6654")), _p("calf_l").y, 0.34, false)
+	_rolled_sleeves(cloth(Color("4a4c40")), cloth(OIL_WHITE))
+	_shawl(cloth(Color("6b6a38")))
+	_kerchief(cloth(OIL_WHITE))
+
+
+## Sheet 63, the young father: a plain grey doublet with a white collar and cuffs, tall brown boots, bare head.
+func _r_oil_father(_tint: Color) -> void:
+	var coat := cloth(Color("3c3d3a"))
+	_recolour("top", cloth(Color("3c3d3a")))
+	_recolour("bot", cloth(Color("343532")))
+	_recolour("lea", leather(Color("5a3f2a")))
+	_hide("fedora")
+	_breeches(cloth(Color("343532")), 0.14)
+	_boots(leather(Color("5a3f2a")))
+	_open_coat(coat, cloth(Color("2e2f2c")), _p("pelvis").y - 0.1 * k, 14.0, true)
+	_coat_sleeves(coat, cloth(OIL_WHITE), cloth(OIL_WHITE))
+	_shawl(cloth(OIL_WHITE))  # the collar
+
+
+## Sheet 63, the child: a grey frock with an apron, a white collar, a close cap.
+func _r_oil_child(_tint: Color) -> void:
+	_recolour("top", cloth(Color("4a4a4c")))
+	_recolour("bot", cloth(Color("4a4a4c")))
+	_recolour("lea", leather(Color("2e2620")))
+	_hide("fedora")
+	_long_skirt(cloth(Color("4a4a4c")), cloth(Color("3a3a3c")), _p("foot_l").y + 0.07 * k, 0.3, false)
+	_shirt_sleeves(cloth(Color("4a4a4c")))
+	_shawl(cloth(OIL_WHITE))
+	_knit_cap(cloth(Color("6a6558")))
+
+
+## Sheet 63, the old man: a long brown coat over a dark doublet, a white collar, a black skull cap.
+func _r_oil_grandpa(_tint: Color) -> void:
+	var coat := cloth(Color("4a3526"))
+	_recolour("top", cloth(Color("33342f")))
+	_recolour("bot", cloth(Color("2c2b28")))
+	_recolour("lea", leather(Color("2e2620")))
+	_hide("fedora")
+	_breeches(cloth(Color("2c2b28")), 0.12)
+	_stockings(cloth(Color("2c2b28")))
+	_open_coat(coat, cloth(Color("3a2a20")), _p("calf_l").y + 0.1 * k, 50.0, true)
+	_coat_sleeves(coat, cloth(Color("3a2a20")), cloth(OIL_WHITE))
+	_shawl(cloth(OIL_WHITE))
+	_knit_cap(cloth(Color("151414")))
+
+
+## Sheet 63, the old woman: a black dress and shawl, a white collar and cap.
+func _r_oil_granny(_tint: Color) -> void:
+	_recolour("top", cloth(OIL_BLACK))
+	_recolour("bot", cloth(Color("2a2a2c")))
+	_recolour("lea", leather(Color("1c1a1a")))
+	_hide("fedora")
+	_long_skirt(cloth(Color("2a2a2c")), cloth(OIL_BLACK), _p("foot_l").y + 0.06 * k, 0.38, false)
+	_shirt_sleeves(cloth(OIL_BLACK))
+	_shawl(cloth(OIL_WHITE))
+	_kerchief(cloth(OIL_WHITE))
 
 
 ## Sheet 56, the aviator: a brown leather jacket with a fur collar, cream breeches, tall laced boots, a white

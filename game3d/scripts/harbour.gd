@@ -94,7 +94,8 @@ static func race_spots() -> Dictionary:
 ## The index island (ADR-0033): a place and a style for now. id → [position, prompt key, radius].
 static func index_spots() -> Dictionary:
 	return {"ship": [IndexIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0],
-		"palace": [IndexIsle.door()[1], "PROMPT_BANK_PALACE", 3.0]}
+		"exchange": [IndexIsle.door()[1], "PROMPT_INDEX_EXCHANGE", 3.0],
+		"stall": [IndexIsle.stall()[1], "PROMPT_CHEESE_STALL", 2.6]}
 
 
 ## The crypto island (ADR-0031): a place and a style for now. id → [position, prompt key, radius].
@@ -322,17 +323,20 @@ func _dress_amber() -> void:
 		_villagers[-1].set_meta("talk", "amber_" + id)
 
 
-## The index island: the gentleman by the palace door, and four people strolling (sheet 50).
+## The index island: the merchant before the Exchange, the cheese woman at her stall, and people of every age
+## strolling — a young woman, a father and his child, an old couple (sheet 63).
 func _dress_index() -> void:
 	var cast := ComicScript.read().cast
-	var at := IndexIsle.door()
-	var g: Dictionary = cast["toy_gentleman"]
-	_npc(str(g["who"]), Color(str(g["coat"])), at[0], atan2(at[1].x - at[0].x, at[1].z - at[0].z), str(g["role"])).name = "Keeper_palace"
-	var homes := {"toy_lady": [Vector3(-6, 0, 2.0), 5.0], "toy_grandpa": [Vector3(-20, 0, -1.2), 5.0], "toy_granny": [Vector3(-18, 0, 1.2), 5.0], "toy_child": [Vector3(8, 0, -3.0), 5.0]}
+	for keeper: Array in [["oil_merchant", IndexIsle.door(), "exchange"], ["oil_market", IndexIsle.stall(), "stall"]]:
+		var c: Dictionary = cast[keeper[0]]
+		var at: Array[Vector3] = keeper[1]
+		_npc(str(c["who"]), Color(str(c["coat"])), at[0], atan2(at[1].x - at[0].x, at[1].z - at[0].z), str(c["role"])).name = "Keeper_" + str(keeper[2])
+	var homes := {"oil_lady": [Vector3(4.6, 0, -4.6), 3.0], "oil_father": [Vector3(12.0, 0, -5.0), 4.0], "oil_child": [Vector3(13.4, 0, -6.2), 3.0],
+		"oil_grandpa": [Vector3(-24.0, 0, 8.0), 3.0], "oil_granny": [Vector3(-22.8, 0, 9.6), 3.0]}
 	for id: String in homes:
 		var c: Dictionary = cast[id]
 		_villager(str(c["who"]), Color(str(c["coat"])), IndexIsle.AT + (homes[id][0] as Vector3), homes[id][1], str(c["role"]))
-		_villagers[-1].set_meta("talk", "index_" + id.trim_prefix("toy_"))
+		_villagers[-1].set_meta("talk", "index_" + id.trim_prefix("oil_"))
 
 
 ## The race island: the marshal by the tower door, the chief mechanic by the skiff in the pit lane, and three
