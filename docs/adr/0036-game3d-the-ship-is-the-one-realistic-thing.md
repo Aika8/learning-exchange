@@ -91,3 +91,36 @@ There are two ways to make an exception to a rule that runs over everything: tea
 or keep the exception out of the rule's sight. The second needs no `if` anywhere — it uses an order that was
 already there. It is the Open–Closed Principle in a renderer: new techniques are added without touching the ship,
 and the ship without touching them.
+
+## Amendment, 2026-11-18: the hull is Poly Haven's pinnace
+Aika looked at the ship built in code and at the CC0 models there are, and chose: **"yes, the pinnace"** —
+Poly Haven's `ship_pinnace` (CC0; already in `make assets`, an allowed source). Decisions 2, 3 and 6 change; the
+rest stands, and above all decision 1: the exception by draw order.
+
+- **2′. The ship is the pinnace when it is downloaded**, scaled to twelve metres (×0.36), turned bow to −z, her
+  waist deck at y = 0 — so the berths, the flight model and the chart are untouched. Every material of the model
+  is copied into the pass after the island's technique (the same rule, the same test); what is inside the hull is
+  not drawn. **Where the model is not downloaded the ship built in code stands in**, whole, as before: the game
+  and its tests work on any machine.
+- **3′. Added to the model after the sheets**: the wing sails with their drops, the etherite crystal in its cage
+  under the keel, our flag at the main mast's head, the bird under the bowsprit, two lanterns that give light and
+  the wind spirit's face on her own carved stern, the name «ПОПУТЧИК». The model's sails keep their texture and
+  cut-out shape and **ripple** a little (a shader). They are not furled by the sail trim: they are part of the
+  model. She has three masts; the sheets show two.
+- **6′. Budget.** The model is 162 000 triangles in full (the rigging alone two fifths). The budget of 60 000 is
+  now for **what is drawn from where she is flown and seen in port**; close to she is all there. Three things
+  keep it: the LODs the import generates, taken early (`lod_bias` 0.15); the rigging not drawn beyond 150 m and
+  casting no shadow; the interior not drawn. Measured from the helmsman's camera: about 30 000 triangles in the
+  view, about 74 000 with her shadows in all four cascades; 120 frames a second. The ship built in code keeps
+  her own limit of 60 000 in full.
+- **7′. The monkey** is still ours and built in code, now nearer her sheet: a dark cap of fur over a pale face,
+  a muzzle and brows, a waistcoat in two fronts with a brass edge and buttons, a ring in her ear, a long tail of
+  nine pieces that curls up; and four poses — sitting, sitting with the spyglass to her eye, climbing hand over
+  hand, running on all fours. No ready CC0 capuchin exists on the allowed sources.
+
+| Alternative | Why not |
+|---|---|
+| Decimate the model once in Blender and keep a lighter copy in the repository | A second copy of a downloaded asset to keep in step; the importer's LODs do it per distance for nothing |
+| Keep the built ship | Aika prefers the model's hull, carving and rigging; the built one stays as the stand-in |
+| Remove the third mast to match the sheets | The masts, rigging and sails are single meshes: cutting one out is modelling work outside the engine |
+

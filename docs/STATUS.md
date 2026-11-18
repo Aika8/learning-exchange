@@ -3,6 +3,12 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D the ship's hull is Poly Haven's pinnace (amendment to ADR-0036) — `docs/demo/G3D-ship.md`
+- Aika chose the CC0 model `ship_pinnace` for the hero's ship. Scaled to twelve metres, every material after the
+  island's technique, wing sails, crystal, flag, bird, lanterns, wind spirit and name added; sails ripple. About
+  30 000 triangles drawn from the helmsman's camera (162 000 in full), 120 fps in flight. Without the download
+  the ship built in code stands in. The monkey has a face, a long tail and four poses. Three masts, not two.
+
 ## G3D comic pages, second pass (ADR-0037, Proposed; amends 0027) — `docs/demo/G3D-comic.md`
 - Portraits are cut out of their paper by a tool in the project (`tools/cut_portraits.gd`; corrections as data)
   and stand on the frame's edge; each frame's background is the softened scene of the talk; balloons are ovals

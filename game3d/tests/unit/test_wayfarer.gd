@@ -34,7 +34,7 @@ func test_no_technique_redraws_the_ship_every_surface_is_drawn_after_the_effect(
 			else:
 				var code := (m as ShaderMaterial).shader.code
 				assert_true(code.contains("depth_draw_always") and code.contains("ALPHA = 1.0"), "%s: a shader of the ship is opaque, in the transparent pass" % mi.name)
-	assert_gt(surfaces, 20)
+	assert_gt(surfaces, 12)
 	for p: CPUParticles3D in ship.find_children("*", "CPUParticles3D", true, false):
 		assert_gt((p.mesh as PrimitiveMesh).material.render_priority, effect, "the drops too")
 	assert_gt((ship.find_child("Name", true, false) as Label3D).render_priority, effect)
@@ -43,7 +43,7 @@ func test_no_technique_redraws_the_ship_every_surface_is_drawn_after_the_effect(
 
 
 func test_she_is_built_after_the_sheets_part_by_part() -> void:
-	var ship := Proc.ship()
+	var ship := Wayfarer.build(false)  # the ship built in code: what she is where the pinnace is not downloaded
 	add_child_autofree(ship)
 	assert_eq(ship.name, &"Wayfarer")
 	for part: String in ["Hull", "Castles", "Stern", "Spars", "Rigging", "Figurehead", "DeckThings", "Anchor", "Sail", "Topsail", "ForeAndAft",
@@ -61,7 +61,7 @@ func test_she_is_built_after_the_sheets_part_by_part() -> void:
 
 
 func test_she_keeps_within_her_budget_and_the_rig_is_not_drawn_from_afar() -> void:
-	var ship := Proc.ship()
+	var ship := Wayfarer.build(false)
 	add_child_autofree(ship)
 	var cost := Wayfarer.cost(ship)
 	gut.p("the ship: %d triangles, %d materials" % [cost.x, cost.y])
@@ -73,7 +73,7 @@ func test_she_keeps_within_her_budget_and_the_rig_is_not_drawn_from_afar() -> vo
 
 
 func test_the_sails_are_set_by_the_trim() -> void:
-	var ship := Proc.ship()
+	var ship := Wayfarer.build(false)
 	add_child_autofree(ship)
 	var sail: Node3D = ship.get_node("Sail")
 	Wayfarer.set_trim(ship, 1.0)
@@ -99,7 +99,7 @@ func test_the_flag_is_our_own_sign() -> void:
 
 func test_the_monkey_lives_in_the_rig_under_way() -> void:
 	var mind := MonkeyMind.new(3)
-	var perches := Wayfarer.perches()
+	var perches := Wayfarer.perches(false)
 	mind.position = perches[0]
 	var seen: Dictionary = {}
 	var ran := false
@@ -150,3 +150,80 @@ func test_in_port_the_monkey_is_ashore_with_the_captain_and_is_drawn_like_the_is
 	for mi: MeshInstance3D in monkey.find_children("*", "MeshInstance3D", true, false):
 		var m := mi.get_active_material(0)
 		assert_lt(m.render_priority, 100, "she is a character of the world: the island's technique draws her")
+
+
+## The amendment to ADR-0036: Poly Haven's pinnace is the ship when it is downloaded.
+func test_the_pinnace_is_the_ship_when_it_is_downloaded_and_nothing_of_it_is_redrawn() -> void:
+	if not Wayfarer.has_model():
+		pending("the pinnace is not downloaded here (make assets): the built ship stands in, tested above")
+		return
+	var ship := Proc.ship()
+	add_child_autofree(ship)
+	assert_true(ship.has_meta("model"))
+	var pinnace: Node3D = ship.get_node("Pinnace")
+	assert_almost_eq(pinnace.scale.x, Wayfarer.MODEL_SCALE, 0.001)
+	var full := 0
+	var light := 0
+	var meshes := 0
+	for mi: MeshInstance3D in pinnace.find_children("*", "MeshInstance3D", true, false):
+		if mi.is_queued_for_deletion():
+			continue
+		meshes += 1
+		assert_false(str(mi.name).contains("interior"), "what is inside the hull is not drawn")
+		assert_almost_eq(mi.lod_bias, Wayfarer.MODEL_LOD_BIAS, 0.001, str(mi.name))
+		var surf := RenderingServer.mesh_get_surface(mi.mesh.get_rid(), 0)
+		var per := 2 if int(surf["vertex_count"]) <= 65536 else 4
+		full += (surf["index_data"] as PackedByteArray).size() / per / 3
+		var lods: Array = surf.get("lods", [])
+		assert_gt(lods.size(), 1, "%s has lighter meshes for a distance" % mi.name)
+		light += (lods[1]["index_data"] as PackedByteArray).size() / per / 3
+		for i in mi.mesh.get_surface_count():
+			var m := mi.get_active_material(i)
+			assert_gt(m.render_priority, 100, "%s: drawn after the island's technique" % mi.name)
+			if m is BaseMaterial3D:
+				assert_eq((m as BaseMaterial3D).transparency, BaseMaterial3D.TRANSPARENCY_ALPHA)
+				assert_eq((m as BaseMaterial3D).depth_draw_mode, BaseMaterial3D.DEPTH_DRAW_ALWAYS)
+			else:
+				assert_true((m as ShaderMaterial).shader.code.contains("ALPHA = 1.0"))
+		if str(mi.name).contains("rigging"):
+			assert_eq(mi.visibility_range_end, Wayfarer.RIG_SEEN_TO)
+			assert_eq(mi.cast_shadow, GeometryInstance3D.SHADOW_CASTING_SETTING_OFF)
+	gut.p("the pinnace: %d triangles in full, %d at the second lighter mesh" % [full, light])
+	assert_eq(meshes, 6)
+	assert_gt(full, 100000, "she is all there close to")
+	assert_lt(light, Wayfarer.MODEL_DRAWN, "and within the budget from where she is flown")
+	for part: String in ["Stern", "Figurehead", "WingL", "WingR", "Crystal", "Flag", "LanternL", "LanternR", "Name"]:
+		assert_not_null(ship.find_child(part, true, false), part + " is added to the model")
+	assert_null(ship.find_child("Hull", true, false), "the built hull is not there too")
+	var sail_code := FileAccess.get_file_as_string("res://shaders/ship_model_sail.gdshader")
+	assert_true(sail_code.contains("TIME") and sail_code.contains("discard"), "the sails ripple and keep their cut-out shape")
+	for p in Wayfarer.perches(true):
+		assert_gt(p.y, 0.3, "the monkey's places are on the ship")
+		assert_lt(absf(p.x), 2.0)
+	Wayfarer.set_trim(ship, 0.0)  # the model's sails are not furled: nothing breaks
+
+
+func test_the_monkey_has_her_poses_from_the_sheet() -> void:
+	assert_eq(Monkey.POSES, ["sit", "scope", "climb", "run"] as Array[String])
+	var mind := MonkeyMind.new(5)
+	var perches := Wayfarer.perches(false)
+	mind.position = perches[0]
+	var seen: Dictionary = {}
+	for i in 60 * 240:
+		mind.aboard(1.0 / 60.0, perches)
+		seen[mind.pose] = true
+		assert_true(mind.pose in Monkey.POSES)
+		assert_eq(mind.running, mind.pose in ["climb", "run"])
+	assert_eq(seen.size(), 4, "in four minutes in the rig she has sat, looked through the glass, climbed and run")
+	var ashore := MonkeyMind.new()
+	var poses: Dictionary = {}
+	for i in 60 * 12:
+		ashore.ashore(1.0 / 60.0, Vector3(1.0, 0, 0), 0.0)
+		poses[ashore.pose] = true
+	assert_true(poses.has("sit") and poses.has("scope"), "when the captain stands long she looks about through the glass")
+	var monkey := Monkey.new()
+	add_child_autofree(monkey)
+	await wait_process_frames(2)
+	assert_not_null(monkey.find_child("Spyglass", true, false))
+	assert_eq(monkey.get("_tail").size(), 9, "a long tail")
+	assert_eq(monkey.get("_limbs").size(), 4)

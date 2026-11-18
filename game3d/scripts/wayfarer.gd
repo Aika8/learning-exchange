@@ -16,6 +16,11 @@ const FORE_TOP := 11.0  ## the height of the mast's head
 const MAIN_TOP := 12.3
 const COURSE_YARD := 5.7  ## the height of the lower yard of the foremast
 const TOPSAIL_YARD := 9.4
+const MODEL := "res://assets/models/ship_pinnace/ship_pinnace_1k.gltf"  ## Poly Haven's pinnace (CC0, `make assets`): her hull, masts, rigging and sails when it is downloaded
+const MODEL_SCALE := 0.36  ## a 33 m hull made 12 m: the berths and the flight model were cut for that
+const MODEL_DECK := 2.98  ## the height of the model's waist deck: it becomes y = 0
+const MODEL_LOD_BIAS := 0.15  ## she steps down to her lighter meshes early: a quarter of the triangles from where she is flown, all of them only from a few metres
+const MODEL_DRAWN := 60000  ## the budget for the model: triangles drawn from where she is flown and seen in port
 const AFTER_EFFECT := 101  ## the render priority of the ship: the island's technique is drawn at 100
 const MAX_TRIANGLES := 60000
 const MAX_MATERIALS := 24
@@ -140,8 +145,22 @@ static func side(t: float, sd: float, up: float = 0.0, out: float = 0.0) -> Vect
 	return Vector3(sd * (half_beam(t) + out), sheer(t) + up, along(t))
 
 
-## Where the monkey may sit and run, in the ship's own space: the two yards of the foremast, both tops, the rail.
-static func perches() -> Array[Vector3]:
+## True when the pinnace is downloaded: then she is the ship, and what is built here is added to her.
+static func has_model() -> bool:
+	return ResourceLoader.exists(MODEL)
+
+
+## A point given in the model's own space (bow at +z, metres of the real ship) as it lies in the ship's space.
+static func at(x: float, y: float, z: float) -> Vector3:
+	return Vector3(-x * MODEL_SCALE, (y - MODEL_DECK) * MODEL_SCALE, -z * MODEL_SCALE)
+
+
+## Where the monkey may sit and run, in the ship's own space: yards, tops and the rail — of the pinnace when she
+## is the ship (`model`), else of the built one.
+static func perches(model: bool = has_model()) -> Array[Vector3]:
+	if model:
+		return [at(-3.4, 12.6, 9.4), at(0.5, 12.6, 9.4), at(3.4, 12.6, 9.4), at(0.7, 14.2, 9.7), at(2.4, 18.6, -2.4), at(-2.4, 18.6, -2.4),
+			at(0.7, 15.6, -1.8), at(3.6, 12.7, -2.6), at(-4.3, 4.5, 2.0)]
 	return [Vector3(-2.6, COURSE_YARD + 0.14, FORE_Z), Vector3(0.4, COURSE_YARD + 0.14, FORE_Z), Vector3(2.6, COURSE_YARD + 0.14, FORE_Z),
 		Vector3(0.45, 6.6, FORE_Z), Vector3(1.7, TOPSAIL_YARD + 0.12, FORE_Z), Vector3(-1.7, TOPSAIL_YARD + 0.12, FORE_Z),
 		Vector3(0.45, 7.1, MAIN_Z), Vector3(1.5, 0.92, -0.4)]
@@ -170,26 +189,149 @@ static func cost(ship: Node3D) -> Vector2i:
 	return Vector2i(tris, mats.size())
 
 
-static func build() -> Node3D:
+## The ship. With `model` and the pinnace downloaded: Poly Haven's model, scaled and turned, every material of it
+## put after the island's technique, and on it what the sheets add — wing sails, the crystal, the flag, the bird,
+## the lanterns and the wind spirit. Otherwise the ship built here part by part.
+static func build(model: bool = true) -> Node3D:
 	var s := Node3D.new()
 	s.name = "Wayfarer"
 	s.set_meta("flat", true)  # beyond the pier's rail: nobody walks her yet
-	s.add_child(_hull())
-	s.add_child(_castles())
-	s.add_child(_stern())
-	s.add_child(_spars())
-	s.add_child(_rigging())
-	s.add_child(_figurehead())
-	s.add_child(_deck_things())
-	for sail: Array in [["Sail", COURSE_YARD, 5.6, 3.5, 0.55], ["Topsail", TOPSAIL_YARD, 4.0, 3.1, 0.4]]:
-		s.add_child(_square_sail(sail[0], sail[1], sail[2], sail[3], sail[4]))
-	s.add_child(_fore_and_aft_sails())
+	var pinnace := _pinnace() if model and has_model() else null
+	if pinnace != null:
+		s.set_meta("model", true)
+		s.add_child(pinnace)
+		s.add_child(_pinnace_stern())
+		var bird := _figurehead()
+		bird.position = at(0, 4.4, 17.3)
+		bird.scale = Vector3.ONE * 0.6
+		s.add_child(bird)
+	else:
+		s.add_child(_hull())
+		s.add_child(_castles())
+		s.add_child(_stern())
+		s.add_child(_spars())
+		s.add_child(_rigging())
+		s.add_child(_figurehead())
+		s.add_child(_deck_things())
+		for sail: Array in [["Sail", COURSE_YARD, 5.6, 3.5, 0.55], ["Topsail", TOPSAIL_YARD, 4.0, 3.1, 0.4]]:
+			s.add_child(_square_sail(sail[0], sail[1], sail[2], sail[3], sail[4]))
+		s.add_child(_fore_and_aft_sails())
 	for sd: float in [-1.0, 1.0]:
-		s.add_child(_wing(sd))
-	s.add_child(_crystal())
-	s.add_child(_flag())
+		var wing := _wing(sd)
+		if pinnace != null:
+			wing.position = Vector3(0, 0.55, -0.2)  # the pinnace's bilge is higher than the built hull's
+		s.add_child(wing)
+	var crystal := _crystal()
+	var flag := _flag()
+	if pinnace != null:
+		crystal.position = at(0, -3.9, 0.5)
+		flag.position = at(0, 28.9, -1.8) + Vector3(0, 0, 1.2)
+	s.add_child(crystal)
+	s.add_child(flag)
 	set_trim(s, 1.0)
 	return s
+
+
+## Poly Haven's pinnace as the ship: scaled to twelve metres, turned bow to −z, her waist deck at y = 0. Every
+## material is copied into the pass after the island's technique (ADR-0036); the sails get a shader that keeps
+## their texture and shape and ripples them. What is inside the hull is not drawn. The rigging — two fifths of her
+## triangles — is not drawn from far away, and every mesh steps down its LODs early (`MODEL_LOD_BIAS`).
+static func _pinnace() -> Node3D:
+	var scene: PackedScene = load(MODEL)
+	if scene == null:
+		return null
+	var n: Node3D = scene.instantiate()
+	n.name = "Pinnace"
+	n.scale = Vector3.ONE * MODEL_SCALE
+	n.rotation.y = PI
+	n.position = Vector3(0, -MODEL_DECK * MODEL_SCALE, 0)
+	for mi: MeshInstance3D in n.find_children("*", "MeshInstance3D", true, false):
+		if str(mi.name).contains("interior"):
+			mi.free()  # not in the tree yet: gone at once
+			continue
+		mi.gi_mode = GeometryInstance3D.GI_MODE_DISABLED
+		mi.lod_bias = MODEL_LOD_BIAS
+		if str(mi.name).contains("rigging"):
+			mi.visibility_range_end = RIG_SEEN_TO
+			mi.cast_shadow = GeometryInstance3D.SHADOW_CASTING_SETTING_OFF  # ropes: two fifths of her triangles, in four cascades, for shadows nobody sees
+		for i in mi.mesh.get_surface_count():
+			var src := mi.mesh.surface_get_material(i) as BaseMaterial3D
+			if src == null:
+				continue
+			mi.set_surface_override_material(i, _after_effect(src, str(mi.name).contains("sails")))
+	return n
+
+
+## A copy of one of the model's materials that is drawn after the island's technique. `sail`: the cut-out cloth,
+## with its ripple.
+static func _after_effect(src: BaseMaterial3D, sail: bool) -> Material:
+	var key := "model/%s" % src.resource_name if not src.resource_name.is_empty() else "model/%d" % src.get_instance_id()
+	if _mats.has(key):
+		return _mats[key]
+	var out: Material
+	if sail:
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/ship_model_sail.gdshader")
+		m.set_shader_parameter("albedo_tex", src.albedo_texture)
+		m.set_shader_parameter("orm_tex", src.roughness_texture if src.roughness_texture != null else src.albedo_texture)
+		m.set_shader_parameter("has_normal", src.normal_enabled and src.normal_texture != null)
+		if src.normal_texture != null:
+			m.set_shader_parameter("normal_tex", src.normal_texture)
+		m.render_priority = AFTER_EFFECT + 1
+		out = m
+	else:
+		var m: BaseMaterial3D = src.duplicate()
+		m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+		m.depth_draw_mode = BaseMaterial3D.DEPTH_DRAW_ALWAYS
+		m.albedo_color.a = 1.0
+		m.render_priority = AFTER_EFFECT
+		out = m
+	out.resource_name = key
+	_mats[key] = out
+	return out
+
+
+## What the sheets add to the pinnace's own carved stern: two lanterns that give light, the wind spirit's gilded
+## face, and the name.
+static func _pinnace_stern() -> Node3D:
+	var n := Node3D.new()
+	n.name = "Stern"
+	var k := Kit.new()
+	var face := at(0, 6.5, -18.45)  # the wind spirit, between the gallery and the taffrail
+	k.mesh(gilt(), Proc._sphere(0.2), Transform3D(Basis().scaled(Vector3(1.0, 1.05, 0.6)), face))
+	for sx: float in [-1.0, 1.0]:
+		k.mesh(gilt(), Proc._sphere(0.08), Transform3D(Basis(), face + Vector3(sx * 0.11, -0.05, 0.08)))
+		for j in 4:
+			k.mesh(gilt(), Proc._cyl_mesh(0.03, 0.05, 0.36 + j * 0.07, 6), Transform3D(Basis(Vector3.BACK, sx * (1.2 + j * 0.16)), face + Vector3(sx * (0.3 + j * 0.06), 0.09 - j * 0.07, -0.02)))
+		var lamp_at := at(sx * 3.3, 10.4, -18.3)  # a lantern at each quarter
+		k.box(iron(), Vector3(0.05, 0.4, 0.05), lamp_at + Vector3(0, -0.36, 0))
+		k.mesh(lit_glass(), Proc._cyl_mesh(0.13, 0.1, 0.32, 6), Transform3D(Basis(), lamp_at))
+		k.mesh(gilt(), Proc._cyl_mesh(0.03, 0.17, 0.15, 6), Transform3D(Basis(), lamp_at + Vector3(0, 0.24, 0)))
+		k.mesh(gilt(), Proc._cyl_mesh(0.15, 0.15, 0.04, 6), Transform3D(Basis(), lamp_at + Vector3(0, -0.18, 0)))
+		for a in 6:
+			k.box(gilt(), Vector3(0.02, 0.32, 0.02), lamp_at + Vector3(cos(a * TAU / 6.0), 0, sin(a * TAU / 6.0)) * 0.13)
+		var lamp := OmniLight3D.new()
+		lamp.name = "LanternL" if sx < 0.0 else "LanternR"
+		lamp.light_color = Color("ffc66e")
+		lamp.light_energy = 0.9
+		lamp.omni_range = 5.0
+		lamp.position = lamp_at
+		n.add_child(lamp)
+	k.mesh(gilt(), Proc._sphere(0.035), Transform3D(Basis(), face + Vector3(0, -0.01, 0.13)))
+	var board := at(0, 4.2, -18.3)
+	k.box(gilt(), Vector3(1.7, 0.26, 0.05), board)
+	n.add_child(k.commit("Carving"))
+	var name_board := Label3D.new()
+	name_board.name = "Name"
+	name_board.text = "ПОПУТЧИК"
+	name_board.font_size = 40
+	name_board.pixel_size = 0.005
+	name_board.modulate = Color("2a1c12")
+	name_board.outline_size = 0
+	name_board.position = board + Vector3(0, 0, 0.035)
+	name_board.render_priority = AFTER_EFFECT + 2
+	n.add_child(name_board)
+	return n
 
 
 ## The hull: a lofted shell of oak, the deck, the bulwarks with their rail, a wale and a gilded strake, gun ports

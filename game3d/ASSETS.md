@@ -100,3 +100,5 @@ The captain and the villagers move with a gait computed in code (`scripts/walker
 feet with two-bone IK on the MakeHuman game-engine rig, feet put on the ground found under them; idle, walk and run
 are the same cycle blended by speed. No animation files are downloaded; nothing new was added to `assets.lock` in the
 G3D polish pass. `street_lamp_02` is a wall lantern: it now hangs on our own timber post and by house doors.
+
+`ship_pinnace` is the hero's ship «Попутчик» (ADR-0036, amended): `scripts/wayfarer.gd` loads it, scales it and adds the wing sails, crystal, flag and figures. `dutch_ship_medium` is no longer used for her.

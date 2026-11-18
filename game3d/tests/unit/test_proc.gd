@@ -19,8 +19,8 @@ func test_island_mesh_has_triangles_and_an_upward_cap() -> void:
 
 func test_ship_has_a_sail_and_scenes_exist() -> void:
 	var s := Proc.ship()
-	# procedural ship has a furling "Sail"; with `make assets` it is the model "Hull" (ADR-0019)
-	var expected := "Hull" if Assets.available() else "Sail"
+	# the pinnace when it is downloaded (ADR-0036, amended), else the ship built in code with its furling "Sail"
+	var expected := "Pinnace" if Wayfarer.has_model() else "Sail"
 	assert_not_null(s.get_node_or_null(expected), expected)
 	s.free()
 	for scene in ["main_menu", "harbour", "hall", "voyage"]:

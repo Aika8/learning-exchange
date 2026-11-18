@@ -13,6 +13,39 @@ is redrawn on landing; **the ship is not** — she is physically lit wood, brass
 |---|---|
 | ![](g3d-ship/ship-deck.jpg) | ![](g3d-ship/ship-wing.jpg) |
 
+## The hull is now Poly Haven's pinnace (amendment to ADR-0036) — before and after
+Aika: "yes, the pinnace". Left: the ship built in code. Right: the model, with what the sheets add to it. Where
+the model is not downloaded (`make assets`) the left one is still the ship.
+
+![](g3d-ship/pinnace-ship.jpg)
+![](g3d-ship/pinnace-stern.jpg)
+![](g3d-ship/pinnace-bow.jpg)
+![](g3d-ship/pinnace-deck.jpg)
+![](g3d-ship/pinnace-flight.jpg)
+
+- The model: `ship_pinnace`, CC0, 162 007 triangles in full without its interior, scaled ×0.36 to twelve metres.
+- **Still never redrawn**: all her materials are copied into the pass after the island's technique. At the index
+  island, painted in oil:
+
+  ![](g3d-ship/pinnace-in-index-port.jpg)
+- **Added after the sheets**: wing sails with drops, the etherite crystal in its cage, our flag, the bird under
+  the bowsprit, two lit lanterns, the wind spirit and the name on her own carved stern. Her sails ripple.
+- **Budget**: from the helmsman's camera she draws about **30 000 triangles in the view** (74 000 with shadows in
+  every cascade) — LODs taken early, no shadows from the rigging, the rigging gone beyond 150 m. In flight
+  **120 fps** average, 1 % low 101–103. In port 115–119 average; 1 % low 53–69 once settled, and one dip to 43 at
+  the first jump to a close view of her.
+- Recording: [pinnace-flight.gif](g3d-ship/pinnace-flight.gif).
+- GUT: 151 tests, all green (2 new; the tests of the built ship now build her explicitly). World audit of Spark
+  Harbour with the pinnace: 0 findings.
+- **Differences from the sheets**: three masts, not two; her sails are not furled by the trim; the bird is small
+  beside a real hull; her own stern lanterns stand next to ours.
+
+### The monkey, nearer her sheet
+A dark cap over a pale face, brows and a muzzle, a waistcoat in two fronts with a brass edge, a ring in her ear,
+a long tail that curls up; poses: sitting, sitting with the spyglass, climbing, running.
+
+![](g3d-ship/monkey-sitting.jpg)
+
 ## Real among the drawn
 The same ship moored at the race island (an art-deco poster) and at the index island (oil paint). The island
 behind her is in its technique; she has no ink line, no flat tones, no haze.
