@@ -35,6 +35,8 @@ var _met: Dictionary = {}  ## who has had a name plate in this talk already
 
 const FONT_FILE := "res://fonts/comic.ttf"  ## the lettering: Comic Relief Regular (SIL OFL 1.1, `fonts/OFL.txt`), Latin and Cyrillic (ADR-0037)
 static var _lettering: Font
+const ART_DIR := "res://art/comic"
+static var _art: Dictionary = {}  ## "talk/page-panel" → the picture, or null when there is none
 
 
 func _init() -> void:
@@ -77,6 +79,22 @@ static func font() -> Font:
 
 ## The place of the talk: the picture on screen as the page opens (the island in its own technique, where the
 ## captain stands), made small and soft so that it is a backdrop and not a second picture. Null without a screen.
+## Panel `panel` of page `page` (both from 0) of talk `talk` drawn as a picture — `art/comic/<talk>/<page>-<panel>.jpg`,
+## counted from 1, as docs/design/comic-script.md names them — or null when there is none: the frame is then put
+## together from the place and the figures, as before.
+static func art(talk: String, page: int, panel: int) -> Texture2D:
+	var key := "%s/%d-%d" % [talk, page + 1, panel + 1]
+	if not _art.has(key):
+		_art[key] = null
+		for ext in ["jpg", "png"]:
+			var file := "%s/%s.%s" % [ART_DIR, key, ext]
+			var img := Image.new()
+			if FileAccess.file_exists(file) and img.load(ProjectSettings.globalize_path(file)) == OK:
+				_art[key] = ImageTexture.create_from_image(img)
+				break
+	return _art[key]
+
+
 func place() -> Texture2D:
 	return _place
 
@@ -189,7 +207,7 @@ func _paint() -> void:
 				if not _met.has(who):
 					_met[who] = true
 					newcomers.append(who)
-			f.setup(self, panels[i], script_data.cast, backdrop, i + _page, newcomers)
+			f.setup(self, panels[i], script_data.cast, backdrop, i + _page, newcomers, art(id, _page, i))
 			_frames.append(f)
 	for i in _frames.size():
 		_frames[i].show_lines(_reader.shown(i))

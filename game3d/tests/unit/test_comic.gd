@@ -335,3 +335,31 @@ func test_the_pages_are_lettered_in_the_projects_own_font() -> void:
 	assert_eq(f.get_font_name(), "Comic Relief")
 	for letter: String in ["Я", "ж", "ё", "é", "Q", "—", "«"]:
 		assert_true(f.has_char(letter.unicode_at(0)), "it has " + letter)
+
+
+func test_a_drawn_panel_replaces_the_figures_and_the_tail_finds_the_mouth_it_is_told() -> void:
+	assert_null(ComicPage.art("mara_first", 0, 2), "no picture: the frame is put together as before")
+	var img := Image.create(320, 180, false, Image.FORMAT_RGB8)
+	img.fill(Color("c0a080"))
+	ComicPage._art["mara_first/1-3"] = ImageTexture.create_from_image(img)
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	page.script_data = ComicScript.read()
+	var panel: Dictionary = page.script_data.talks["mara_first"]["pages"][0]["panels"][2]
+	panel["tail"] = {"captain": [0.8, 0.3]}
+	assert_true(page.open("mara_first"))
+	await wait_process_frames(2)
+	var drawn := page.frames()[2]
+	var plain := page.frames()[1]
+	assert_not_null(drawn._back.art, "the third frame shows the picture")
+	assert_null(plain._back.art, "the second has none and keeps its figures")
+	assert_true(plain.actors["mara"]["node"] is Control)
+	for who: String in drawn.actors:
+		assert_null(drawn.actors[who]["node"], "nobody is drawn over the picture")
+	assert_eq(drawn.actors["captain"]["mouth"], Vector2(0.8, 0.3) * drawn.size, "the tail goes where the data says")
+	drawn.show_lines(2)
+	var b: Dictionary = drawn.balloons[0]
+	assert_eq(b["who"], "captain")
+	assert_gt((b["tip"] - b["base"]).normalized().dot((Vector2(0.8, 0.3) * drawn.size - b["base"]).normalized()), 0.99)
+	ComicPage._art.clear()
+	panel.erase("tail")
