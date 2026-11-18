@@ -34,10 +34,11 @@ func test_no_technique_redraws_the_ship_every_surface_is_drawn_after_the_effect(
 			else:
 				var code := (m as ShaderMaterial).shader.code
 				assert_true(code.contains("depth_draw_always") and code.contains("ALPHA = 1.0"), "%s: a shader of the ship is opaque, in the transparent pass" % mi.name)
-	assert_gt(surfaces, 12)
+	assert_gt(surfaces, 8)
 	for p: CPUParticles3D in ship.find_children("*", "CPUParticles3D", true, false):
 		assert_gt((p.mesh as PrimitiveMesh).material.render_priority, effect, "the drops too")
-	assert_gt((ship.find_child("Name", true, false) as Label3D).render_priority, effect)
+	for l: Label3D in ship.find_children("*", "Label3D", true, false):
+		assert_gt(l.render_priority, effect)
 	var shader := FileAccess.get_file_as_string("res://shaders/ink.gdshader")
 	assert_false(shader.contains("ship") or shader.contains("Wayfarer"), "and the effect knows nothing about her")
 
@@ -192,8 +193,10 @@ func test_the_pinnace_is_the_ship_when_it_is_downloaded_and_nothing_of_it_is_red
 	assert_eq(meshes, 6)
 	assert_gt(full, 100000, "she is all there close to")
 	assert_lt(light, Wayfarer.MODEL_DRAWN, "and within the budget from where she is flown")
-	for part: String in ["Stern", "Figurehead", "WingL", "WingR", "Crystal", "Flag", "LanternL", "LanternR", "Name"]:
+	for part: String in ["Stern", "Crystal", "Flag", "LanternL", "LanternR"]:
 		assert_not_null(ship.find_child(part, true, false), part + " is added to the model")
+	for part: String in ["Figurehead", "WingL", "WingR", "Name", "Carving"]:
+		assert_null(ship.find_child(part, true, false), part + ": built in code, it fell short of the model, so it is not added")
 	assert_null(ship.find_child("Hull", true, false), "the built hull is not there too")
 	var sail_code := FileAccess.get_file_as_string("res://shaders/ship_model_sail.gdshader")
 	assert_true(sail_code.contains("TIME") and sail_code.contains("discard"), "the sails ripple and keep their cut-out shape")

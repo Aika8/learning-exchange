@@ -190,8 +190,8 @@ static func cost(ship: Node3D) -> Vector2i:
 
 
 ## The ship. With `model` and the pinnace downloaded: Poly Haven's model, scaled and turned, every material of it
-## put after the island's technique, and on it what the sheets add — wing sails, the crystal, the flag, the bird,
-## the lanterns and the wind spirit. Otherwise the ship built here part by part.
+## put after the island's technique, and on it only the crystal, the flag and the light of her stern lanterns: the
+## bird, the wind spirit, the name board and the wing sails built in code fell short of her (ADR-0036, amendment 2). Otherwise the ship built here part by part.
 static func build(model: bool = true) -> Node3D:
 	var s := Node3D.new()
 	s.name = "Wayfarer"
@@ -200,11 +200,7 @@ static func build(model: bool = true) -> Node3D:
 	if pinnace != null:
 		s.set_meta("model", true)
 		s.add_child(pinnace)
-		s.add_child(_pinnace_stern())
-		var bird := _figurehead()
-		bird.position = at(0, 4.4, 17.3)
-		bird.scale = Vector3.ONE * 0.6
-		s.add_child(bird)
+		s.add_child(_pinnace_lights())  # the pinnace is carved already: only the light of her stern lanterns is added
 	else:
 		s.add_child(_hull())
 		s.add_child(_castles())
@@ -217,10 +213,8 @@ static func build(model: bool = true) -> Node3D:
 			s.add_child(_square_sail(sail[0], sail[1], sail[2], sail[3], sail[4]))
 		s.add_child(_fore_and_aft_sails())
 	for sd: float in [-1.0, 1.0]:
-		var wing := _wing(sd)
-		if pinnace != null:
-			wing.position = Vector3(0, 0.55, -0.2)  # the pinnace's bilge is higher than the built hull's
-		s.add_child(wing)
+		if pinnace == null:  # the wing sails were flat fans beside her real cloth: the pinnace has none (ADR-0036, amendment 2)
+			s.add_child(_wing(sd))
 	var crystal := _crystal()
 	var flag := _flag()
 	if pinnace != null:
@@ -291,46 +285,18 @@ static func _after_effect(src: BaseMaterial3D, sail: bool) -> Material:
 	return out
 
 
-## What the sheets add to the pinnace's own carved stern: two lanterns that give light, the wind spirit's gilded
-## face, and the name.
-static func _pinnace_stern() -> Node3D:
+## The light of the pinnace's stern lanterns, at each quarter of the taffrail: lights only, her own carving stays.
+static func _pinnace_lights() -> Node3D:
 	var n := Node3D.new()
 	n.name = "Stern"
-	var k := Kit.new()
-	var face := at(0, 6.5, -18.45)  # the wind spirit, between the gallery and the taffrail
-	k.mesh(gilt(), Proc._sphere(0.2), Transform3D(Basis().scaled(Vector3(1.0, 1.05, 0.6)), face))
 	for sx: float in [-1.0, 1.0]:
-		k.mesh(gilt(), Proc._sphere(0.08), Transform3D(Basis(), face + Vector3(sx * 0.11, -0.05, 0.08)))
-		for j in 4:
-			k.mesh(gilt(), Proc._cyl_mesh(0.03, 0.05, 0.36 + j * 0.07, 6), Transform3D(Basis(Vector3.BACK, sx * (1.2 + j * 0.16)), face + Vector3(sx * (0.3 + j * 0.06), 0.09 - j * 0.07, -0.02)))
-		var lamp_at := at(sx * 3.3, 10.4, -18.3)  # a lantern at each quarter
-		k.box(iron(), Vector3(0.05, 0.4, 0.05), lamp_at + Vector3(0, -0.36, 0))
-		k.mesh(lit_glass(), Proc._cyl_mesh(0.13, 0.1, 0.32, 6), Transform3D(Basis(), lamp_at))
-		k.mesh(gilt(), Proc._cyl_mesh(0.03, 0.17, 0.15, 6), Transform3D(Basis(), lamp_at + Vector3(0, 0.24, 0)))
-		k.mesh(gilt(), Proc._cyl_mesh(0.15, 0.15, 0.04, 6), Transform3D(Basis(), lamp_at + Vector3(0, -0.18, 0)))
-		for a in 6:
-			k.box(gilt(), Vector3(0.02, 0.32, 0.02), lamp_at + Vector3(cos(a * TAU / 6.0), 0, sin(a * TAU / 6.0)) * 0.13)
 		var lamp := OmniLight3D.new()
 		lamp.name = "LanternL" if sx < 0.0 else "LanternR"
 		lamp.light_color = Color("ffc66e")
 		lamp.light_energy = 0.9
 		lamp.omni_range = 5.0
-		lamp.position = lamp_at
+		lamp.position = at(sx * 3.3, 10.4, -18.3)
 		n.add_child(lamp)
-	k.mesh(gilt(), Proc._sphere(0.035), Transform3D(Basis(), face + Vector3(0, -0.01, 0.13)))
-	var board := at(0, 4.2, -18.3)
-	k.box(gilt(), Vector3(1.7, 0.26, 0.05), board)
-	n.add_child(k.commit("Carving"))
-	var name_board := Label3D.new()
-	name_board.name = "Name"
-	name_board.text = "ПОПУТЧИК"
-	name_board.font_size = 40
-	name_board.pixel_size = 0.005
-	name_board.modulate = Color("2a1c12")
-	name_board.outline_size = 0
-	name_board.position = board + Vector3(0, 0, 0.035)
-	name_board.render_priority = AFTER_EFFECT + 2
-	n.add_child(name_board)
 	return n
 
 

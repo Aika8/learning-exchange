@@ -628,3 +628,10 @@ Build and CI
 - Talks: the host (each newcomer brings two), the barker (a doubled golden ticket, no risk, a trade secret), the happy
   ticket holder (never took it out), the worried coin counter (the till opens tomorrow), the sweeper (fairs come and
   go), and a stranger (so many people cannot be wrong). The captain names the sign each time; nobody advises.
+
+## G3D the pinnace without the code-built parts (ADR-0036, amendment 2)
+- `Wayfarer.build(true)` with the pinnace adds only `Stern` (two `OmniLight3D`, `LanternL`/`LanternR`, no meshes),
+  the crystal and the flag. `_pinnace_stern` is gone; `_figurehead` and `_wing` are used by the built ship only.
+- The model test now asserts that `Figurehead`, `WingL`, `WingR`, `Name` and `Carving` are absent on the pinnace.
+- Frame rate in the harbour after the change (1920×1080, `--fps --only=harbour`): the captain 118.0 / 1 % low 64.1;
+  the ship views 117.5–118.9 / lows 59.5–74.6.

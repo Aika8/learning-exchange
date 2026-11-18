@@ -121,3 +121,16 @@ Recording of the helmsman flying her from the harbour to Silk Reach: [flight.gif
 `godot --path game3d` → the ship lies at the pier of every port; the chart at the ship → any island, and fly;
 or `godot --path game3d -- --views=<dir> --only=harbour` (`view-ship*`),
 `--flight=<dir> --island=harbour --to=silk [--measure]`.
+
+## Without the code-built parts (ADR-0036, amendment 2)
+The bird, the wind spirit, the name board, the code-built lanterns and the wing sails are taken off the pinnace;
+the crystal, the flag and the lanterns' light stay. Before | after:
+
+| | |
+|---|---|
+| ![](g3d-ship/trim-before-bow.jpg) | ![](g3d-ship/trim-after-bow.jpg) |
+| ![](g3d-ship/trim-before-stern.jpg) | ![](g3d-ship/trim-after-stern.jpg) |
+| ![](g3d-ship/trim-before-wing.jpg) | ![](g3d-ship/trim-after-wing.jpg) |
+| ![](g3d-ship/trim-before-ship.jpg) | ![](g3d-ship/trim-after-ship.jpg) |
+
+In flight (before: `pinnace-flight.jpg` above): ![](g3d-ship/trim-after-flight.jpg)
