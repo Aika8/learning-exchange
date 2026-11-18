@@ -113,6 +113,7 @@ const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1,
 	"mara": [0.98, 1.08, 1.34, 0.09], "changer": [0.96, 1.32, 1.3, 0.06], "olva": [1.0, 0.8, 1.12, 0.1], "trader": [0.88, 1.45, 1.15, 0.05],
 	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0],
 	"crypto_trader": [1.04, 1.0, 1.12, 0.06], "crypto_miner": [0.98, 1.2, 1.15, 0.05], "crypto_dreamer": [0.96, 0.82, 1.14, 0.06], "crypto_analyst": [1.0, 0.84, 1.12, 0.06],
+	"toy_gentleman": [1.0, 1.45, 1.2, 0.05], "toy_lady": [0.98, 0.85, 1.18, 0.04], "toy_grandpa": [0.95, 0.95, 1.2, 0.07], "toy_granny": [0.86, 1.1, 1.22, 0.05], "toy_child": [0.66, 0.92, 1.36, 0.04],
 	"noir_broker": [1.06, 1.05, 1.12, 0.07], "noir_tramp": [0.93, 1.15, 1.2, 0.12], "noir_youth": [0.98, 0.74, 1.16, 0.06], "noir_lady": [1.0, 0.85, 1.14, 0.06]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
 	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
@@ -141,8 +142,8 @@ func _body(role: String) -> void:
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
 	if nose > 0.0:  # no face, but a nose: it belongs to the outline
 		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
-	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst"]:  # hair under the hat or kerchief
-		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child"]:  # hair under the hat or kerchief
+		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp", "toy_grandpa", "toy_granny"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
 	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
@@ -352,6 +353,71 @@ func _r_crypto_analyst(_tint: Color) -> void:
 	_open_coat(jacket, cloth(Color("19d8f0")), _p("pelvis").y - 0.14 * k, 24.0, true)
 	_coat_sleeves(jacket, cloth(Color("19d8f0")), cloth(Color("23283a")))
 	_bun()
+
+
+## Sheet 50, the calm rich gentleman: a mint frock coat with lavender trim over a butter waistcoat, cream
+## trousers, a tall powder-blue hat.
+func _r_toy_gentleman(_tint: Color) -> void:
+	var coat := cloth(Color("b5e2b8"))
+	_recolour("top", cloth(Color("ffeb99")))
+	_recolour("bot", cloth(Color("f3ead6")))
+	_recolour("lea", leather(Color("6b4630")))
+	_hide("fedora")
+	_breeches(cloth(Color("f3ead6")), 0.12)
+	_stockings(cloth(Color("f3ead6")))
+	_waistcoat(cloth(Color("ffeb99")), 30.0)
+	_open_coat(coat, cloth(Color("d7bde2")), _p("calf_l").y + 0.12 * k, 62.0, false)
+	_coat_sleeves(coat, cloth(Color("d7bde2")), cloth(Color("ffffff")))
+	_wide_hat(felt(Color("a8cce4")), 0.1, 0.24)
+
+
+## Sheet 50, the elegant lady: a wide pink gown, a lavender bonnet.
+func _r_toy_lady(_tint: Color) -> void:
+	_recolour("top", cloth(Color("ffb7b2")))
+	_recolour("bot", cloth(Color("ffd9e0")))
+	_recolour("lea", leather(Color("f3ead6")))
+	_long_skirt(cloth(Color("ffd9e0")), cloth(Color("d7bde2")), _p("foot_l").y + 0.06 * k, 0.56, false)
+	_shirt_sleeves(cloth(Color("ffb7b2")))
+	_shawl(cloth(Color("ffb7b2")))
+	_wide_hat(felt(Color("e2cee2")), 0.26, 0.09)
+
+
+## Sheet 50, the retired husband: a powder-blue jacket, butter trousers, a flat cap.
+func _r_toy_grandpa(_tint: Color) -> void:
+	var coat := cloth(Color("a8cce4"))
+	_recolour("top", cloth(Color("fdf5e6")))
+	_recolour("bot", cloth(Color("f9e79f")))
+	_recolour("lea", leather(Color("6b4630")))
+	_hide("fedora")
+	_breeches(cloth(Color("f9e79f")), 0.11)
+	_stockings(cloth(Color("f9e79f")))
+	_open_coat(coat, cloth(Color("8fb4d0")), _p("pelvis").y - 0.16 * k, 40.0, true)
+	_coat_sleeves(coat, cloth(Color("8fb4d0")), cloth(Color("fdf5e6")))
+	_knit_cap(cloth(Color("b9ad8a")))
+
+
+## Sheet 50, the retired wife: a lavender shawl over a mint dress, a bonnet.
+func _r_toy_granny(_tint: Color) -> void:
+	_recolour("top", cloth(Color("a2d9ce")))
+	_recolour("bot", cloth(Color("a2d9ce")))
+	_recolour("lea", leather(Color("6b4630")))
+	_long_skirt(cloth(Color("a2d9ce")), cloth(Color("f5b7b1")), _p("foot_l").y + 0.06 * k, 0.38, false)
+	_shirt_sleeves(cloth(Color("a2d9ce")))
+	_shawl(cloth(Color("d7bde2")))
+	_kerchief(cloth(Color("a2d9ce")))
+
+
+## Sheet 50, the child in a sailor suit: a powder-blue blouse with a dark collar, dark shorts, a sailor cap.
+func _r_toy_child(_tint: Color) -> void:
+	_recolour("top", cloth(Color("aed6f1")))
+	_recolour("bot", cloth(Color("2a3a4a")))
+	_recolour("lea", leather(Color("6b4630")))
+	_hide("fedora")
+	_breeches(cloth(Color("2a3a4a")), 0.1)
+	_stockings(cloth(Color("d9d9d9")))
+	_shirt_sleeves(cloth(Color("aed6f1")))
+	_shawl(cloth(Color("1a5b5c")))  # the sailor collar
+	_knit_cap(cloth(Color("aed6f1")))
 
 
 const NOIR_RED := Color("c4302b")  ## the one colour of the short sellers' island (sheet 36)

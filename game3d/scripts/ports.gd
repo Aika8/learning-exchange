@@ -6,7 +6,7 @@ extends RefCounted
 
 const WORLD_CENTRE := Vector3(0, 0, 0)
 const WORLD_RADIUS := 620.0  ## the farthest berth lies about 420 m out
-const ORDER: Array[String] = ["harbour", "silk", "amber", "shorts", "crypto"]
+const ORDER: Array[String] = ["harbour", "silk", "amber", "shorts", "crypto", "index"]
 
 
 ## id → {name: i18n key, berth: where the ship lies moored, centre: the island's top, radius, depth, away: heading
@@ -20,6 +20,7 @@ static func all() -> Dictionary:
 		"amber": {"name": "AMB_TITLE", "berth": AmberCliff.DOCK + Vector3(0, 1.2, 0), "centre": AmberCliff.AT, "radius": AmberCliff.RADIUS, "depth": 58.0},
 		"shorts": {"name": "SHORTS_TITLE", "berth": ShortIsle.DOCK + Vector3(0, 1.2, 0), "centre": ShortIsle.AT, "radius": ShortIsle.RADIUS, "depth": 46.0},
 		"crypto": {"name": "CRYPTO_TITLE", "berth": CryptoIsle.DOCK + Vector3(0, 1.2, 0), "centre": CryptoIsle.AT, "radius": CryptoIsle.RADIUS, "depth": 44.0},
+		"index": {"name": "INDEX_TITLE", "berth": IndexIsle.DOCK + Vector3(0, 1.2, 0), "centre": IndexIsle.AT, "radius": IndexIsle.RADIUS, "depth": 40.0},
 	}
 
 

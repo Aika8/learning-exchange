@@ -33,7 +33,12 @@
     "crypto_analyst": {"name": "WHO_CRYPTO_ANALYST", "who": "trader", "role": "crypto_analyst", "coat": "23283a", "face": "crypto_analyst", "one_face": true},
     "bot_trader": {"name": "WHO_BOT_TRADER", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_trader", "one_face": true},
     "bot_miner": {"name": "WHO_BOT_MINER", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_miner", "one_face": true},
-    "bot_info": {"name": "WHO_BOT_INFO", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_info", "one_face": true}
+    "bot_info": {"name": "WHO_BOT_INFO", "who": "", "role": "", "coat": "8a8fb0", "face": "bot_info", "one_face": true},
+    "toy_gentleman": {"name": "WHO_TOY_GENTLEMAN", "who": "trader", "role": "toy_gentleman", "coat": "b5e2b8", "face": "toy_gentleman", "one_face": true},
+    "toy_lady": {"name": "WHO_TOY_LADY", "who": "trader", "role": "toy_lady", "coat": "ffb7b2", "face": "toy_lady", "one_face": true},
+    "toy_grandpa": {"name": "WHO_TOY_GRANDPA", "who": "oldman", "role": "toy_grandpa", "coat": "a8cce4", "face": "toy_grandpa", "one_face": true},
+    "toy_granny": {"name": "WHO_TOY_GRANNY", "who": "trader", "role": "toy_granny", "coat": "d7bde2", "face": "toy_granny", "one_face": true},
+    "toy_child": {"name": "WHO_TOY_CHILD", "who": "child", "role": "toy_child", "coat": "aed6f1", "face": "toy_child", "one_face": true}
   },
   "backdrops": {
     "wharf": {"sky": "f3d7a8", "ground": "8a5a3c"},
@@ -43,7 +48,8 @@
     "amber": {"sky": "8fd0d8", "ground": "e3c58a"},
     "amber_in": {"sky": "f1dcae", "ground": "9a6a4a"},
     "noir": {"sky": "8a8a8a", "ground": "1d1c20"},
-    "neon": {"sky": "5b2a86", "ground": "1b1035"}
+    "neon": {"sky": "5b2a86", "ground": "1b1035"},
+    "pastel": {"sky": "e2cee2", "ground": "b5e2b8"}
   },
   "talks": {
     "mara_first": {"backdrop": "wharf", "pages": [
@@ -284,6 +290,41 @@
       {"panels": [
         {"shot": "two", "cast": ["bot_info", "captain"], "lines": [["bot_info", "TALK_BOT_INFO_1", "neutral"], ["captain", "TALK_BOT_INFO_2", "sly"]]},
         {"shot": "close", "cast": ["bot_info"], "lines": [["bot_info", "TALK_BOT_INFO_3", "neutral"]]}
+      ]}
+    ]},
+    "index_palace": {"backdrop": "pastel", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["toy_gentleman", "captain"], "caption": "TALK_INDEX_PALACE_C", "mood": {"toy_gentleman": "neutral", "captain": "neutral"}},
+        {"shot": "two", "cast": ["toy_gentleman", "captain"], "lines": [["toy_gentleman", "TALK_INDEX_PALACE_1", "neutral"], ["captain", "TALK_INDEX_PALACE_2", "surprised"]]},
+        {"shot": "close", "cast": ["toy_gentleman"], "lines": [["toy_gentleman", "TALK_INDEX_PALACE_3", "neutral"]]}
+      ]},
+      {"panels": [
+        {"shot": "close", "cast": ["captain"], "lines": [["captain", "TALK_INDEX_PALACE_4", "sly"]]},
+        {"shot": "low", "cast": ["toy_gentleman"], "lines": [["toy_gentleman", "TALK_INDEX_PALACE_5", "neutral"]]}
+      ]}
+    ]},
+    "index_lady": {"backdrop": "pastel", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["toy_lady", "captain"], "lines": [["toy_lady", "TALK_INDEX_LADY_1", "neutral"], ["captain", "TALK_INDEX_LADY_2", "surprised"]]},
+        {"shot": "close", "cast": ["toy_lady"], "lines": [["toy_lady", "TALK_INDEX_LADY_3", "neutral"]]}
+      ]}
+    ]},
+    "index_grandpa": {"backdrop": "pastel", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["toy_grandpa", "captain"], "lines": [["toy_grandpa", "TALK_INDEX_GRANDPA_1", "neutral"], ["captain", "TALK_INDEX_GRANDPA_2", "surprised"]]},
+        {"shot": "close", "cast": ["toy_grandpa"], "lines": [["toy_grandpa", "TALK_INDEX_GRANDPA_3", "neutral"]]}
+      ]}
+    ]},
+    "index_granny": {"backdrop": "pastel", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["toy_granny", "captain"], "lines": [["toy_granny", "TALK_INDEX_GRANNY_1", "neutral"], ["captain", "TALK_INDEX_GRANNY_2", "sly"]]},
+        {"shot": "close", "cast": ["toy_granny"], "lines": [["toy_granny", "TALK_INDEX_GRANNY_3", "neutral"]]}
+      ]}
+    ]},
+    "index_child": {"backdrop": "pastel", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["toy_child", "captain"], "lines": [["toy_child", "TALK_INDEX_CHILD_1", "neutral"], ["captain", "TALK_INDEX_CHILD_2", "happy"]]},
+        {"shot": "close", "cast": ["toy_child"], "lines": [["toy_child", "TALK_INDEX_CHILD_3", "neutral"]]}
       ]}
     ]}
   }

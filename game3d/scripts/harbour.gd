@@ -76,6 +76,16 @@ func _crypto() -> bool:
 	return Game.island == CryptoIsle.ID
 
 
+func _index() -> bool:
+	return Game.island == IndexIsle.ID
+
+
+## The index island (ADR-0033): a place and a style for now. id → [position, prompt key, radius].
+static func index_spots() -> Dictionary:
+	return {"ship": [IndexIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0],
+		"palace": [IndexIsle.door()[1], "PROMPT_BANK_PALACE", 3.0]}
+
+
 ## The crypto island (ADR-0031): a place and a style for now. id → [position, prompt key, radius].
 static func crypto_spots() -> Dictionary:
 	var out := {"ship": [CryptoIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0]}
@@ -106,6 +116,8 @@ func _spots() -> Dictionary:
 		return shorts_spots()
 	if _crypto():
 		return crypto_spots()
+	if _index():
+		return index_spots()
 	return SILK_SPOTS if _silk() else HARBOUR_SPOTS
 
 
@@ -130,6 +142,8 @@ func _ready() -> void:
 		ship.position = ShortIsle.DOCK + Vector3(0, 1.2, 0)
 	if _crypto():
 		ship.position = CryptoIsle.DOCK + Vector3(0, 1.2, 0)
+	if _index():
+		ship.position = IndexIsle.DOCK + Vector3(0, 1.2, 0)
 	ship.rotation.y = PI / 2
 	add_child(ship)
 	_captain = Captain.new()
@@ -169,6 +183,9 @@ func _dress() -> void:
 		return
 	if _crypto():
 		_dress_crypto()
+		return
+	if _index():
+		_dress_index()
 		return
 	if _silk():
 		var post_y := Archipelago.silk_ground(SILK_POST - Archipelago.SILK)
@@ -287,6 +304,19 @@ func _dress_amber() -> void:
 		_villagers[-1].set_meta("talk", "amber_" + id)
 
 
+## The index island: the gentleman by the palace door, and four people strolling (sheet 50).
+func _dress_index() -> void:
+	var cast := ComicScript.read().cast
+	var at := IndexIsle.door()
+	var g: Dictionary = cast["toy_gentleman"]
+	_npc(str(g["who"]), Color(str(g["coat"])), at[0], atan2(at[1].x - at[0].x, at[1].z - at[0].z), str(g["role"])).name = "Keeper_palace"
+	var homes := {"toy_lady": [Vector3(-6, 0, 2.0), 5.0], "toy_grandpa": [Vector3(-20, 0, -1.2), 5.0], "toy_granny": [Vector3(-18, 0, 1.2), 5.0], "toy_child": [Vector3(8, 0, -3.0), 5.0]}
+	for id: String in homes:
+		var c: Dictionary = cast[id]
+		_villager(str(c["who"]), Color(str(c["coat"])), IndexIsle.AT + (homes[id][0] as Vector3), homes[id][1], str(c["role"]))
+		_villagers[-1].set_meta("talk", "index_" + id.trim_prefix("toy_"))
+
+
 ## The crypto island: the miner by his machine and three people in the street (sheet 44). The robots are built
 ## with the island; each is a spot to talk at.
 func _dress_crypto() -> void:
@@ -347,7 +377,7 @@ func _build_ui() -> void:
 	top.offset_top = 22
 	root.add_child(top)
 	var titles := VBoxContainer.new()
-	var title := Hud.text("CRYPTO_TITLE" if _crypto() else "SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
+	var title := Hud.text("INDEX_TITLE" if _index() else "CRYPTO_TITLE" if _crypto() else "SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
 	title.add_theme_font_override("font", Hud.serif())
 	titles.add_child(title)
 	_title = title
@@ -432,7 +462,7 @@ func _process(delta: float) -> void:
 		blades.rotation.z += delta * 0.5
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
-		ship.position.y = (CryptoIsle.DOCK.y if _crypto() else ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+		ship.position.y = (IndexIsle.DOCK.y if _index() else CryptoIsle.DOCK.y if _crypto() else ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
 	for w in _idlers:
 		w.step(delta, 0.0)
 	if _flying:
@@ -449,7 +479,14 @@ func _process(delta: float) -> void:
 	if _target.is_empty():
 		_dialog.visible = false
 	_report_timer -= delta
-	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts() and not _crypto():
+	if _index():  # the fountain drops a coin every few seconds: a regular contribution, and the island's only motion
+		var coin: Node3D = _parts["index"].get_node_or_null("Coin")
+		if coin:
+			var h := IndexIsle.coin_height(Time.get_ticks_msec() * 0.001)
+			coin.visible = h >= 0.0
+			coin.position.y = 2.0 + maxf(h, 0.0)
+			coin.rotation.z = h * 3.0
+	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts() and not _crypto() and not _index():
 		_report_timer = 2.0
 		Game.watch_report()
 
@@ -578,7 +615,7 @@ func interact() -> void:
 	if _target == "ship":
 		await open_chart()
 		return
-	if _amber() or _shorts() or _crypto():
+	if _amber() or _shorts() or _crypto() or _index():
 		if _crypto():
 			await talk(_target)  # a robot: the spot is named like its talk
 		elif not _target.is_empty():

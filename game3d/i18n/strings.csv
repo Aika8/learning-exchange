@@ -320,3 +320,5 @@ VOYAGE_CHART_ROW,%s — %s м,%s — %s m
 VOYAGE_CHART_FREE,Лететь свободно,Fly free
 VOYAGE_CHART_STAY,Остаться в порту,Stay in port
 VOYAGE_CHART_NOTE,"Пока корабль в пути, часы Биржи идут ×60. Причалить можно у любого острова.",While the ship is under way the Exchange clock runs ×60. You may moor at any island.
+PROMPT_BANK_PALACE,E — Банк-дворец,E — the Bank Palace
+INDEX_TITLE,Остров индексов,Index Island

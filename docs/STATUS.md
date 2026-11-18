@@ -3,6 +3,12 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D index island (ADR-0033, Proposed) — `docs/demo/G3D-index.md`
+- A sixth island: a mirror-symmetrical pastel toy town — identical mansions, an avenue to the Bank Palace, a
+  fountain that drops a coin, sky yachts — drawn with gloss, soft seams and a careful tilt-shift. A place and a
+  style: no index mechanics (they wait for intent 03). Five islanders talk. On the flight chart. Audit 0, GUT 130,
+  118 fps average at 1080p. The glass dome is not built.
+
 ## G3D free flight (ADR-0032, Proposed) — `docs/demo/G3D-flight.md`
 - The player flies the ship between all five islands: sail, wheel, height, wind; islands are solid, the world has
   an edge; a chart at the pier marks a destination or "fly free"; compass and chart in the HUD; moor at any pier.

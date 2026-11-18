@@ -6,7 +6,7 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4}
+const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4, "toy": 5}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
 ## Spark Harbour is the look of ADR-0024 as approved. Every other island has a technique of its own.
@@ -75,6 +75,19 @@ const TABLE := {
 		"sun": Color("b9a6ff"),  # a violet dusk
 		"sun_energy": 0.85,
 		"accent": Color("00f0ff"),
+	},
+	"index": {
+		"technique": "toy",  # a pastel toy town: gloss, soft seams, tilt-shift at the rims (sheets 47–51; ADR-0033)
+		"ramp": [Color("c9b8e8"), Color("1a5b5c"), Color("fff3e0"), Color("bfe3ea")],  # the shade's lavender, the seam's teal, sky low, sky high
+		"ink": Color("1a5b5c"),
+		"width": 1.2,
+		"tint": Color(1.0, 1.0, 1.0),
+		"paper": Color("fdf5e6"),
+		"hatch_turn": 0.0,
+		"hatch_gap": 9.0,
+		"sun": Color("fff4e0"),  # even, soft
+		"sun_energy": 1.1,
+		"accent": Color("f4d03f"),
 	},
 }
 
