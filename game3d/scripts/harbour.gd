@@ -168,6 +168,9 @@ func _ready() -> void:
 	_captain.position = at[0]
 	_captain.respawn = at[0]
 	_captain.yaw = at[1]
+	var monkey := Monkey.new()  # she comes ashore with the captain (ADR-0036)
+	monkey.follow = _captain
+	add_child(monkey)
 	Session.set_style(Game.island)
 	Session.hero = _captain
 	if Game.attuned != Game.island and not Session.tooling():

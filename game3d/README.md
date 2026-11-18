@@ -52,6 +52,8 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/amber_cliff.gd`, `scripts/core/island_tongue.gd`, `i18n/amber.csv` | Amber Cliff, the French-speaking island (ADR-0028): the town, the island's tongue, its words (`fr,ru,en`) |
 | `scripts/index_isle.gd` | The index island (ADR-0035): a canal town — gabled brick houses, a canal with bridges, the Exchange, the coin fountain, sky ships |
 | `scripts/race_isle.gd` | The race island (ADR-0034): a banked track in the air on brackets, the timing tower, pit boxes, a grandstand, four sky skiffs as decoration |
+| `scripts/wayfarer.gd` | The hero's ship «Попутчик» (ADR-0036): the one realistic thing, drawn after the island's technique; hull, rig, stern, figurehead, wing sails, crystal, flag |
+| `scripts/monkey.gd`, `scripts/core/monkey_mind.gd` | The ship's monkey: her body, and her decisions as a pure model (in the rig under way, near the captain ashore) |
 | `scripts/crypto_isle.gd` | The crypto island (ADR-0031): neon towers, palms, the Exchange That Never Closes, the wind coin, the three robots |
 | `scripts/short_isle.gd` | The short sellers' island (ADR-0030): the slab, crooked houses and towers, the Exchange of Falling Prices, its props |
 | `scripts/props.gd` | The props of the props sheet built in code: lamp, stall, crate, barrel, chest, rope coil, bollard, anchor, signboards |

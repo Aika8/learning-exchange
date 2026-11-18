@@ -531,3 +531,20 @@ Build and CI
   eye-comfort measurement walks, so its numbers are the picture's.
 - Spots: `exchange` (the merchant) and `stall` (the cheese woman); the prompt `PROMPT_BANK_PALACE` is replaced.
 - The first look's demo page is `docs/demo/G3D-toy-town.md`.
+
+## G3D the ship and the monkey (ADR-0036)
+- Ship materials: transparent pass, `depth_draw ALWAYS`, alpha 1, render priority 101 (cloth, sails and flag 102,
+  the name 103, drops 104); the effect is at 100. All are made in `Wayfarer.material` / `canvas` and nowhere else.
+- Poly Haven textures are taken through `Assets.pbr(...).duplicate()` with world triplanar turned off, so the
+  grain is in the ship's space; the shared cached material is not touched.
+- Hull: 24 slices; half-beam 76 % at the transom, full at 40 % of the length, a cosine to the stem; sheer 0.55 m
+  aft and 0.6 m forward. 12 m on deck, 3.6 m beam, bow at −z as before, so every berth in `Ports` still fits.
+- `Wayfarer.set_trim` replaces the voyage scene's own scaling of a node called "Sail": both square sails are
+  gathered up to their yards (22 % of their height when furled).
+- The flag flies aft, as on the sheet, although the sails are full from astern.
+- The wing sails' roots are below the gun ports (y −1.25) so the lids are not inside the canvas.
+- The monkey is a `CharacterBody3D` with no shape and layers 0: the audit counts her with the creatures, not with
+  the things one may not walk through, and she stops nobody. Ashore she runs at 6.5 m/s, sits within 1.7 m of the
+  captain and gets up at 2.8 m. Seeded: the same seed gives the same monkey.
+- `Proc.ship()` is now `Wayfarer.build()`; `Proc._real_ship` (the Poly Haven model) is removed.
+- Five fixed views of the ship are added to the harbour's list (`view-ship*`).

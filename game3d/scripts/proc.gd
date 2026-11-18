@@ -460,67 +460,9 @@ static func hull_mesh(length: float, width: float, height: float) -> ArrayMesh:
 	return m
 
 
-## The player's ship «Попутчик»: hull, mast, billowing sail (child "Sail"), side vanes, a crystal keel and a lantern.
+## The player's ship «Попутчик» (ADR-0036): built by `Wayfarer`, the one realistic thing in the game.
 static func ship() -> Node3D:
-	var real := _real_ship()
-	if real != null:
-		return real
-	var s := Node3D.new()
-	var hull := mesh_node(hull_mesh(9.0, 3.2, 1.8), vertex_mat())
-	(hull.material_override as StandardMaterial3D).cull_mode = BaseMaterial3D.CULL_DISABLED
-	s.add_child(hull)
-	s.add_child(box(Vector3(2.4, 1.1, 2.2), TIMBER_DARK, Vector3(0, 0.55, 3.0)))
-	s.add_child(box(Vector3(2.6, 0.15, 2.4), BRASS, Vector3(0, 1.15, 3.0)))
-	s.add_child(cyl(0.14, 0.18, 8.5, 6, TIMBER_DARK, Vector3(0, 4.2, -0.4)))
-	s.add_child(box(Vector3(5.2, 0.18, 0.18), TIMBER_DARK, Vector3(0, 7.4, -0.4)))
-	var sail_mesh := PlaneMesh.new()
-	sail_mesh.size = Vector2(4.8, 5.0)
-	sail_mesh.subdivide_width = 8
-	sail_mesh.subdivide_depth = 8
-	sail_mesh.orientation = PlaneMesh.FACE_Z
-	var sail_mat := ShaderMaterial.new()
-	sail_mat.shader = load("res://shaders/sail.gdshader")
-	var sail := mesh_node(sail_mesh, sail_mat, Vector3(0, 4.8, -0.55))
-	sail.name = "Sail"
-	s.add_child(sail)
-	for side in [-1.0, 1.0]:
-		var vane := box(Vector3(2.6, 0.08, 1.4), CANVAS, Vector3(side * 2.5, 0.3, 0.4))
-		vane.rotation.z = side * 0.25
-		s.add_child(vane)
-	var keel := cyl(0.0, 0.5, 1.6, 5, CRYSTAL, Vector3(0, -2.0, 0.2))
-	keel.material_override = mat(CRYSTAL, 2.5)
-	keel.rotation.x = PI
-	s.add_child(keel)
-	s.add_child(ball(0.25, Color("ffcf6e"), Vector3(0, 2.0, 4.0), 3.0))
-	return s
-
-
-## Sky ship from the Poly Haven Dutch ship model (ADR-0019) with our ether keel and wind vanes. Bow at -z, ~11 m.
-static func _real_ship() -> Node3D:
-	var m := Assets.model("dutch_ship_medium")
-	if m == null:
-		return null
-	var s := Node3D.new()
-	m.name = "Hull"
-	m.scale = Vector3.ONE * SHIP_SCALE
-	m.rotation.y = SHIP_YAW
-	m.position = Vector3(0, SHIP_LIFT, 0)
-	s.add_child(m)
-	for side in [-1.0, 1.0]:
-		var vane := box(Vector3(2.6, 0.08, 1.4), CANVAS, Vector3(side * 2.4, 0.4, 0.4))
-		vane.rotation.z = side * 0.25
-		s.add_child(vane)
-	var keel := cyl(0.0, 0.5, 1.6, 7, CRYSTAL, Vector3(0, -1.6, 0.2))
-	keel.material_override = mat(CRYSTAL, 2.5)
-	keel.rotation.x = PI
-	s.add_child(keel)
-	var glow := OmniLight3D.new()
-	glow.light_color = CRYSTAL
-	glow.light_energy = 1.5
-	glow.omni_range = 5.0
-	glow.position = Vector3(0, -1.8, 0)
-	s.add_child(glow)
-	return s
+	return Wayfarer.build()
 
 
 ## A villager figure: body, head, hat. `coat` and `hat` colours tell people apart. `who` picks a MakeHuman
