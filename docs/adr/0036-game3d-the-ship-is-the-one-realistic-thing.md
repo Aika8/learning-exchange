@@ -124,3 +124,15 @@ rest stands, and above all decision 1: the exception by draw order.
 | Keep the built ship | Aika prefers the model's hull, carving and rigging; the built one stays as the stand-in |
 | Remove the third mast to match the sheets | The masts, rigging and sails are single meshes: cutting one out is modelling work outside the engine |
 
+
+## Amendment 2, 2026-11-18: only what holds up beside the pinnace is added to her
+Aika: the bird on the bow and some added parts "look very bad". Seen beside Poly Haven's pinnace, close and far,
+the parts built in code are another level of detail and of material: the low-poly yellow-green bird, the flat grey
+fans of the wing sails, the gilded wind spirit, the gilt name board and the lanterns of boxes and cylinders.
+- **Removed from the model ship**: the figurehead bird, the wind spirit, the name board «ПОПУТЧИК», the code-built
+  stern lanterns, and the wing sails (they could not be made as real cloth on yards in this step). The pinnace's own
+  carving stays as it is; only the **light** of two stern lanterns is added, without any geometry.
+- **Kept**: the flag (our sign) and the etherite crystal under the keel — at the pinnace's scale they hold up.
+- The ship built in code (no pinnace downloaded) keeps all of its parts: there they are of one level with the rest.
+- The sheets' name and wing sails wait for a version in the model's quality (PBR textures, real geometry, cloth like
+  her own sails); that is a new decision, not a fix.
