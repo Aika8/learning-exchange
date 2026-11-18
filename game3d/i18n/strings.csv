@@ -322,3 +322,6 @@ VOYAGE_CHART_STAY,Остаться в порту,Stay in port
 VOYAGE_CHART_NOTE,"Пока корабль в пути, часы Биржи идут ×60. Причалить можно у любого острова.",While the ship is under way the Exchange clock runs ×60. You may moor at any island.
 PROMPT_BANK_PALACE,E — Банк-дворец,E — the Bank Palace
 INDEX_TITLE,Остров индексов,Index Island
+PROMPT_TIMING_TOWER,E — Башня хронометража,E — the timing tower
+PROMPT_PIT_LANE,E — Пит-лейн,E — the pit lane
+RACE_TITLE,Остров гонок,Race Island

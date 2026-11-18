@@ -121,3 +121,26 @@ TALK_INDEX_GRANNY_3,"За тридцать лет один лишний проц
 TALK_INDEX_CHILD_1,"Тут скучно. Ничего нельзя трогать. И все дома одинаковые.","It is boring here. You may not touch anything. And all the houses are the same."
 TALK_INDEX_CHILD_2,"А тебе хотелось бы, как на других островах?","Would you rather it were like the other islands?"
 TALK_INDEX_CHILD_3,"Там весело! Но папа говорит: в деньгах скука — это хорошо.","It is fun there! But father says: with money, boring is good."
+WHO_DECO_AVIATOR,Авиатор,The aviator
+WHO_DECO_MECHANIC,Шеф-механик,The chief mechanic
+WHO_DECO_CREW,Член команды,The crew member
+WHO_DECO_MARSHAL,Маршал,The marshal
+WHO_DECO_LADY,Зрительница,The spectator
+TALK_RACE_TOWER_C,"Башня хронометража. Гран-при Ветров сегодня не идёт: трассу красят.","The timing tower. No Grand Prix of the Winds today: the track is being painted."
+TALK_RACE_TOWER_1,"Красный флаг — стоп. Это решено до старта, а не на вираже.","A red flag means stop. That was decided before the start, not in the bend."
+TALK_RACE_TOWER_2,"А если пилот уверен, что проскочит?","And if the pilot is sure he will slip through?"
+TALK_RACE_TOWER_3,"Уверены все. Поэтому правило пишут заранее. У торговцев такое правило — стоп-заявка.","Everyone is sure. That is why the rule is written beforehand. Traders call theirs a stop order."
+TALK_RACE_TOWER_4,"А часы на башне — тоже правило?","And the clock on the tower, is that a rule too?"
+TALK_RACE_TOWER_5,"Часы — это измерение. Без записи круга пилот помнит только удачные виражи.","The clock is measurement. Without a lap on paper a pilot remembers only the bends that went well."
+TALK_RACE_PIT_1,"Пит-стоп стоит четыре секунды. Каждый. Мы знаем это ещё до гонки.","A pit stop costs four seconds. Every one. We know that before the race."
+TALK_RACE_PIT_2,"А если не заезжать вовсе?","And if you never come in at all?"
+TALK_RACE_PIT_3,"Тогда платишь колесом на последнем круге. Издержки, известные заранее, — как комиссия: их считают в плане.","Then you pay with a wheel on the last lap. Costs known beforehand are like a fee: they go into the plan."
+TALK_RACE_AVIATOR_1,"Приз за третье место — хороший ужин и новые перчатки.","The prize for third place is a good supper and new gloves."
+TALK_RACE_AVIATOR_2,"Небогато.","Not much."
+TALK_RACE_AVIATOR_3,"Это плата за работу, а не клад. Она мала, зато не зависит от ветра на бирже.","It is pay for work, not a treasure. It is small, but it does not depend on the wind at the exchange."
+TALK_RACE_CREW_1,"Я записываю каждый круг: давление, время, ветер.","I write down every lap: pressure, time, wind."
+TALK_RACE_CREW_2,"Зачем столько цифр?","Why so many figures?"
+TALK_RACE_CREW_3,"Чтобы спорить с записью, а не с памятью. У вас это, кажется, журнал сделок.","To argue with the record, not with memory. You would call it a trading journal, I think."
+TALK_RACE_LADY_1,"Я болею за «Феникса». Он самый красивый.","I cheer for the Phoenix. It is the prettiest."
+TALK_RACE_LADY_2,"А если он не придёт первым?","And if it does not come in first?"
+TALK_RACE_LADY_3,"Трибуна стоит один билет, сколько бы кругов он ни проиграл. Я заранее знаю, сколько могу потерять.","The stand costs one ticket, however many laps it loses. I know beforehand how much I can lose."

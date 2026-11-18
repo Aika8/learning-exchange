@@ -14,6 +14,10 @@
 // 5 = toy (ADR-0033) — a pastel toy town: colours lifted towards cream, shade a soft lavender, a small gloss
 //     highlight from the normal, a soft teal seam instead of a line, and tilt-shift — the top and bottom of the
 //     screen blurred a little, the middle half left exactly sharp; nothing animated;
+// 6 = deco (ADR-0034) — a streamline art-deco poster: each surface in three flat tones of its own hue, shade
+//     leaning to navy and light to ivory; brass and copper in clean bands chosen from the surface's normal; a thin
+//     navy line; a peach sky with a low sun and twelve wide brass rays fixed to the world, not to the screen;
+//     nothing animated;
 // 2 = aquarelle — pen and watercolour: a thin trembling line, washes that run past it, a lot of bare paper, a
 //     violet-grey wash for shade, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
@@ -312,6 +316,67 @@ void fragment() {
 		result = mix(result, sky, far);
 		// a soft seam where parts meet, fading out in the blurred rims
 		result = mix(result, seam, edge * 0.42 * (1.0 - blur) * (1.0 - far));
+	} else if (tech == 6) {
+		vec3 navy = pow(line, vec3(0.45));
+		vec3 shade = pow(mix(ramp0, ramp0_from, old), vec3(0.45));
+		vec3 brass = pow(mix(ramp1, ramp1_from, old), vec3(0.45));
+		vec3 sky_low = pow(mix(ramp2, ramp2_from, old), vec3(0.45));
+		vec3 sky_high = pow(mix(ramp3, ramp3_from, old), vec3(0.45));
+		vec3 ivory = pow(sheet_colour, vec3(0.45));
+		vec3 copper = vec3(0.698, 0.325, 0.161);
+		vec3 seen = pow(clamp(col, 0.0, 1.0), vec3(0.45));
+		float top = max(seen.r, max(seen.g, seen.b));
+		float chroma = top - min(seen.r, min(seen.g, seen.b));
+		float far = smoothstep(500.0, 900.0, d);
+		vec3 world = (INV_VIEW_MATRIX * vec4(here, 1.0)).xyz;
+		vec3 wn = normalize(mat3(INV_VIEW_MATRIX) * n);
+		// flat poster colour: the light in five flat steps with narrow soft edges, the hue kept
+		float f = lum * 5.0;
+		float tone = (floor(f) + smoothstep(0.4, 0.6, fract(f))) / 5.0;
+		vec3 flat_c = seen * (tone / max(lum, 0.04));
+		flat_c = mix(vec3(dot(flat_c, vec3(0.333))), flat_c, 1.12);
+		flat_c = mix(mix(shade, flat_c, 0.45), flat_c, smoothstep(0.2, 0.5, tone));  // shade leans to navy
+		flat_c = mix(flat_c, ivory, smoothstep(0.8, 1.0, tone) * 0.3);  // light leans to ivory
+		if (mode == 2) {
+			flat_c = mix(navy, ivory, smoothstep(0.36, 0.44, lum));
+		} else {
+			// metal in clean bands: brass and copper are warm and saturated; the band comes from the normal
+			float gr = seen.g / max(seen.r, 0.01);
+			float metal = smoothstep(0.24, 0.32, chroma) * step(seen.b, seen.r * 0.47) * step(0.36, gr) * step(seen.g, seen.r);
+			float t = dot(wn, normalize(vec3(0.3, 1.0, 0.2)));
+			float b = fract(t * 2.5 + 0.75);  // a plate that faces up is the plain metal
+			float bright = smoothstep(0.42, 0.46, b) - smoothstep(0.58, 0.62, b);
+			float dark = smoothstep(0.76, 0.8, b) - smoothstep(0.92, 0.96, b);
+			vec3 sheet_metal = mix(copper, brass, smoothstep(0.5, 0.64, gr));
+			vec3 banded = mix(mix(sheet_metal, mix(sheet_metal, ivory, 0.45), bright), sheet_metal * 0.7, dark) * mix(0.82, 1.0, smoothstep(0.3, 0.5, lum));
+			flat_c = mix(flat_c, banded, metal);
+			// the one signal red
+			float red = step(1.6 * max(seen.g, seen.b), seen.r) * step(0.2, chroma) * step(gr, 0.36);
+			flat_c = mix(flat_c, vec3(0.784, 0.243, 0.235) * mix(0.72, 1.0, smoothstep(0.35, 0.5, lum)), red);
+		}
+		// the cloud sea: dusk navy, peach where the light falls
+		float sea = step(world.y, -44.0) * (1.0 - far);  // by height alone: the sea's own normals are not to be trusted
+		flat_c = mix(flat_c, mix(mix(shade, sky_low, 0.5), sky_low, smoothstep(0.9, 0.99, lum)), sea * float(mode != 2));
+		// the sky of the poster, fixed to the world: peach low, ivory high, a low sun and twelve wide rays
+		vec3 dir = normalize(mat3(INV_VIEW_MATRIX) * here);
+		vec3 sun = normalize(vec3(0.93, 0.1, 0.36));
+		vec3 su = normalize(cross(sun, vec3(0.0, 1.0, 0.0)));
+		vec3 sv = cross(su, sun);
+		float along = dot(dir, sun);
+		float off_sun = sqrt(max(1.0 - along * along, 0.0));
+		float r = abs(fract(atan(dot(dir, sv), dot(dir, su)) / 6.2831853 * 12.0) - 0.5) * 2.0;
+		float soft = 0.012 / max(off_sun, 0.03);
+		float ray = smoothstep(0.5 - soft, 0.5 + soft, r) * step(0.0, along) * (1.0 - smoothstep(0.25, 1.0, off_sun)) * smoothstep(0.1, 0.16, off_sun);
+		vec3 sky = mix(sky_low, sky_high, smoothstep(-0.05, 0.55, dir.y));
+		if (mode == 2) {
+			sky = ivory;
+		} else {
+			sky = mix(sky, brass, ray * 0.3);
+			sky = mix(sky, mix(ivory, brass, 0.25), step(0.0, along) * (1.0 - smoothstep(0.094, 0.1, off_sun)));
+		}
+		flat_c = mix(flat_c, sky, far);
+		flat_c = mix(flat_c, navy, edge * 0.85 * (1.0 - far));
+		result = pow(clamp(flat_c, 0.0, 1.0), vec3(2.2));
 	} else if (tech == 4) {
 		// Synthwave in texels that belong to the world, not to the screen (ADR-0031, revised): the edges of things
 		// are drawn at full sharpness; what is chunky is the paint on them, in squares 14 cm wide that stay on the

@@ -3,6 +3,13 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D race island (ADR-0034, Proposed) — `docs/demo/G3D-race.md`
+- A seventh island: the Grand Prix of the Winds, our own sky race, drawn as a streamline art-deco poster (flat
+  tones, metal in stripes from the normal, a world-fixed sunburst sky). A banked track in the air round the rock,
+  the timing tower, pit boxes, a grandstand, four skiffs as decoration. A place and a style: no race or pit-stop
+  mechanics (they wait for intent 03, question 13). Five islanders talk. On the flight chart. Audit 0, GUT 135, 118 fps
+  average at 1080p. The hangar islet and bridge of sheet 52 are not built.
+
 ## G3D index island (ADR-0033, Proposed) — `docs/demo/G3D-index.md`
 - A sixth island: a mirror-symmetrical pastel toy town — identical mansions, an avenue to the Bank Palace, a
   fountain that drops a coin, sky yachts — drawn with gloss, soft seams and a careful tilt-shift. A place and a

@@ -80,6 +80,17 @@ func _index() -> bool:
 	return Game.island == IndexIsle.ID
 
 
+func _race() -> bool:
+	return Game.island == RaceIsle.ID
+
+
+## The race island (ADR-0034): a place and a style for now. id → [position, prompt key, radius].
+static func race_spots() -> Dictionary:
+	return {"ship": [RaceIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0],
+		"tower": [RaceIsle.tower_door()[1], "PROMPT_TIMING_TOWER", 3.0],
+		"pit": [RaceIsle.pit_spot()[1], "PROMPT_PIT_LANE", 2.6]}
+
+
 ## The index island (ADR-0033): a place and a style for now. id → [position, prompt key, radius].
 static func index_spots() -> Dictionary:
 	return {"ship": [IndexIsle.PIER_FROM + Vector3(6.0, 0, 2.4), "PROMPT_SHIP_HOME", 5.0],
@@ -118,6 +129,8 @@ func _spots() -> Dictionary:
 		return crypto_spots()
 	if _index():
 		return index_spots()
+	if _race():
+		return race_spots()
 	return SILK_SPOTS if _silk() else HARBOUR_SPOTS
 
 
@@ -144,6 +157,8 @@ func _ready() -> void:
 		ship.position = CryptoIsle.DOCK + Vector3(0, 1.2, 0)
 	if _index():
 		ship.position = IndexIsle.DOCK + Vector3(0, 1.2, 0)
+	if _race():
+		ship.position = RaceIsle.DOCK + Vector3(0, 1.2, 0)
 	ship.rotation.y = PI / 2
 	add_child(ship)
 	_captain = Captain.new()
@@ -186,6 +201,9 @@ func _dress() -> void:
 		return
 	if _index():
 		_dress_index()
+		return
+	if _race():
+		_dress_race()
 		return
 	if _silk():
 		var post_y := Archipelago.silk_ground(SILK_POST - Archipelago.SILK)
@@ -317,6 +335,21 @@ func _dress_index() -> void:
 		_villagers[-1].set_meta("talk", "index_" + id.trim_prefix("toy_"))
 
 
+## The race island: the marshal by the tower door, the chief mechanic by the skiff in the pit lane, and three
+## people strolling (sheet 56).
+func _dress_race() -> void:
+	var cast := ComicScript.read().cast
+	for keeper: Array in [["deco_marshal", RaceIsle.tower_door(), "tower"], ["deco_mechanic", RaceIsle.pit_spot(), "pit"]]:
+		var c: Dictionary = cast[keeper[0]]
+		var at: Array[Vector3] = keeper[1]
+		_npc(str(c["who"]), Color(str(c["coat"])), at[0], atan2(at[1].x - at[0].x, at[1].z - at[0].z), str(c["role"])).name = "Keeper_" + str(keeper[2])
+	var homes := {"deco_aviator": [Vector3(-14, 0, 1.0), 5.0], "deco_crew": [Vector3(-4, 0, 10.0), 4.0], "deco_lady": [Vector3(-6, 0, -12.0), 5.0]}
+	for id: String in homes:
+		var c: Dictionary = cast[id]
+		_villager(str(c["who"]), Color(str(c["coat"])), RaceIsle.AT + (homes[id][0] as Vector3), homes[id][1], str(c["role"]))
+		_villagers[-1].set_meta("talk", "race_" + id.trim_prefix("deco_"))
+
+
 ## The crypto island: the miner by his machine and three people in the street (sheet 44). The robots are built
 ## with the island; each is a spot to talk at.
 func _dress_crypto() -> void:
@@ -377,7 +410,7 @@ func _build_ui() -> void:
 	top.offset_top = 22
 	root.add_child(top)
 	var titles := VBoxContainer.new()
-	var title := Hud.text("INDEX_TITLE" if _index() else "CRYPTO_TITLE" if _crypto() else "SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
+	var title := Hud.text("RACE_TITLE" if _race() else "INDEX_TITLE" if _index() else "CRYPTO_TITLE" if _crypto() else "SHORTS_TITLE" if _shorts() else ("SILK_TITLE" if _silk() else "HARBOUR_TITLE"), 36, Hud.BRASS)
 	title.add_theme_font_override("font", Hud.serif())
 	titles.add_child(title)
 	_title = title
@@ -462,7 +495,7 @@ func _process(delta: float) -> void:
 		blades.rotation.z += delta * 0.5
 	var ship: Node3D = get_node_or_null("Wayfarer")
 	if ship:
-		ship.position.y = (IndexIsle.DOCK.y if _index() else CryptoIsle.DOCK.y if _crypto() else ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
+		ship.position.y = (RaceIsle.DOCK.y if _race() else IndexIsle.DOCK.y if _index() else CryptoIsle.DOCK.y if _crypto() else ShortIsle.DOCK.y if _shorts() else (AmberCliff.DOCK.y if _amber() else (Archipelago.SILK_DOCK.y if _silk() else Archipelago.PIER_END.y))) + 1.2 + sin(Time.get_ticks_msec() * 0.0012) * 0.25
 	for w in _idlers:
 		w.step(delta, 0.0)
 	if _flying:
@@ -486,7 +519,7 @@ func _process(delta: float) -> void:
 			coin.visible = h >= 0.0
 			coin.position.y = 2.0 + maxf(h, 0.0)
 			coin.rotation.z = h * 3.0
-	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts() and not _crypto() and not _index():
+	if _report_timer <= 0.0 and not _silk() and not _amber() and not _shorts() and not _crypto() and not _index() and not _race():
 		_report_timer = 2.0
 		Game.watch_report()
 
@@ -615,7 +648,7 @@ func interact() -> void:
 	if _target == "ship":
 		await open_chart()
 		return
-	if _amber() or _shorts() or _crypto() or _index():
+	if _amber() or _shorts() or _crypto() or _index() or _race():
 		if _crypto():
 			await talk(_target)  # a robot: the spot is named like its talk
 		elif not _target.is_empty():

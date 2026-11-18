@@ -38,7 +38,12 @@
     "toy_lady": {"name": "WHO_TOY_LADY", "who": "trader", "role": "toy_lady", "coat": "ffb7b2", "face": "toy_lady", "one_face": true},
     "toy_grandpa": {"name": "WHO_TOY_GRANDPA", "who": "oldman", "role": "toy_grandpa", "coat": "a8cce4", "face": "toy_grandpa", "one_face": true},
     "toy_granny": {"name": "WHO_TOY_GRANNY", "who": "trader", "role": "toy_granny", "coat": "d7bde2", "face": "toy_granny", "one_face": true},
-    "toy_child": {"name": "WHO_TOY_CHILD", "who": "child", "role": "toy_child", "coat": "aed6f1", "face": "toy_child", "one_face": true}
+    "toy_child": {"name": "WHO_TOY_CHILD", "who": "child", "role": "toy_child", "coat": "aed6f1", "face": "toy_child", "one_face": true},
+    "deco_aviator": {"name": "WHO_DECO_AVIATOR", "who": "sailor", "role": "deco_aviator", "coat": "4a3528", "face": "deco_aviator", "one_face": true},
+    "deco_mechanic": {"name": "WHO_DECO_MECHANIC", "who": "sailor", "role": "deco_mechanic", "coat": "c9c1ad", "face": "deco_mechanic", "one_face": true},
+    "deco_crew": {"name": "WHO_DECO_CREW", "who": "sailor", "role": "deco_crew", "coat": "3f7482", "face": "deco_crew", "one_face": true},
+    "deco_marshal": {"name": "WHO_DECO_MARSHAL", "who": "sailor", "role": "deco_marshal", "coat": "1a2f4c", "face": "deco_marshal", "one_face": true},
+    "deco_lady": {"name": "WHO_DECO_LADY", "who": "trader", "role": "deco_lady", "coat": "f3be9f", "face": "deco_lady", "one_face": true}
   },
   "backdrops": {
     "wharf": {"sky": "f3d7a8", "ground": "8a5a3c"},
@@ -49,7 +54,8 @@
     "amber_in": {"sky": "f1dcae", "ground": "9a6a4a"},
     "noir": {"sky": "8a8a8a", "ground": "1d1c20"},
     "neon": {"sky": "5b2a86", "ground": "1b1035"},
-    "pastel": {"sky": "e2cee2", "ground": "b5e2b8"}
+    "pastel": {"sky": "e2cee2", "ground": "b5e2b8"},
+    "deco": {"sky": "f6c8a4", "ground": "103c42"}
   },
   "talks": {
     "mara_first": {"backdrop": "wharf", "pages": [
@@ -325,6 +331,41 @@
       {"panels": [
         {"shot": "two", "cast": ["toy_child", "captain"], "lines": [["toy_child", "TALK_INDEX_CHILD_1", "neutral"], ["captain", "TALK_INDEX_CHILD_2", "happy"]]},
         {"shot": "close", "cast": ["toy_child"], "lines": [["toy_child", "TALK_INDEX_CHILD_3", "neutral"]]}
+      ]}
+    ]},
+    "race_tower": {"backdrop": "deco", "pages": [
+      {"panels": [
+        {"shot": "wide", "cast": ["deco_marshal", "captain"], "caption": "TALK_RACE_TOWER_C", "mood": {"deco_marshal": "neutral", "captain": "neutral"}},
+        {"shot": "two", "cast": ["deco_marshal", "captain"], "lines": [["deco_marshal", "TALK_RACE_TOWER_1", "neutral"], ["captain", "TALK_RACE_TOWER_2", "surprised"]]},
+        {"shot": "close", "cast": ["deco_marshal"], "lines": [["deco_marshal", "TALK_RACE_TOWER_3", "neutral"]]}
+      ]},
+      {"panels": [
+        {"shot": "close", "cast": ["captain"], "lines": [["captain", "TALK_RACE_TOWER_4", "sly"]]},
+        {"shot": "low", "cast": ["deco_marshal"], "lines": [["deco_marshal", "TALK_RACE_TOWER_5", "neutral"]]}
+      ]}
+    ]},
+    "race_pit": {"backdrop": "deco", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["deco_mechanic", "captain"], "lines": [["deco_mechanic", "TALK_RACE_PIT_1", "neutral"], ["captain", "TALK_RACE_PIT_2", "surprised"]]},
+        {"shot": "close", "cast": ["deco_mechanic"], "lines": [["deco_mechanic", "TALK_RACE_PIT_3", "neutral"]]}
+      ]}
+    ]},
+    "race_aviator": {"backdrop": "deco", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["deco_aviator", "captain"], "lines": [["deco_aviator", "TALK_RACE_AVIATOR_1", "neutral"], ["captain", "TALK_RACE_AVIATOR_2", "sly"]]},
+        {"shot": "close", "cast": ["deco_aviator"], "lines": [["deco_aviator", "TALK_RACE_AVIATOR_3", "neutral"]]}
+      ]}
+    ]},
+    "race_crew": {"backdrop": "deco", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["deco_crew", "captain"], "lines": [["deco_crew", "TALK_RACE_CREW_1", "neutral"], ["captain", "TALK_RACE_CREW_2", "surprised"]]},
+        {"shot": "close", "cast": ["deco_crew"], "lines": [["deco_crew", "TALK_RACE_CREW_3", "neutral"]]}
+      ]}
+    ]},
+    "race_lady": {"backdrop": "deco", "pages": [
+      {"panels": [
+        {"shot": "two", "cast": ["deco_lady", "captain"], "lines": [["deco_lady", "TALK_RACE_LADY_1", "neutral"], ["captain", "TALK_RACE_LADY_2", "worried"]]},
+        {"shot": "close", "cast": ["deco_lady"], "lines": [["deco_lady", "TALK_RACE_LADY_3", "neutral"]]}
       ]}
     ]}
   }

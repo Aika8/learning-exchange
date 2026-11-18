@@ -6,7 +6,7 @@ style guide: `docs/design/game3d-style.md`; **the look follows the concept sheet
 M3 vertical slice (`docs/demo/M3.md`, ADR-0023): one game day — Port → Plan voyage with Mara (risk ≤ 1%, the Anchor =
 stop-loss) → Trading on the Ladder → Sailing (the clock runs ×60, a storm) → Evening chronicle with replay. Act I
 (debt, provisions, garden, fog), spread/fees/liquidity, the Anchor and a gap, the Forge report season, the captain's
-glossary (G), the «Реальный мир» board. Islands: Spark Harbour, Silk Reach, the short sellers' island (a noir town; a place and a style for now, ADR-0030), the crypto island (a neon town in pixel art; likewise, ADR-0031), the index island (a pastel toy town; likewise, ADR-0033), and Amber Cliff — «La Falaise d'Ambre», where
+glossary (G), the «Реальный мир» board. Islands: Spark Harbour, Silk Reach, the short sellers' island (a noir town; a place and a style for now, ADR-0030), the crypto island (a neon town in pixel art; likewise, ADR-0031), the index island (a pastel toy town; likewise, ADR-0033), the race island (the Grand Prix of the Winds as an art-deco poster; likewise, ADR-0034), and Amber Cliff — «La Falaise d'Ambre», where
 everything is in French (hold T for the translation; `docs/demo/G3D-amber.md`, ADR-0028).
 
 ## Run
@@ -51,6 +51,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `data/talks.json`, `i18n/talk.csv`, `art/portraits/`, `scripts/core/comic_script.gd`, `comic_reader.gd`, `scripts/ui/comic_page.gd`, `comic_frame.gd`, `comic_faces.gd`, `comic_doodle.gd` | Talks as comic pages (ADR-0027): the data and words, the drawn faces (one per hero and emotion), the reader, the page, the stand-in for people without a sheet |
 | `scripts/amber_cliff.gd`, `scripts/core/island_tongue.gd`, `i18n/amber.csv` | Amber Cliff, the French-speaking island (ADR-0028): the town, the island's tongue, its words (`fr,ru,en`) |
 | `scripts/index_isle.gd` | The index island (ADR-0033): a mirror-symmetrical toy town — mansions, the Bank Palace, the coin fountain, sky yachts |
+| `scripts/race_isle.gd` | The race island (ADR-0034): a banked track in the air on brackets, the timing tower, pit boxes, a grandstand, four sky skiffs as decoration |
 | `scripts/crypto_isle.gd` | The crypto island (ADR-0031): neon towers, palms, the Exchange That Never Closes, the wind coin, the three robots |
 | `scripts/short_isle.gd` | The short sellers' island (ADR-0030): the slab, crooked houses and towers, the Exchange of Falling Prices, its props |
 | `scripts/props.gd` | The props of the props sheet built in code: lamp, stall, crate, barrel, chest, rope coil, bollard, anchor, signboards |
