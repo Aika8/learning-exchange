@@ -134,3 +134,12 @@ the crystal, the flag and the lanterns' light stay. Before | after:
 | ![](g3d-ship/trim-before-ship.jpg) | ![](g3d-ship/trim-after-ship.jpg) |
 
 In flight (before: `pinnace-flight.jpg` above): ![](g3d-ship/trim-after-flight.jpg)
+
+## The bottom toned down (ADR-0036, amendment 3)
+Before: `trim-after-wing.jpg`, `trim-after-stern.jpg` above. After:
+
+| | |
+|---|---|
+| ![](g3d-ship/bottom-after-wing.jpg) | ![](g3d-ship/bottom-after-stern.jpg) |
+
+![](g3d-ship/bottom-after-ship.jpg)

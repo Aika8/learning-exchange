@@ -252,8 +252,25 @@ static func _pinnace() -> Node3D:
 			var src := mi.mesh.surface_get_material(i) as BaseMaterial3D
 			if src == null:
 				continue
-			mi.set_surface_override_material(i, _after_effect(src, str(mi.name).contains("sails")))
+			mi.set_surface_override_material(i, _hull_after_effect(src) if str(mi.name).ends_with("hull") else _after_effect(src, str(mi.name).contains("sails")))
 	return n
+
+
+## The hull's material drawn after the island's technique, its white bottom toned down to the planking
+## (`shaders/ship_model_hull.gdshader`, ADR-0036 amendment 3).
+static func _hull_after_effect(src: BaseMaterial3D) -> Material:
+	if not _mats.has("model/hull"):
+		var m := ShaderMaterial.new()
+		m.shader = load("res://shaders/ship_model_hull.gdshader")
+		m.set_shader_parameter("albedo_tex", src.albedo_texture)
+		m.set_shader_parameter("orm_tex", src.roughness_texture if src.roughness_texture != null else src.albedo_texture)
+		m.set_shader_parameter("has_normal", src.normal_enabled and src.normal_texture != null)
+		if src.normal_texture != null:
+			m.set_shader_parameter("normal_tex", src.normal_texture)
+		m.render_priority = AFTER_EFFECT
+		m.resource_name = "model/hull"
+		_mats["model/hull"] = m
+	return _mats["model/hull"]
 
 
 ## A copy of one of the model's materials that is drawn after the island's technique. `sail`: the cut-out cloth,
