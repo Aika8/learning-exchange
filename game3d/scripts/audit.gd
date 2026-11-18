@@ -10,7 +10,12 @@ const SHOTS_PER_KIND := 3
 
 ## Fixed camera views of each place, for the before/after pictures: [file, camera position, look-at].
 const VIEWS := {
-	"harbour": [["view-square", Vector3(3, 7, 24), Vector3(-2, 1.5, 0)], ["view-houses", Vector3(-4, 3.2, 3), Vector3(-15, 2.2, 3)],
+	"harbour": [["view-ship", Archipelago.PIER_END + Vector3(-9, 5.5, 21), Archipelago.PIER_END + Vector3(0, 5.2, 5.5)],
+		["view-ship-stern", Archipelago.PIER_END + Vector3(13.5, 3.4, 9.5), Archipelago.PIER_END + Vector3(5, 2.6, 5.5)],
+		["view-ship-bow", Archipelago.PIER_END + Vector3(-11.5, 2.6, 9.5), Archipelago.PIER_END + Vector3(-5, 2.2, 5.5)],
+		["view-ship-deck", Archipelago.PIER_END + Vector3(3.5, 11.5, 9.0), Archipelago.PIER_END + Vector3(0, 1.6, 5.5)],
+		["view-ship-wing", Archipelago.PIER_END + Vector3(2, -1.5, 17), Archipelago.PIER_END + Vector3(0, 0.6, 5.5)],
+		["view-square", Vector3(3, 7, 24), Vector3(-2, 1.5, 0)], ["view-houses", Vector3(-4, 3.2, 3), Vector3(-15, 2.2, 3)],
 		["view-house-close", Vector3(-8.5, 2.4, 1.5), Vector3(-14, 2.2, -2)], ["view-wharf", Vector3(27, 8, 27), Vector3(34, 0.5, 3)],
 		["view-pier", Vector3(52, 5, -3), Vector3(40, 0.5, 4)], ["view-exchange", Vector3(7, 3, -1), Vector3(0, 5, -15)],
 		["view-top", Vector3(12, 62, 6), Vector3(12, 0, 4)], ["view-wharf-gate", Vector3(15, 4.5, 11), Vector3(24, 0.6, 4)]],

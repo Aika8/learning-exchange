@@ -24,7 +24,6 @@ var _span := FREE_STORM  ## straight distance from the berth left to the one mar
 
 var model: FlightModel
 var _ship: Node3D
-var _sail: Node3D
 var _cam: Camera3D
 var _yaw := 0.0  ## the camera, round the ship: 0 = from astern
 var _pitch := -0.22
@@ -56,7 +55,9 @@ func _ready() -> void:
 	_ship = Proc.ship()
 	_ship.position = model.position
 	add_child(_ship)
-	_sail = _ship.get_node_or_null("Sail")  # the model ship (ADR-0019) has fixed sails
+	var monkey := Monkey.new()  # under way she lives in the rig (ADR-0036)
+	monkey.ship = _ship
+	add_child(monkey)
 	_cam = Camera3D.new()
 	_cam.fov = 60
 	_cam.far = 3000
@@ -110,9 +111,7 @@ func _process(delta: float) -> void:
 	var roll := 1.0 + _storm * 3.0
 	var lean := -keys.x * 0.12 * clampf(model.speed / FlightModel.BASE_SPEED, 0.0, 1.0)  # she heels into a turn
 	_ship.rotation = Vector3(sin(_t * 0.9) * 0.025 * roll, model.yaw, sin(_t * 1.1) * 0.05 * roll + lean)
-	if _sail:
-		_sail.scale.y = lerpf(_sail.scale.y, lerpf(0.25, 1.0, model.trim), 4.0 * delta)
-		_sail.position.y = 4.8 + (1.0 - _sail.scale.y) * 2.4
+	Wayfarer.set_trim(_ship, model.trim, minf(4.0 * delta, 1.0))
 	var blades: Node3D = _parts.get("blades")
 	if blades:
 		blades.rotation.z += delta * 0.5

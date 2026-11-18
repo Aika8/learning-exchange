@@ -64,7 +64,7 @@ clash with PBR).
 | `single_root` | glTF model (1k textures) | [polyhaven.com/a/single_root](https://polyhaven.com/a/single_root) | CC0 | 3.8 MB |
 
 How they are used: `scripts/assets.gd` (paths, fallbacks), `scripts/proc.gd` (`_pbr_for` palette → texture set,
-`_real_ship`, `_person`), `scripts/archipelago.gd` (sky, harbour props, trees), `scripts/hall.gd` (interior).
+`_person`), `scripts/wayfarer.gd` (the ship's wood: `dark_wood`, `weathered_planks`; ADR-0036), `scripts/archipelago.gd` (sky, harbour props, trees), `scripts/hall.gd` (interior).
 
 ## Our own work
 

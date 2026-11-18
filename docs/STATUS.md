@@ -3,6 +3,13 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D the ship «Попутчик» and her monkey (ADR-0036, Proposed) — `docs/demo/G3D-ship.md`
+- The hero's ship is the one realistic thing: physically lit, built in code after Aika's six sheets (hull, rig
+  with shrouds and deadeyes, carved stern with lit lanterns, a bird figurehead, guns, wheel, anchor, wing sails
+  that drip, the etherite crystal, our own flag), and no island's technique redraws her — every surface is drawn
+  after the effect, by render order. 22 840 triangles; 118 fps average in flight. A monkey lives in the rig and
+  comes ashore with the captain. Audit 0. Nothing below deck; the monkey has no props or expressions yet.
+
 ## G3D index island, second look (ADR-0035, Proposed; supersedes 0033) — `docs/demo/G3D-index.md`
 - The index island is now a canal town of the Dutch Golden Age painted in oil: muted warm colour, strokes laid
   out in the world, a golden haze, a low soft sun. A canal with three bridges, twenty gabled houses, the Exchange
