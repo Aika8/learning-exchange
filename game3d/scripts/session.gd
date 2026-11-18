@@ -57,6 +57,8 @@ func _ready() -> void:
 		Audit.read.call_deferred(get_tree())
 	elif not arg("stroll").is_empty():
 		Audit.stroll.call_deferred(get_tree())
+	elif not arg("flight").is_empty():
+		Audit.flight.call_deferred(get_tree())
 
 
 func _process(_delta: float) -> void:
@@ -216,7 +218,7 @@ static func arg(key: String) -> String:
 
 ## True for the audit, views and gait runs: no mouse capture, the scripts drive the scene.
 static func tooling() -> bool:
-	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune") + arg("talk") + arg("read") + arg("stroll")).is_empty() or arg("fps").length() > 1
+	return not (arg("audit") + arg("views") + arg("gait") + arg("profile") + arg("people") + arg("attune") + arg("talk") + arg("read") + arg("stroll") + arg("flight")).is_empty() or arg("fps").length() > 1
 
 
 static func active() -> bool:

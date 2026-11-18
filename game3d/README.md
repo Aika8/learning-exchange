@@ -17,7 +17,7 @@ Without `make assets` the game still runs with the old procedural look.
 The MakeHuman people are **not** part of `make assets`: build them with `game3d/tools/people/build.sh` (Blender + MPFB) or
 copy `game3d/assets/models/people/` from a checkout that has them; without them dressed stand-in figures are shown.
 Other server: `godot --path game3d -- --server=http://localhost:8090`. Keys: WASD, Shift (run), mouse, Tab (fly camera), E (interact),
-Space (sail during the voyage), G (glossary), T (hold on Amber Cliff: translation), V (look: colour / ink outline / engraving), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
+in flight W/S (sail), A/D (wheel), Space/Shift (up/down), E (moor), G (glossary), T (hold on Amber Cliff: translation), V (look: colour / ink outline / engraving), Enter (close a lesson card), F3 (fps), Esc (release the mouse / leave the hall).
 
 ## Tests
 `make test-game3d` — GUT headless. `tests/unit/test_world_walk.gd` walks a grid over both islands and the hall: nobody
@@ -27,7 +27,7 @@ trapped and walks through nothing he can see, villagers can finish their strolls
 
 ## World audit and measurements (`docs/demo/G3D-polish.md`)
 `godot --path game3d -- --audit=<dir>` (every problem with a picture, `audit.json`; about a minute, `--only=harbour|silk|hall` for one place), `--views=<dir>` (fixed views),
-`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--stroll=<dir>` (a walking camera, to look for shimmer), `--read=<dir>` (Amber Cliff's prompts and signs, then with T), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
+`--gait=<dir>` (idle, walk, run, a doorstep), `--talk=<dir>` (every talk as comic pages; ADR-0027), `--flight=<dir>` (a voyage steered by the compass; ADR-0032), `--stroll=<dir>` (a walking camera, to look for shimmer), `--read=<dir>` (Amber Cliff's prompts and signs, then with T), `--attune=<dir>` (the island's wind restyling the captain, a frame every 0.1 s; ADR-0025), `--people=<dir>` (line-up of the costumes; `--plain` = as downloaded), `--fps=<file.json>` (run at 1920x1080), `--profile=1` (cost of each
 effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long frame after every camera jump).
 
 ## Layout
@@ -36,7 +36,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `shared/` | Symlinks to `game/scripts/` (locale, exchange_api, market_stream, money, book_model, order_draft) — one implementation for both games |
 | `scripts/market_stream_3d.gd` | Autoload: extends the shared stream with the `clock` channel |
 | `scripts/session.gd` | Autoload: `--server=`, scene fades, fps overlay, `--demo=` screenshots |
-| `scripts/sim_clock.gd`, `voyage_model.gd`, `board_layout.gd` | Pure logic, covered by GUT |
+| `scripts/sim_clock.gd`, `flight_model.gd`, `ports.gd`, `board_layout.gd` | Pure logic, covered by GUT: the clock, the rules of free flight (ADR-0032), the islands as the ship sees them |
 | `scripts/proc.gd`, `archipelago.gd`, `shaders/` | Procedural art: meshes, sky, light, fog, cloud sea |
 | `scripts/core/` | M3 pure logic, covered by GUT: `GameFlow` (state machine), `VoyagePlan` (Mara's check), `DayLog` (day events), `SessionFacts` (fold), `Chronicler` (port + template adapter), `Lessons`, `ReportSeason`, `CaptainGlossary` |
 | `scripts/game.gd` | Autoload `Game`: the day, its log, plan, Anchor, sync with the exchange, report-season watch |

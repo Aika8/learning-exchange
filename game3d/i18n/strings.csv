@@ -75,7 +75,7 @@ HARBOUR_FLY,Облёт камерой (Tab — вернуться к капит�
 HARBOUR_ACCOUNT,Счёт %s · %s,Account %s · %s
 HARBOUR_MARA,"Мара Якорная: «Мельница наверху — Ветряная Биржа. В её зале горит Лестница — по-вашему, стакан заявок. А у причала ждёт твой «Попутчик».»","Mara Anchor: «The windmill up there is the Wind Exchange. The Ladder glows in its hall — the order book, as your world calls it. And your «Wayfarer» waits at the pier.»"
 PROMPT_EXCHANGE,E — войти в зал Биржи,E — enter the Exchange hall
-PROMPT_SHIP,E — отплыть на Шёлковый Плёс,E — sail to Silk Reach
+PROMPT_SHIP,E — к штурвалу: выбрать курс,E — to the wheel: choose a course
 PROMPT_MARA,E — поговорить с Марой,E — talk to Mara
 HALL_TITLE,Зал Биржи,Exchange hall
 HALL_LORE,Ветряная Биржа,the Wind Exchange
@@ -94,7 +94,7 @@ VOYAGE_WIND_SIDE,боковой,crosswind
 VOYAGE_MARKET,%s на Бирже: последняя сделка %s,%s on the Exchange: last trade %s
 VOYAGE_ARRIVED,Шёлковый Плёс! Здесь растёт ветряной шёлк.,Silk Reach! Wind silk grows here.
 VOYAGE_HOME,Обратно в Гавань,Back to the Harbour
-VOYAGE_HELP,Мышь — камера · колесо — ближе/дальше · Пробел — поднять парус,Mouse — camera · wheel — zoom · Space — raise the sail
+VOYAGE_HELP,W/S — парус · A/D — штурвал · Пробел/Shift — выше/ниже · E — швартовка · мышь — камера,W/S — sail · A/D — wheel · Space/Shift — up/down · E — moor · mouse — camera
 FPS,%s кадр/с,%s fps
 VOYAGE_START,Отплытие,Departure
 VOYAGE_END,Прибытие,Arrival
@@ -230,7 +230,7 @@ PROMPT_GARDEN,E — сад,E — the garden
 PROMPT_OLVA,"E — Ольва Перо, аналитик","E — Olva Quill, analyst"
 PROMPT_POST,E — шёлковый рынок,E — the silk market
 PROMPT_PROVISIONS,E — купить провизию,E — buy provisions
-PROMPT_SHIP_HOME,E — плыть в Гавань,E — sail to the Harbour
+PROMPT_SHIP_HOME,E — к штурвалу: выбрать курс,E — to the wheel: choose a course
 QUEST_OUTCOME_RECORD_BUT_FELL,"«Рекорд, а акция упала»: рекорд, но ниже ожиданий — рынок торгует сюрприз.","«A record, yet the stock fell»: a record, but below expectations — the market trades the surprise."
 QUEST_OUTCOME_BEAT_ROSE,Лучше ожиданий — цена открылась выше.,Above expectations — the price opened higher.
 QUEST_OUTCOME_MISS_FELL,Хуже ожиданий — цена открылась ниже.,Below expectations — the price opened lower.
@@ -304,3 +304,19 @@ SHORTS_TITLE,Остров шортистов,Short Sellers' Island
 PROMPT_FERRY_CRYPTO,E — пакетбот на Остров крипты,E — the packet boat to the Crypto Island
 PROMPT_OPEN_EXCHANGE,E — Биржа, которая не закрывается,E — the Exchange That Never Closes
 CRYPTO_TITLE,Остров крипты,Crypto Island
+VOYAGE_COURSE,Курс: %s,Course: %s
+VOYAGE_FREE,Свободный полёт,Flying free
+VOYAGE_LEFT,До причала %s м,%s m to the pier
+VOYAGE_FLOWN,Пройдено %s м,%s m flown
+VOYAGE_WIND_HEAD,встречный,head wind
+VOYAGE_HELM,Ход %s м/с · парус %s%% · высота %s м,Speed %s m/s · sail %s%% · height %s m
+VOYAGE_MOOR,E — пришвартоваться: %s,E — moor: %s
+VOYAGE_TOO_FAST,Слишком быстро для швартовки — убери парус (S),Too fast to moor — take in sail (S)
+VOYAGE_EDGE,Край карты: Течение разворачивает корабль,The edge of the chart: the Current turns the ship back
+VOYAGE_ARRIVED_AT,%s. Пришвартовались.,%s. Moored.
+VOYAGE_CHART_TITLE,Куда летим?,Where to?
+VOYAGE_CHART_LORE,карта Течений,the chart of the Currents
+VOYAGE_CHART_ROW,%s — %s м,%s — %s m
+VOYAGE_CHART_FREE,Лететь свободно,Fly free
+VOYAGE_CHART_STAY,Остаться в порту,Stay in port
+VOYAGE_CHART_NOTE,"Пока корабль в пути, часы Биржи идут ×60. Причалить можно у любого острова.",While the ship is under way the Exchange clock runs ×60. You may moor at any island.

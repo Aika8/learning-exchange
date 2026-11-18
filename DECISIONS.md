@@ -465,3 +465,15 @@ Build and CI
   45 % strength, on every other half-texel.
 - Sky cells: 1/240 rad. Stars: 0.15 % of cells above 0.2 rad.
 - `--stroll` takes `--turn` (stand and turn 2° a frame).
+
+## G3D free flight (ADR-0032)
+- Numbers of `FlightModel`: 14 m/s base, wind ×0.5…1.5, drift 25 %, turn 0.75 rad/s (slower when slow), climb 6 m/s,
+  speed follows in about 1.2 s, hull 5 m, moor within 16 m and under 9 m/s, the edge pushes over its last 80 m.
+- An island is a cylinder that narrows to 35 % at its root; 9 m over its top is clear.
+- The world's edge is 620 m from the origin; the farthest berth is about 420 m out.
+- The destination is only a mark (`Game.destination`), cleared on mooring. Tool and demo runs skip the chart and
+  take the old route (harbour ↔ Silk Reach).
+- Right after casting off the ship is not offered to moor where she lay (until 60 m flown).
+- `Ports.steer` approaches a pier from its seaward side; an earlier helmsman who simply aimed at the berth drove
+  into the island lying in the way — which is the model doing its job.
+- `VoyageModel` and its test are removed; old `VOYAGE_TITLE*` / `VOYAGE_ARRIVED*` strings are left unused.
