@@ -45,9 +45,16 @@ class Back:
 	var ground := Color("7fb069")
 	var corner := Vector2.ZERO
 	var shift := 0.0  ## each frame of a page looks at a slightly different part of the place
+	var art: Texture2D  ## a drawn panel (docs/design/comic-script.md): fills the frame, cut to it, nothing over it
 
 	func _draw() -> void:
 		var box := Rect2(Vector2.ZERO, size)
+		if art != null:
+			var full := art.get_size()
+			var k := maxf(size.x / full.x, size.y / full.y)  # cover: the picture fills the frame, its middle kept
+			var part := size / k
+			draw_texture_rect_region(art, box, Rect2((full - part) * 0.5, part))
+			return
 		if place != null:
 			var full := place.get_size()
 			var w := full.x * float(view[0])
@@ -88,7 +95,8 @@ class Mount:
 			draw_rect(r.grow(5.0), ComicPage.INK, false, 2.5)
 
 
-func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dictionary, index: int = 0, introduce: Array = []) -> void:
+## `art` is the panel drawn as a picture, or null: then the place and the figures are put together here.
+func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dictionary, index: int = 0, introduce: Array = [], art: Texture2D = null) -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = ComicPage.font()
@@ -107,12 +115,25 @@ func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dicti
 	_back.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
 	_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_back)
+	_back.art = art
+	var tails: Dictionary = panel.get("tail", {})  ## cast id → [x, y], shares of the frame: where that one's mouth is
 	var lines: Array = panel.get("lines", [])
 	var first_voice := str(lines[0][0]) if not lines.is_empty() else ""
 	var tall := size.y * float(HEIGHT.get(shot, 0.86))
 	for i in who_list.size():
 		var who: String = who_list[i]
 		var c: Dictionary = cast[who]
+		if art != null:  # the picture has the people in it already: only where each mouth is, for the tails
+			var at := Vector2(0.27 if who_list.size() == 1 else (0.25 if i == 0 else 0.75), 0.42)
+			if tails.has(who):
+				at = Vector2(float(tails[who][0]), float(tails[who][1]))
+			var m := at * size
+			actors[who] = {"node": null, "rect": Rect2(m - Vector2(60, 50), Vector2(120, 260)), "head": m, "mouth": m, "face": str(c.get("face", "")),
+				"side": -1.0 if i == 0 and who_list.size() > 1 else 1.0, "kind": "art"}
+			feeling[who] = str(mood.get(who, "neutral"))
+			if who in introduce:
+				_plate(page, who, c, m.x)
+			continue
 		var face := str(c.get("face", ""))
 		var drawn := ComicFaces.has(face)
 		var kind := ComicFaces.kind(face) if drawn else "cut"
@@ -164,15 +185,13 @@ func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dicti
 		add_child(node)
 		var mouth_at := ComicFaces.mouth(face) if drawn else 0.34
 		var mouth := Vector2(cx, rect.position.y + h * mouth_at)
+		if tails.has(who):
+			mouth = Vector2(float(tails[who][0]), float(tails[who][1])) * size
 		actors[who] = {"node": node, "rect": rect, "head": Vector2(cx, rect.position.y + h * maxf(mouth_at - 0.2, 0.08)), "mouth": mouth, "face": face,
 			"side": -1.0 if i == 0 and who_list.size() > 1 else 1.0, "kind": kind}
 		_feel(who, str(mood.get(who, "neutral")), 1.0)
 		if who in introduce:
-			var text := page.say(str(c.get("name", "")))
-			var ts := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_SIZE)
-			var pw := ts.x + 20.0
-			var px := clampf(cx - pw * 0.5, 8.0, size.x - pw - 8.0)
-			plates.append({"who": who, "text": text, "rect": Rect2(px, size.y - 34.0, pw, 24.0)})
+			_plate(page, who, c, cx)
 	if panel.has("caption"):
 		caption = page.say(panel["caption"])
 		caption_gloss = page.gloss(panel["caption"])
@@ -223,6 +242,13 @@ static func _on_oval(rect: Rect2, way: Vector2) -> Vector2:
 	return rect.get_center() + way / u.length()
 
 
+func _plate(page: ComicPage, who: String, c: Dictionary, cx: float) -> void:
+	var text := page.say(str(c.get("name", "")))
+	var pw := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_SIZE).x + 20.0
+	var px := clampf(cx - pw * 0.5, 8.0, size.x - pw - 8.0)
+	plates.append({"who": who, "text": text, "rect": Rect2(px, size.y - 34.0, pw, 24.0)})
+
+
 func _text_size(text: String, width: float) -> Vector2:
 	return _font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, width, FONT_SIZE)
 
@@ -231,6 +257,8 @@ func _text_size(text: String, width: float) -> Vector2:
 func _feel(who: String, e: String, light: float) -> void:
 	feeling[who] = e
 	var a: Dictionary = actors[who]
+	if a["node"] == null:  # a drawn panel: the face is the picture's
+		return
 	if a["node"] is TextureRect:
 		(a["node"] as TextureRect).texture = ComicFaces.texture(a["face"], e)
 		((a["node"] as TextureRect).material as ShaderMaterial).set_shader_parameter("dim", light)
@@ -277,7 +305,7 @@ func shown() -> int:
 
 func _draw() -> void:
 	var talking := speaker()
-	if actors.has(talking):
+	if actors.has(talking) and actors[talking]["node"] != null:
 		_marks(actors[talking], str(feeling.get(talking, "neutral")))
 	if not caption.is_empty():
 		var text := caption_gloss if _gloss and not caption_gloss.is_empty() else caption

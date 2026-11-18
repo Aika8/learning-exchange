@@ -60,10 +60,24 @@ if talks_path.is_file():
             for panel in page["panels"]:
                 if "caption" in panel:
                     keys.add(panel["caption"])
+                for who, at in panel.get("tail", {}).items():
+                    if who not in panel.get("cast", []) or len(at) != 2 or not all(0 <= v <= 1 for v in at):
+                        problems.append(f"talks.json: bad tail {who} {at}")
                 for line in panel.get("lines", []):
                     keys.add(line[1])
                     if len(line) > 2 and line[2] not in EMOTIONS:
                         problems.append(f"talks.json: unknown emotion {line[2]}")
+    art = GAME / "art" / "comic"  # drawn panels: art/comic/<talk>/<page>-<panel>.jpg, each one a panel that exists
+    if art.is_dir():
+        for pic in sorted(art.glob("*/*")):
+            talk = data["talks"].get(pic.parent.name)
+            nums = pic.stem.split("-")
+            ok = talk is not None and pic.suffix in (".jpg", ".png") and len(nums) == 2 and all(n.isdigit() for n in nums)
+            if ok:
+                page, panel = int(nums[0]), int(nums[1])
+                ok = 1 <= page <= len(talk["pages"]) and 1 <= panel <= len(talk["pages"][page - 1]["panels"])
+            if not ok:
+                problems.append(f"art/comic/{pic.parent.name}/{pic.name}: no such talk, page or panel")
     for key in sorted(keys):
         homes = [(langs, table[key]) for langs, table in words if key in table]
         if not homes:
