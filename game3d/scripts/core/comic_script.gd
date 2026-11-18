@@ -13,6 +13,7 @@ const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "
 	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child",
 	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady",
 	"oil_merchant", "oil_lady", "oil_market", "oil_father", "oil_child", "oil_grandpa", "oil_granny"]  ## heroes who have a sheet
+const VOICES: Array[String] = ["say", "shout", "thought"]  ## a line's optional fourth word: the shape of its balloon
 const MAX_PANELS := 4
 const MAX_LINES := 2
 const MAX_CHARS := 150  ## a balloon longer than this covers the picture
@@ -114,6 +115,8 @@ func problems(catalogues: Array) -> Array[String]:
 						out.append("%s: %s speaks but is not in the frame" % [id, line[0]])
 					if line.size() > 2 and not line[2] in EMOTIONS:
 						out.append("%s: unknown emotion %s" % [id, line[2]])
+					if line.size() > 3 and not line[3] in VOICES:
+						out.append("%s: unknown voice %s" % [id, line[3]])
 	var spoken: Dictionary = {}  # key → the tongue of the talk it is said in
 	for id: String in talks:
 		var tongue := str(talks[id].get("speak", ""))

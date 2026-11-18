@@ -548,3 +548,23 @@ Build and CI
   captain and gets up at 2.8 m. Seeded: the same seed gives the same monkey.
 - `Proc.ship()` is now `Wayfarer.build()`; `Proc._real_ship` (the Poly Haven model) is removed.
 - Five fixed views of the ship are added to the harbour's list (`view-ship*`).
+
+## G3D comic pages, second pass (ADR-0037)
+- Cut-out: paper = the median colour of the top row and the upper half of both side columns; a pixel is paper
+  within 0.13 of it (largest channel difference) and within 0.05 of the flooded neighbour it was reached from;
+  flood from all four edges; kept pieces under 1.5 % of the picture are dropped; a 12 px fade at the left and
+  right edges (0 for the race island's five, whose crops have room); output trimmed to what is left.
+- WebP, lossy 0.86, with alpha: 13 MB for 130 cut-outs against 71 MB as PNG. Loaded from the file like the
+  sheets' cuts (`art/.gdignore`: nothing is imported).
+- Kinds: the seven oil portraits are `oval`; noir, crypto and the robots (eleven) are `card`; everything else `cut`.
+- A cut figure goes 5 % of its height below the frame's edge. A card or an oval is at most 0.8 of the frame high
+  and stands 14 px above the edge on its mount.
+- The backdrop: the viewport without 8 % at the sides and 16 % top and bottom (the HUD), shrunk to 96×44 and
+  enlarged to 384×176; 30 % paper over it; each frame's cut is shifted by −12 %, 0 or +12 % of the picture.
+- Balloon: text box × 1.3 wide and × 1.42 high plus padding; the answer starts 55 % of the question's height
+  lower; the tail is 22 px wide at the root and at most 44 px long.
+- A line said `angry` is a shout unless the data says otherwise; `surprised` no longer bristles (it has its "!").
+- `data/cutouts.json` also holds `mouth` per sheet (default 0.47 of the picture's height).
+- Candidates for the lettering font, both SIL OFL 1.1 with Cyrillic: Comic Relief (Jeff Davis; on Google Fonts)
+  and Balsamiq Sans (Balsamiq; on Google Fonts). Comic Neue and Bangers have no Cyrillic. The page loads
+  `res://fonts/comic.ttf` when it exists.

@@ -202,3 +202,126 @@ func test_olva_says_the_numbers_of_the_day() -> void:
 	await wait_process_frames(2)
 	assert_string_contains(page.say("TALK_OLVA_CONSENSUS_2"), "1,25")
 	assert_false(page.open("no such talk"))
+
+
+## ADR-0037: the second pass over the page.
+func test_every_portrait_is_cut_out_of_its_paper() -> void:
+	var cut := 0
+	for face: String in ComicFaces.FACES:
+		assert_true(ComicFaces.kind(face) in ["cut", "oval", "card"], face)
+		for emotion: String in (["neutral"] if face in ComicFaces.ONE_FACE else ComicFaces.EMOTIONS):
+			assert_true(FileAccess.file_exists("%s/%s_%s.jpg" % [ComicFaces.SHEETS, face, emotion]), "%s %s: the cut from the sheet is kept" % [face, emotion])
+			var img := ComicFaces.texture(face, emotion).get_image()
+			if ComicFaces.kind(face) == "card":
+				continue  # a picture with its own drawn background: shown whole, as a card
+			cut += 1
+			assert_lt(img.get_pixel(1, 1).a, 0.3, "%s %s: nothing in the corner" % [face, emotion])
+			assert_lt(img.get_pixel(img.get_width() - 2, 1).a, 0.3, "%s %s: nor in the other" % [face, emotion])
+			assert_gt(img.get_pixel(img.get_width() / 2, img.get_height() * 2 / 3).a, 0.9, "%s %s: and somebody in the middle" % [face, emotion])
+		assert_between(ComicFaces.mouth(face), 0.15, 0.7, face + ": where the mouth is")
+	assert_gt(cut, 100)
+	assert_eq(ComicFaces.kind("captain"), "cut")
+	assert_eq(ComicFaces.kind("oil_grandpa"), "oval")
+	assert_eq(ComicFaces.kind("noir_broker"), "card")
+
+
+func test_a_figure_stands_on_the_frames_edge_and_a_close_shot_is_larger() -> void:
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("mara_first"))
+	await wait_process_frames(2)
+	var frames := page.frames()
+	var wide: Rect2 = frames[0].actors["mara"]["rect"]
+	var close: Rect2 = frames[1].actors["mara"]["rect"]
+	assert_gt(wide.end.y, frames[0].size.y, "the frame cuts the bust: nothing hangs in the air")
+	assert_gt(close.size.y, frames[1].size.y, "a close shot is taller than its frame")
+	assert_gt(close.size.y / frames[1].size.y, wide.size.y / frames[0].size.y * 1.5, "faces are not all one size")
+	var two := frames[2]
+	assert_ne((two.actors["mara"]["rect"] as Rect2).size.y, (two.actors["captain"]["rect"] as Rect2).size.y, "of two, the one who listens stands a little back")
+	assert_null(page.place(), "without a screen there is no picture of the place: the frame draws sky over ground")
+	assert_true(frames[1].position.x > frames[0].position.x, "the first page: the large frame on the left")
+
+
+func test_a_name_is_on_a_plate_once_and_never_in_a_balloon() -> void:
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("mara_first"))
+	await wait_process_frames(2)
+	var named: Dictionary = {}
+	var guard := 0
+	while page.is_open() and guard < 60:
+		guard += 1
+		for f in page.frames():
+			for p in f.plates:
+				named[f.get_instance_id()] = true
+			for b in f.balloons:
+				assert_false(str(b["text"]).begins_with(str(b["name"])), "the name is not part of the words")
+		page.step()
+	var s := ComicScript.read()
+	var plates: Dictionary = {}  # who → how many plates over the whole talk
+	var met: Dictionary = {}
+	for pg: Dictionary in s.talks["mara_first"]["pages"]:
+		for panel: Dictionary in pg["panels"]:
+			for who: String in panel["cast"]:
+				if not met.has(who):
+					met[who] = true
+					plates[who] = 1
+	assert_eq(plates.size(), 2, "Mara and the captain")
+	page = ComicPage.new()
+	add_child_autofree(page)
+	page.open("mara_first")
+	await wait_process_frames(2)
+	var first := page.frames()[0]
+	assert_eq(first.plates.size(), 2, "both are introduced where they are first seen")
+	assert_eq(page.frames()[1].plates.size(), 0, "and not again")
+	assert_eq(page.frames()[2].plates.size(), 0)
+	var source := FileAccess.get_file_as_string("res://scripts/ui/comic_frame.gd")
+	assert_false(source.contains("b[\"name\"]).to_upper()"), "the frame no longer letters a name into a balloon")
+
+
+func test_a_balloon_is_an_oval_whose_short_tail_points_at_the_mouth() -> void:
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("mara_first"))
+	await wait_process_frames(2)
+	for f in page.frames():
+		for b in f.balloons:
+			var rect: Rect2 = b["rect"]
+			var mouth: Vector2 = f.actors[b["who"]]["mouth"]
+			var base: Vector2 = b["base"]
+			var tip: Vector2 = b["tip"]
+			var u := (base - rect.get_center()) / (rect.size * 0.5)
+			assert_almost_eq(u.length(), 1.0, 0.02, "the tail leaves the oval's edge")
+			assert_gt((tip - base).normalized().dot((mouth - base).normalized()), 0.99, "towards the speaker's mouth")
+			assert_lt(tip.distance_to(base), 45.0, "and is short: it does not cross a face")
+			assert_gt(rect.size.x, f._text_size(str(b["text"]), rect.size.x).x * 0.9, "the words have room")
+			assert_true(Rect2(Vector2.ZERO, f.size).grow(1.0).encloses(rect), "the balloon is inside its frame")
+	assert_eq(page.frames()[1].balloons[0]["voice"], "shout", "Mara's first line is said in anger: the balloon bristles")
+	assert_eq(page.frames()[2].balloons[0]["voice"], "say")
+	assert_eq(ComicScript.VOICES, ["say", "shout", "thought"] as Array[String])
+	var bad := ComicScript.new()
+	bad.cast = {"a": {"face": "captain"}}
+	bad.backdrops = {"x": {}}
+	bad.talks = {"t": {"backdrop": "x", "pages": [{"panels": [{"shot": "close", "cast": ["a"], "lines": [["a", "K", "neutral", "sung"]]}]}]}}
+	assert_true(", ".join(bad.problems([])).contains("unknown voice sung"))
+	assert_gt(ComicFrame._cloud(Rect2(0, 0, 200, 100)).size(), 40, "a thought is a cloud")
+	assert_gt(ComicFrame.FONT_SIZE, 18, "the lettering is larger than it was")
+
+
+func test_the_second_page_is_laid_out_the_other_way_round() -> void:
+	var page := ComicPage.new()
+	add_child_autofree(page)
+	assert_true(page.open("mara_first"))
+	await wait_process_frames(2)
+	var first_x := page.frames()[0].position.x
+	var guard := 0
+	while page.reader().page() == 0 and guard < 30:
+		guard += 1
+		page.step()
+	if page.is_open() and page.frames().size() > 1:
+		var xs: Array[float] = []
+		for f in page.frames():
+			xs.append(f.position.x)
+		assert_true(page.frames()[0].position.x >= xs.min(), "frames are still inside the sheet")
+		if page.frames().size() == 3:
+			assert_gt(page.frames()[0].position.x, first_x, "the large frame has moved to the right")

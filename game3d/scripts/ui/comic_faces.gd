@@ -4,7 +4,10 @@
 class_name ComicFaces
 extends RefCounted
 
-const DIR := "res://art/portraits"
+const DIR := "res://art/cutouts"  ## the portraits cut out of their paper (`tools/cut_portraits.gd`, ADR-0037)
+const SHEETS := "res://art/portraits"  ## as they were cut from the sheets, paper and all: what the cut-outs are made from
+const RULES := "res://data/cutouts.json"
+const MOUTH := 0.47  ## how far down a bust the mouth is, when the rules do not say
 const EMOTIONS: Array[String] = ["neutral", "happy", "surprised", "sly", "worried", "angry"]
 const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "merchant", "chronicler", "keeper", "sailor", "sailor2", "child", "townsman",
 	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady",
@@ -21,6 +24,7 @@ const ONE_FACE: Array[String] = ["noir_broker", "noir_tramp", "noir_youth", "noi
 const ASPECT := 0.55  ## width / height of a portrait when nothing better is known (the stand-in)
 
 static var _cache: Dictionary = {}
+static var _rules: Dictionary = {}
 
 
 static func has(face: String) -> bool:
@@ -28,7 +32,26 @@ static func has(face: String) -> bool:
 
 
 static func path(face: String, emotion: String) -> String:
-	return "%s/%s_%s.jpg" % [DIR, face, emotion]
+	return "%s/%s_%s.webp" % [DIR, face, emotion]
+
+
+static func rule(face: String) -> Dictionary:
+	if _rules.is_empty():
+		var data: Variant = JSON.parse_string(FileAccess.get_file_as_string(RULES))
+		_rules = data if data is Dictionary else {"": {}}
+	return _rules.get(face, {})
+
+
+## "cut" — a figure with nothing round it; "oval" — a painted bust in an oval; "card" — a picture with a drawn
+## background of its own, shown with a border.
+static func kind(face: String) -> String:
+	var r := rule(face)
+	return "card" if r.get("card", false) else ("oval" if r.get("oval", false) else "cut")
+
+
+## How far down `face`'s pictures the mouth is (0 top … 1 bottom): where the tail of a balloon points.
+static func mouth(face: String) -> float:
+	return float(rule(face).get("mouth", MOUTH))
 
 
 ## The portrait of `face` feeling `emotion`; null when there is no such picture.

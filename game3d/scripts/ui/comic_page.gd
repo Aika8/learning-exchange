@@ -1,5 +1,6 @@
-## A talk shown as a comic page: a paper sheet with one to four frames, the speakers in them, speech balloons with
-## tails and name tags, captions. E / Enter / click — next, Esc — close. The page only draws what `ComicReader`
+## A talk shown as a comic page: a paper sheet with one to four frames; behind the speakers the place they stand
+## in (a softened picture of the scene, taken as the page opens); oval balloons with tails to the mouth; a name
+## plate the first time somebody is seen; captions. ADR-0037 redrew the page of ADR-0027. E / Enter / click — next, Esc — close. The page only draws what `ComicReader`
 ## says is visible. See docs/adr/0027-game3d-talk-as-comic-pages.md
 class_name ComicPage
 extends Control
@@ -29,6 +30,11 @@ var _frames: Array[ComicFrame] = []
 var _hint: Label
 var _count: Label
 var _page := -1
+var _place: Texture2D  ## the scene as it was when the talk began, softened: what the frames show behind the people
+var _met: Dictionary = {}  ## who has had a name plate in this talk already
+
+const FONT_FILE := "res://fonts/comic.ttf"  ## a lettering font with Cyrillic, when one is in the project (ADR-0037)
+static var _lettering: Font
 
 
 func _init() -> void:
@@ -54,11 +60,40 @@ func _init() -> void:
 	add_child(_count)
 
 
+## The lettering of the pages: the project's own comic font when it has one, else a rounded system face.
 static func font() -> Font:
-	var f := SystemFont.new()
-	f.font_names = PackedStringArray(["Avenir Next", "Helvetica Neue", "Noto Sans", "DejaVu Sans", "Arial"])
-	f.font_weight = 600
-	return f
+	if _lettering == null:
+		if FileAccess.file_exists(FONT_FILE):
+			var file := FontFile.new()
+			if file.load_dynamic_font(FONT_FILE) == OK:
+				_lettering = file
+		if _lettering == null:
+			var f := SystemFont.new()
+			f.font_names = PackedStringArray(["Avenir Next Rounded", "Arial Rounded MT Bold", "Avenir Next", "Helvetica Neue", "Noto Sans", "DejaVu Sans", "Arial"])
+			f.font_weight = 600
+			_lettering = f
+	return _lettering
+
+
+## The place of the talk: the picture on screen as the page opens (the island in its own technique, where the
+## captain stands), made small and soft so that it is a backdrop and not a second picture. Null without a screen.
+func place() -> Texture2D:
+	return _place
+
+
+func _take_place() -> void:
+	_place = null
+	if DisplayServer.get_name() == "headless" or not is_inside_tree():
+		return
+	var img := get_viewport().get_texture().get_image()
+	if img == null or img.is_empty():
+		return
+	var w := img.get_width()
+	var h := img.get_height()
+	img = img.get_region(Rect2i(int(w * 0.08), int(h * 0.16), int(w * 0.84), int(h * 0.68)))  # without the HUD's edges
+	img.resize(96, 44, Image.INTERPOLATE_LANCZOS)  # small…
+	img.resize(384, 176, Image.INTERPOLATE_CUBIC)  # …and soft
+	_place = ImageTexture.create_from_image(img)
 
 
 func is_open() -> bool:
@@ -76,6 +111,8 @@ func open(talk_id: String, vars: Dictionary = {}) -> bool:
 	_vars = vars
 	_reader = script_data.reader(talk_id)
 	_page = -1
+	_met = {}
+	_take_place()
 	visible = true
 	_paint()
 	return true
@@ -138,13 +175,21 @@ func _paint() -> void:
 		var backdrop: Dictionary = script_data.backdrops.get(talk.get("backdrop", ""), {})
 		var inner := size_px - Vector2(GUTTER, GUTTER)
 		var layout: Array = LAYOUTS[clampi(panels.size(), 1, 4)]
+		var mirrored := _page % 2 == 1  # the next page is laid out the other way round: pages do not all look alike
 		for i in mini(panels.size(), 4):
 			var r: Rect2 = layout[i]
+			if mirrored:
+				r.position.x = 1.0 - r.position.x - r.size.x
 			var f := ComicFrame.new()
 			f.position = (Vector2(GUTTER, GUTTER) + r.position * inner).round()
 			f.size = (r.size * inner - Vector2(GUTTER, GUTTER)).round()
 			_sheet.add_child(f)
-			f.setup(self, panels[i], script_data.cast, backdrop)
+			var newcomers: Array = []
+			for who: String in panels[i].get("cast", []):
+				if not _met.has(who):
+					_met[who] = true
+					newcomers.append(who)
+			f.setup(self, panels[i], script_data.cast, backdrop, i + _page, newcomers)
 			_frames.append(f)
 	for i in _frames.size():
 		_frames[i].show_lines(_reader.shown(i))

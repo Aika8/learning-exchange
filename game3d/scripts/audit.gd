@@ -244,9 +244,19 @@ static func talk(tree: SceneTree) -> void:
 	var scene := tree.current_scene as Node3D
 	var page: ComicPage = scene.call("comic")
 	var sample := {"eps": "1,25", "revenue": "48 000,00", "season": "3", "consensus": "1,10"}
+	var homes := {"amber": ["amber_"], "shorts": ["shorts_"], "crypto": ["crypto_", "bot_"], "index": ["index_"], "race": ["race_"]}
 	for id: String in ComicScript.read().talks:
 		if not Session.arg("only").is_empty() and id != Session.arg("only"):
 			continue
+		if Session.arg("only").is_empty() and not Session.arg("island").is_empty():  # `--island` alone: the talks that happen there
+			var home := "harbour"
+			for isl: String in homes:
+				for prefix: String in homes[isl]:
+					if id.begins_with(prefix):
+						home = isl
+			if home != Game.island:
+				continue
+		await Session.wait(0.4)  # the page before is off the screen: the next one takes the place, not that page, as its backdrop
 		page.open(id, sample)
 		var n := 1
 		while page.is_open():

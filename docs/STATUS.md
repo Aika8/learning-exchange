@@ -3,6 +3,13 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D comic pages, second pass (ADR-0037, Proposed; amends 0027) — `docs/demo/G3D-comic.md`
+- Portraits are cut out of their paper by a tool in the project (`tools/cut_portraits.gd`; corrections as data)
+  and stand on the frame's edge; each frame's background is the softened scene of the talk; balloons are ovals
+  with short tails towards the mouth, a name plate once, a zigzag for a shout; lettering larger and centred;
+  figures of different sizes by shot, every second page mirrored. All 46 talks before and after in the demo page.
+  No font added yet: two OFL candidates with Cyrillic wait for Aika's yes.
+
 ## G3D the ship «Попутчик» and her monkey (ADR-0036, Proposed) — `docs/demo/G3D-ship.md`
 - The hero's ship is the one realistic thing: physically lit, built in code after Aika's six sheets (hull, rig
   with shrouds and deadeyes, carved stern with lit lanterns, a bird figurehead, guns, wheel, anchor, wing sails

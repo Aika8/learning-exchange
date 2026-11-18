@@ -14,6 +14,7 @@ import sys
 from pathlib import Path
 
 GAME = Path(__file__).resolve().parent.parent
+OPTIONAL = {"fonts/comic.ttf"}  # used when present: the lettering font waits for Aika's yes (ADR-0037)
 EMOTIONS = ["neutral", "happy", "surprised", "sly", "worried", "angry"]
 problems = []
 
@@ -22,7 +23,7 @@ def named_files():
     found = set()
     for script in list((GAME / "scripts").rglob("*.gd")) + list((GAME / "shared").glob("*.gd")):
         for m in re.finditer(r'"res://([A-Za-z0-9_./-]+\.[a-z]+)"', script.read_text(encoding="utf-8")):
-            if not m.group(1).startswith("assets/"):  # downloaded by `make assets`, ignored on purpose (ADR-0019)
+            if not m.group(1).startswith("assets/") and m.group(1) not in OPTIONAL:  # assets: downloaded by `make assets`, ignored on purpose (ADR-0019)
                 found.add(m.group(1))
     return sorted(found)
 
@@ -78,6 +79,10 @@ if talks_path.is_file():
             portraits.append(rel)
             if not (GAME / rel).is_file():
                 problems.append(f"{rel}: the portrait is not in the repository")
+            cut = f"art/cutouts/{face}_{emotion}.webp"
+            portraits.append(cut)
+            if not (GAME / cut).is_file():
+                problems.append(f"{cut}: the portrait is not cut out (godot --headless --path game3d -s tools/cut_portraits.gd)")
 for rel in ignored(files + portraits):
     problems.append(f"{rel}: ignored by git (.gitignore) — it will not reach anybody else")
 
