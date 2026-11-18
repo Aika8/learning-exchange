@@ -114,6 +114,7 @@ const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1,
 	"townsman": [0.97, 0.86, 1.25, 0.15], "child": [0.68, 0.95, 1.38, 0.04], "chronicler": [1.0, 1.0, 1.0, 0.0],
 	"crypto_trader": [1.04, 1.0, 1.12, 0.06], "crypto_miner": [0.98, 1.2, 1.15, 0.05], "crypto_dreamer": [0.96, 0.82, 1.14, 0.06], "crypto_analyst": [1.0, 0.84, 1.12, 0.06],
 	"toy_gentleman": [1.0, 1.45, 1.2, 0.05], "toy_lady": [0.98, 0.85, 1.18, 0.04], "toy_grandpa": [0.95, 0.95, 1.2, 0.07], "toy_granny": [0.86, 1.1, 1.22, 0.05], "toy_child": [0.66, 0.92, 1.36, 0.04],
+	"deco_aviator": [1.05, 1.12, 1.12, 0.07], "deco_mechanic": [1.03, 1.35, 1.14, 0.08], "deco_crew": [0.96, 0.84, 1.14, 0.05], "deco_marshal": [1.06, 0.98, 1.08, 0.07], "deco_lady": [0.99, 0.82, 1.16, 0.04],
 	"noir_broker": [1.06, 1.05, 1.12, 0.07], "noir_tramp": [0.93, 1.15, 1.2, 0.12], "noir_youth": [0.98, 0.74, 1.16, 0.06], "noir_lady": [1.0, 0.85, 1.14, 0.06]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
 	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
@@ -142,7 +143,7 @@ func _body(role: String) -> void:
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
 	if nose > 0.0:  # no face, but a nose: it belongs to the outline
 		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
-	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child"]:  # hair under the hat or kerchief
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child", "deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady"]:  # hair under the hat or kerchief
 		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp", "toy_grandpa", "toy_granny"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
@@ -418,6 +419,75 @@ func _r_toy_child(_tint: Color) -> void:
 	_shirt_sleeves(cloth(Color("aed6f1")))
 	_shawl(cloth(Color("1a5b5c")))  # the sailor collar
 	_knit_cap(cloth(Color("aed6f1")))
+
+
+## Sheet 56, the aviator: a brown leather jacket with a fur collar, cream breeches, tall laced boots, a white
+## scarf, a leather flying helmet.
+func _r_deco_aviator(_tint: Color) -> void:
+	var jacket := leather(Color("4a3528"))
+	_recolour("top", cloth(Color("e9e2d0")))
+	_recolour("bot", cloth(Color("d9c8a0")))
+	_recolour("lea", leather(Color("3c2a20")))
+	_hide("fedora")
+	_breeches(cloth(Color("d9c8a0")), 0.17)
+	_boots(leather(Color("3c2a20")))
+	_open_coat(jacket, cloth(Color("b9a27a")), _p("pelvis").y - 0.05 * k, 26.0, true)
+	_coat_sleeves(jacket, leather(Color("3c2a20")), leather(Color("3c2a20")))
+	_shawl(cloth(Color("f4efe2")))  # the scarf
+	_knit_cap(leather(Color("3c2a20")))  # the flying helmet
+
+
+## Sheet 56, the chief mechanic: a navy shirt with rolled sleeves under pale overalls, a flat cap.
+func _r_deco_mechanic(_tint: Color) -> void:
+	_recolour("top", cloth(Color("27384f")))
+	_recolour("bot", cloth(Color("c9c1ad")))
+	_recolour("lea", leather(Color("3a2c24")))
+	_hide("fedora")
+	_breeches(cloth(Color("c9c1ad")), 0.12)
+	_stockings(cloth(Color("c9c1ad")))
+	_waistcoat(cloth(Color("c9c1ad")), 8.0)  # the bib
+	_rolled_sleeves(cloth(Color("27384f")), cloth(Color("27384f")))
+	_beret(cloth(Color("6b6a55")))
+
+
+## Sheet 56, the crew member: a teal coverall with an ivory stripe, a peaked cap.
+func _r_deco_crew(_tint: Color) -> void:
+	var suit := cloth(Color("3f7482"))
+	_recolour("top", suit)
+	_recolour("bot", suit)
+	_recolour("lea", leather(Color("4a3528")))
+	_hide("fedora")
+	_breeches(suit, 0.09)
+	_stockings(suit)
+	_shirt_sleeves(suit)
+	_sash(cloth(Color("f4efe2")), true, 0.12)
+	_knit_cap(suit)
+
+
+## Sheet 56, the marshal: a navy jacket with a white armband and its red disc, khaki breeches, tall black boots.
+func _r_deco_marshal(_tint: Color) -> void:
+	var jacket := cloth(Color("1a2f4c"))
+	_recolour("top", cloth(Color("f4efe2")))
+	_recolour("bot", cloth(Color("a8946e")))
+	_recolour("lea", leather(Color("15161a")))
+	_hide("fedora")
+	_breeches(cloth(Color("a8946e")), 0.17)
+	_boots(leather(Color("15161a")))
+	_open_coat(jacket, cloth(Color("27384f")), _p("pelvis").y - 0.08 * k, 20.0, true)
+	_coat_sleeves(jacket, cloth(Color("f4efe2")), cloth(Color("f4efe2")))
+	_box("upperarm_l", cloth(Color("c83e3c")), Vector3(0.05, 0.07, 0.07) * k, _p("upperarm_l") + Vector3(0.075, -0.12, 0) * k)
+
+
+## Sheet 56, the spectator: a long peach coat with navy facings, a cloche hat, a pale scarf.
+func _r_deco_lady(_tint: Color) -> void:
+	_recolour("top", cloth(Color("f3be9f")))
+	_recolour("bot", cloth(Color("f3be9f")))
+	_recolour("lea", leather(Color("1a2f4c")))
+	_hide("fedora")
+	_long_skirt(cloth(Color("f3be9f")), cloth(Color("1a2f4c")), _p("calf_l").y - 0.1 * k, 0.3, false)
+	_shirt_sleeves(cloth(Color("f3be9f")))
+	_shawl(cloth(Color("f8e1d2")))
+	_wide_hat(felt(Color("f0b090")), 0.05, 0.15)
 
 
 const NOIR_RED := Color("c4302b")  ## the one colour of the short sellers' island (sheet 36)

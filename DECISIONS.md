@@ -489,3 +489,23 @@ Build and CI
 - Lollipop crowns start 2.25 m up, above the tallest hat; only the stick is solid.
 - The island is at (380, 4, 120): 398 m from Spark Harbour, clear of the others by more than 60 m between rocks.
 - Talks use generic real terms (index fund, TER, compound interest); no SPY/BIL until intent 03's question 7 is answered.
+
+## G3D race island (ADR-0034)
+- Deco paint: brightness in five flat steps (edges 0.4–0.6 of a step), shade 55 % navy below step 0.2–0.5, light
+  30 % ivory above 0.8. Metal = warm and saturated with blue under 47 % of red and green between 36 % and 100 % of
+  red; its band comes from the world normal · (0.3, 1, 0.2): plain, one bright stripe, one dark stripe; a plate that
+  faces up is plain. Red = green under 36 % of red. Line 85 % navy.
+- The sun of the poster is the fixed world direction (0.93, 0.1, 0.36): from the pier it stands behind the timing
+  tower. Twelve rays, 30 % brass, fading by 1 rad from the sun. It is not the scene's light: shadows fall as on
+  every island.
+- The cloud sea is told by height alone (below −44 m): its own normals cannot be trusted.
+- `Kit.commit(name, false)` keeps every triangle: the track's thin bands and rails vanished under LODs. A surface
+  of a `Kit` is built either from quads/triangles or from boxes — mixed, the quads are lost; the track's rail
+  posts use their own material for that reason.
+- The track is 5 m wide at radius 46 m, 6.6 m up, banked 0.22; the island's solid for the ship is 50 m (`REACH`),
+  so the berth is at the end of a 41 m pier.
+- The island is at (−390, 8, −120): 408 m from Spark Harbour; moved 42 m from the first place to get clear of a
+  stray decorative islet.
+- Signal gates glow only 0.3: brighter, the red washes towards orange and is read as copper.
+- The fourth skiff («Адмирал») is moored by the pier; «Феникс» stands in the pit lane, «Быстрая звезда» and «Буря»
+  on the track.

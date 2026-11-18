@@ -6,7 +6,7 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4, "toy": 5}
+const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4, "toy": 5, "deco": 6}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
 ## Spark Harbour is the look of ADR-0024 as approved. Every other island has a technique of its own.
@@ -88,6 +88,19 @@ const TABLE := {
 		"sun": Color("fff4e0"),  # even, soft
 		"sun_energy": 1.1,
 		"accent": Color("f4d03f"),
+	},
+	"race": {
+		"technique": "deco",  # a streamline art-deco poster: flat tones, metal in bands, a sunburst sky (sheets 52–58; ADR-0034)
+		"ramp": [Color("1a2f4c"), Color("e0aa3e"), Color("f6c8a4"), Color("f8e6cf")],  # the shade's navy, brass, sky low (peach), sky high
+		"ink": Color("15233b"),  # the navy line
+		"width": 1.2,
+		"tint": Color(1.0, 1.0, 1.0),
+		"paper": Color("f4efe2"),  # ivory
+		"hatch_turn": 0.0,
+		"hatch_gap": 9.0,
+		"sun": Color("ffe2c2"),  # a low warm sun
+		"sun_energy": 1.35,
+		"accent": Color("e0aa3e"),
 	},
 }
 

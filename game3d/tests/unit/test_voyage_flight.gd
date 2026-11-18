@@ -98,7 +98,7 @@ func test_the_chart_at_the_pier_offers_every_other_island_and_the_day_loop_still
 	var offered: Array[String] = []
 	for b in chart.find_children("To_*", "Button", true, false):
 		offered.append(str(b.name).trim_prefix("To_"))
-	assert_eq(offered, ["silk", "amber", "shorts", "crypto", "index"] as Array[String])
+	assert_eq(offered, ["silk", "amber", "shorts", "crypto", "index", "race"] as Array[String])
 	assert_not_null(chart.find_child("Free", true, false))
 	assert_not_null(chart.find_child("Stay", true, false))
 	# the guard of the day loop is asked exactly as before: SAILING from PORT is allowed, from PLAN it is not

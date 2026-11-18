@@ -52,13 +52,15 @@ func tri(m: Material, a: Vector3, b: Vector3, c: Vector3) -> void:
 		st.add_vertex(v)
 
 
-func commit(name: String = "Mesh") -> MeshInstance3D:
+## `lods` = false keeps every triangle at any distance: for thin bands on a big surface, which simplifying drops.
+func commit(name: String = "Mesh", lods: bool = true) -> MeshInstance3D:
 	var im := ImporterMesh.new()
 	for m in _order:
 		var st: SurfaceTool = _tools[m]
 		st.index()
 		im.add_surface(Mesh.PRIMITIVE_TRIANGLES, st.commit_to_arrays(), [], {}, m)
-	im.generate_lods(25.0, 60.0, [])
+	if lods:
+		im.generate_lods(25.0, 60.0, [])
 	var mi := MeshInstance3D.new()
 	mi.name = name
 	mi.mesh = im.get_mesh()
