@@ -6,7 +6,7 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-## `toy` (5) belongs to no island now (ADR-0035): it is kept for the one Aika gives it to.
+## `toy` (5) is the pyramid island's (ADR-0038); it was the index island's first look (ADR-0033, superseded by 0035).
 const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4, "toy": 5, "deco": 6, "oil": 7}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
@@ -116,6 +116,21 @@ const TABLE := {
 		"sun_height": 34.0,
 		"sun_soft": 0.8,
 		"accent": Color("e0aa3e"),
+	},
+	"pyramid": {
+		"technique": "toy",  # glossy pastel toys under glass, soft even light (sheets 73–79; ADR-0038)
+		"ramp": [Color("c9b2ea"), Color("1a5b5c"), Color("fff3e0"), Color("bfe3ea")],  # the shade's lavender, the seam's teal, sky low, sky high
+		"ink": Color("1a5b5c"),
+		"width": 1.2,
+		"tint": Color(1.0, 1.0, 1.0),
+		"paper": Color("fdf5e6"),
+		"hatch_turn": 0.0,
+		"hatch_gap": 9.0,
+		"sun": Color("fff4e0"),  # even, soft
+		"sun_energy": 1.1,
+		"sun_height": 48.0,  # a high sun: short soft shadows under the glass (sheet 79, "soft even light")
+		"sun_soft": 3.0,
+		"accent": Color("e1b04a"),
 	},
 }
 

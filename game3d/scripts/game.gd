@@ -24,6 +24,7 @@ var provisions := false
 var destination := ""  ## the island marked on the chart for this voyage; "" = flying free (ADR-0032)
 var island := "harbour"  ## harbour | silk — where the ship is
 var met: Dictionary = {}  ## talks already had this run (the first meeting is a comic page, ADR-0027)
+var visits: Dictionary = {}  ## island id → how many times the captain has landed there this run (ADR-0038)
 var attuned := "harbour"  ## the island whose style the captain is drawn in; its wind restyles a newcomer (ADR-0025)
 var anchor_id := -1
 var anchor: Dictionary = {}
@@ -72,6 +73,13 @@ func record(kind: String, data: Dictionary = {}, key: String = "") -> void:
 	if daylog.append(kind, now(), data, key):
 		save()
 		log_changed.emit()
+
+
+## The visit whose stage the pyramid island shows: `--stage=N` on the command line (captures, tests' tools), else
+## the number of landings there so far.
+func pyramid_stage() -> int:
+	var forced := Session.arg("stage")
+	return int(forced) if forced.is_valid_int() else int(visits.get("pyramid", 0))
 
 
 func save() -> void:

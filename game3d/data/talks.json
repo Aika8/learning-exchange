@@ -39,6 +39,11 @@
     "toy_grandpa": {"name": "WHO_TOY_GRANDPA", "who": "oldman", "role": "toy_grandpa", "coat": "a8cce4", "face": "toy_grandpa", "one_face": true},
     "toy_granny": {"name": "WHO_TOY_GRANNY", "who": "trader", "role": "toy_granny", "coat": "d7bde2", "face": "toy_granny", "one_face": true},
     "toy_child": {"name": "WHO_TOY_CHILD", "who": "child", "role": "toy_child", "coat": "aed6f1", "face": "toy_child", "one_face": true},
+    "pyr_host": {"name": "WHO_PYR_HOST", "who": "trader", "role": "pyr_host", "coat": "c9b2ea", "face": "pyr_host", "one_face": true},
+    "pyr_barker": {"name": "WHO_PYR_BARKER", "who": "sailor", "role": "pyr_barker", "coat": "f7b6c8", "face": "pyr_barker", "one_face": true},
+    "pyr_happy": {"name": "WHO_PYR_HAPPY", "who": "sailor", "role": "pyr_happy", "coat": "a8e2c4", "face": "pyr_happy", "one_face": true},
+    "pyr_worried": {"name": "WHO_PYR_WORRIED", "who": "oldman", "role": "pyr_worried", "coat": "e2cee2", "face": "pyr_worried", "one_face": true},
+    "pyr_sweeper": {"name": "WHO_PYR_SWEEPER", "who": "trader", "role": "pyr_sweeper", "coat": "9a9aa2", "face": "pyr_sweeper", "one_face": true},
     "deco_aviator": {"name": "WHO_DECO_AVIATOR", "who": "sailor", "role": "deco_aviator", "coat": "4a3528", "face": "deco_aviator", "one_face": true},
     "deco_mechanic": {"name": "WHO_DECO_MECHANIC", "who": "sailor", "role": "deco_mechanic", "coat": "c9c1ad", "face": "deco_mechanic", "one_face": true},
     "deco_crew": {"name": "WHO_DECO_CREW", "who": "sailor", "role": "deco_crew", "coat": "3f7482", "face": "deco_crew", "one_face": true},
@@ -63,7 +68,8 @@
     "neon": {"sky": "5b2a86", "ground": "1b1035"},
     "pastel": {"sky": "e2cee2", "ground": "b5e2b8"},
     "deco": {"sky": "f6c8a4", "ground": "103c42"},
-    "oil": {"sky": "d9bd84", "ground": "5a4634"}
+    "oil": {"sky": "d9bd84", "ground": "5a4634"},
+    "fair": {"sky": "e2cee2", "ground": "f6eedd"}
   },
   "talks": {
     "mara_first": {"backdrop": "wharf", "pages": [
@@ -387,6 +393,12 @@
         {"shot": "two", "cast": ["deco_lady", "captain"], "lines": [["deco_lady", "TALK_RACE_LADY_1", "neutral"], ["captain", "TALK_RACE_LADY_2", "worried"]]},
         {"shot": "close", "cast": ["deco_lady"], "lines": [["deco_lady", "TALK_RACE_LADY_3", "neutral"]]}
       ]}
-    ]}
+    ]},
+    "pyramid_stairs": {"backdrop": "fair", "pages": [{"panels": [{"shot": "wide", "cast": ["pyr_host", "captain"], "caption": "PYR_STAIRS_C"}, {"shot": "low", "cast": ["pyr_host"], "lines": [["pyr_host", "PYR_STAIRS_1", "happy"]]}, {"shot": "two", "cast": ["pyr_host", "captain"], "lines": [["captain", "PYR_STAIRS_2", "sly"], ["pyr_host", "PYR_STAIRS_3", "happy"]]}]}]},
+    "pyramid_booth": {"backdrop": "fair", "pages": [{"panels": [{"shot": "close", "cast": ["pyr_barker"], "lines": [["pyr_barker", "PYR_BOOTH_1", "happy", "shout"]]}, {"shot": "two", "cast": ["pyr_barker", "captain"], "lines": [["captain", "PYR_BOOTH_2", "neutral"], ["pyr_barker", "PYR_BOOTH_3", "worried"]]}, {"shot": "close", "cast": ["captain"], "lines": [["captain", "PYR_BOOTH_4", "neutral", "thought"]]}]}]},
+    "pyramid_happy": {"backdrop": "fair", "pages": [{"panels": [{"shot": "close", "cast": ["pyr_happy"], "lines": [["pyr_happy", "PYR_HAPPY_1", "happy"]]}, {"shot": "two", "cast": ["pyr_happy", "captain"], "lines": [["captain", "PYR_HAPPY_2", "sly"], ["pyr_happy", "PYR_HAPPY_3", "surprised"]]}]}]},
+    "pyramid_worried": {"backdrop": "fair", "pages": [{"panels": [{"shot": "close", "cast": ["pyr_worried"], "lines": [["pyr_worried", "PYR_WORRIED_1", "worried"]]}, {"shot": "two", "cast": ["pyr_worried", "captain"], "lines": [["captain", "PYR_WORRIED_2", "worried"], ["pyr_worried", "PYR_WORRIED_3", "worried"]]}]}]},
+    "pyramid_sweeper": {"backdrop": "fair", "pages": [{"panels": [{"shot": "close", "cast": ["pyr_sweeper"], "lines": [["pyr_sweeper", "PYR_SWEEPER_1", "neutral"]]}, {"shot": "two", "cast": ["pyr_sweeper", "captain"], "lines": [["captain", "PYR_SWEEPER_2", "neutral"], ["pyr_sweeper", "PYR_SWEEPER_3", "worried"]]}]}]},
+    "pyramid_crowd": {"backdrop": "fair", "pages": [{"panels": [{"shot": "two", "cast": ["toy_gentleman", "captain"], "lines": [["toy_gentleman", "PYR_CROWD_1", "happy"], ["captain", "PYR_CROWD_2", "neutral", "thought"]]}]}]}
   }
 }

@@ -157,3 +157,27 @@ TALK_INDEX_GRANDPA_3,"Не спал ночами, но не продал. Вер
 TALK_INDEX_GRANNY_1,"Вот наш дом тридцать лет назад. А вот год, когда сад стал вдвое меньше.","Here is our house thirty years ago. And here is the year the garden was half its size."
 TALK_INDEX_GRANNY_2,"Вы и плохие годы храните в альбоме?","You keep the bad years in the album too?"
 TALK_INDEX_GRANNY_3,"Обязательно. Иначе внуки решат, что так было всегда. Быстро здесь не бывает ничего.","Always. Or the grandchildren will think it was ever so. Nothing here is quick."
+WHO_PYR_HOST,Распорядитель,The host
+WHO_PYR_BARKER,Зазывала,The barker
+WHO_PYR_HAPPY,Счастливчик с билетами,The lucky ticket holder
+WHO_PYR_WORRIED,Человек с монетами,The man with the coins
+WHO_PYR_SWEEPER,Метельщица,The sweeper
+PYR_STAIRS_C,Остров пирамиды. Под стеклом всегда праздник.,The pyramid island. Under the glass it is always a holiday.
+PYR_STAIRS_1,"Добро пожаловать наверх, капитан! Каждый, кто поднялся, приводит двоих — и поднимается выше.","Welcome to the top, captain! Everyone who climbs brings two more — and climbs higher."
+PYR_STAIRS_2,"А чем платят тем, кто наверху?",And what pays the ones at the top?
+PYR_STAIRS_3,"Билетами новичков, конечно! Пока новички идут.","The newcomers' tickets, of course! As long as newcomers come."
+PYR_BOOTH_1,Золотой билет! Удвоение к пятнице! Без риска!,A golden ticket! Doubled by Friday! No risk!
+PYR_BOOTH_2,Откуда берётся удвоение?,Where does the doubling come from?
+PYR_BOOTH_3,Это… секрет фирмы! Главное — успеть.,That's… a trade secret! The point is to be in time.
+PYR_BOOTH_4,"Обещают доход без риска и не говорят, откуда он. Запомню эти слова.",They promise a return with no risk and won't say where it comes from. I'll remember those words.
+PYR_HAPPY_1,Я уже получил вдвое! Позови друзей — и тебе дадут ещё билетов!,I've doubled already! Bring your friends and you get more tickets!
+PYR_HAPPY_2,А забрать деньги ты пробовал?,Have you tried taking the money out?
+PYR_HAPPY_3,"Зачем забирать, если растёт?",Why take it out if it grows?
+PYR_WORRIED_1,Третий день прошу вернуть монеты. Говорят — касса откроется завтра.,Third day I've asked for my coins back. They say the till opens tomorrow.
+PYR_WORRIED_2,"Много здесь таких, как вы?",Are there many like you here?
+PYR_WORRIED_3,С каждым днём больше. А новичков всё меньше.,More every day. And fewer newcomers.
+PYR_SWEEPER_1,"Я мету эти билеты не первый раз, сынок. Ярмарки приходят и уходят.","I've swept these tickets before, son. Fairs come and go."
+PYR_SWEEPER_2,И кто уходит с деньгами?,And who leaves with the money?
+PYR_SWEEPER_3,"Те, кто пришёл первым и ушёл раньше всех. Остальные — с билетами.",The ones who came first and left before everyone. The rest leave with tickets.
+PYR_CROWD_1,"Все здесь — значит, это надёжно. Разве столько людей может ошибаться?","Everybody's here, so it must be safe. Could so many people be wrong?"
+PYR_CROWD_2,Толпа — не довод. Довод — откуда берутся деньги.,A crowd isn't a reason. Where the money comes from is.

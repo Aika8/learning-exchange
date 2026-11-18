@@ -10,7 +10,7 @@ const EMOTIONS: Array[String] = ["neutral", "happy", "surprised", "sly", "worrie
 const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "merchant", "chronicler", "keeper", "sailor", "sailor2", "child", "townsman",
 	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady",
 	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info",
-	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child",
+	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child", "pyr_host", "pyr_barker", "pyr_happy", "pyr_worried", "pyr_sweeper",
 	"deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady",
 	"oil_merchant", "oil_lady", "oil_market", "oil_father", "oil_child", "oil_grandpa", "oil_granny"]  ## heroes who have a sheet
 const VOICES: Array[String] = ["say", "shout", "thought"]  ## a line's optional fourth word: the shape of its balloon

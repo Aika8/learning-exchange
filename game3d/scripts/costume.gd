@@ -117,6 +117,7 @@ const BUILDS := {"captain": [1.0, 0.92, 1.22, 0.07], "sailor": [1.08, 0.82, 1.1,
 	"oil_merchant": [1.02, 1.4, 1.16, 0.07], "oil_lady": [0.97, 0.84, 1.14, 0.04], "oil_market": [0.94, 1.25, 1.16, 0.06], "oil_father": [1.04, 0.92, 1.1, 0.06],
 	"oil_child": [0.6, 0.95, 1.36, 0.03], "oil_grandpa": [0.93, 0.9, 1.16, 0.09], "oil_granny": [0.86, 1.05, 1.18, 0.06],
 	"deco_aviator": [1.05, 1.12, 1.12, 0.07], "deco_mechanic": [1.03, 1.35, 1.14, 0.08], "deco_crew": [0.96, 0.84, 1.14, 0.05], "deco_marshal": [1.06, 0.98, 1.08, 0.07], "deco_lady": [0.99, 0.82, 1.16, 0.04],
+	"pyr_host": [1.0, 1.25, 1.3, 0.05], "pyr_barker": [0.98, 1.05, 1.3, 0.05], "pyr_happy": [0.96, 1.0, 1.32, 0.04], "pyr_worried": [0.95, 0.88, 1.3, 0.04], "pyr_sweeper": [0.86, 1.0, 1.3, 0.05],
 	"noir_broker": [1.06, 1.05, 1.12, 0.07], "noir_tramp": [0.93, 1.15, 1.2, 0.12], "noir_youth": [0.98, 0.74, 1.16, 0.06], "noir_lady": [1.0, 0.85, 1.14, 0.06]}
 const BONES := [["Root", ""], ["pelvis", "Root"], ["spine_01", "pelvis"], ["spine_02", "spine_01"], ["spine_03", "spine_02"], ["neck_01", "spine_03"],
 	["head", "neck_01"], ["upperarm_l", "spine_03"], ["lowerarm_l", "upperarm_l"], ["hand_l", "lowerarm_l"], ["upperarm_r", "spine_03"],
@@ -145,8 +146,8 @@ func _body(role: String) -> void:
 	_add("head", skin, _sphere(), Transform3D(Basis().scaled(Vector3(0.2, 0.245, 0.22) * hk), head))
 	if nose > 0.0:  # no face, but a nose: it belongs to the outline
 		_tube("head", skin, head + Vector3(0, 0.0, 0.085) * hk, head + Vector3(0, -0.035 * hk, 0.1 * hk + nose * k), 0.032 * hk, 0.008 * hk, 1.0, false, 5)
-	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child", "deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady", "oil_merchant", "oil_father", "oil_grandpa"]:  # hair under the hat or kerchief
-		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp", "toy_grandpa", "toy_granny", "oil_merchant", "oil_grandpa"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
+	if role in ["trader", "townsman", "captain", "mara", "olva", "changer", "child", "noir_tramp", "noir_youth", "noir_lady", "crypto_trader", "crypto_dreamer", "crypto_analyst", "toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child", "pyr_host", "pyr_barker", "pyr_happy", "pyr_worried", "pyr_sweeper", "deco_aviator", "deco_mechanic", "deco_crew", "deco_marshal", "deco_lady", "oil_merchant", "oil_father", "oil_grandpa"]:  # hair under the hat or kerchief
+		_dome("head", _plain("hair", Color("9a9a96") if role in ["townsman", "mara", "noir_tramp", "toy_grandpa", "toy_granny", "pyr_sweeper", "oil_merchant", "oil_grandpa"] else (Color("1c1a1a") if role.begins_with("noir") else Color("5a3a26")), 0.9), head + Vector3(0, 0.035, -0.03) * hk, Vector3(0.104, 0.1, 0.1) * hk)
 	_tube("neck_01", skin, _p("neck_01") - Vector3(0, 0.03, 0) * k, head - Vector3(0, 0.08, 0) * hk, 0.05 * k, 0.048 * k)
 	_tube("spine_01", shirt, _p("pelvis"), _p("spine_03"), 0.165 * k, 0.185 * k, 0.72)
 	_tube("spine_03", shirt, _p("spine_03"), _p("neck_01") - Vector3(0, 0.02, 0) * k, 0.185 * k, 0.1 * k, 0.72)
@@ -421,6 +422,74 @@ func _r_toy_child(_tint: Color) -> void:
 	_shirt_sleeves(cloth(Color("aed6f1")))
 	_shawl(cloth(Color("1a5b5c")))  # the sailor collar
 	_knit_cap(cloth(Color("aed6f1")))
+
+
+## Sheet 76, the host: an iridescent pastel tailcoat over a butter waistcoat, a lilac bow, cream trousers, a pastel
+## top hat, a cane.
+func _r_pyr_host(_tint: Color) -> void:
+	var coat := cloth(Color("c9b2ea"))
+	_recolour("top", cloth(Color("fbe39a")))
+	_recolour("bot", cloth(Color("f3e2c8")))
+	_recolour("lea", leather(Color("5a3a2a")))
+	_hide("fedora")
+	_breeches(cloth(Color("f3e2c8")), 0.12)
+	_stockings(cloth(Color("f3e2c8")))
+	_waistcoat(cloth(Color("a8e2c4")), 30.0)
+	_open_coat(coat, cloth(Color("f7b6c8")), _p("calf_l").y + 0.1 * k, 60.0, false)
+	_coat_sleeves(coat, cloth(Color("a9cdee")), cloth(Color("ffffff")))
+	_wide_hat(felt(Color("f7b6c8")), 0.08, 0.26)
+	_tube("hand_r", leather(Color("5a3a2a")), _p("hand_r") - Vector3(0, 0.05, 0) * k, _p("foot_r") + Vector3(0.12, 0, 0.12) * k, 0.014 * k, 0.014 * k)
+
+
+## Sheet 76, the barker: a pink-and-mint striped jacket, grey trousers, a patchwork cap, a megaphone at the mouth.
+func _r_pyr_barker(_tint: Color) -> void:
+	var coat := cloth(Color("f7b6c8"))
+	_recolour("top", cloth(Color("f6eedd")))
+	_recolour("bot", cloth(Color("9a9aa2")))
+	_recolour("lea", leather(Color("3a3436")))
+	_hide("fedora")
+	_open_coat(coat, cloth(Color("a8e2c4")), _p("pelvis").y - 0.1 * k, 24.0, true)
+	_coat_sleeves(coat, cloth(Color("a8e2c4")), cloth(Color("f6eedd")))
+	_knit_cap(cloth(Color("a9cdee")))
+	var horn := _p("hand_r") + Vector3(-0.02, 0.05, 0.12) * k
+	_tube("hand_r", cloth(Color("f7b6c8")), horn, horn + Vector3(0, 0.02, 0.26) * k, 0.03 * k, 0.11 * k)
+
+
+## Sheet 76, the happy ticket holder: a rainbow-striped jacket over a butter waistcoat, a fan of tickets in hand.
+func _r_pyr_happy(_tint: Color) -> void:
+	var coat := cloth(Color("a8e2c4"))
+	_recolour("top", cloth(Color("fbe39a")))
+	_recolour("bot", cloth(Color("c9b2ea")))
+	_recolour("lea", leather(Color("e1b04a")))
+	_hide("fedora")
+	_waistcoat(cloth(Color("fbe39a")), 30.0)
+	_open_coat(coat, cloth(Color("f7b6c8")), _p("pelvis").y - 0.12 * k, 30.0, true)
+	_coat_sleeves(coat, cloth(Color("c9b2ea")), cloth(Color("ffffff")))
+	_box("hand_r", cloth(Color("e1b04a")), Vector3(0.16, 0.1, 0.02) * k, _p("hand_r") + Vector3(0, 0.04, 0.06) * k, Vector3(0, 0, 0.4))
+
+
+## Sheet 76, the worried coin counter: a long lilac coat, olive trousers, coins in a cupped hand.
+func _r_pyr_worried(_tint: Color) -> void:
+	var coat := cloth(Color("e2cee2"))
+	_recolour("top", cloth(Color("f6eedd")))
+	_recolour("bot", cloth(Color("8a8a5a")))
+	_recolour("lea", leather(Color("5a3a2a")))
+	_hide("fedora")
+	_open_coat(coat, cloth(Color("c9b2ea")), _p("calf_l").y + 0.2 * k, 12.0, true)
+	_coat_sleeves(coat, cloth(Color("c9b2ea")), cloth(Color("f6eedd")))
+	_ball("hand_l", cloth(Color("e1b04a")), _p("hand_l") + Vector3(0, -0.02, 0.05) * k, 0.03 * k)
+
+
+## Sheet 76, the sweeper: an old woman all in grey — kerchief, dress, apron — with a broom.
+func _r_pyr_sweeper(_tint: Color) -> void:
+	_recolour("top", cloth(Color("9a9aa2")))
+	_recolour("bot", cloth(Color("8a8a92")))
+	_recolour("lea", leather(Color("3a3436")))
+	_long_skirt(cloth(Color("8a8a92")), cloth(Color("6e6e76")), _p("foot_l").y + 0.06 * k, 0.4, true)
+	_shirt_sleeves(cloth(Color("9a9aa2")))
+	_apron(cloth(Color("c9c9cc")), _p("calf_l").y, 0.3, true)
+	_kerchief(cloth(Color("b0b0b6")))
+	_tube("hand_l", leather(Color("8a6a4a")), _p("hand_l") + Vector3(0, 0.5, 0.1) * k, _p("foot_l") + Vector3(0, 0, 0.35) * k, 0.016 * k, 0.016 * k)
 
 
 const OIL_BLACK := Color("1e1c1c")  ## the dark cloth of the index island (sheet 63)

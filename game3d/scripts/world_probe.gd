@@ -293,7 +293,7 @@ func check_spot(name: String, p: Vector3, radius: float) -> bool:
 func _units() -> Array[Node3D]:
 	var out: Array[Node3D] = []
 	for c in world.get_children():
-		if c.name in [&"SparkHarbour", &"SilkReach", &"AmberCliff", &"ShortIsle", &"CryptoIsle", &"IndexIsle", &"RaceIsle"]:
+		if c.name in [&"SparkHarbour", &"SilkReach", &"AmberCliff", &"ShortIsle", &"CryptoIsle", &"IndexIsle", &"RaceIsle", &"PyramidIsle"]:
 			for g in c.get_children():
 				if g is Node3D:
 					out.append(g)
