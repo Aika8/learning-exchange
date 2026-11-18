@@ -26,6 +26,9 @@ lose everything, borrow, work one's way back, and feel what a debt is.
    the hero changes to its style.
 6. Her open question: **how does the player see the current phase of the market** — a chart at the exchange, news
    in the ports, the behaviour of the islanders?
+7. **The index island, in more detail** (added 2026-11-18; see "The index island: Aika's ideas" below): time is
+   seen with the eyes, the storm passes over it, it is quiet inside, its people are of every age — and it is
+   **not** "the right answer".
 
 ## What already exists and fits
 | Wish | Already there |
@@ -86,6 +89,45 @@ island or borrow → come back wiser. Nothing protects the player from a loss, a
   A lender is an account; default has a consequence in the game, and the ledger keeps the debt.
 - **Shorts** exist as leveraged positions; a whole island of them may need borrow costs — a question.
 
+## The index island: Aika's ideas (2026-11-18)
+The island exists as a place and a style only (ADR-0033); its look is being chosen again by Aika and is not part
+of this section. These are ideas for what the place *does*; nothing here is built.
+
+1. **Time is seen with the eyes.** Trees and houses grow slowly from visit to visit: compound interest shown as
+   a garden, not as a number. A visitor who comes back after a long voyage sees the difference at once; one who
+   stands and waits sees nothing.
+2. **The storm passes over it too.** When the whole market is in a falling phase there is a thunderstorm above
+   the island as well, and the fountain drops fewer coins — but the islanders walk as calmly as before and nobody
+   panics. The lesson is to sit through a drawdown.
+3. **Shelter from noise.** Outside: news, the short sellers shouting, the neon of the crypto island. Inside:
+   silence. A metaphor for "do not react to noise".
+4. **Adults of every age.** Families, people in their middle years and the old — not only the old. Their wealth
+   was earned by patience; somebody keeps a photo album "30 years ago".
+
+**The island does not say "this is the right answer".** Its costs must be as visible as its wealth:
+- drawdowns of 30–50 %;
+- years before the value comes back;
+- boredom — the main difficulty;
+- no quick result.
+
+How it could sit on what exists (for discussion):
+- **Growth** is a pure function of the island's own holding in the index fund on the simulation clock (ADR-0021),
+  so a replay grows the same garden. It follows invariant 2: the trees grow because the fund did, never by a
+  script — which means that in a long falling phase they must also stop, thin out or lose leaves. A garden that
+  only ever grows would be the "right answer" Aika does not want.
+- **The storm and the fountain** read the same phase as every other island (invariants 1 and 3); the fountain's
+  rate could be the fund's distributions or the islanders' standing orders, whichever question 9 settles.
+  The calm is behaviour of the islanders, not protection: their accounts fall with the market like anyone's.
+- **Silence** is presentation only: the news board and the criers stop at the pier, sound and motion drop.
+  The news still exists and the player may read it elsewhere; the island hides nothing from the ledger.
+- **The minuses** belong where the player cannot miss them: the album also has the bad years (the page where the
+  garden was half its size and how long it took to return), an islander who sold at the bottom and tells it,
+  the island's "when this fails" card (invariant 10), and the Chronicler's review comparing the player's own
+  years with the island's, without a verdict.
+- The figures (30–50 %, years) are of the order known from real index history; inside the game the numbers come
+  from the seeded economy, so a test must show that a falling phase can really cost the island that much
+  (invariant 4) — otherwise the talk would promise a risk the market never delivers.
+
 ## Questions for Aika
 **The world**
 1. The name: «Воздушные пираты» or «Летопись Ветров»? Are the captain and crew pirates, or traders among pirates?
@@ -123,6 +165,19 @@ island or borrow → come back wiser. Nothing protects the player from a loss, a
     At what level, and should it follow your TCF preparation?
 16. How much does a side job pay compared with the treasure — a day's provisions, a tenth of the treasure?
 
+**The index island (to the ideas of 2026-11-18)**
+19. Growth "from visit to visit": measured in game days since the captain's last landing, or in the fund's value?
+    How long must an absence be before a difference is seen — and does the player's own stake grow a tree of
+    its own (ties in with question 9)?
+20. In a long falling phase, may the garden visibly shrink (bare trees, a closed shutter), or does it only stop?
+21. Silence: is it literal (no news board, no music, muted sound on the island), and may the player still open
+    the chart and the Barometer there, or only outside?
+22. The islanders today are five by the sheet: a gentleman, a lady, an elderly couple, a boy. For "every age" we
+    need families and people in their middle years — will there be a sheet for them? Who owns the photo album,
+    and is it a comic page (drawn "then" and "now") or an object on a table?
+23. Who tells the minuses in person — somebody who sold at the bottom and left, somebody who stayed and is
+    simply bored? Is there an islander who regrets being here?
+
 **Look**
 17. Which indie manners do you have in mind, island by island (as principles, not copies)? Which islands are 2D,
     and what does the captain do there — walk a side-on street?
@@ -139,6 +194,8 @@ island or borrow → come back wiser. Nothing protects the player from a loss, a
    real players before any new phase exists.
 3. **The index island.** Rich, boring, walk-only; a standing order buys the index fund on the simulation clock.
    Uses the fund and the index bot that exist. First island whose method can be compared with the player's own.
+   The place stands already (ADR-0033). After phases exist (step 4): the growing garden, the storm overhead,
+   the quiet, the album with its bad years — see "The index island: Aika's ideas".
 4. **Phases proper** (ADR): rising, falling, sideways blocks in the economy generator, with the property test of
    invariant 4 for the index method.
 5. **A second method that is right at another time** (short sellers or momentum). From here "each island is right
