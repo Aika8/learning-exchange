@@ -325,3 +325,13 @@ func test_the_second_page_is_laid_out_the_other_way_round() -> void:
 		assert_true(page.frames()[0].position.x >= xs.min(), "frames are still inside the sheet")
 		if page.frames().size() == 3:
 			assert_gt(page.frames()[0].position.x, first_x, "the large frame has moved to the right")
+
+
+func test_the_pages_are_lettered_in_the_projects_own_font() -> void:
+	assert_true(FileAccess.file_exists(ComicPage.FONT_FILE))
+	assert_true(FileAccess.get_file_as_string("res://fonts/OFL.txt").contains("SIL OPEN FONT LICENSE Version 1.1"), "its licence travels with it")
+	var f := ComicPage.font()
+	assert_true(f is FontFile, "not a system face: the same letters on every machine")
+	assert_eq(f.get_font_name(), "Comic Relief")
+	for letter: String in ["Я", "ж", "ё", "é", "Q", "—", "«"]:
+		assert_true(f.has_char(letter.unicode_at(0)), "it has " + letter)
