@@ -11,6 +11,9 @@
 //     surfaces in 14 cm squares that stay put when the camera moves; twelve colours in flat tones, neon kept as
 //     neon, a banded night sky with a striped sun, a glowing grid on the ground, a small dithered halo round
 //     neon and no other dithering; nothing animated;
+// 5 = toy (ADR-0033) — a pastel toy town: colours lifted towards cream, shade a soft lavender, a small gloss
+//     highlight from the normal, a soft teal seam instead of a line, and tilt-shift — the top and bottom of the
+//     screen blurred a little, the middle half left exactly sharp; nothing animated;
 // 2 = aquarelle — pen and watercolour: a thin trembling line, washes that run past it, a lot of bare paper, a
 //     violet-grey wash for shade, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
@@ -106,6 +109,16 @@ vec3 neon_of(vec3 c) {
 	}
 	float gr = seen.g / max(seen.r, 0.01);
 	return gr > 0.66 ? hexc(255.0, 204.0, 0.0) : (gr > 0.4 ? hexc(255.0, 122.0, 61.0) : hexc(255.0, 46.0, 136.0));  // gold, orange, pink
+}
+
+// The paint of the toy technique for one sample of the picture: lifted towards cream, shade turned lavender.
+vec3 toy_paint(vec3 c, vec3 cream, vec3 shade) {
+	vec3 seen = pow(clamp(c, 0.0, 1.0), vec3(0.45));
+	float l = dot(seen, vec3(0.299, 0.587, 0.114));
+	vec3 soft = mix(seen, cream, 0.1);  // low contrast: everything a little nearer the paper
+	soft = mix(soft, mix(shade, soft, 0.6) * 0.92, 1.0 - smoothstep(0.3, 0.62, l));  // shade is a lavender veil, never dark
+	soft = mix(vec3(dot(soft, vec3(0.333))), soft, 1.45);  // candy colour: pastel is pale, not grey
+	return pow(clamp(soft, 0.0, 1.0), vec3(2.2));
 }
 
 void vertex() {
@@ -262,6 +275,43 @@ void fragment() {
 		result *= 0.965 + 0.05 * hash(floor(FRAGCOORD.xy / max(s, 1.0)));  // the tooth of the paper
 		float alive = 0.62 + 0.38 * smoothstep(0.2, 0.7, blot(FRAGCOORD.xy / (16.0 * s)));  // the pen presses and lifts
 		result = mix(result, line, edge * alive);
+	} else if (tech == 5) {
+		vec3 shade = mix(ramp0, ramp0_from, old);
+		vec3 seam = mix(ramp1, ramp1_from, old);
+		vec3 sky_low = mix(ramp2, ramp2_from, old);
+		vec3 sky_high = mix(ramp3, ramp3_from, old);
+		vec3 cream = pow(sheet_colour, vec3(0.45));
+		// tilt-shift: only the height on screen decides — the middle half is untouched, the rims a little soft
+		float off_centre = abs(SCREEN_UV.y - 0.5) * 2.0;  // 0 in the middle, 1 at the top and bottom
+		float blur = mode == 2 ? 0.0 : smoothstep(0.5, 1.0, off_centre);
+		vec3 c = col;
+		if (blur > 0.0) {
+			vec2 r = blur * 5.0 * s / VIEWPORT_SIZE;
+			vec3 sum = col * 2.0;
+			for (int i = 0; i < 4; i++) {
+				sum += texture(screen_tex, SCREEN_UV + offs[i] * r).rgb;
+				sum += texture(screen_tex, SCREEN_UV + (offs[i] + offs[(i + 2) % 4].yx) * r * 0.7).rgb;
+			}
+			c = sum / 10.0;
+		}
+		result = toy_paint(c, cream, pow(shade, vec3(0.45)));
+		float far = smoothstep(500.0, 900.0, d);
+		vec3 wn = normalize(mat3(INV_VIEW_MATRIX) * n);
+		if (mode != 2 && far < 0.5) {
+			// gloss: a lamp above the viewer's shoulder; the highlight sits still on a still thing
+			float shine = pow(max(dot(n, normalize(vec3(-0.35, 0.6, 0.72))), 0.0), 28.0);
+			float rim = pow(1.0 - max(dot(n, vec3(0.0, 0.0, 1.0)), 0.0), 3.0);
+			result += vec3(0.3) * shine * (1.0 - blur) + vec3(0.06) * rim;
+		}
+		// the cloud sea: lavender cream; the sky: a pale wash from cream up to powder blue
+		if (far < 0.5) {
+			vec3 world = (INV_VIEW_MATRIX * vec4(here, 1.0)).xyz;
+			result = mix(result, mix(shade, vec3(1.0), 0.7), step(world.y, -30.0) * step(0.8, wn.y) * 0.75);
+		}
+		vec3 sky = mix(sky_low, sky_high, clamp(1.0 - SCREEN_UV.y * 1.5, 0.0, 1.0));
+		result = mix(result, sky, far);
+		// a soft seam where parts meet, fading out in the blurred rims
+		result = mix(result, seam, edge * 0.42 * (1.0 - blur) * (1.0 - far));
 	} else if (tech == 4) {
 		// Synthwave in texels that belong to the world, not to the screen (ADR-0031, revised): the edges of things
 		// are drawn at full sharpness; what is chunky is the paint on them, in squares 14 cm wide that stay on the

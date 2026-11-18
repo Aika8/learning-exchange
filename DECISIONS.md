@@ -477,3 +477,15 @@ Build and CI
 - `Ports.steer` approaches a pier from its seaward side; an earlier helmsman who simply aimed at the berth drove
   into the island lying in the way — which is the model doing its job.
 - `VoyageModel` and its test are removed; old `VOYAGE_TITLE*` / `VOYAGE_ARRIVED*` strings are left unused.
+
+## G3D index island (ADR-0033)
+- Toy paint: 10 % towards cream, shade 40 % lavender below brightness 0.3–0.62, saturation ×1.45. Highlight
+  exponent 28, strength 0.3; seam 42 % teal. Tilt-shift: nothing inside the middle half of the screen height, up
+  to 5 px (at 1080p) at the rim, ten taps; off in mode 2.
+- Symmetry is built by listing one side and mirroring it (`IndexIsle.mansions()`, `trees()`); each mirrored thing
+  carries `mirror` = ±1 for the test.
+- The fountain's coin is the island's own child (not the fountain's) and carries `hung`, or the audit reports a
+  detached part.
+- Lollipop crowns start 2.25 m up, above the tallest hat; only the stick is solid.
+- The island is at (380, 4, 120): 398 m from Spark Harbour, clear of the others by more than 60 m between rocks.
+- Talks use generic real terms (index fund, TER, compound interest); no SPY/BIL until intent 03's question 7 is answered.

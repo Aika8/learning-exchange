@@ -33,6 +33,8 @@ static func walk_areas(island_id: String) -> Array[Dictionary]:
 		return ShortIsle.walk_areas()
 	if island_id == CryptoIsle.ID:
 		return CryptoIsle.walk_areas()
+	if island_id == IndexIsle.ID:
+		return IndexIsle.walk_areas()
 	if island_id == "silk":
 		return [{"name": "silk", "kind": "disc", "centre": SILK, "radius": SILK_RADIUS, "seed": SILK_SEED},
 			{"name": "silk-pier", "kind": "rect", "from": SILK_PIER_FROM, "to": SILK_PIER_TO}]
@@ -49,6 +51,8 @@ static func spawn_point(island_id: String, spawn: String) -> Array:
 		return [ShortIsle.SPAWN, -PI / 2]
 	if island_id == CryptoIsle.ID:
 		return [CryptoIsle.SPAWN, -PI / 2]
+	if island_id == IndexIsle.ID:
+		return [IndexIsle.SPAWN, -PI / 2]
 	if island_id == "silk":
 		return [SILK_DOCK + Vector3(8, 0.5, 0), -2.3]  # every arrival at Silk Reach is by ship
 	match spawn:
@@ -267,6 +271,10 @@ static func build(root: Node3D, detail: bool = true) -> Dictionary:
 	crypto.position = CryptoIsle.AT
 	root.add_child(crypto)
 	parts["crypto"] = crypto
+	var index := IndexIsle.build(Game.island == IndexIsle.ID)
+	index.position = IndexIsle.AT
+	root.add_child(index)
+	parts["index"] = index
 	var rng := RandomNumberGenerator.new()
 	rng.seed = 2026
 	var far: Array[Node3D] = []

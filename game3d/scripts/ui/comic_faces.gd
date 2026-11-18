@@ -8,10 +8,12 @@ const DIR := "res://art/portraits"
 const EMOTIONS: Array[String] = ["neutral", "happy", "surprised", "sly", "worried", "angry"]
 const FACES: Array[String] = ["captain", "mara", "vetla", "olva", "oldsailor", "merchant", "chronicler", "keeper", "sailor", "sailor2", "child", "townsman",
 	"banquiere", "boulangere", "garcon", "libraire", "gardienne", "noir_broker", "noir_tramp", "noir_youth", "noir_lady",
-	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info"]  ## heroes with a sheet
+	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info",
+	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child"]  ## heroes with a sheet
 ## Heroes drawn once, with no expression sheet yet: their one picture stands for every emotion.
 const ONE_FACE: Array[String] = ["noir_broker", "noir_tramp", "noir_youth", "noir_lady",
-	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info"]
+	"crypto_trader", "crypto_miner", "crypto_dreamer", "crypto_analyst", "bot_trader", "bot_miner", "bot_info",
+	"toy_gentleman", "toy_lady", "toy_grandpa", "toy_granny", "toy_child"]
 const ASPECT := 0.55  ## width / height of a portrait when nothing better is known (the stand-in)
 
 static var _cache: Dictionary = {}

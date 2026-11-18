@@ -98,3 +98,26 @@ TALK_BOT_MINER_3,"Нет. Когда все спешат, плата растё�
 TALK_BOT_INFO_1,"Сводка. За ночь цена изменилась двадцать раз. Я не сплю. Я не устаю.","Bulletin. Overnight the price changed twenty times. I do not sleep. I do not tire."
 TALK_BOT_INFO_2,"И куда она пойдёт завтра?","And where will it go tomorrow?"
 TALK_BOT_INFO_3,"Неизвестно. Я знаю всё, что уже было. Того, что будет, не знает никто.","Unknown. I know all that has been. What will be, nobody knows."
+WHO_TOY_GENTLEMAN,Спокойный господин,The calm gentleman
+WHO_TOY_LADY,Дама с зонтиком,The lady with the parasol
+WHO_TOY_GRANDPA,Дедушка,The old gentleman
+WHO_TOY_GRANNY,Бабушка,The old lady
+WHO_TOY_CHILD,Мальчик в матроске,The boy in the sailor suit
+TALK_INDEX_PALACE_C,"Банк-дворец. Круглый зал ещё красят: внутрь пока не пускают.","The Bank Palace. The round hall is still being painted: nobody is let in yet."
+TALK_INDEX_PALACE_1,"Добро пожаловать. У нас ничего не происходит. Уже сорок лет.","Welcome. Nothing happens here. It has not for forty years."
+TALK_INDEX_PALACE_2,"И чем же вы тогда занимаетесь?","Then what is it you do?"
+TALK_INDEX_PALACE_3,"Покупаем понемногу всего сразу — весь рынок одной корзиной. Это индексный фонд.","We buy a little of everything at once — the whole market in one basket. That is an index fund."
+TALK_INDEX_PALACE_4,"И не выбираете, какой остров вырастет?","And you do not pick which island will grow?"
+TALK_INDEX_PALACE_5,"Никогда. Кто-то вырастет, кто-то упадёт. Корзина держит всех. Это диверсификация.","Never. Some will rise, some will fall. The basket holds them all. That is diversification."
+TALK_INDEX_LADY_1,"Видите фонтан? Раз в несколько секунд — монета. В любой день, при любой цене.","Do you see the fountain? A coin every few seconds. On any day, at any price."
+TALK_INDEX_LADY_2,"Даже когда цена высокая?","Even when the price is high?"
+TALK_INDEX_LADY_3,"Даже тогда. Это регулярные взносы: не надо угадывать удачный день.","Even then. Those are regular contributions: there is no lucky day to guess."
+TALK_INDEX_GRANDPA_1,"Я не продал ни в одну бурю. Скучно? Очень. Зато сложный процент работал все эти годы.","I did not sell in any storm. Dull? Very. But compound interest worked all those years."
+TALK_INDEX_GRANDPA_2,"Сколько же вы ждали?","How long did you wait?"
+TALK_INDEX_GRANDPA_3,"Тридцать лет. Время на рынке важнее, чем угаданный момент.","Thirty years. Time in the market matters more than timing it."
+TALK_INDEX_GRANNY_1,"Мы платим за ведение фонда совсем чуть-чуть. Это комиссия фонда — TER.","We pay very little for the keeping of the fund. That is the fund's fee — the TER."
+TALK_INDEX_GRANNY_2,"Разве такая мелочь важна?","Does such a trifle matter?"
+TALK_INDEX_GRANNY_3,"За тридцать лет один лишний процент в год съедает четверть урожая, милый.","Over thirty years one extra per cent a year eats a quarter of the harvest, dear."
+TALK_INDEX_CHILD_1,"Тут скучно. Ничего нельзя трогать. И все дома одинаковые.","It is boring here. You may not touch anything. And all the houses are the same."
+TALK_INDEX_CHILD_2,"А тебе хотелось бы, как на других островах?","Would you rather it were like the other islands?"
+TALK_INDEX_CHILD_3,"Там весело! Но папа говорит: в деньгах скука — это хорошо.","It is fun there! But father says: with money, boring is good."

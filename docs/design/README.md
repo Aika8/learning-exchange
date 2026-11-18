@@ -7,7 +7,7 @@ Palette, light and world notes: `docs/design/game3d-style.md`. Lore: `docs/lore/
 > Islands: each island is drawn in a technique of its own, chosen by Aika (ADR-0026, 0029) — Spark Harbour in pen
 > and ink (the style below), Silk Reach as **katazome**, a Japanese stencil-resist print in several blues, ochre and rust (sheet 28; 27 for the motifs), Amber Cliff
 > in **pen and watercolour**, a French travel sketchbook (sheets 29–34), the short sellers' island as **noir** —
-> black, white and one red (sheets 35–40; ADR-0030), the crypto island as **synthwave pixel art, softened** — sharp edges, texels fixed to the world, no dithering (sheets 41–46;
+> black, white and one red (sheets 35–40; ADR-0030), the index island as a **pastel toy town** (sheets 47–51; ADR-0033), the crypto island as **synthwave pixel art, softened** — sharp edges, texels fixed to the world, no dithering (sheets 41–46;
 > ADR-0031). **No real brands**: where a sheet showed a real coin's mark or ticker, the copy here has it covered and
 > the game uses its own wind coin. The technique and its colours are a row in
 > `game3d/scripts/island_style.gd`. **The captain is redrawn in the technique of every port** by the island's wind
@@ -78,6 +78,11 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `44-crypto-people.jpg` | People and bots: trader, miner, dreamer, analyst; trading bot, mining bot, news bot. *A real coin mark is covered in this copy* | the islanders and the three robots; their figures are also their comic portraits (one face each) | `Costume._r_crypto_*`, `CryptoIsle.bot`, `game3d/art/portraits/crypto_*`, `bot_*` |
 | `45-crypto-props.jpg` | Props: mining machine, ticker board, vending machine, wallet chest, neon palm, **the coin monument — our own wind coin**, a broken neon sign. *Real tickers on the board are covered in this copy* | palm, monument, mining machine, vending machine, ticker board (a chart, no letters) are built; the chest and the neon sign are not | `CryptoIsle` |
 | `46-crypto-technique.jpg` | Samples of the technique: how pixels are drawn, dithered glow, the perspective grid, the striped sun, water, pixel shadows | what the pixel shader is tuned by | `shaders/ink.gdshader` (`tech == 4`) |
+| `47-index-view.jpg` | The index island, the establishing view: a symmetrical town under a glass dome — palace bank, identical mansions, round square with a fountain, hedges, sky yachts; **a pastel toy town** | the island and its technique (ADR-0033); **the glass dome and wooden base are not built** | `scripts/index_isle.gd`, `shaders/ink.gdshader` (`tech == 5`), row `index` |
+| `48-index-houses.jpg` | The mansion kit: pink walls with mint trim, arched windows, lavender or blue roofs with gold finials, balcony, picket fence, hedges | the identical mansions and hedges; the picket fences are not built | `IndexIsle.mansion` |
+| `49-index-bank.jpg` | The bank palace: outside, a round palace with domes and a pastel mill; inside, a round hall with a smoothly rising chart | the palace outside (dome and columns, after sheet 47 rather than the mill of this sheet); **the inside is not built** | `IndexIsle._palace` |
+| `50-index-people.jpg` | Its people: the calm rich gentleman, the elegant lady, the retired couple, the child in a sailor suit | the five islanders; their figures are also their comic portraits (one face each) | `Costume._r_toy_*`, `game3d/art/portraits/toy_*_neutral.jpg` |
+| `51-index-technique.jpg` | Samples of the technique: glossy plastic and wood, tilt-shift blur, pastel light, soft shadows, gold accents, water and clouds | what the toy shader is tuned by | `shaders/ink.gdshader` (`tech == 5`) |
 
 **Dialogue panels (sheets 06–23).** The faces on a page are these drawings, one per emotion, left to right on each
 sheet: neutral, happy, surprised, sly, worried, angry. The emotion is chosen per line in `game3d/data/talks.json`.
