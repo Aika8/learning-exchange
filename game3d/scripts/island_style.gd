@@ -6,7 +6,8 @@ extends RefCounted
 const HOME := "harbour"
 
 ## How the picture is made (ADR-0026); the number is what `shaders/ink.gdshader` branches on.
-const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4, "toy": 5, "deco": 6}
+## `toy` (5) belongs to no island now (ADR-0035): it is kept for the one Aika gives it to.
+const TECHNIQUES := {"ink": 0, "katazome": 1, "aquarelle": 2, "noir": 3, "pixel": 4, "toy": 5, "deco": 6, "oil": 7}
 const INK_RAMP: Array[Color] = [Color("12162e"), Color("2a6b8c"), Color("db8590"), Color("f7edd6")]
 
 ## Spark Harbour is the look of ADR-0024 as approved. Every other island has a technique of its own.
@@ -22,6 +23,8 @@ const TABLE := {
 		"hatch_gap": 9.0,  # pixels between strokes at 1080p
 		"sun": Color("ffe1b0"),
 		"sun_energy": 1.35,
+		"sun_height": 34.0,
+		"sun_soft": 0.8,
 		"accent": Color("ffcf6e"),  # the colour of this island's wind
 	},
 	"silk": {
@@ -35,6 +38,8 @@ const TABLE := {
 		"hatch_gap": 9.0,
 		"sun": Color("ffeede"),
 		"sun_energy": 1.25,
+		"sun_height": 34.0,
+		"sun_soft": 0.8,
 		"accent": Color("e58a6a"),  # the wind of the dye works: rust
 	},
 	"amber": {
@@ -48,6 +53,8 @@ const TABLE := {
 		"hatch_gap": 6.0,
 		"sun": Color("fff3d6"),
 		"sun_energy": 1.5,
+		"sun_height": 34.0,
+		"sun_soft": 0.8,
 		"accent": Color("ffb347"),
 	},
 	"shorts": {
@@ -61,6 +68,8 @@ const TABLE := {
 		"hatch_gap": 9.0,
 		"sun": Color("ffffff"),  # hard light
 		"sun_energy": 1.7,
+		"sun_height": 34.0,
+		"sun_soft": 0.8,
 		"accent": Color("e0453f"),
 	},
 	"crypto": {
@@ -74,20 +83,24 @@ const TABLE := {
 		"hatch_gap": 9.0,
 		"sun": Color("b9a6ff"),  # a violet dusk
 		"sun_energy": 0.85,
+		"sun_height": 34.0,
+		"sun_soft": 0.8,
 		"accent": Color("00f0ff"),
 	},
 	"index": {
-		"technique": "toy",  # a pastel toy town: gloss, soft seams, tilt-shift at the rims (sheets 47–51; ADR-0033)
-		"ramp": [Color("c9b8e8"), Color("1a5b5c"), Color("fff3e0"), Color("bfe3ea")],  # the shade's lavender, the seam's teal, sky low, sky high
-		"ink": Color("1a5b5c"),
+		"technique": "oil",  # soft oil paint of the Dutch Golden Age: muted warm colour, world-anchored strokes, a golden haze (sheets 59–66; ADR-0035)
+		"ramp": [Color("3a2a1c"), Color("e3c489"), Color("f0d79c"), Color("8fa3b0")],  # the shade's umber, the haze's gold, sky low, sky high
+		"ink": Color("2e2118"),  # the soft edge: umber
 		"width": 1.2,
 		"tint": Color(1.0, 1.0, 1.0),
-		"paper": Color("fdf5e6"),
+		"paper": Color("eae2ca"),  # cream
 		"hatch_turn": 0.0,
 		"hatch_gap": 9.0,
-		"sun": Color("fff4e0"),  # even, soft
-		"sun_energy": 1.1,
-		"accent": Color("f4d03f"),
+		"sun": Color("ffd9a0"),  # a warm, low side light
+		"sun_energy": 1.25,
+		"sun_height": 16.0,  # degrees above the horizon: a low sun, long shadows (ADR-0035)
+		"sun_soft": 3.0,  # the sun's width in degrees: soft shadows
+		"accent": Color("cbb45e"),
 	},
 	"race": {
 		"technique": "deco",  # a streamline art-deco poster: flat tones, metal in bands, a sunburst sky (sheets 52–58; ADR-0034)
@@ -100,6 +113,8 @@ const TABLE := {
 		"hatch_gap": 9.0,
 		"sun": Color("ffe2c2"),  # a low warm sun
 		"sun_energy": 1.35,
+		"sun_height": 34.0,
+		"sun_soft": 0.8,
 		"accent": Color("e0aa3e"),
 	},
 }

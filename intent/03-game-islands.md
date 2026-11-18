@@ -90,8 +90,8 @@ island or borrow → come back wiser. Nothing protects the player from a loss, a
 - **Shorts** exist as leveraged positions; a whole island of them may need borrow costs — a question.
 
 ## The index island: Aika's ideas (2026-11-18)
-The island exists as a place and a style only (ADR-0033); its look is being chosen again by Aika and is not part
-of this section. These are ideas for what the place *does*; nothing here is built.
+The island exists as a place and a style only: a canal town painted in oil (ADR-0035, which replaced the pastel
+toy town of ADR-0033). Its sheet 65, the overcast day, is drawn for idea 2 below and waits for phases. These are ideas for what the place *does*; nothing here is built.
 
 1. **Time is seen with the eyes.** Trees and houses grow slowly from visit to visit: compound interest shown as
    a garden, not as a number. A visitor who comes back after a long voyage sees the difference at once; one who
@@ -194,7 +194,7 @@ How it could sit on what exists (for discussion):
    real players before any new phase exists.
 3. **The index island.** Rich, boring, walk-only; a standing order buys the index fund on the simulation clock.
    Uses the fund and the index bot that exist. First island whose method can be compared with the player's own.
-   The place stands already (ADR-0033). After phases exist (step 4): the growing garden, the storm overhead,
+   The place stands already (ADR-0035). After phases exist (step 4): the growing garden, the storm overhead,
    the quiet, the album with its bad years — see "The index island: Aika's ideas".
 4. **Phases proper** (ADR): rising, falling, sideways blocks in the economy generator, with the property test of
    invariant 4 for the index method.

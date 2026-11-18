@@ -1,105 +1,101 @@
-# G3D — the index island: a symmetrical pastel toy town (ADR-0033)
+# G3D — the index island: a canal town painted in oil (ADR-0035, supersedes 0033)
 
-A sixth island, from Aika's five sheets (`docs/design/concepts/47…51`): very rich and very boring. **A place and a
-style only** — nothing can be bought there; how index investing works in the game waits for intent 03 (question 9).
+The index island has a second look, from Aika's eight sheets (`docs/design/concepts/59…66`): a town of the Dutch
+Golden Age in soft oil paint. The first look — the pastel toy town — read as childish for a grown-up method; it is
+kept for another island (`G3D-toy-town.md`). **Still a place and a style only**: nothing can be bought here; how
+index investing works in the game waits for intent 03 (question 9).
 
-![](g3d-index/index-avenue.jpg)
+![](g3d-index/index-street.jpg)
 
-| The town from above the pier: mirror-symmetrical | The Bank Palace |
+| The town from above the pier | The canal from the street's bridge |
 |---|---|
-| ![](g3d-index/index.jpg) | ![](g3d-index/index-palace.jpg) |
+| ![](g3d-index/index.jpg) | ![](g3d-index/index-canal.jpg) |
 
-| Identical mansions | The pier and the sky yachts |
+| The quay: doors, lindens, lanterns | The Exchange under its clock tower |
 |---|---|
-| ![](g3d-index/index-mansions.jpg) | ![](g3d-index/index-pier.jpg) |
+| ![](g3d-index/index-quay.jpg) | ![](g3d-index/index-exchange.jpg) |
 
-## The technique: a toy town
-- **Pastel, low contrast**: colours lifted a little towards cream; shade is a lavender veil, never dark.
-- **Gloss**: a small white highlight where a surface faces a fixed lamp above the viewer, and a paler rim —
-  computed from the surface's normal alone, so it sits still on a still thing.
-- **No ink line**: a soft teal seam where parts meet.
-- **Tilt-shift, carefully**: the middle half of the screen is exactly sharp; only towards the top and bottom the
-  picture softens, up to 5 pixels at the very rim (at 1080p). It depends on the height on screen and on nothing
-  else, so it does not swim. The HUD is drawn after the effect and is never blurred. The very top of the screen
-  and its middle, enlarged:
+| The square: the fountain, the cheese stall, gables | The pier and the sky ships |
+|---|---|
+| ![](g3d-index/index-square.jpg) | ![](g3d-index/index-pier.jpg) |
 
-  ![](g3d-index/tilt-shift-rim-and-middle.jpg)
-- Nothing is animated by the effect. V gives the plain version — pastel, no gloss, no blur:
+## The technique: soft oil paint
+- **Muted, warm colour**: a third of the saturation taken out, everything leaning to ochre; darks go to warm
+  umber and never to black, lights to cream.
+- **Melted shading**: a blur of 1.5 pixels runs the facets of the low-poly light together; silhouettes stay
+  clear, with a soft umber edge instead of an ink line.
+- **Brush strokes that belong to the world**: slow noise laid out along each surface in world space (on the
+  captain: in the captain's own space) varies the paint by a few percent in long strokes. It stays on the wall.
+  There is no "oil filter" over the screen: those boil.
+- **Golden haze** over distance; a sky gold below and grey-blue above with big soft clouds fixed to the world.
+- **Canvas**: a faint weave, 2.5 % — the only layer that lies on the screen.
+- **A low, soft sun**: 16° above the horizon on this island (the others keep 34°) — a row of the style table can
+  now set its own hour.
+- Nothing is animated by the effect. V gives the plain version — umber and cream:
 
-  ![](g3d-index/avenue-plain.jpg)
+  ![](g3d-index/street-plain.jpg)
 
 ## Easy on the eyes — measured
 Mean change between neighbouring frames, of 255 (a frame every 0.1 s):
 
-| | Index island | for scale |
+| | Index island, in oil | for scale |
 |---|---|---|
-| camera standing still | 0.10 | crypto 0.66, noir 1.1 |
-| walking 12 m up the avenue | 4.7 | watercolour 11.4, crypto 16.9, noir 29.7 |
-| standing and turning 2° a frame | 7.0 | crypto 24.6 |
+| camera standing still | 0.01 | the toy town 0.10, race 0.28, crypto 0.66 |
+| walking 12 m up the street | 14.0 | toy 4.7, race 10.2, watercolour 11.4, crypto 16.9, noir 29.7 |
+| standing and turning 2° a frame | 12.5 | toy 7.0, race 15.8, crypto 24.6 |
 
-It is the calmest island so far: low contrast, no pattern, no line, a blur that does not depend on the scene.
-Recordings: [walking](g3d-index/walking.gif), [turning](g3d-index/turning.gif).
+Standing, nothing moves at all. Walking, the number is the highest after crypto and noir: the street begins between
+two tall red walls that fill a third of the frame each and slide past. It is the town's geometry and colour, not a
+pattern — but it is not as calm as the toy town was. Recordings: [walking](g3d-index/walking.gif),
+[turning](g3d-index/turning.gif).
 
 ![](g3d-index/walking.jpg)
 
-## The island
-- **Strict symmetry** about the avenue: ten identical mansions in five mirrored pairs (pink walls, mint trim,
-  arched windows, a balcony over the door, a hipped roof with gold finials — only the roof's colour alternates),
-  hedges, lollipop trees, lamps and four sky yachts, each with its twin. A test checks that everything on one side
-  has its mirror on the other and that every mansion is the same mansion.
-- **The avenue** runs straight from the pier across a round square to **the Bank Palace**: a round hall with a
-  portico of four columns, two wings, a rose dome with a gold lantern and a flag. Its door is a talk.
-- **The fountain drops a coin** every four seconds — a regular contribution. It is the island's only motion.
-- **On the flight chart**: a sixth row in `Ports`; the island lies 398 m east of Spark Harbour.
+## The town
+- **The canal** crosses the town between brick quay walls, closed at both ends, with three stone crossings: the
+  street's wide bridge and two footbridges. Boats lie on it.
+- **Twenty narrow houses** with stepped or bell gables stand in two rows along the quays and round the square:
+  brick, ochre and olive fronts, cream bands and window frames, shutters, arched doors up a step, tiled roofs in
+  red and slate blue. A test checks that no two neighbours share a front.
+- **The Exchange** closes the street: a cream front with an arcade of five arches and a pediment, brick wings,
+  a brick clock tower with a slate spire. Its gates are shut — the courtyard waits for the mechanics.
+- **The fountain still drops a coin** every four seconds: the regular contribution.
+- Lindens on the quays, lanterns on the bridges, a cheese stall, benches, barrels and crates, sky ships at the pier.
+- The pier, the berth and the row in `Ports` are unchanged: the island is where it was on the chart.
 
-![](g3d-index/moored.jpg)
+## Its people, of every age (sheet 63)
+The merchant before the Exchange, the cheese woman at her stall, a young woman, a young father with his child, an
+old couple. The island does not say "this is the right answer" (intent 03): next to the method and its real terms
+— index fund, diversification, regular contributions, the fund's fee (TER), compound interest — they tell the
+costs: the basket lost a third, even a half; it took years to come back; the neighbour who sold at the bottom;
+boredom as the hardest part; nothing here is quick. A test checks that the costs are said. Nobody recommends anything.
 
-## The captain is redrawn as a toy on landing
-![](g3d-index/captain-toy.jpg)
-
-Recording: [captain-toy.gif](g3d-index/captain-toy.gif).
-
-## The islanders (sheet 50) and what they say
-Five costume roles from the existing garments; in comic pages their figures from the sheet, one face each.
-
-| The gentleman at the palace door | The lady by the fountain |
+| | |
 |---|---|
-| ![](g3d-index/talk-palace.jpg) | ![](g3d-index/talk-lady.jpg) |
+| ![](g3d-index/talk-exchange.jpg) | ![](g3d-index/talk-grandpa.jpg) |
 
-| Who | Idea, the real term beside the lore |
-|---|---|
-| The calm gentleman | the index fund — the whole market in one basket; diversification |
-| The lady with the parasol | regular contributions: a coin on any day, at any price |
-| The old gentleman | compound interest; time in the market, not timing it |
-| The old lady | the fund's fee (TER) and what one per cent a year costs over thirty years |
-| The boy in the sailor suit | "with money, boring is good" |
+## The captain is redrawn in oil on landing
+![](g3d-index/captain-oil.jpg)
 
-Words: `game3d/i18n/talk.csv` (`TALK_INDEX_*`). No real fund is named (a test checks: whether SPY and BIL may
-appear is intent 03's open question 7). Nobody recommends anything.
+Recording: [captain-oil.gif](g3d-index/captain-oil.gif).
 
-## How to rerun
-```
-godot --path game3d --resolution 1600x900 -- --views=<dir> --only=index --ink=1      # --ink=2: the plain version
-godot --path game3d --resolution 1600x900 -- --attune=<dir> --island=index
-godot --path game3d --resolution 1600x900 -- --stroll=<dir> --island=index [--turn | --still]
-godot --path game3d --resolution 1600x900 -- --flight=<dir> --island=harbour --to=index
-godot --path game3d --resolution 1600x900 -- --audit=<dir> --only=index
-```
+## Numbers
+- World audit on the island: **0 findings** (604 free points of 927, 9 400 of 9 552 cells reachable, 60 villager routes). On the way it caught: a parapet low enough to climb into the canal, the
+  Exchange's columns being walked through, bench backs hanging in the air, a stroller stuck by the merchant.
+- Frame rate at 1920×1080: average 100–119 over the captain's camera and seven fixed views; 1 % low 64–95.
+  In the first run after a shader change one camera jump dipped to 42 for a moment.
+- GUT: 136 tests, all green (the island's six rewritten; one of them keeps the toy technique alive).
 
-## Checked
-- World audit of the island: 0 findings (10 401 of 10 577 lattice cells reached from the pier; 48 villager
-  strolls). Found and fixed on the way: a porch collider wider than the porch, and tree crowns at head height.
-- GUT 130 green (5 new in `test_index_isle.gd`; the walk tests, the captain contract and the 90 compass flights —
-  six islands, three winds — cover the new island).
-- A helmsman flew harbour → index and moored (300 m).
-- Frame rate at 1920×1080: average 118–119 (display cap 120), 1 %-low 62–67, worst frame 22.4 ms.
+## Not built
+- **The overcast day** of sheet 65: it belongs with the market's phases.
+- The inside of the Exchange (the courtyard, the board), the windmill of sheet 61, the family album as a thing to
+  open, the growing garden, flower boxes, carved ornaments and iron railings.
+- The canal is water at street level between parapets, and the bridges are level: the islands' ground is one
+  flat cap. From above it reads as a full canal, not a deep one.
+- Costumes are approximate (no ruff or lace as such, no cane); one face each, and the portraits are rectangles
+  cut from the dark sheet.
 
-## Not done, not checked
-- Not played by hand.
-- **The glass dome and its wooden base are not built** (ADR-0033 says why): the sheet's main image is missing.
-- Not built from the sheets: the inside of the palace, picket fences, the terraced steps and bridges round the
-  square, the hedge maze, the palace as the round "mill" of sheet 49 (it follows sheet 47).
-- Costumes are approximations in the old garments (no real top hat brim, no parasol, no crinoline shape); one face
-  each in the talks.
-- The far view of the island is plain pastel blocks (the town is built only when the captain is there).
-- The other five islands were not re-audited: nothing of theirs changed.
+## How to see it
+`godot --path game3d` → sail from the harbour (the chart at the ship) to «Остров индексов»; or
+`godot --path game3d -- --views=<dir> --only=index`, `--stroll=<dir> --island=index [--still|--turn]`,
+`--attune=<dir> --island=index`, `--talk=<dir> --island=index --only=index_exchange`.

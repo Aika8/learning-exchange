@@ -1,6 +1,6 @@
 # 0033. The index island: a symmetrical pastel toy town; a place and a style, no mechanics yet
 
-- Status: Proposed
+- Status: Superseded by [0035](0035-game3d-index-island-as-a-dutch-golden-age-painting.md) (the technique `toy` is kept for another island)
 - Date: 2026-11-18
 - Pattern(s): Strategy chosen by data (a sixth technique, ADR-0026/0029), Builder (`IndexIsle`), Registry row (`Ports`, ADR-0032)
 

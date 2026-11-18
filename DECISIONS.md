@@ -509,3 +509,25 @@ Build and CI
 - Signal gates glow only 0.3: brighter, the red washes towards orange and is read as copper.
 - The fourth skiff («Адмирал») is moored by the pier; «Феникс» stands in the pit lane, «Быстрая звезда» and «Буря»
   on the track.
+
+## G3D index island, second look (ADR-0035)
+- Oil paint: saturation ×0.7, warm (1.03, 1, 0.92); darks = umber + 55 % of the colour below brightness
+  0.08–0.42; lights 35 % cream above 0.82; a 4-tap melt at 1.5 px; strokes ±5.5 % (two octaves of noise stretched
+  1 : 4 along the surface), gone where a pixel covers more than 2–8 cm; haze up to 60 % from 30 to 450 m; edge 40 %
+  umber; canvas 2.5 % at a 2.4 px thread.
+- Every `IslandStyle` row carries `sun_height` and `sun_soft` (34° and 0.8 everywhere but here; shadow blur 2
+  when the sun is wider than 1°). Index: 16° and 3.0, sun energy 1.25.
+- The toy row is gone from `TABLE`; `TECHNIQUES["toy"]` stays 5 and its shader branch stays. A test keeps both and
+  checks that no island uses it.
+- The canal is a strip of water at street level; quay walls look 0.72 m high and are solid to 1.2 m (like a rail).
+  The water itself is solid to the same height on a node of its own (`CanalBed`, not `flat`): on a `flat` node
+  the audit took its top for a deck and stood walkers on it; with no collider the water was a pocket of ground
+  nobody reaches, and the "whole island is reached" test (97 %) failed.
+- The Exchange's arches hold dark gates 0.3 m behind the columns' faces: an open bay with a solid in front of it
+  is what the audit calls a loose collider, and the courtyard is closed anyway.
+- `Kit.tri` now writes a tangent like `Kit.quad`: one material may take both. Boxes and ready meshes still need
+  a material of their own (`_mat(..., flat)` in `IndexIsle`).
+- The old couple stroll by the pier and the others on the square: nobody's home is on the 12 m of street the
+  eye-comfort measurement walks, so its numbers are the picture's.
+- Spots: `exchange` (the merchant) and `stall` (the cheese woman); the prompt `PROMPT_BANK_PALACE` is replaced.
+- The first look's demo page is `docs/demo/G3D-toy-town.md`.

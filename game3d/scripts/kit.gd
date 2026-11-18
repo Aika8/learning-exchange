@@ -46,8 +46,10 @@ func quad(m: Material, a: Vector3, b: Vector3, c: Vector3, d: Vector3, uv_scale:
 func tri(m: Material, a: Vector3, b: Vector3, c: Vector3) -> void:
 	var st := _tool(m)
 	var n := (b - a).cross(c - a).normalized() * -1.0
+	var t := (b - a).normalized()
 	for v: Vector3 in [a, b, c]:
 		st.set_normal(n)
+		st.set_tangent(Plane(t, 1.0))  # the same vertex format as `quad`: one material may take both
 		st.set_uv(Vector2(v.z, -v.y))
 		st.add_vertex(v)
 

@@ -18,6 +18,11 @@
 //     leaning to navy and light to ivory; brass and copper in clean bands chosen from the surface's normal; a thin
 //     navy line; a peach sky with a low sun and twelve wide brass rays fixed to the world, not to the screen;
 //     nothing animated;
+// 7 = oil (ADR-0035) — soft oil paint of the Dutch Golden Age: muted warm colour, darks to umber and never to
+//     black, a 1.5-pixel melt of the facets, a soft umber edge, brush strokes as slow noise laid out in world
+//     space along each surface (on the hero: in the hero's space), a golden haze over distance, a gold and
+//     grey-blue sky with big soft clouds fixed to the world, and a faint canvas weave — the one layer on the
+//     screen; nothing animated;
 // 2 = aquarelle — pen and watercolour: a thin trembling line, washes that run past it, a lot of bare paper, a
 //     violet-grey wash for shade, paper grain.
 // It draws with two styles at once (ADR-0025): the island's, and `*_from` for what stands in a small column round
@@ -316,6 +321,51 @@ void fragment() {
 		result = mix(result, sky, far);
 		// a soft seam where parts meet, fading out in the blurred rims
 		result = mix(result, seam, edge * 0.42 * (1.0 - blur) * (1.0 - far));
+	} else if (tech == 7) {
+		vec3 umber = pow(mix(ramp0, ramp0_from, old), vec3(0.45));
+		vec3 haze = pow(mix(ramp1, ramp1_from, old), vec3(0.45));
+		vec3 sky_low = pow(mix(ramp2, ramp2_from, old), vec3(0.45));
+		vec3 sky_high = pow(mix(ramp3, ramp3_from, old), vec3(0.45));
+		vec3 cream = pow(sheet_colour, vec3(0.45));
+		vec3 c = col * 2.0;  // melted shading: the facets of the low-poly light run together a little
+		for (int i = 0; i < 4; i++) {
+			c += texture(screen_tex, SCREEN_UV + offs[i] * 1.5 * s / VIEWPORT_SIZE).rgb * mix(tint, tint_from, old);
+		}
+		vec3 seen = pow(clamp(c / 6.0, 0.0, 1.0), vec3(0.45));
+		float l = dot(seen, vec3(0.299, 0.587, 0.114));
+		float far = smoothstep(500.0, 900.0, d);
+		vec3 world = (INV_VIEW_MATRIX * vec4(here, 1.0)).xyz;
+		vec3 wn = normalize(mat3(INV_VIEW_MATRIX) * n);
+		vec3 p = mix(vec3(l), seen, 0.7) * vec3(1.03, 1.0, 0.92);  // muted, and warm
+		p = mix(umber + p * 0.55, p, smoothstep(0.08, 0.42, l));  // darks are warm umber, never black
+		p = mix(p, cream, smoothstep(0.82, 1.0, l) * 0.35);
+		if (mode == 2) {
+			p = mix(umber, cream, smoothstep(0.3, 0.5, l));
+		} else {
+			// brush strokes: slow noise in world space along the surface, so it stays on the wall
+			vec3 anchored = world;
+			if (hero_radius > 0.0 && length(world.xz - hero.xz) < hero_radius && world.y > hero.y + 0.05 && world.y < hero.y + 2.7) {
+				anchored -= hero;
+			}
+			vec2 q = abs(wn.y) > 0.6 ? anchored.xz : (abs(wn.x) > abs(wn.z) ? anchored.zy : anchored.xy);
+			float px_world = d * 2.0 / (PROJECTION_MATRIX[1][1] * VIEWPORT_SIZE.y);  // metres a pixel covers here
+			float stroke = blot(q * vec2(1.1, 4.0)) * 0.6 + blot(q * vec2(3.0, 9.0) + 7.0) * 0.4;
+			float readable = 1.0 - smoothstep(0.02, 0.08, px_world);  // gone before a stroke is a pixel wide
+			p *= 1.0 + (stroke - 0.5) * 0.11 * readable * (1.0 - far);
+			float sea = step(world.y, -44.0) * (1.0 - far);
+			p = mix(p, mix(haze, cream, smoothstep(0.7, 0.95, l)), sea * 0.8);
+			p = mix(p, haze, smoothstep(30.0, 450.0, d) * 0.6 * (1.0 - far));  // the golden haze
+		}
+		vec3 dir = normalize(mat3(INV_VIEW_MATRIX) * here);
+		vec2 cq = dir.xz / max(dir.y + 0.25, 0.08) * 1.4;
+		float cloud = blot(cq) * 0.6 + blot(cq * 2.3 + 5.0) * 0.4;
+		vec3 sky = mix(sky_low, sky_high, smoothstep(0.0, 0.6, dir.y));
+		sky = mix(sky, cream, smoothstep(0.45, 0.75, cloud) * 0.55 * smoothstep(-0.05, 0.15, dir.y));
+		p = mix(p, mode == 2 ? cream : sky, far);
+		p = mix(p, pow(line, vec3(0.45)), edge * 0.4 * (1.0 - far));
+		vec2 thread = FRAGCOORD.xy / (2.4 * s);  // the canvas
+		p *= 0.975 + 0.025 * sin(thread.x * 3.14159) * sin(thread.y * 3.14159);
+		result = pow(clamp(p, 0.0, 1.0), vec3(2.2));
 	} else if (tech == 6) {
 		vec3 navy = pow(line, vec3(0.45));
 		vec3 shade = pow(mix(ramp0, ramp0_from, old), vec3(0.45));
