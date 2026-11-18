@@ -14,7 +14,7 @@ import sys
 from pathlib import Path
 
 GAME = Path(__file__).resolve().parent.parent
-OPTIONAL = {"fonts/comic.ttf"}  # used when present: the lettering font waits for Aika's yes (ADR-0037)
+OPTIONAL: set = set()  # files a script names but may live without
 EMOTIONS = ["neutral", "happy", "surprised", "sly", "worried", "angry"]
 problems = []
 

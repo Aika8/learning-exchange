@@ -19,12 +19,19 @@ page: **before on the left, after on the right**. All 46 talks, 53 pages, each t
 - **Composition**: a close shot is taller than its frame, a wide one small with the place round it; of two
   people the listener is a little smaller; every second page is mirrored.
 
+## The lettering: Comic Relief (added after Aika's choice)
+`game3d/fonts/comic.ttf` — Comic Relief Regular by Jeff Davis, SIL Open Font License 1.1 (`game3d/fonts/OFL.txt`),
+Latin and Cyrillic, from the Google Fonts repository. Left: the system face; right: Comic Relief. It is a wide
+face, so balloons of a frame with two speakers are wider, the size is 19 px, and two people in a frame stand a
+little lower to leave room over their heads.
+
+![](g3d-comic-font/mara_first-1.jpg)
+![](g3d-comic-font/amber_bakery-1.jpg)
+![](g3d-comic-font/index_grandpa-1.jpg)
+
 ## What is still not right
 - **The captain's hat** (and a few shoulders) end in a soft fade at the side where, on the sheet, the next face
   overlaps them: that part of the drawing does not exist. A sheet with the faces apart would cut clean.
-- **The lettering is still a system face.** No font was added: that is a new asset. Two candidates with Cyrillic
-  under the SIL Open Font License 1.1: **Comic Relief** and **Balsamiq Sans** (Comic Neue and Bangers have no
-  Cyrillic). With Aika's yes one file goes to `game3d/fonts/comic.ttf` and the page picks it up.
 - **Islanders with one picture** (noir, crypto, index, race) do not change face; the five strollers of Amber
   Cliff are still stand-ins drawn in code.
 - The backdrop is whatever the camera saw: at a door it can be mostly wall.

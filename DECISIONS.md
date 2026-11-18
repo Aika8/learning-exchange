@@ -568,6 +568,12 @@ Build and CI
 - Candidates for the lettering font, both SIL OFL 1.1 with Cyrillic: Comic Relief (Jeff Davis; on Google Fonts)
   and Balsamiq Sans (Balsamiq; on Google Fonts). Comic Neue and Bangers have no Cyrillic. The page loads
   `res://fonts/comic.ttf` when it exists.
+- **The lettering font is Comic Relief** (Aika's choice, 2026-11-18): `game3d/fonts/comic.ttf` is
+  `ComicRelief-Regular.ttf` (80 KB) from the Google Fonts repository (`google/fonts`, `ofl/comicrelief`), by Jeff
+  Davis, SIL Open Font License 1.1 — the licence is beside it, `game3d/fonts/OFL.txt`; subsets Latin and Cyrillic.
+  Only the regular weight: the page uses one face. `make check-game3d-data` now requires the file.
+- With Comic Relief: lettering 19 px (20 with the system face), the text of a two-balloon frame up to 37 % of the
+  frame wide (was 31 %), figures of a two-shot 0.72 of the frame high (was 0.86).
 
 ## G3D the pinnace as the ship (amendment to ADR-0036)
 - `Wayfarer.build(model := true)`: the pinnace when `assets/models/ship_pinnace` is there, else the built ship;

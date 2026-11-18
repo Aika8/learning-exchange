@@ -33,7 +33,7 @@ var _page := -1
 var _place: Texture2D  ## the scene as it was when the talk began, softened: what the frames show behind the people
 var _met: Dictionary = {}  ## who has had a name plate in this talk already
 
-const FONT_FILE := "res://fonts/comic.ttf"  ## a lettering font with Cyrillic, when one is in the project (ADR-0037)
+const FONT_FILE := "res://fonts/comic.ttf"  ## the lettering: Comic Relief Regular (SIL OFL 1.1, `fonts/OFL.txt`), Latin and Cyrillic (ADR-0037)
 static var _lettering: Font
 
 

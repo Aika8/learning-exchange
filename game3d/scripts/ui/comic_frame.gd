@@ -5,11 +5,11 @@
 class_name ComicFrame
 extends Control
 
-const FONT_SIZE := 20
+const FONT_SIZE := 19
 const PLATE_SIZE := 15
 const PAD := Vector2(16, 10)
 ## How tall a figure is, in frame heights, by shot. A close shot is taller than its frame: the frame cuts the bust.
-const HEIGHT := {"close": 1.22, "low": 1.08, "two": 0.86, "wide": 0.58}
+const HEIGHT := {"close": 1.22, "low": 1.08, "two": 0.72, "wide": 0.58}  # two: room over the heads for what they say
 ## The part of the place seen behind, by shot: [how much of the picture's width, where its middle is, 0…1].
 const VIEW := {"wide": [1.0, 0.5], "two": [0.66, 0.5], "close": [0.4, 0.42], "low": [0.5, 0.6]}
 const SINK := 0.05  ## a figure's lower end is this far below the frame's edge: the frame cuts it, nothing hangs
@@ -183,7 +183,7 @@ func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dicti
 		var text := page.say(lines[n][1])
 		var a: Dictionary = actors.get(who, {})
 		var mouth: Vector2 = a.get("mouth", size * 0.5)
-		var width := clampf(size.x * (0.5 if lines.size() == 1 else 0.31), 140.0, 330.0)
+		var width := clampf(size.x * (0.5 if lines.size() == 1 else 0.37), 140.0, 340.0)  # Comic Relief is a wide face: wider balloons, not taller ones
 		var face_edge := 0.0  # alone and large in the frame: the balloon keeps to the side of the face, if there is room
 		if who_list.size() == 1 and not a.is_empty():
 			var ar: Rect2 = a["rect"]
