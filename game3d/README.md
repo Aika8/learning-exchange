@@ -53,6 +53,7 @@ effect). `--sdfgi` turns SDFGI on (off by default: it cost ~9 fps and a long fra
 | `scripts/index_isle.gd` | The index island (ADR-0035): a canal town — gabled brick houses, a canal with bridges, the Exchange, the coin fountain, sky ships |
 | `scripts/race_isle.gd` | The race island (ADR-0034): a banked track in the air on brackets, the timing tower, pit boxes, a grandstand, four sky skiffs as decoration |
 | `scripts/wayfarer.gd` | The hero's ship «Попутчик» (ADR-0036): the one realistic thing, drawn after the island's technique; hull, rig, stern, figurehead, wing sails, crystal, flag |
+| `tools/cut_portraits.gd`, `data/cutouts.json` | Cuts the comic portraits out of their paper into `art/cutouts/` (ADR-0037); the corrections and each sheet's mouth |
 | `scripts/monkey.gd`, `scripts/core/monkey_mind.gd` | The ship's monkey: her body, and her decisions as a pure model (in the rig under way, near the captain ashore) |
 | `scripts/crypto_isle.gd` | The crypto island (ADR-0031): neon towers, palms, the Exchange That Never Closes, the wind coin, the three robots |
 | `scripts/short_isle.gd` | The short sellers' island (ADR-0030): the slab, crooked houses and towers, the Exchange of Falling Prices, its props |

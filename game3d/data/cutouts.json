@@ -1,0 +1,160 @@
+{
+ "banquiere": {
+  "mouth": 0.48
+ },
+ "bot_info": {
+  "card": true,
+  "mouth": 0.42
+ },
+ "bot_miner": {
+  "card": true,
+  "mouth": 0.42
+ },
+ "bot_trader": {
+  "card": true,
+  "mouth": 0.42
+ },
+ "boulangere": {
+  "mouth": 0.45
+ },
+ "captain": {
+  "mouth": 0.62
+ },
+ "child": {
+  "mouth": 0.5
+ },
+ "chronicler": {
+  "mouth": 0.4
+ },
+ "crypto_analyst": {
+  "card": true,
+  "mouth": 0.24
+ },
+ "crypto_dreamer": {
+  "card": true,
+  "mouth": 0.24
+ },
+ "crypto_miner": {
+  "card": true,
+  "mouth": 0.24
+ },
+ "crypto_trader": {
+  "card": true,
+  "mouth": 0.24
+ },
+ "deco_aviator": {
+  "fade": 0,
+  "mouth": 0.6
+ },
+ "deco_crew": {
+  "fade": 0,
+  "mouth": 0.62
+ },
+ "deco_lady": {
+  "fade": 0,
+  "mouth": 0.56
+ },
+ "deco_marshal": {
+  "fade": 0,
+  "mouth": 0.55
+ },
+ "deco_mechanic": {
+  "fade": 0,
+  "mouth": 0.58
+ },
+ "garcon": {
+  "mouth": 0.42
+ },
+ "gardienne": {
+  "mouth": 0.44
+ },
+ "keeper": {
+  "mouth": 0.46
+ },
+ "libraire": {
+  "mouth": 0.5
+ },
+ "mara": {
+  "mouth": 0.5
+ },
+ "merchant": {
+  "mouth": 0.5
+ },
+ "noir_broker": {
+  "card": true,
+  "mouth": 0.27
+ },
+ "noir_lady": {
+  "card": true,
+  "mouth": 0.27
+ },
+ "noir_tramp": {
+  "card": true,
+  "mouth": 0.27
+ },
+ "noir_youth": {
+  "card": true,
+  "mouth": 0.27
+ },
+ "oil_child": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oil_father": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oil_grandpa": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oil_granny": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oil_lady": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oil_market": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oil_merchant": {
+  "mouth": 0.5,
+  "oval": true
+ },
+ "oldsailor": {
+  "mouth": 0.44
+ },
+ "olva": {
+  "mouth": 0.62
+ },
+ "sailor": {
+  "mouth": 0.5
+ },
+ "sailor2": {
+  "mouth": 0.5
+ },
+ "townsman": {
+  "mouth": 0.52
+ },
+ "toy_child": {
+  "mouth": 0.2
+ },
+ "toy_gentleman": {
+  "mouth": 0.2
+ },
+ "toy_grandpa": {
+  "mouth": 0.2
+ },
+ "toy_granny": {
+  "mouth": 0.2
+ },
+ "toy_lady": {
+  "mouth": 0.2
+ },
+ "vetla": {
+  "mouth": 0.5
+ }
+}

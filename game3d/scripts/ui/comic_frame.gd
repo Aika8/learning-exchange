@@ -1,23 +1,28 @@
-## One frame of a comic page: paper with halftone dots, the speakers as drawn portraits whose faces change with every
-## line (Aika's expression sheets, or a code-drawn stand-in for people without a sheet), balloons with tails, a
-## caption box, the marks comics put round a head (a burst, sweat drops, a sparkle), a black border.
-## See docs/adr/0027-game3d-talk-as-comic-pages.md
+## One frame of a comic page (ADR-0027, redrawn by ADR-0037): the place of the talk behind — a softened picture of
+## the scene, each frame its own cut of it — the speakers as figures cut out of their sheets and standing on the
+## frame's lower edge, oval balloons whose tails point at the mouth, a name plate the first time somebody is seen,
+## a caption box, the marks comics put round a head, a clean black border.
 class_name ComicFrame
 extends Control
 
-const FONT_SIZE := 17
-const PAD := Vector2(14, 9)
-const HEIGHT := {"close": 1.0, "low": 1.1, "two": 0.8, "wide": 0.62}  ## portrait height in frame heights, by shot
-const FADE := "shader_type canvas_item;
+const FONT_SIZE := 20
+const PLATE_SIZE := 15
+const PAD := Vector2(16, 10)
+## How tall a figure is, in frame heights, by shot. A close shot is taller than its frame: the frame cuts the bust.
+const HEIGHT := {"close": 1.22, "low": 1.08, "two": 0.86, "wide": 0.58}
+## The part of the place seen behind, by shot: [how much of the picture's width, where its middle is, 0…1].
+const VIEW := {"wide": [1.0, 0.5], "two": [0.66, 0.5], "close": [0.4, 0.42], "low": [0.5, 0.6]}
+const SINK := 0.05  ## a figure's lower end is this far below the frame's edge: the frame cuts it, nothing hangs
+const TINT := "shader_type canvas_item;
 uniform float dim = 1.0;
 void fragment() {
 	vec4 c = texture(TEXTURE, UV);
-	float a = smoothstep(0.0, 0.14, UV.x) * smoothstep(1.0, 0.86, UV.x) * smoothstep(0.0, 0.07, UV.y);
-	COLOR = vec4(c.rgb * dim, a);
+	COLOR = vec4(c.rgb * dim, c.a);
 }"
 
-var actors: Dictionary = {}  ## cast id → {node, rect, head, face, side}
-var balloons: Array[Dictionary] = []  ## {who, rect, tip, base, text, gloss, name, emotion}
+var actors: Dictionary = {}  ## cast id → {node, rect, head, mouth, face, side, kind}
+var balloons: Array[Dictionary] = []  ## {who, rect, tip, base, text, gloss, name, emotion, voice}
+var plates: Array[Dictionary] = []  ## name plates of the people first seen in this frame: {who, text, rect}
 var mood: Dictionary = {}  ## cast id → the face they wear in this frame when they are not speaking
 var caption := ""
 var caption_gloss := ""
@@ -25,70 +30,116 @@ var feeling: Dictionary = {}  ## cast id → the emotion shown right now
 var _shown := -1
 var _gloss := false
 var _font: Font
-var _sky := Color("f0dcb4")
+var _back: Back
 
-static var _fade: Shader
+static var _tint: Shader
 
 
-## The paper and the dots behind the people.
+## The place behind the people: a cut of the softened scene, or — when there is no picture of it — sky over
+## ground in the backdrop's two colours; a wash of paper over it, and halftone dots only as a shade in one corner.
 class Back:
 	extends Control
-	var tone := Color.WHITE
+	var place: Texture2D
+	var view: Array = [1.0, 0.5]
+	var sky := Color("f0dcb4")
+	var ground := Color("7fb069")
 	var corner := Vector2.ZERO
+	var shift := 0.0  ## each frame of a page looks at a slightly different part of the place
 
 	func _draw() -> void:
-		draw_rect(Rect2(Vector2.ZERO, size), ComicPage.PAPER)
-		var reach := size.length() * 0.8
-		var y := 6.0
-		while y < size.y:
-			var x := 6.0 + (8.0 if int(y / 14.0) % 2 == 1 else 0.0)
-			while x < size.x:
-				var k := 1.0 - Vector2(x, y).distance_to(corner) / reach
-				if k > 0.12:
-					draw_circle(Vector2(x, y), 5.2 * k, tone)
-				x += 16.0
-			y += 14.0
+		var box := Rect2(Vector2.ZERO, size)
+		if place != null:
+			var full := place.get_size()
+			var w := full.x * float(view[0])
+			var h := minf(w * size.y / size.x, full.y)
+			w = h * size.x / size.y
+			var cx := clampf(full.x * (float(view[1]) + shift), w * 0.5, full.x - w * 0.5)
+			draw_texture_rect_region(place, box, Rect2(cx - w * 0.5, (full.y - h) * 0.45, w, h))
+			draw_rect(box, Color(ComicPage.PAPER, 0.3))
+		else:
+			var horizon := size.y * 0.62
+			draw_rect(Rect2(0, 0, size.x, horizon), sky.lerp(ComicPage.PAPER, 0.45))
+			draw_rect(Rect2(0, horizon, size.x, size.y - horizon), ground.lerp(ComicPage.PAPER, 0.35))
+			draw_rect(Rect2(0, horizon - 3, size.x, 6), ground.lerp(sky, 0.5).lerp(ComicPage.PAPER, 0.4))
+		var reach := minf(size.x, size.y) * 0.62  # the shade of dots: one corner, fading out
+		var y := 5.0
+		while y < reach:
+			var x := 5.0 + (7.0 if int(y / 12.0) % 2 == 1 else 0.0)
+			while x < reach:
+				var at := Vector2(x if corner.x < 1.0 else size.x - x, y)
+				var k := 1.0 - Vector2(x, y).length() / reach
+				if k > 0.08:
+					draw_circle(at, 3.6 * k, Color(ComicPage.INK, 0.16))
+				x += 14.0
+			y += 12.0
 
 
-func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dictionary) -> void:
+## What a picture that is not a cut-out stands on: a white card with an ink border, or a dark oval.
+class Mount:
+	extends Control
+	var oval := false
+
+	func _draw() -> void:
+		var r := Rect2(Vector2.ZERO, size)
+		if oval:
+			draw_colored_polygon(ComicFrame._oval(r.grow_individual(4.0, 4.0, 4.0, 0.0), 40, true), Color("3a2a1c"))
+		else:
+			draw_rect(r.grow(5.0), Color.WHITE)
+			draw_rect(r.grow(5.0), ComicPage.INK, false, 2.5)
+
+
+func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dictionary, index: int = 0, introduce: Array = []) -> void:
 	clip_contents = true
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_font = ComicPage.font()
-	_sky = Color(str(backdrop.get("sky", "f0dcb4")))
 	mood = panel.get("mood", {})
 	var who_list: Array = panel.get("cast", [])
-	var back := Back.new()
-	back.tone = _sky
-	back.corner = Vector2(0, 0) if who_list.size() > 1 else Vector2(size.x, 0)
-	back.size = size
-	back.show_behind_parent = true
-	back.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	add_child(back)
-	var tall := size.y * float(HEIGHT.get(panel.get("shot", "two"), 0.8))
+	var shot := str(panel.get("shot", "two"))
+	_back = Back.new()
+	_back.place = page.place()
+	_back.view = VIEW.get(shot, VIEW["two"])
+	_back.shift = (index % 3 - 1) * 0.12
+	_back.sky = Color(str(backdrop.get("sky", "f0dcb4")))
+	_back.ground = Color(str(backdrop.get("ground", "7fb069")))
+	_back.corner = Vector2(1, 0) if who_list.size() == 1 else Vector2(0, 0)
+	_back.size = size
+	_back.show_behind_parent = true
+	_back.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR
+	_back.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(_back)
+	var lines: Array = panel.get("lines", [])
+	var first_voice := str(lines[0][0]) if not lines.is_empty() else ""
+	var tall := size.y * float(HEIGHT.get(shot, 0.86))
 	for i in who_list.size():
 		var who: String = who_list[i]
 		var c: Dictionary = cast[who]
-		var shape := ComicFaces.aspect(str(c.get("face", ""))) if ComicFaces.has(str(c.get("face", ""))) else ComicFaces.ASPECT
-		var h := tall
-		var w := h * shape
-		if who_list.size() == 2 and w > size.x * 0.48:
-			w = size.x * 0.48
-			h = w / shape
-		var cx := size.x * (0.3 if who_list.size() == 1 else (0.25 if i == 0 else 0.75))
-		cx = clampf(cx, w * 0.5 + 4.0, size.x - w * 0.5 - 4.0)
-		var rect := Rect2(Vector2(cx - w * 0.5, size.y - h + (h * 0.07 if panel.get("shot", "") == "low" else 0.0)), Vector2(w, h))
 		var face := str(c.get("face", ""))
+		var drawn := ComicFaces.has(face)
+		var kind := ComicFaces.kind(face) if drawn else "cut"
+		var shape := ComicFaces.aspect(face) if drawn else ComicFaces.ASPECT
+		var h := tall * (1.0 if who_list.size() == 1 or who == first_voice or first_voice.is_empty() else 0.9)  # who listens stands a little back
+		if kind != "cut":
+			h = minf(h, size.y * 0.8)  # a card or an oval is a picture in the frame: it is never cut by it
+		var w := h * shape
+		if who_list.size() == 2 and w > size.x * 0.5:
+			w = size.x * 0.5
+			h = w / shape
+		var cx := size.x * (0.27 if who_list.size() == 1 else (0.25 if i == 0 else 0.75))
+		cx = clampf(cx, w * 0.5 + 6.0, size.x - w * 0.5 - 6.0)
+		var bottom := size.y + h * SINK if kind == "cut" else size.y - 14.0
+		var rect := Rect2(Vector2(cx - w * 0.5, bottom - h), Vector2(w, h))
 		var node: Control
-		if ComicFaces.has(face):
+		if drawn:
 			var t := TextureRect.new()
 			t.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 			t.stretch_mode = TextureRect.STRETCH_SCALE
+			t.texture_filter = CanvasItem.TEXTURE_FILTER_LINEAR_WITH_MIPMAPS
 			t.flip_h = i == 1  # the sheets look to the right: the second speaker is turned to face the first
-			if _fade == null:
-				_fade = Shader.new()
-				_fade.code = FADE
+			if _tint == null:
+				_tint = Shader.new()
+				_tint.code = TINT
 			var m := ShaderMaterial.new()
-			m.shader = _fade
+			m.shader = _tint
 			t.material = m
 			node = t
 		else:
@@ -98,47 +149,82 @@ func setup(page: ComicPage, panel: Dictionary, cast: Dictionary, backdrop: Dicti
 				d.look = d.look.merged({"coat": str(c.get("coat", "8a6a4a"))})
 			d.flip = i == 1
 			node = d
+		if kind != "cut":  # a card and an oval are pictures in the frame: each gets its mount, behind it
+			var mount := Mount.new()
+			mount.oval = kind == "oval"
+			mount.position = rect.position
+			mount.size = rect.size
+			mount.show_behind_parent = true
+			mount.mouse_filter = Control.MOUSE_FILTER_IGNORE
+			add_child(mount)
 		node.position = rect.position
 		node.size = rect.size
 		node.show_behind_parent = true
 		node.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		add_child(node)
-		actors[who] = {"node": node, "rect": rect, "head": Vector2(cx, rect.position.y + h * 0.2), "face": face, "side": -1.0 if i == 0 and who_list.size() > 1 else 1.0}
+		var mouth_at := ComicFaces.mouth(face) if drawn else 0.34
+		var mouth := Vector2(cx, rect.position.y + h * mouth_at)
+		actors[who] = {"node": node, "rect": rect, "head": Vector2(cx, rect.position.y + h * maxf(mouth_at - 0.2, 0.08)), "mouth": mouth, "face": face,
+			"side": -1.0 if i == 0 and who_list.size() > 1 else 1.0, "kind": kind}
 		_feel(who, str(mood.get(who, "neutral")), 1.0)
+		if who in introduce:
+			var text := page.say(str(c.get("name", "")))
+			var ts := _font.get_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_SIZE)
+			var pw := ts.x + 20.0
+			var px := clampf(cx - pw * 0.5, 8.0, size.x - pw - 8.0)
+			plates.append({"who": who, "text": text, "rect": Rect2(px, size.y - 34.0, pw, 24.0)})
 	if panel.has("caption"):
 		caption = page.say(panel["caption"])
 		caption_gloss = page.gloss(panel["caption"])
 	var top := 12.0 + (_text_size(caption, size.x - 60).y + 2 * PAD.y + 10 if not caption.is_empty() else 0.0)
-	var lines: Array = panel.get("lines", [])
 	var taken: Dictionary = {}  # side (−1 left, 1 right) → the y below the balloons already there
 	for n in lines.size():
 		var who: String = lines[n][0]
 		var text := page.say(lines[n][1])
-		var name := page.say(str(cast[who].get("name", "")))
-		var head: Vector2 = actors[who]["head"] if actors.has(who) else size * 0.5
-		var width := clampf(size.x * (0.6 if lines.size() == 1 else 0.47), 170.0, 360.0)
-		var body := _text_size(text, width - 2 * PAD.x)
-		var bw := maxf(body.x, _font.get_string_size(name, HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE - 4).x) + 2 * PAD.x
-		var bh := body.y + 2 * PAD.y + FONT_SIZE
-		var side := -1 if head.x < size.x * 0.5 else 1
-		if who_list.size() == 1:  # alone in the frame: the first balloon goes to the emptier side, a second one under it
-			side = 1 if head.x < size.x * 0.55 else -1
-		var y: float = taken.get(side, top + (0.0 if n == 0 else 22.0))  # the answer hangs a little lower
-		var rect := Rect2(Vector2(12.0 if side < 0 else size.x - bw - 12.0, y), Vector2(bw, bh))
-		var base := Vector2(clampf(head.x, rect.position.x + 26, rect.end.x - 26), rect.end.y)
-		if who_list.size() == 1:
-			base.x = rect.position.x + 30 if side > 0 else rect.end.x - 30
-		var to_mouth := head + Vector2(0, tall * 0.2) - base
-		var tip := base + to_mouth.normalized() * minf(to_mouth.length() * 0.5, 38.0)  # a short tail: it points, it does not cross a face
-		tip.y = maxf(tip.y, base.y + 12)
-		balloons.append({"who": who, "rect": rect, "tip": tip, "base": base, "text": text, "gloss": page.gloss(lines[n][1]), "name": name,
-			"emotion": str(lines[n][2]) if (lines[n] as Array).size() > 2 else "neutral"})
-		taken[side] = rect.end.y + 24
+		var a: Dictionary = actors.get(who, {})
+		var mouth: Vector2 = a.get("mouth", size * 0.5)
+		var width := clampf(size.x * (0.5 if lines.size() == 1 else 0.31), 140.0, 330.0)
+		var face_edge := 0.0  # alone and large in the frame: the balloon keeps to the side of the face, if there is room
+		if who_list.size() == 1 and not a.is_empty():
+			var ar: Rect2 = a["rect"]
+			var room := (size.x - (ar.get_center().x + ar.size.x * 0.27) - 14.0 - 2 * PAD.x) / 1.3
+			if room >= 190.0:
+				face_edge = ar.get_center().x + ar.size.x * 0.27
+				width = minf(room, width)
+		var body := _text_size(text, width)
+		var oval := Vector2(body.x * 1.3 + 2 * PAD.x, body.y * 1.42 + 2 * PAD.y)  # the text's box fits inside the oval
+		oval.x = minf(oval.x, size.x - 20.0)
+		var side := -1 if mouth.x < size.x * 0.5 else 1
+		if who_list.size() == 1:  # alone in the frame: the balloon goes to the emptier side
+			side = 1 if mouth.x < size.x * 0.55 else -1
+		var y: float = taken.get(side, top + (0.0 if n == 0 else float(balloons[0]["rect"].size.y) * 0.55))  # the answer hangs lower, clear of the question
+		var rect := Rect2(Vector2(10.0 if side < 0 else size.x - oval.x - 10.0, y), oval)
+		if face_edge > 0.0 and side > 0:
+			rect.position.x = maxf(rect.position.x, minf(face_edge, size.x - oval.x - 6.0))
+		rect.position.y = minf(rect.position.y, maxf(size.y - oval.y - 44.0, 8.0))
+		var reach := mouth - rect.get_center()
+		var base := _on_oval(rect, reach)  # where the tail leaves the balloon: on its edge, towards the mouth
+		# the tail points at the mouth and is short: it says whose words these are without crossing a face
+		var far := maxf((mouth - base).length() - maxf(float(a.get("rect", Rect2(0, 0, 0, 120)).size.y) * 0.16, 18.0), 14.0)
+		var tip := base + (mouth - base).normalized() * minf(far, 44.0)
+		balloons.append({"who": who, "rect": rect, "tip": tip, "base": base, "text": text, "gloss": page.gloss(lines[n][1]),
+			"name": page.say(str(cast[who].get("name", ""))), "emotion": str(lines[n][2]) if (lines[n] as Array).size() > 2 else "neutral",
+			"voice": str(lines[n][3]) if (lines[n] as Array).size() > 3 else ("shout" if (lines[n] as Array).size() > 2 and lines[n][2] == "angry" else "say")})
+		taken[side] = rect.end.y + 14.0
 	modulate.a = 0.0
 
 
+## The point of the oval `rect`'s edge that lies in direction `way` from its middle.
+static func _on_oval(rect: Rect2, way: Vector2) -> Vector2:
+	var half := rect.size * 0.5
+	if way.length() < 0.001:
+		return rect.get_center() + Vector2(0, half.y)
+	var u := way / half
+	return rect.get_center() + way / u.length()
+
+
 func _text_size(text: String, width: float) -> Vector2:
-	return _font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, width, FONT_SIZE)
+	return _font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, width, FONT_SIZE)
 
 
 ## Puts emotion `e` on `who`'s face; `light` < 1 steps a listener back a little.
@@ -175,7 +261,7 @@ func show_lines(count: int) -> void:
 			now[balloons[i]["who"]] = balloons[i]["emotion"]
 	var talking := speaker()
 	for who: String in actors:
-		_feel(who, now[who], 0.84 if not talking.is_empty() and who != talking and actors.size() > 1 else 1.0)
+		_feel(who, now[who], 0.86 if not talking.is_empty() and who != talking and actors.size() > 1 else 1.0)
 	queue_redraw()
 
 
@@ -195,49 +281,104 @@ func _draw() -> void:
 		_marks(actors[talking], str(feeling.get(talking, "neutral")))
 	if not caption.is_empty():
 		var text := caption_gloss if _gloss and not caption_gloss.is_empty() else caption
-		var body := _text_size(text, size.x - 60)
+		var body := _font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_LEFT, size.x - 60, FONT_SIZE - 2)
 		var box := Rect2(Vector2(10, 10), body + 2 * PAD)
 		draw_rect(box, ComicPage.CAPTION)
 		draw_rect(box, ComicPage.INK, false, 2.0)
-		draw_multiline_string(_font, box.position + PAD + Vector2(0, FONT_SIZE), text, HORIZONTAL_ALIGNMENT_LEFT, body.x + 1, FONT_SIZE, -1, ComicPage.INK)
+		draw_multiline_string(_font, box.position + PAD + Vector2(0, FONT_SIZE - 3), text, HORIZONTAL_ALIGNMENT_LEFT, body.x + 1, FONT_SIZE - 2, -1, ComicPage.INK)
+	for p in plates:  # who this is: said once, on a plate, the first time they are seen
+		var r: Rect2 = p["rect"]
+		draw_rect(r, ComicPage.CAPTION)
+		draw_rect(r, ComicPage.INK, false, 2.0)
+		draw_string(_font, r.position + Vector2(10, 17), str(p["text"]), HORIZONTAL_ALIGNMENT_LEFT, -1, PLATE_SIZE, ComicPage.INK)
 	for i in mini(maxi(_shown, 0), balloons.size()):
-		var b := balloons[i]
-		var rect: Rect2 = b["rect"]
-		var loud: bool = b["emotion"] in ["surprised", "angry"]
-		if loud:  # a shout: the balloon bristles
-			var spikes := _bristle(rect.grow(3.0))
-			draw_colored_polygon(spikes, Color.WHITE)
-			spikes.append(spikes[0])
-			draw_polyline(spikes, ComicPage.INK, 2.5, true)
-		else:
-			var style := Hud.box(Color.WHITE, ComicPage.INK, 2, 16)
-			style.shadow_size = 0
-			draw_style_box(style, rect)
-		var base: Vector2 = b["base"]
-		var tail := PackedVector2Array([base + Vector2(-11, -4), base + Vector2(11, -4), b["tip"]])
-		draw_colored_polygon(tail, Color.WHITE)
-		draw_line(tail[0] + Vector2(0, 4), tail[2], ComicPage.INK, 2.0, true)
-		draw_line(tail[1] + Vector2(0, 4), tail[2], ComicPage.INK, 2.0, true)
-		var at := rect.position + PAD
-		draw_string(_font, at + Vector2(0, FONT_SIZE - 4), str(b["name"]).to_upper(), HORIZONTAL_ALIGNMENT_LEFT, -1, FONT_SIZE - 5, ComicPage.TAG)
-		var text: String = b["gloss"] if _gloss and not str(b["gloss"]).is_empty() else b["text"]
-		draw_multiline_string(_font, at + Vector2(0, FONT_SIZE * 2), text, HORIZONTAL_ALIGNMENT_LEFT, rect.size.x - 2 * PAD.x, FONT_SIZE, -1,
-			Color("3a4a6a") if _gloss and not str(b["gloss"]).is_empty() else ComicPage.INK)
+		_balloon(balloons[i])
 	draw_rect(Rect2(Vector2.ONE, size - Vector2(2, 2)), ComicPage.INK, false, 3.0)
 
 
-## A rectangle with a zigzag edge.
-static func _bristle(r: Rect2) -> PackedVector2Array:
+func _balloon(b: Dictionary) -> void:
+	var rect: Rect2 = b["rect"]
+	var voice := str(b["voice"])
+	var centre := rect.get_center()
+	var base: Vector2 = b["base"]
+	var tip: Vector2 = b["tip"]
+	var shape: PackedVector2Array
+	match voice:
+		"shout":
+			shape = _burst(rect)
+		"thought":
+			shape = _cloud(rect)
+		_:
+			shape = _oval(rect, 48)
+	if voice == "thought":  # a thought has no tail: three bubbles lead to the head
+		for k in 3:
+			var at := base.lerp(tip, 0.25 + k * 0.3)
+			draw_circle(at, 8.0 - k * 2.2, Color.WHITE)
+			draw_arc(at, 8.0 - k * 2.2, 0, TAU, 16, ComicPage.INK, 2.0, true)
+	else:
+		var across := (base - centre).normalized().rotated(PI / 2) * 11.0
+		var inside := base.lerp(centre, 0.12)  # the tail starts inside the balloon, so the outline has no gap
+		var tail := PackedVector2Array([inside - across, inside + across, tip])
+		draw_colored_polygon(tail, Color.WHITE)
+		draw_polyline(PackedVector2Array([base - across, tip, base + across]), ComicPage.INK, 2.5, true)
+	draw_colored_polygon(shape, Color.WHITE)
+	var outline := shape.duplicate()
+	outline.append(outline[0])
+	if voice == "thought" or voice == "shout":
+		draw_polyline(outline, ComicPage.INK, 2.5, true)
+	else:  # the outline, open where the tail joins
+		var across := (base - centre).normalized().rotated(PI / 2) * 11.0
+		for k in outline.size() - 1:
+			var mid := (outline[k] + outline[k + 1]) * 0.5
+			if mid.distance_to(base) > across.length() + 1.0:
+				draw_line(outline[k], outline[k + 1], ComicPage.INK, 2.5, true)
+	var text: String = b["gloss"] if _gloss and not str(b["gloss"]).is_empty() else b["text"]
+	var width := rect.size.x - 2 * PAD.x - rect.size.x * 0.16
+	var body := _font.get_multiline_string_size(text, HORIZONTAL_ALIGNMENT_CENTER, width, FONT_SIZE)
+	var at := Vector2(centre.x - width * 0.5, centre.y - body.y * 0.5 + _font.get_ascent(FONT_SIZE))
+	draw_multiline_string(_font, at, text, HORIZONTAL_ALIGNMENT_CENTER, width, FONT_SIZE, -1,
+		Color("3a4a6a") if _gloss and not str(b["gloss"]).is_empty() else ComicPage.INK)
+
+
+## An ellipse in `rect`; `bust` = flat along the lower edge (a painted oval portrait that stands on the frame).
+static func _oval(rect: Rect2, points: int, bust: bool = false) -> PackedVector2Array:
 	var out := PackedVector2Array()
-	var corners := [r.position, Vector2(r.end.x, r.position.y), r.end, Vector2(r.position.x, r.end.y)]
-	for s in 4:
-		var a: Vector2 = corners[s]
-		var b: Vector2 = corners[(s + 1) % 4]
-		var n := maxi(2, int(a.distance_to(b) / 20.0))
-		var outward := (b - a).normalized().rotated(-PI / 2)
-		for i in n:
-			out.append(a.lerp(b, float(i) / n))
-			out.append(a.lerp(b, (i + 0.5) / n) + outward * 7.0)
+	var c := rect.get_center()
+	var half := rect.size * 0.5
+	if bust:
+		c.y = rect.position.y + rect.size.y * 0.625
+		half.y = rect.size.y * 0.625
+	for i in points:
+		var a := TAU * i / points
+		var p := c + Vector2(cos(a) * half.x, sin(a) * half.y)
+		p.y = minf(p.y, rect.end.y)
+		out.append(p)
+	return out
+
+
+## A shout: an oval with a zigzag edge.
+static func _burst(rect: Rect2) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	var c := rect.get_center()
+	var half := rect.size * 0.5
+	var teeth := maxi(14, int((rect.size.x + rect.size.y) / 22.0))
+	for i in teeth * 2:
+		var a := TAU * i / (teeth * 2)
+		var k := 1.07 if i % 2 == 0 else 0.93
+		out.append(c + Vector2(cos(a) * half.x, sin(a) * half.y) * k)
+	return out
+
+
+## A thought: an oval with a scalloped edge.
+static func _cloud(rect: Rect2) -> PackedVector2Array:
+	var out := PackedVector2Array()
+	var c := rect.get_center()
+	var half := rect.size * 0.5
+	var puffs := maxi(9, int((rect.size.x + rect.size.y) / 34.0))
+	for i in puffs * 6:
+		var a := TAU * i / (puffs * 6)
+		var k := 0.95 + 0.07 * absf(sin(a * puffs * 0.5))
+		out.append(c + Vector2(cos(a) * half.x, sin(a) * half.y) * k)
 	return out
 
 
@@ -253,9 +394,10 @@ static func _star(c: Vector2, outer: float, inner: float, points: int, turn: flo
 ## for a sly thought, little stars for joy. Our own shapes and letters.
 func _marks(a: Dictionary, e: String) -> void:
 	var rect: Rect2 = a["rect"]
-	var at := Vector2(rect.get_center().x + float(a["side"]) * rect.size.x * 0.4, rect.position.y + rect.size.y * 0.16)
+	var head: Vector2 = a["head"]
+	var at := Vector2(head.x + float(a["side"]) * rect.size.x * 0.42, head.y - rect.size.y * 0.08)
 	at = at.clamp(Vector2(34, 34), size - Vector2(34, 34))
-	var k := clampf(rect.size.y / 300.0, 0.6, 1.5)
+	var k := clampf(rect.size.y / 340.0, 0.6, 1.4)
 	match e:
 		"surprised", "angry":
 			var burst := _star(at, 30.0 * k, 17.0 * k, 9, 0.3)

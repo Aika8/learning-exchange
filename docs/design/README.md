@@ -105,6 +105,12 @@ world; nothing is copied from a book, film or game. The palette row at the botto
 | `71-ship-flag-sails.jpg` | The flag — black, ragged, a compass rose over crossed bones (our sign, no skull) — and the wet wing sails with drops | the flag shader and the wing sails with their drops | `shaders/ship_flag.gdshader`, `Wayfarer._wings` |
 | `72-ship-monkey.jpg` | The monkey: six expressions; sitting with a spyglass, climbing a rope, running, holding a coin; a red waistcoat, an earring | the monkey's figure, her sitting and running; **the spyglass, the coin and the expressions are not built** | `scripts/monkey.gd`, `scripts/core/monkey_mind.gd` |
 
+**Cut-outs (ADR-0037).** The page does not show the sheets' cuts themselves but figures cut out of their paper:
+`godot --headless --path game3d -s tools/cut_portraits.gd` makes `game3d/art/cutouts/*.webp` from
+`game3d/art/portraits/*.jpg`; hand corrections and where each sheet's mouth is live in `game3d/data/cutouts.json`.
+Run it again after replacing a sheet. Sheets drawn with the faces apart (not overlapping, as the captain's hats do
+on sheet 07) cut clean; overlapped brims and shoulders are faded at the cut.
+
 **Dialogue panels (sheets 06–23).** The faces on a page are these drawings, one per emotion, left to right on each
 sheet: neutral, happy, surprised, sly, worried, angry. The emotion is chosen per line in `game3d/data/talks.json`.
 `game3d/art/portraits/` holds the cut-outs (recut them with the boxes in `docs/demo/G3D-talk.md` if a sheet is
