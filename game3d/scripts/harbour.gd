@@ -52,6 +52,7 @@ var _idlers: Array[Walker] = []
 var _nav: NavigationRegion3D
 var _report_timer := 0.0
 var _comic: ComicPage
+var _chart: FlightChartPanel
 var _talker: Villager
 var _glossing := false  ## T is held: the island's words are shown in the game's language (ADR-0028)
 var _gloss: Label
@@ -405,6 +406,13 @@ func _build_ui() -> void:
 	_plan.approved.connect(_on_plan_approved)
 	_plan.cancelled.connect(_close_plan)
 	_build_post(root)
+	_chart = FlightChartPanel.new()
+	_chart.set_anchors_preset(Control.PRESET_CENTER)
+	_chart.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_chart.grow_vertical = Control.GROW_DIRECTION_BOTH
+	_chart.visible = false
+	root.add_child(_chart)
+	_chart.chosen.connect(_on_chart)
 	_comic = ComicPage.new()
 	root.add_child(_comic)
 	_comic.finished.connect(_on_talk_over)
@@ -457,7 +465,7 @@ func _read_sign() -> String:
 
 
 func _nearest() -> String:
-	if _flying or _hud.is_modal() or _plan.visible or _comic.is_open():
+	if _flying or _hud.is_modal() or _plan.visible or _comic.is_open() or _chart.visible:
 		return ""
 	var p := _captain.global_position
 	for i in _villagers.size():  # a stroller at arm's length comes before the place they walk through
@@ -473,6 +481,8 @@ func _nearest() -> String:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		if _chart.visible:
+			_on_chart(FlightChartPanel.STAY)
 		if _plan.visible:
 			_close_plan()
 		elif _post.visible:
@@ -491,7 +501,7 @@ func _unhandled_input(event: InputEvent) -> void:
 
 
 func _ui_open() -> bool:
-	return _plan.visible or _post.visible or _hud.is_modal() or _comic.is_open()
+	return _plan.visible or _post.visible or _hud.is_modal() or _comic.is_open() or _chart.visible
 
 
 func _on_modal(open: bool) -> void:
@@ -565,10 +575,11 @@ func interact() -> void:
 		var role: String = _talker.role if not _talker.role.is_empty() else {"oldman": "townsman"}.get(_talker.who, _talker.who)
 		await talk(str(_talker.get_meta("talk", "stroll_" + role)))
 		return
+	if _target == "ship":
+		await open_chart()
+		return
 	if _amber() or _shorts() or _crypto():
-		if _target == "ship":  # the packet boat home: no trading day is needed for this passage
-			_sail_to("harbour")
-		elif _crypto():
+		if _crypto():
 			await talk(_target)  # a robot: the spot is named like its talk
 		elif not _target.is_empty():
 			await talk(Game.island + "_" + _target)
@@ -579,16 +590,12 @@ func interact() -> void:
 				Game.move(GameFlow.State.TRADING)
 			Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 			Session.go("hall")
-		"ship":
-			if Game.move(GameFlow.State.SAILING):
-				Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-				Session.go("voyage")
 		"ferry":
-			_sail_to(AmberCliff.ID)
+			cast_off(AmberCliff.ID)
 		"ferry_shorts":
-			_sail_to(ShortIsle.ID)
+			cast_off(ShortIsle.ID)
 		"ferry_crypto":
-			_sail_to(CryptoIsle.ID)
+			cast_off(CryptoIsle.ID)
 		"mara":
 			await _meet("mara_first")
 			open_plan()
@@ -627,12 +634,37 @@ func interact() -> void:
 			await open_post()
 
 
-## The packet boat between Spark Harbour and Amber Cliff: a fade, and the captain is on the other pier.
-func _sail_to(island: String) -> void:
-	Game.island = island
-	Session.spawn = "pier"
+## The chart at the ship (ADR-0032): where to — any other island, or nowhere in particular. The screenshot and tool
+## runs have nobody to choose: they take the old route.
+func open_chart() -> void:
+	if Session.active() or Session.tooling():
+		cast_off("harbour" if Game.island != "harbour" else "silk")
+		return
+	_chart.offer(Game.island)
+	_captain.controlled = false
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
-	Session.go("harbour")
+
+
+## Casts off for `destination` ("" = flying free). The day loop decides whether the ship may leave: with cargo
+## aboard and no Anchor it may not. True when she sailed.
+func cast_off(destination: String) -> bool:
+	if not Game.move(GameFlow.State.SAILING):
+		return false
+	Game.destination = destination
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
+	Session.go("voyage")
+	return true
+
+
+func _on_chart(destination: String) -> void:
+	_chart.visible = false
+	_captain.controlled = true
+	if destination != FlightChartPanel.STAY and not cast_off(destination) and not Session.tooling():
+		Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+
+
+func chart() -> FlightChartPanel:
+	return _chart
 
 
 func _rates() -> Dictionary:

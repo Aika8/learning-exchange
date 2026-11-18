@@ -21,6 +21,7 @@ var glossary := CaptainGlossary.new()
 var plan: VoyagePlan
 var approved := false
 var provisions := false
+var destination := ""  ## the island marked on the chart for this voyage; "" = flying free (ADR-0032)
 var island := "harbour"  ## harbour | silk — where the ship is
 var met: Dictionary = {}  ## talks already had this run (the first meeting is a comic page, ADR-0027)
 var attuned := "harbour"  ## the island whose style the captain is drawn in; its wind restyles a newcomer (ADR-0025)

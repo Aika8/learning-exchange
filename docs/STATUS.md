@@ -3,6 +3,12 @@
 Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `docs/demo/G3D-polish.md`, `docs/demo/G3D-walk.md`,
 `docs/demo/G3D-looks.md`, `docs/demo/G3D-talk.md`, `docs/demo/G3D-amber.md`.
 
+## G3D free flight (ADR-0032, Proposed) — `docs/demo/G3D-flight.md`
+- The player flies the ship between all five islands: sail, wheel, height, wind; islands are solid, the world has
+  an edge; a chart at the pier marks a destination or "fly free"; compass and chart in the HUD; moor at any pier.
+  The SAILING state, the ×60 clock, the storm and the Anchor watch are kept; the instant packet boat is gone.
+  GUT 125. Open: nobody has flown it by hand.
+
 ## G3D crypto island (ADR-0031, Proposed) — `docs/demo/G3D-crypto.md`
 - A fifth island: a night town of neon towers with the Exchange That Never Closes, drawn as synthwave pixel art
   (twelve colours in flat tones, texels fixed to the world, sharp edges, a striped sun, a ground grid, nothing animated; reworked after Aika found screen pixels hard on the eyes). A place and a style: no

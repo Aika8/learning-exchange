@@ -323,6 +323,50 @@ static func stroll(tree: SceneTree) -> void:
 	tree.quit()
 
 
+## `--flight=<dir>`: a voyage with the compass at the wheel (ADR-0032) — from `--island` (default harbour) to `--to`
+## (default amber); a frame every 0.5 s as frame-NNN.png until moored (at most 150), with the HUD. `--storm` flies it in
+## a storm; `--measure` prints the frame rate under way instead.
+static func flight(tree: SceneTree) -> void:
+	var dir := Session.arg("flight")
+	DirAccess.make_dir_recursive_absolute(dir)
+	Game.island = "harbour" if Session.arg("island").is_empty() else Session.arg("island")
+	Game.attuned = Game.island
+	Game.destination = "amber" if Session.arg("to").is_empty() else Session.arg("to")
+	if not Session.arg("chart").is_empty():  # `--chart`: only the "where to?" chart at the pier
+		Session.spawn = "pier"
+		tree.change_scene_to_file("res://scenes/harbour.tscn")
+		await Session.wait(2.0)
+		(tree.current_scene.call("chart") as FlightChartPanel).offer(Game.island)
+		await Session.wait(0.6)
+		tree.current_scene.get_viewport().get_texture().get_image().save_png(dir.path_join("chart.png"))
+		tree.quit()
+		return
+	tree.change_scene_to_file("res://scenes/voyage.tscn")
+	await Session.wait(1.5)
+	var scene := tree.current_scene as Node3D
+	scene.set("_auto", true)
+	if not Session.arg("storm").is_empty():
+		scene.call("demo_storm", 0.9)
+	if not Session.arg("measure").is_empty():  # frame rate under way, nothing being saved
+		await Session.wait(2.0)
+		var r: Dictionary = await _measure(tree, "voyage", 0.0, 6.0)
+		print("flight fps: avg %.0f  1%%-low %.0f  worst frame %.1f ms" % [r["avg"], r["low"], r["worst_ms"]])
+		tree.quit()
+		return
+	var n := 0
+	while n < 150 and not scene.call("arrived"):
+		await Session.wait(0.5)
+		scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%03d.png" % n))
+		n += 1
+		if str(scene.get("_at")) == Game.destination:
+			scene.call("moor")
+	await Session.wait(0.6)
+	scene.get_viewport().get_texture().get_image().save_png(dir.path_join("frame-%03d.png" % n))
+	var m: FlightModel = scene.get("model")
+	print("flight: %s → %s in %d frames, flown %d m, moored at %s, fps=%d" % [Session.arg("island"), Game.destination, n, int(m.flown), Game.island, int(Engine.get_frames_per_second())])
+	tree.quit()
+
+
 ## `--attune=<dir>`: the captain lands on Silk Reach still drawn the Spark Harbour way and the island's wind
 ## restyles them (ADR-0025). Saves a frame every 0.1 s as frame-NN.png; add `--ink=2` for the engraving.
 static func attune(tree: SceneTree) -> void:
