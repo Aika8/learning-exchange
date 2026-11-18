@@ -86,7 +86,7 @@ Recording: [captain-deco.gif](g3d-race/captain-deco.gif).
   on a lift above every hat.
 - Frame rate at 1920×1080: average 118 (the display's cap is 120); 1 % low 59–78 over the captain's camera and
   seven fixed views.
-- GUT: see the PR.
+- GUT: 135 tests, all green (5 new; the walk tests and the compass flights cover the new island).
 
 ## Not built
 - The second islet with hangars and the suspension bridge of sheet 52; the entrance complex with turnstiles of

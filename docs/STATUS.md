@@ -7,7 +7,7 @@ Updated: 2026-11-17, G3D looks, talk, Amber Cliff. Demos: `docs/demo/M4.md`, `do
 - A seventh island: the Grand Prix of the Winds, our own sky race, drawn as a streamline art-deco poster (flat
   tones, metal in stripes from the normal, a world-fixed sunburst sky). A banked track in the air round the rock,
   the timing tower, pit boxes, a grandstand, four skiffs as decoration. A place and a style: no race or pit-stop
-  mechanics (they wait for intent 03, question 13). Five islanders talk. On the flight chart. Audit 0, 118 fps
+  mechanics (they wait for intent 03, question 13). Five islanders talk. On the flight chart. Audit 0, GUT 135, 118 fps
   average at 1080p. The hangar islet and bridge of sheet 52 are not built.
 
 ## G3D index island (ADR-0033, Proposed) — `docs/demo/G3D-index.md`
