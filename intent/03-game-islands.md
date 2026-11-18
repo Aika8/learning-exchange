@@ -128,6 +128,13 @@ How it could sit on what exists (for discussion):
   from the seeded economy, so a test must show that a falling phase can really cost the island that much
   (invariant 4) — otherwise the talk would promise a risk the market never delivers.
 
+## The pyramid island (2026-11-18)
+Aika's idea: an island that is **too good to be true** — a scheme that promises easy money and lives on newcomers.
+Seven sheets (`docs/design/concepts/73…79`). A pastel fairground under a glass dome; every front is plywood on
+scaffolding from behind; four stages of decay, one per visit (ADR-0038). **No Ponzi mechanics**: nothing is paid
+from newcomers' money, nothing can be invested; it is a place to look at and talk in. Signs carry pictograms, never
+promised percentages.
+
 ## Questions for Aika
 **The world**
 1. The name: «Воздушные пираты» or «Летопись Ветров»? Are the captain and crew pirates, or traders among pirates?
@@ -182,6 +189,16 @@ How it could sit on what exists (for discussion):
 17. Which indie manners do you have in mind, island by island (as principles, not copies)? Which islands are 2D,
     and what does the captain do there — walk a side-on street?
 18. Islands "from what we watched and discussed": which ones are on your list?
+
+**The pyramid island (ADR-0038)**
+24. Stages follow the number of visits for now (1, 2, 3, 4 and on). Later: game days, the market's phase, or
+    the visits of the player only? Does it ever come back — a new fair opens somewhere else?
+25. Does the player lose anything here, or is it only seen? If something: a ticket bought at stage 1 that is
+    worthless at stage 4 (with no market money involved)?
+26. Its people (sheet 76): the host, the barker, the happy ticket holder, the worried coin counter, the sweeper.
+    Who of them knows what it is? Does the happy one become the worried one at a later stage?
+27. Which real schemes should its talks echo (pyramids, "guaranteed" returns, referral bonuses), and in which
+    words — the real term beside the lore name, as elsewhere?
 
 ## Proposed order, in small steps (each ends in something that runs; ADR first where marked)
 0. **Answers.** Then ADRs for the three costly decisions: market phases in the scheduled economy; loans and wages
