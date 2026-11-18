@@ -14,6 +14,7 @@ const VIEWS := {
 		["view-ship-stern", Archipelago.PIER_END + Vector3(13.5, 3.4, 9.5), Archipelago.PIER_END + Vector3(5, 2.6, 5.5)],
 		["view-ship-bow", Archipelago.PIER_END + Vector3(-11.5, 2.6, 9.5), Archipelago.PIER_END + Vector3(-5, 2.2, 5.5)],
 		["view-ship-deck", Archipelago.PIER_END + Vector3(3.5, 11.5, 9.0), Archipelago.PIER_END + Vector3(0, 1.6, 5.5)],
+		["view-monkey", Vector3(5.6, 0.5, 11.9), Vector3(6.9, 0.28, 10.6)],  # the monkey, sitting beside the captain where he starts
 		["view-ship-wing", Archipelago.PIER_END + Vector3(2, -1.5, 17), Archipelago.PIER_END + Vector3(0, 0.6, 5.5)],
 		["view-square", Vector3(3, 7, 24), Vector3(-2, 1.5, 0)], ["view-houses", Vector3(-4, 3.2, 3), Vector3(-15, 2.2, 3)],
 		["view-house-close", Vector3(-8.5, 2.4, 1.5), Vector3(-14, 2.2, -2)], ["view-wharf", Vector3(27, 8, 27), Vector3(34, 0.5, 3)],
@@ -380,6 +381,19 @@ static func flight(tree: SceneTree) -> void:
 		await Session.wait(2.0)
 		var r: Dictionary = await _measure(tree, "voyage", 0.0, 6.0)
 		print("flight fps: avg %.0f  1%%-low %.0f  worst frame %.1f ms" % [r["avg"], r["low"], r["worst_ms"]])
+		var ship: Node3D = scene.find_child("Wayfarer", true, false)
+		var sun: DirectionalLight3D = scene.find_child("Sun", true, false)
+		if ship != null and sun != null:  # what the ship herself costs from the helmsman's camera: the frame with her and without
+			var counts: Array[int] = []
+			for shadows: bool in [true, false]:
+				sun.shadow_enabled = shadows
+				for shown: bool in [true, false]:
+					ship.visible = shown
+					await Session.wait(0.5)
+					counts.append(int(RenderingServer.get_rendering_info(RenderingServer.RENDERING_INFO_TOTAL_PRIMITIVES_IN_FRAME)))
+			ship.visible = true
+			sun.shadow_enabled = true
+			print("flight: the ship draws %d triangles in the view from the helmsman's camera, %d with her shadows in every cascade" % [counts[2] - counts[3], counts[0] - counts[1]])
 		tree.quit()
 		return
 	var n := 0

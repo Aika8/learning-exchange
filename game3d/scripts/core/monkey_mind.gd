@@ -13,9 +13,13 @@ const SIDE := 0.9  ## she stops a little to one side of him, not under his feet
 var position := Vector3.ZERO  ## aboard: in the ship's own space; ashore: in the world
 var yaw := 0.0
 var running := false
+var pose := "sit"  ## sit | scope (sitting with the spyglass to her eye) | climb (up or down the rig) | run
 var perch := 0  ## aboard: the perch she sits on or runs to
 var _wait := 2.0
 var _rng := RandomNumberGenerator.new()
+var _looks := true
+var _look_until := 1.4
+var _still := 0.0  ## ashore: how long she has sat
 
 
 func _init(seed_value: int = 7) -> void:
@@ -31,18 +35,26 @@ func aboard(delta: float, perches: Array[Vector3]) -> void:
 	var goal := perches[perch]
 	if position.distance_to(goal) > 0.02:
 		running = true
-		_face(goal - position)
+		var way := goal - position
+		pose = "climb" if absf(way.y) > Vector2(way.x, way.z).length() else "run"  # up the shrouds, or along a yard
+		_face(way)
 		position = position.move_toward(goal, CLIMB * delta)
 		return
 	running = false
+	pose = "scope" if _looks and _wait < _look_until else "sit"
 	_wait -= delta
 	if _wait <= 0.0:
 		_wait = _rng.randf_range(3.0, 7.0)
+		_looks = _rng.randf() < 0.6  # on most perches she has a look through the spyglass before she moves on
+		_look_until = _wait * 0.7
 		var step := 1 if _rng.randf() < 0.5 else -1
 		perch = clampi(perch + step, 0, perches.size() - 1) if perches.size() > 1 else 0
 		if perches[perch].distance_to(position) < 0.02 and perches.size() > 1:
 			perch = clampi(perch - step, 0, perches.size() - 1)  # at the end of the list she turns back
 		running = perches[perch].distance_to(position) > 0.02  # she is off at once
+		if running:
+			var way := perches[perch] - position
+			pose = "climb" if absf(way.y) > Vector2(way.x, way.z).length() else "run"
 
 
 ## A step ashore: `captain` is where the captain stands, `heading` the way he faces (radians round y).
@@ -57,9 +69,13 @@ func ashore(delta: float, captain: Vector3, heading: float) -> void:
 		var to := Vector3(beside.x, captain.y, beside.z)
 		_face(to - position)
 		position = position.move_toward(to, RUN * delta)
+		pose = "run"
+		_still = 0.0
 		if position.distance_to(to) < 0.05:
 			running = false
 	else:
+		_still += delta
+		pose = "scope" if fmod(_still, 9.0) > 5.0 else "sit"  # when he stands long she looks about through the glass
 		position.y = lerpf(position.y, captain.y, minf(8.0 * delta, 1.0))
 		_face(captain - position)  # sitting, she watches him
 

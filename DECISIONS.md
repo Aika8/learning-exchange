@@ -574,3 +574,22 @@ Build and CI
   Only the regular weight: the page uses one face. `make check-game3d-data` now requires the file.
 - With Comic Relief: lettering 19 px (20 with the system face), the text of a two-balloon frame up to 37 % of the
   frame wide (was 31 %), figures of a two-shot 0.72 of the frame high (was 0.86).
+
+## G3D the pinnace as the ship (amendment to ADR-0036)
+- `Wayfarer.build(model := true)`: the pinnace when `assets/models/ship_pinnace` is there, else the built ship;
+  `build(false)` always gives the built one (its tests use that). `Wayfarer.at(x, y, z)` turns a point of the
+  model (bow at +z, real metres) into the ship's space: scale 0.36, the waist deck (model y 2.98) at 0, turned.
+- The model is loaded by its path whether or not `--pbr` is given: the ship is realistic in every style.
+- `lod_bias` 0.15 on every mesh of the model: from 18 m (the helmsman's camera) the second generated LOD is
+  drawn, a quarter of the triangles. 0.5 still drew the full meshes.
+- The rigging casts no shadow: it was most of the 123 000 triangles the ship cost with four shadow cascades.
+- `--flight --measure` now also prints what the ship draws, with and without shadows (the frame with her and
+  with her hidden).
+- The model's own `interior` mesh is freed when the ship is built.
+- Model sails: `shaders/ship_model_sail.gdshader` keeps the albedo texture and the cut-out (discard below 0.5
+  alpha) and moves each vertex along its normal by up to 0.1 model metres (3.6 cm).
+- The monkey's limbs fold forward with a negative angle about x, and her tail curls up with a positive one: the
+  first try had both the other way (legs behind her, the tail in the ground).
+- Monkey poses: `MonkeyMind.pose` — `climb` when the way to the next perch is steeper than 45°, else `run`;
+  `scope` for the first 70 % of a sit on 60 % of perches; ashore `scope` for 4 s of every 9 s of sitting.
+- A fixed view `view-monkey` is added to the harbour's list.
