@@ -646,3 +646,10 @@ Build and CI
   a separate counter over submits only (same order, one more number to explain) or the book id (ids also go to market
   orders that never rest). A `Cancel` picks among live orders in this arrival order; its `pickIndex` is drawn from
   0..999 and taken modulo the live count.
+- LE-007: how to replay a failing property in the REPL — `ReplScript.render(actions, Runner.run(actions))` prints one
+  REPL command per action (`buy 5@100`, `sell 2`, `cancel 1`); paste it into `make repl`. New property tests print it
+  in their failure message from the start (e.g. `assertTrue(ok, () -> ReplScript.render(actions, steps))`). A cancel
+  with nothing resting renders as `book` (only prints the book), so line i stays action i; not taken: dropping the
+  line (breaks the line↔action match) or a comment line (the REPL has no comment syntax and would print an error).
+  The test checks the lines against a regex copy of the REPL grammar, because engine tests cannot depend on
+  `backend/repl`; not taken: moving the parser out of `Repl` into a shared place (outside the task's paths).
