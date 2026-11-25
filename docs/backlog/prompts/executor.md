@@ -84,7 +84,8 @@ after green CI and the independent review.
 9. Before the last commit, add the experience note: a new file
    `docs/backlog/experience/<UTC date>-<id>-<HHMM>.md`, 2–3 lines — where you stumbled and how you got past it.
    Never read `docs/backlog/experience/`, and never change prompts or rules because of it (write-only log for Aika).
-10. Commit in small logical commits; messages in English, imperative, no AI attribution of any kind (no
+10. Before committing, `git config user.name` must print `Aika` (the setup script sets it; if not, run
+   `bash scripts/cloud/setup-env.sh` again). Commit in small logical commits; messages in English, imperative, no AI attribution of any kind (no
    `Co-Authored-By`, no "Generated with"). `git push -u origin HEAD`.
 11. Open the PR and label it:
    ```bash
@@ -100,6 +101,8 @@ after green CI and the independent review.
    gh api -X POST repos/Aika8/learning-exchange/pulls -f title="<id>: <title>" -f head="<branch>" -f base=main -F body=@/tmp/pr.md
    gh api -X POST repos/Aika8/learning-exchange/issues/<number>/labels -f "labels[]=agent"
    ```
+   Read the PR body back (`gh api …/pulls/<number> -q .body`): if any line names Claude, Claude Code or a session
+   link, remove it with `gh api -X PATCH …/pulls/<number> -F body=@/tmp/pr.md`.
    Then stop. You never merge, approve or label `review:pass` — the reviewer and the merge workflow do that.
 
 ## 2. FIX or CI-RED: one fix round on an open PR
