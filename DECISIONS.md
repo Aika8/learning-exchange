@@ -664,3 +664,11 @@ Build and CI
   skipping those cancels (leaves "unknown / already filled" never compared) or changing `ActionGen` to emit stale ids
   (would change the action streams of LE-001…008). The engine side is its own `OrderBook` fed the same actions, so
   `bids(10)`/`asks(10)` are the book's own depth-10 view, not a cut of the Runner's full view.
+- LE-010: the regression-file format and how a shrunk case is compared — chosen: the REPL grammar that `ReplScript`
+  already writes (`buy 5@100`, `sell 3`, `cancel <id>`, `book` = no-op), plus `#` comment lines; `cancel <id>` must
+  name an order still resting there and is turned back into the matching pick index (`engine.model.RegressionFile`).
+  The comparison is `engine.model.Divergence.first(actions)`: ids, cancel results, trades and full depth after every
+  step, returned as a value so the `Shrinker` can call it many times. Not taken: storing raw `Cancel(pick)` indices
+  (unreadable, and not pasteable into `make repl`), or reusing `DifferentialTest.compare` (private and fails through
+  `fail()`; changing an existing test is outside the task's rules) — so for now the trade comparison lives in two
+  places, see `docs/backlog/tech-debt/2026-11-25-LE-010-1.md`.
