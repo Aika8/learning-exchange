@@ -435,7 +435,8 @@ def check_paths(branch: str, changes: list[Change], tasks: list[Task], root: Pat
                 problems.append(f"{p}: an existing test or quality gate is {c.status}; add a new file instead")
             if c.status != "added" and ADR_FILE.match(p) and not adr_is_open(p, root):
                 problems.append(f"{p}: an accepted ADR is never edited; supersede it with a new ADR")
-        if c.status == "added" and matches(c.path, APPEND_ONLY) and SKIP_MARKERS.search(c.added_text):
+        if (c.status == "added" and matches(c.path, APPEND_ONLY) and not c.path.endswith(".md")
+                and SKIP_MARKERS.search(c.added_text)):
             problems.append(f"{c.path}: a new test file skips or disables tests")
         if kind == "task":
             own = c.path[:-4] if c.path.endswith(".gd.uid") else c.path  # Godot's id file next to an allowed script

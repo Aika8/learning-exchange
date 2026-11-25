@@ -13,8 +13,9 @@ added in the PR of the task during which it was found. Format:
 - found by: <task id>, <executor|reviewer>, <date>
 ```
 
-The reviewer does not commit: it lists such findings in its review comment under "Out of scope (tech debt)", and the
-executor of the next fix round of that PR adds them as files. The merge gate allows adding these files to any task PR
+The reviewer does not commit: it lists such findings in its review comment under "Out of scope (tech debt)"; the
+executor of the next fix round of that PR adds them as files, and when the review passes (no fix round) the reviewer
+opens one GitHub issue per finding titled `[tech-debt] …` with the label `tech-debt`. The merge gate allows adding these files to any task PR
 and refuses changing or deleting existing ones.
 
 How a finding is classified (all runs):
