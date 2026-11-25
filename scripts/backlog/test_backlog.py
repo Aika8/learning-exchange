@@ -275,6 +275,19 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class DebtAndExperienceTest(unittest.TestCase):
+    def test_task_may_add_but_not_change_debt_and_experience_files(self):
+        tasks = b.parse_tasks(QUEUE)
+        ok = b.check_paths("claude/le-001", [b.Change("added", "docs/backlog/tech-debt/2026-12-03-LE-001-1.md"),
+                                             b.Change("added", "docs/backlog/experience/2026-12-03-LE-001-0912.md")],
+                           tasks)
+        self.assertEqual(ok, [])
+        bad = b.check_paths("claude/le-001", [b.Change("modified", "docs/backlog/experience/2026-12-02-LE-000-0800.md")],
+                            tasks)
+        self.assertTrue(any("existing" in x for x in bad))
+        self.assertTrue(b.check_paths("claude/le-001", [b.Change("modified", "docs/backlog/TECH-DEBT.md")], tasks))
+
+
 class HardeningTest(unittest.TestCase):
     """Holes found by the independent review of 2026-11-25."""
 

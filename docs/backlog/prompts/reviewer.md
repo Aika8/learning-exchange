@@ -67,6 +67,11 @@ Review round <k> of <task id>: **<pass|fail>**
 
 <for fail: what must change, per "no" answer, in one line each>
 
+Out of scope (tech debt): <problems outside this task: `where` — what — why it matters; or "none". Do not fail the
+review for them.>
+
+Experience: <2–3 lines: where this review stumbled and how it got past it>
+
 <!-- backlog-review round=<k> verdict=<pass|fail> sha=<head sha> -->
 EOF
 gh api -X POST repos/Aika8/learning-exchange/issues/<n>/comments -F body=@/tmp/review.md
@@ -75,6 +80,10 @@ gh api -X POST repos/Aika8/learning-exchange/issues/<n>/comments -F body=@/tmp/r
 - pass → `gh api -X POST repos/Aika8/learning-exchange/issues/<n>/labels -f "labels[]=review:pass"`
 - fail → label `needs-fix` instead. If `fixes` is 2 or more (two fix rounds already used), label `parked`
   instead and write in the comment what Aika must decide.
+
+Classify findings like the executor (`docs/backlog/TECH-DEBT.md`): a regression inside the change → a "no" answer;
+the task itself wrong → fail and say "park: <reason>"; outside the task → "Out of scope", not a failure. A new test
+that checks the wording of documentation is a "no" on question 3. Never read `docs/backlog/experience/`.
 
 Do not push commits, do not merge, do not edit the PR. Stop.
 

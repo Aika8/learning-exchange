@@ -47,7 +47,7 @@ after green CI and the independent review.
    ```
    (A branch without a PR counts as taken for 3 hours; after that the task is free again. If the branch already
    exists on origin and `plan` still gave you this task, an earlier run died: check it out and continue from it.)
-3. Change **only** files matching the task's `paths`, plus `DECISIONS.md`. The merge gate checks this in code and
+3. Change **only** files matching the task's `paths`, plus `DECISIONS.md` and new files in `docs/backlog/tech-debt/` and `docs/backlog/experience/`. The merge gate checks this in code and
    will not merge a PR that strays; so will it for: `.github/`, `Makefile`, any `CLAUDE.md`, `scripts/backlog/`,
    `scripts/cloud/`, `docs/backlog/` rules and queue, accepted ADRs, existing tests (add new test files instead),
    and anything that changes how `game3d` looks.
@@ -58,20 +58,28 @@ after green CI and the independent review.
    already exists, use it; if it looks wrong, do not write a second one — park (section 4) with your reasoning.
    Before changing code that looks odd, check why it is so (`git log -S`, `git blame`, `DECISIONS.md`); if the
    reason is unclear, leave it and say so in the PR.
-5. A question the files do not answer: follow "do not wait for Aika" in `docs/backlog/README.md` — cheap to undo →
+5. Findings, classified (see `docs/backlog/TECH-DEBT.md`): a regression inside your own change → fix it here; the
+   task itself is wrong or contradicts the intent/ADRs → park it with the reason; anything outside the task's
+   scope → add a file `docs/backlog/tech-debt/<date>-<id>-<n>.md` in this PR and do **not** fix it.
+   Never write a test that checks the wording of documentation (Markdown prose, README text): it turns CI red for
+   every harmless edit. Tests check behaviour, data and code.
+6. A question the files do not answer: follow "do not wait for Aika" in `docs/backlog/README.md` — cheap to undo →
    decide and write it in `DECISIONS.md` under `## Backlog run (December 2026)`; costly → park.
-6. If you start a server: `make dev PORT=8091 JOURNAL=memory` (never 8080), and stop it before you finish
+7. If you start a server: `make dev PORT=8091 JOURNAL=memory` (never 8080), and stop it before you finish
    (`make stop PORT=8091`; `make ps` shows nothing of yours).
-7. Check, all three, and read the output:
+8. Check, all three, and read the output:
    ```bash
    <the task's verify command>          # must meet the task's expect
    make test                            # must be green
    python3 scripts/backlog/backlog.py check-paths --branch "$(git branch --show-current)" --base origin/main
    ```
    If you cannot get there within about 45 minutes of work, park (section 4) instead of pushing something broken.
-8. Commit in small logical commits; messages in English, imperative, no AI attribution of any kind (no
+9. Before the last commit, add the experience note: a new file
+   `docs/backlog/experience/<UTC date>-<id>-<HHMM>.md`, 2–3 lines — where you stumbled and how you got past it.
+   Never read `docs/backlog/experience/`, and never change prompts or rules because of it (write-only log for Aika).
+10. Commit in small logical commits; messages in English, imperative, no AI attribution of any kind (no
    `Co-Authored-By`, no "Generated with"). `git push -u origin HEAD`.
-9. Open the PR and label it:
+11. Open the PR and label it:
    ```bash
    cat > /tmp/pr.md <<'EOF'
    Task: <id> — <title> (docs/backlog/QUEUE.md)
@@ -95,7 +103,8 @@ after green CI and the independent review.
    (`gh api repos/Aika8/learning-exchange/actions/runs?branch=<branch>` → jobs → logs).
 2. Check out the branch, read the task (`python3 scripts/backlog/backlog.py show <id>`), fix what the questions or
    the log point at — within the task's paths, never by weakening or deleting a test.
-3. Run the three checks of 1.7, commit, push.
+3. Add the tech-debt files the reviewer listed under "Out of scope (tech debt)", and your own experience note (1.9).
+   Run the three checks of 1.8, commit, push.
 4. Comment on the PR (the marker counts the fix rounds; after two, the PR is parked):
    ```bash
    gh api -X POST repos/Aika8/learning-exchange/issues/<n>/comments -f body="Fix round <k>: <what changed, per question>
@@ -108,7 +117,7 @@ after green CI and the independent review.
 ## 3. REBASE
 
 Check out the PR's branch, `git merge origin/main`, resolve conflicts keeping both sides' intent (for
-`DECISIONS.md`: keep every bullet), run the three checks of 1.7, push, remove the label `needs-rebase`
+`DECISIONS.md`: keep every bullet), run the three checks of 1.8, push, remove the label `needs-rebase`
 (`gh api -X DELETE …/issues/<n>/labels/needs-rebase`). If the conflict cannot be resolved without changing what
 another merged task did, park instead. Stop.
 

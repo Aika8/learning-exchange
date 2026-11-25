@@ -55,6 +55,8 @@ PROTECTED = [
     "docs/backlog/prompts/**",
     "docs/backlog/PAUSE",
     "docs/backlog/intake-log.md",
+    "docs/backlog/TECH-DEBT.md",
+    "docs/backlog/experience/README.md",
     "gradle/wrapper/**",
     "docs/adr/0000-template.md",
     "gradlew",
@@ -109,8 +111,11 @@ APPEND_ONLY = [
     "**/quality-gates/**",
     "**/test_*.py",
     "scripts/docs/check_*.py",
+    "docs/backlog/tech-debt/**",
+    "docs/backlog/experience/**",
 ]
-ALWAYS_ALLOWED_FOR_TASKS = ["DECISIONS.md"]
+# Every task PR may add these (new files only — APPEND_ONLY covers the two folders).
+ALWAYS_ALLOWED_FOR_TASKS = ["DECISIONS.md", "docs/backlog/tech-debt/*.md", "docs/backlog/experience/*.md"]
 SKIP_MARKERS = re.compile(r"@Disabled|@Ignore|\btest\.skip\(|\bit\.skip\(|\bdescribe\.skip\(|\btest\.todo\(|"
                           r"\bpending\(|assumeTrue\(false|\bskip\s*:\s*true|func\s+skip_", re.I)
 ADR_FILE = re.compile(r"^docs/adr/\d{4}-.*\.md$")
