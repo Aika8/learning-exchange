@@ -16,6 +16,9 @@ Start with `intent/02-platform.md`, `docs/adr/README.md`, `docs/lore/world-bible
 - Intent → ADR → contract (`api/`) → code + tests → `DECISIONS.md` for small behaviour choices.
 - Costly-to-reverse decisions get an ADR (`docs/adr/0000-template.md`) **before** the code. Never edit an Accepted ADR; supersede it.
 - Accept a Proposed ADR by changing its status when the code implementing it lands.
+- Agents here commit, push to `claude/*` branches and open PRs without asking. Merging needs green CI and an
+  independent review; while Aika is away (`docs/backlog/UNATTENDED` exists) only `.github/workflows/automerge.yml`
+  merges. The cloud backlog run: `docs/backlog/README.md`.
 
 ## Code conventions
 - A class/module implementing a named pattern starts with a doc comment:

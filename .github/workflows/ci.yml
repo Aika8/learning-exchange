@@ -8,6 +8,9 @@ on:
   push:
     branches: [main]
   pull_request:
+  # The automerge workflow re-runs CI on a branch it brought up to date with main (pushes made with GITHUB_TOKEN
+  # start no workflow by themselves). See docs/backlog/README.md.
+  workflow_dispatch:
 
 permissions:
   contents: read

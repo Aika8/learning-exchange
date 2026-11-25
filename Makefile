@@ -1,12 +1,17 @@
-.PHONY: ps stop test test-backend test-web test-mobile check-game3d-data test-game test-game3d game game3d assets dev reset repl web mobile mobile-web gen-api e2e clean
+.PHONY: ps stop test test-backlog test-backend test-web test-mobile check-game3d-data test-game test-game3d game game3d assets dev reset repl web mobile mobile-web gen-api e2e clean
 
 # Run every test in the repo: backend (Gradle), both clients (unit tests, i18n keys, type check) and the game.
 # Works in a clean clone: client dependencies are installed with `npm ci` first. Without Godot the game tests are
 # skipped with a note (CI has no Godot). E2E is separate: `make e2e`.
-test: test-backend test-web test-mobile check-game3d-data test-game test-game3d
+test: test-backlog test-backend test-web test-mobile check-game3d-data test-game test-game3d
 
 test-backend:
 	./gradlew test
+
+# The cloud backlog run (docs/backlog/README.md): its rules as code, and the queue's format.
+test-backlog:
+	python3 -m unittest discover -s scripts/backlog -p 'test_*.py'
+	python3 scripts/backlog/backlog.py lint
 
 # `npm ci` runs when node_modules is missing or older than package-lock.json (always in a clean clone).
 clients/%/node_modules/.ci-stamp: clients/%/package-lock.json
