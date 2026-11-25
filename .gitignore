@@ -17,3 +17,6 @@ playwright-report/
 # game3d CC0 assets: fetched by `make assets`, never committed
 game3d/assets/
 .env
+
+# Python caches (scripts/backlog, game3d/tools)
+__pycache__/

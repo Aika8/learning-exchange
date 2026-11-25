@@ -17,6 +17,9 @@ DAY=$(date -u +%F)
 If `docs/backlog/proposals/$DAY-user.md` already exists on `main` or on an open branch `claude/proposals-user-$DAY`,
 stop. Read `CLAUDE.md`, `docs/backlog/README.md`, `docs/backlog/PROPOSALS.md` (the format).
 
+Long commands (Gradle, `make`): run them in the foreground with the Bash `timeout` set to 600000; never end your
+turn while a command is still running (an ended turn ends the run).
+
 ## 1. Walk the product (budget: about 40 minutes)
 
 Start the exchange on another port and **always stop it** at the end:
