@@ -38,6 +38,11 @@ after green CI and the independent review.
 
 ## 1. NEW: do one task
 
+0. Note the start time (`date -u +%H:%M`). Budget: **50 minutes** of work per run. At 50 minutes, stop where you are:
+   commit what you have to the branch with "WIP:" in the message, push, and park (section 4) saying where you stopped
+   and what is left. Never wait in a loop, never poll; a command that runs long runs in the foreground (see 8).
+   You may refuse a task at the start: if its description is incomplete or contradicts the code, the intents or the
+   ADRs, do not guess — park it (section 4) with "missing: …" or "contradicts: …".
 1. The task text printed by `plan` is your whole assignment: description, `paths`, `verify`, `expect`. Do not
    widen it. Do not start a second task.
 2. Claim the task at once, so the next hourly run does not take it too:
@@ -98,6 +103,10 @@ after green CI and the independent review.
    Then stop. You never merge, approve or label `review:pass` — the reviewer and the merge workflow do that.
 
 ## 2. FIX or CI-RED: one fix round on an open PR
+
+Stop rule first: if CI or a check fails **a second time with the same error**, or the failure has nothing to do with
+the task's change (infrastructure, network, the runner, a service outside the repo), do not "fix" anything — park
+(section 4) and quote the error text.
 
 1. `gh api repos/Aika8/learning-exchange/pulls/<n>` (head branch), the PR's comments
    (`gh api repos/Aika8/learning-exchange/issues/<n>/comments`) — the latest reviewer comment has questions

@@ -17,6 +17,7 @@ Commands
   plan                         the executor's move for this run: PAUSED | PARK | FIX | REBASE | CI-RED |
                                WIP-LIMIT | NOTHING | NEW <task>
   review-queue                 the reviewer's move: PAUSED | REVIEW #n … | NOTHING
+  prod-changes [--base REF]    changed non-test, non-doc files (the reviewer's "tests in a vacuum" check)
 """
 from __future__ import annotations
 
@@ -147,6 +148,12 @@ def narrow(path: str) -> bool:
     """A proposal's glob names at least two folders before any wildcard: `backend/app/**` yes, `backend/**` no."""
     head = re.split(r"[*?]", path, 1)[0]
     return head == path or head.count("/") >= 2
+
+
+def is_production(path: str) -> bool:
+    """Code whose behaviour tests pin: not a test, not docs, not the backlog's own files."""
+    return not (matches(path, APPEND_ONLY) or path.endswith(".md") or path.startswith("docs/")
+                or matches(path, ["**/*.gd.uid", "**/test_*.py"]))
 
 
 def visual(path: str) -> bool:
@@ -796,6 +803,8 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("intake"); s.add_argument("--date", default=dt.date.today().isoformat())
     s = sub.add_parser("automerge"); s.add_argument("--dry-run", action="store_true")
     sub.add_parser("plan", help="executor: what to do in this run (one line: MOVE detail)")
+    s = sub.add_parser("prod-changes", help="reviewer: changed files that are not tests or docs (for the vacuum check)")
+    s.add_argument("--base", default="origin/main")
     sub.add_parser("review-queue", help="reviewer: which PR to review in this run")
     a = ap.parse_args(argv)
 
@@ -811,6 +820,11 @@ def main(argv: list[str] | None = None) -> int:
         print("\n".join([f"accepted: {x}" for x in acc] + [f"left for Aika: {x}" for x in rej]) or "nothing")
         return 0
 
+    if a.cmd == "prod-changes":
+        for c in changes_from_git(a.base):
+            if c.status != "removed" and is_production(c.path):
+                print(c.path)
+        return 0
     tasks = load_tasks()
     if a.cmd in ("plan", "review-queue"):
         if (ROOT / PAUSE).exists():

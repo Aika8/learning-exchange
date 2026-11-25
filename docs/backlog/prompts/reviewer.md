@@ -35,7 +35,13 @@ gh api repos/Aika8/learning-exchange/issues/<n>/comments      # earlier rounds, 
 git fetch origin <branch> && git diff origin/main...origin/<branch>
 ```
 
-Check out the branch and run the task's `verify` command yourself; compare with `expect`. Do not trust the PR
+Check out the branch and run the task's `verify` command yourself; compare with `expect`.
+
+Tests in a vacuum: if the PR changes production code (`python3 scripts/backlog/backlog.py prod-changes --base
+origin/main` lists those files; empty = a test-only task, skip this), put those files back to main
+(`git checkout origin/main -- <files>`), run the new tests, then restore the branch (`git checkout <head sha> -- .`).
+The new tests must **fail** without the change and **pass** with it. A new test green both ways pins nothing:
+answer "no" to question 3. Do not trust the PR
 description's claims; the diff and your own run are the evidence. (CI already ran `make test`; you need not repeat it.)
 
 ## 2. Judge with yes/no questions

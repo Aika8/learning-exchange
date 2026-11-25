@@ -275,6 +275,16 @@ if __name__ == "__main__":
     unittest.main()
 
 
+class ProductionFilesTest(unittest.TestCase):
+    def test_tests_and_docs_are_not_production(self):
+        for p in ["backend/engine/src/test/java/engine/X.java", "clients/mobile/test/a.test.mjs", "DECISIONS.md",
+                  "docs/backlog/tech-debt/x.md", "game3d/tests/unit/test_x.gd", "game3d/tools/test_check_data.py"]:
+            self.assertFalse(b.is_production(p), p)
+        for p in ["backend/engine/src/main/java/engine/OrderBook.java", "game3d/scripts/core/goals.gd",
+                  "clients/mobile/src/statement.ts", "api/openapi.yaml"]:
+            self.assertTrue(b.is_production(p), p)
+
+
 class DebtAndExperienceTest(unittest.TestCase):
     def test_task_may_add_but_not_change_debt_and_experience_files(self):
         tasks = b.parse_tasks(QUEUE)
