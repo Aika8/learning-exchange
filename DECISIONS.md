@@ -646,3 +646,8 @@ Build and CI
   a separate counter over submits only (same order, one more number to explain) or the book id (ids also go to market
   orders that never rest). A `Cancel` picks among live orders in this arrival order; its `pickIndex` is drawn from
   0..999 and taken modulo the live count.
+- LE-051: what `ReferenceBook.lastTrades()` returns and how it rejects bad input — chosen: the trades of the most
+  recent submit only (empty after a submit that traded nothing; a cancel leaves it unchanged), and qty ≤ 0 or limit
+  price ≤ 0 throw `IllegalArgumentException` before an id is taken, mirroring `Order.limit` / `Order.market` per the
+  increment 1 bullets. Not taken: an accumulating trade log (LE-008 would have to diff it) or silently ignoring bad
+  input (the engine throws, so the oracle must too).
