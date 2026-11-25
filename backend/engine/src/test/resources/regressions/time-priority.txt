@@ -1,0 +1,11 @@
+# Time priority: two sells rest at 100 (ids 1, 2), a better-priced sell rests
+# at 99 (id 3). The buy (id 4) takes 99 first, then 100 in arrival order: id 1
+# fully, then id 2 partly (3 left). Cancelling 2 removes that remainder; a new
+# sell at 100 (id 5) is then the only one a market buy (id 6) can reach.
+sell 4@100
+sell 5@100
+sell 2@99
+buy 8@100
+cancel 2
+sell 3@100
+buy 1
