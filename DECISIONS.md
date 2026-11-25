@@ -653,3 +653,8 @@ Build and CI
   line (breaks the line↔action match) or a comment line (the REPL has no comment syntax and would print an error).
   The test checks the lines against a regex copy of the REPL grammar, because engine tests cannot depend on
   `backend/repl`; not taken: moving the parser out of `Repl` into a shared place (outside the task's paths).
+- LE-051: what `ReferenceBook.lastTrades()` returns and how it rejects bad input — chosen: the trades of the most
+  recent submit only (empty after a submit that traded nothing; a cancel leaves it unchanged), and qty ≤ 0 or limit
+  price ≤ 0 throw `IllegalArgumentException` before an id is taken, mirroring `Order.limit` / `Order.market` per the
+  increment 1 bullets. Not taken: an accumulating trade log (LE-008 would have to diff it) or silently ignoring bad
+  input (the engine throws, so the oracle must too).
