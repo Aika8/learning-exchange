@@ -286,6 +286,12 @@ class ProductionFilesTest(unittest.TestCase):
 
 
 class DebtAndExperienceTest(unittest.TestCase):
+    def test_a_note_may_mention_a_skip_marker(self):
+        tasks = b.parse_tasks(QUEUE)
+        ok = b.check_paths("claude/le-001", [b.Change("added", "docs/backlog/tech-debt/2026-12-03-LE-001-1.md", None,
+                                                      "# A test uses @Disabled without a reason")], tasks)
+        self.assertEqual(ok, [])
+
     def test_task_may_add_but_not_change_debt_and_experience_files(self):
         tasks = b.parse_tasks(QUEUE)
         ok = b.check_paths("claude/le-001", [b.Change("added", "docs/backlog/tech-debt/2026-12-03-LE-001-1.md"),

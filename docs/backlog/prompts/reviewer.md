@@ -38,10 +38,12 @@ git fetch origin <branch> && git diff origin/main...origin/<branch>
 Check out the branch and run the task's `verify` command yourself; compare with `expect`.
 
 Tests in a vacuum: if the PR changes production code (`python3 scripts/backlog/backlog.py prod-changes --base
-origin/main` lists those files; empty = a test-only task, skip this), put those files back to main
-(`git checkout origin/main -- <files>`), run the new tests, then restore the branch (`git checkout <head sha> -- .`).
-The new tests must **fail** without the change and **pass** with it. A new test green both ways pins nothing:
-answer "no" to question 3. Do not trust the PR
+origin/main` lists those files; empty = a test-only task, skip this), put them back to main with
+`git restore --source origin/main --worktree -- <files>` (this also removes files the PR added), run the new tests,
+then restore the branch with `git checkout <head sha> -- .`. The new tests must **fail** without the change and
+**pass** with it. A new test green both ways pins nothing: answer "no" to question 3. If without the change the new
+tests do not even compile, that proves nothing: instead break one line of the new production code by hand, run the
+tests, see them fail, and restore. Do not trust the PR
 description's claims; the diff and your own run are the evidence. (CI already ran `make test`; you need not repeat it.)
 
 ## 2. Judge with yes/no questions
@@ -86,7 +88,10 @@ EOF
 gh api -X POST repos/Aika8/learning-exchange/issues/<n>/comments -F body=@/tmp/review.md
 ```
 
-- pass → `gh api -X POST repos/Aika8/learning-exchange/issues/<n>/labels -f "labels[]=review:pass"`
+- pass → `gh api -X POST repos/Aika8/learning-exchange/issues/<n>/labels -f "labels[]=review:pass"`. With a pass
+  there is no fix round to turn "Out of scope" findings into files, so open one issue per finding instead:
+  `gh api -X POST repos/Aika8/learning-exchange/issues -f title="[tech-debt] <one line>" -f body="<where, what,
+  why it matters, found while reviewing #<n>>" -f "labels[]=tech-debt"`.
 - fail → label `needs-fix` instead. If `fixes` is 2 or more (two fix rounds already used), label `parked`
   instead and write in the comment what Aika must decide.
 
