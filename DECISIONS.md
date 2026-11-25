@@ -638,3 +638,11 @@ Build and CI
 - The pinnace's hull (mesh `ship_pinnace_hull`) gets `Wayfarer._hull_after_effect`: a shader with the white bottom
   below model height 0.6 m toned to `#291c14` × the texture's lightness, roughness 0.9 there (ADR-0036 amendment 3).
   Harbour fps after it: the captain 117.6 / 1 % low 59.5; ship views 117.2–118.2 / lows 59.5–79.0.
+
+## Backlog run (December 2026)
+
+- LE-001: what "arrival index" of a live order means in `engine.model.Runner` — chosen: the 0-based index of the
+  action that submitted it (unique, increases with time, so it orders orders the way time priority does). Not taken:
+  a separate counter over submits only (same order, one more number to explain) or the book id (ids also go to market
+  orders that never rest). A `Cancel` picks among live orders in this arrival order; its `pickIndex` is drawn from
+  0..999 and taken modulo the live count.
