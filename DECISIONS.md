@@ -658,3 +658,9 @@ Build and CI
   price ≤ 0 throw `IllegalArgumentException` before an id is taken, mirroring `Order.limit` / `Order.market` per the
   increment 1 bullets. Not taken: an accumulating trade log (LE-008 would have to diff it) or silently ignoring bad
   input (the engine throws, so the oracle must too).
+- LE-009: what "the result of every cancel" covers when a `Cancel` action finds nothing resting (the Runner then
+  calls no cancel) — chosen: `DifferentialDepthTest` cancels the last assigned id on both books instead (a filled or
+  market order) and both must return false; this changes no state, so the depth comparison is unaffected. Not taken:
+  skipping those cancels (leaves "unknown / already filled" never compared) or changing `ActionGen` to emit stale ids
+  (would change the action streams of LE-001…008). The engine side is its own `OrderBook` fed the same actions, so
+  `bids(10)`/`asks(10)` are the book's own depth-10 view, not a cut of the Runner's full view.
