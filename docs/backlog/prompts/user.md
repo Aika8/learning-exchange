@@ -42,8 +42,14 @@ Choose two of these each day, a different pair from yesterday (look at the lates
 3. **The mobile app's words** — read `clients/mobile/src/i18n/ru.json` and `en.json` screen by screen in the order
    a newcomer meets them (`clients/mobile/src/app/`: login → home → instrument → …). Where does the copy assume
    knowledge? Where do ru and en say different things?
-4. **The web client in a headless browser** — if Playwright runs here (see `docs/backlog/reports/e2e-cloud.md`),
-   start the web client against 8091 and walk login → book → order; note what is confusing. If it cannot run, skip.
+4. **The web client and the mobile app, seen in a headless browser** (works here, checked 2026-11-25). Chrome is at
+   `$CHROME_PATH`; `playwright-core` comes with `cd clients/web && npm ci`. Web: `npm run dev &` in `clients/web`
+   (port 5173, with the exchange on 8091: `VITE_API_URL=http://localhost:8091`). Mobile: `cd clients/mobile && npm ci &&
+   npx expo export --platform web --output-dir /tmp/expo-web`, then `python3 -m http.server 8099 -d /tmp/expo-web &`.
+   Take screenshots with a few lines of Node (`chromium.launch({ executablePath: process.env.CHROME_PATH })`,
+   `page.screenshot`), open them with the Read tool and judge them as a newcomer: what do I see first, what do I
+   tap, is the next step obvious? Walk login → home → one instrument → an order. Stop every server you started.
+   You judge clarity of words and flow, not the visual design (that is Aika's).
 5. **The game's teaching texts** — read `game3d/i18n/talk.csv` and `game3d/data/talks.json` for one island as a
    newcomer: does each talk teach one idea clearly? Is anything said as advice ("buy this")? You judge the words
    only — never the look; there is no screen here.
