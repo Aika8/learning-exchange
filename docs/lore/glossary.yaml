@@ -158,3 +158,19 @@ terms:
     real: { ru: "Проскальзывание", en: "Slippage" }
     lore: { ru: "Снос якоря", en: "Anchor drag" }
     definition: { ru: "Разница между ценой стопа и ценой, по которой сделка прошла на самом деле.", en: "The difference between the stop price and the price the trade actually got." }
+  - id: trailing-take-profit
+    real: { ru: "Трейлинг тейк-профит", en: "Trailing take-profit" }
+    lore: { ru: "Попутный парус", en: "the Fair-wind sail" }
+    definition: { ru: "Уровень выхода, который идёт за ценой на заданном расстоянии и закрывает позицию, когда цена разворачивается.", en: "An exit level that follows the price at a set distance and closes the position when the price turns back." }
+  - id: atr
+    real: { ru: "ATR (средний истинный диапазон)", en: "ATR (average true range)" }
+    lore: { ru: "Высота волны", en: "Wave height" }
+    definition: { ru: "Средний дневной размах цены за последние дни; мера колебаний, а не направления.", en: "The average daily price range over recent days; a measure of swings, not of direction." }
+  - id: fund-ter
+    real: { ru: "Комиссия фонда (TER)", en: "Fund expense ratio (TER)" }
+    lore: { ru: "Плата за ведение фонда", en: "Fund keeping fee" }
+    definition: { ru: "Доля от стоимости фонда, которую за год забирают на его ведение; вычитается из стоимости пая.", en: "The share of a fund's value taken each year to run it; it comes out of the unit's value." }
+  - id: price-level
+    real: { ru: "Ценовой уровень", en: "Price level" }
+    lore: { ru: "Ступень", en: "a Rung" }
+    definition: { ru: "Одна цена в стакане и все заявки, которые ждут на ней.", en: "One price in the order book and all the orders waiting at it." }
