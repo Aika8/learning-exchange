@@ -142,6 +142,46 @@ class TradingMistakesSecondBatchTest {
     }
 
     @Test
+    void b4SnapshotsOutsideTheSessionDoNotCountTowardItsMedian() {
+        quote(FROM - 3 * MIN, 9_900, 10_100);   // 200, before the session
+        quote(FROM - 2 * MIN, 9_900, 10_100);   // 200
+        quote(FROM - MIN, 9_900, 10_100);       // 200
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_990, 10_010);   // 20
+        quote(FROM + 3 * MIN, 9_990, 10_010);   // 20: the session's median
+        quote(FROM + 4 * MIN, 9_970, 10_030);   // 60: three times 20, a third of the out-of-session 200
+        buy(FROM + 4 * MIN + 1, 5, 10_030);
+        quote(TO, 9_900, 10_100);               // 200, at the session's end: outside [from, to)
+        quote(TO + MIN, 9_900, 10_100);         // 200, after the session
+
+        assertEquals(List.of(new Mistake(B4_WIDE_SPREAD, SILK, FROM + 4 * MIN + 1,
+                "spread=60 median=20 quotedAt=" + (FROM + 4 * MIN))), find(B4_WIDE_SPREAD));
+    }
+
+    @Test
+    void b4AOneSidedSnapshotIsIgnored() {
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_990, 10_010);   // 20
+        quote(FROM + 3 * MIN, 9_990, 10_010);   // 20: the last two-sided book before the entry
+        quote(FROM + 4 * MIN, 0, 10_010);       // no bid: not a spread of 10 010
+        buy(FROM + 4 * MIN + 1, 5, 10_010);
+
+        assertEquals(List.of(), find(B4_WIDE_SPREAD));
+    }
+
+    @Test
+    void b4ASnapshotTakenAtTheEntrysOwnTimeIsTheOneSeen() {
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_990, 10_010);   // 20
+        quote(FROM + 3 * MIN, 9_990, 10_010);   // 20
+        quote(FROM + 4 * MIN, 9_970, 10_030);   // 60, at the same millisecond as the entry
+        buy(FROM + 4 * MIN, 5, 10_030);
+
+        assertEquals(List.of(new Mistake(B4_WIDE_SPREAD, SILK, FROM + 4 * MIN,
+                "spread=60 median=20 quotedAt=" + (FROM + 4 * MIN))), find(B4_WIDE_SPREAD));
+    }
+
+    @Test
     void b4WithoutSnapshotsTheOldSignatureFindsNothing() {
         quote(FROM + MIN, 9_990, 10_010);
         quote(FROM + 2 * MIN, 9_990, 10_010);
