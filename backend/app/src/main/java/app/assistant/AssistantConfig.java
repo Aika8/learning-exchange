@@ -1,5 +1,6 @@
 package app.assistant;
 
+import app.bff.Catalogue;
 import application.TradingService;
 import application.assistant.AdviceGuard;
 import application.assistant.Assistant;
@@ -16,7 +17,7 @@ import tools.jackson.databind.json.JsonMapper;
 
 /**
  * Wires the assistant (ADR-0013): Claude when {@code ANTHROPIC_API_KEY} is set in the environment, the template
- * otherwise; always behind the fallback and the advice guard. Model and URL come from {@code assistant.*} properties.
+ * otherwise (with the glossary for «what is X?», LE-097); always behind the fallback and the advice guard. Model and URL come from {@code assistant.*} properties.
  *
  * <p>Pattern: Factory — the choice of adapter is made once, here.
  */
@@ -30,7 +31,8 @@ public class AssistantConfig {
                         @Value("${assistant.base-url:https://api.anthropic.com}") String baseUrl,
                         @Value("${assistant.max-tokens:400}") int maxTokens,
                         @Value("${assistant.use-key:true}") boolean useKey,
-                        JsonMapper json) {
+                        JsonMapper json,
+                        Catalogue catalogue) {
         String key = System.getenv("ANTHROPIC_API_KEY");
         Assistant primary = null;
         if (useKey && key != null && !key.isBlank()) {
@@ -39,7 +41,7 @@ public class AssistantConfig {
         } else {
             log.info("assistant: template only (no ANTHROPIC_API_KEY)");
         }
-        return new FallbackAssistant(primary, new TemplateAssistant(), new AdviceGuard());
+        return new FallbackAssistant(primary, new TemplateAssistant(new CatalogueGlossary(catalogue)), new AdviceGuard());
     }
 
     @Bean
