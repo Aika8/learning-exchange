@@ -302,7 +302,7 @@ Place: Spark Harbour, a timber wharf on a flying island: planks, bollards, rope 
 
 **Panel 1** — `game3d/art/comic/stroll_sailor3/1-1.jpg` — left, 3:4 (≈599×752), shot `two`
 
-- sailor3 (neutral): «Forty years I have walked past the Gap. Between the best bid and the best ask lies the spread.»
+- sailor3 (neutral): «Forty years I have walked past the Chasm. Between the best bid and the best ask lies the spread.»
 - attach: `06-comic-style.jpg`, `11-faces-old-sailor.jpg`, `02-sailors.jpg`, `07-faces-captain.jpg`, `01-captain.jpg`, `24-spark-harbour.jpg`, `25-props.jpg`
 
 ```text
@@ -311,7 +311,7 @@ Comic book panel in the style of the attached sheet 06-comic-style: confident bl
 
 **Panel 2** — `game3d/art/comic/stroll_sailor3/1-2.jpg` — right, 3:4 (≈599×752), shot `close`
 
-- sailor3 (sly): «The wider the Gap, the dearer the jump. A market order pays all of it.»
+- sailor3 (sly): «The wider the Chasm, the dearer the jump. A market order pays all of it.»
 - attach: `06-comic-style.jpg`, `11-faces-old-sailor.jpg`, `02-sailors.jpg`, `24-spark-harbour.jpg`, `25-props.jpg`
 
 ```text

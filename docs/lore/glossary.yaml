@@ -8,7 +8,7 @@ terms:
     definition: { ru: "Все лимитные заявки на покупку и продажу по ценам.", en: "All resting buy and sell limit orders by price." }
   - id: spread
     real: { ru: "Спред", en: "Spread" }
-    lore: { ru: "Пропасть", en: "the Gap" }
+    lore: { ru: "Пропасть", en: "the Chasm" }
     definition: { ru: "Разница между лучшей ценой продажи и лучшей ценой покупки.", en: "The difference between the best ask and the best bid." }
   - id: limit-order
     real: { ru: "Лимитная заявка", en: "Limit order" }
@@ -16,7 +16,7 @@ terms:
     definition: { ru: "Купить или продать не хуже указанной цены; может ждать в стакане.", en: "Buy or sell at the given price or better; may wait in the book." }
   - id: market-order
     real: { ru: "Рыночная заявка", en: "Market order" }
-    lore: { ru: "Прыжок через Пропасть", en: "Jump the Gap" }
+    lore: { ru: "Прыжок через Пропасть", en: "Leap over the Chasm" }
     definition: { ru: "Исполняется сразу по лучшим доступным ценам.", en: "Fills at once at the best prices available." }
   - id: fee
     real: { ru: "Комиссия", en: "Fee" }
