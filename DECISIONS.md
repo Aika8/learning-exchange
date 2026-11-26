@@ -704,3 +704,13 @@ Build and CI
   kind); resting limit sells do not count. Margin positions are ignored. `detail` is key=value numbers, not copy —
   the wording is Aika's (LE-058). Not taken: notional size (needs a price for market orders), a per-order realised
   profit of our own (would duplicate the statement's average cost).
+- LE-057: B1, B4 in `application.review.TradingMistakes` (constants with a reason in the class). B1: an entry whose
+  last market trade price *before* the order is at least `RISE_BPS` = 500 (5%) above the instrument's first trade in
+  the session (a move the buyer makes with their own sweep does not count). B4: book snapshots are not in the journal,
+  so a new overload `find(…, List<Quote> quotes)` takes them (`Quote(ts, instrument, bid, ask)`, a plain record, no API
+  change); the old signature passes none and finds no B4. Flagged when the last snapshot at or before the entry has a
+  spread of at least `SPREAD_FACTOR` = 3× the session's lower median spread, needing `MIN_QUOTES` = 3 snapshots in the
+  session. **B5 is skipped**: the simulation has no pre-open phase — markets trade continuously and the only "open"
+  is the reopening after an `EARNINGS_NIGHT` halt, during which orders are refused, so no price can rise "before the
+  open". Not taken: rebuilding the book from the journal (would duplicate the engine's matching rules); treating the
+  halt reopen as the open (no prices exist inside the halt). B5 waits for a market-hours/phases decision (intent 03).
