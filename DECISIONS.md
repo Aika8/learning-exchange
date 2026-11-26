@@ -690,3 +690,17 @@ Build and CI
   Port; every state has an edge back to Port) → SAIL_OR_STAY with action PORT; FLOW_NO_SAME (nothing to remove) →
   EXPLORE. An unknown key → EXPLORE plus push_error, like `next()`. Not taken: a new goal id such as RETURN_TO_PORT
   (needs new hint copy, which is Aika's), or a `state` argument (the task gives the signature). All in `goals.gd`.
+- LE-056: thresholds and meanings in `application.review.TradingMistakes` (constants with a reason in the class).
+  Revenge/size window `AFTER_LOSS_WINDOW` = 5 sim minutes (300 000 ms of simulation time, read literally from the
+  task) — note that with the default `exchange.savings.day-millis=60000` that is 5 bank days, so Aika may want it as a
+  fraction of a bank day instead; B8 size factor 2× the lower median of the person's earlier own BUY orders **in the
+  same instrument** (qty, since market orders have no price), needing at least 3 earlier orders; B2 window 2 bank days
+  (`dayMillis` argument) before the `reportAt` of the latest `ConsensusPublished` (the journalled calendar entry, so
+  the schedule generator is not re-run). An "entry" is an own spot BUY order with at least one fill, not one a
+  conditional generated; a "closed loss" is a spot SELL fill whose statement line has negative realised profit
+  (average cost and fees from `StatementProjection`, not a second rule); B8 counts a loss in any instrument, B10 only
+  in the same one. B6: a BUY fill while the held quantity is worth less than its cost at that fill's price. B7: a
+  position entered in the session, still held at its end, and not fully covered by waiting SELL conditionals (any
+  kind); resting limit sells do not count. Margin positions are ignored. `detail` is key=value numbers, not copy —
+  the wording is Aika's (LE-058). Not taken: notional size (needs a price for market orders), a per-order realised
+  profit of our own (would duplicate the statement's average cost).
