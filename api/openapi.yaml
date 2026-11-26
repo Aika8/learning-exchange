@@ -623,7 +623,8 @@ paths:
         Every order I placed in the period, with its journal note when I wrote one. Result of an order = what its
         fills earned against the last price (or against the price I later sold/bought back at), fees included; R =
         result / planned risk when the note gives the risk. Grouped by mood and by market state, so the review can
-        show "my FOMO trades lost 1.4 R on average". Not advice: it describes what happened.
+        show "my FOMO trades lost 1.4 R on average". `mistakes` lists the field guide's trading mistakes (table B) found
+        in the period. Not advice: it describes what happened.
       parameters:
         - name: from
           in: query
@@ -1404,7 +1405,7 @@ components:
         avgRx100: { type: [integer, 'null'], format: int64, description: 'Average R × 100 of the orders with a planned risk' }
     SessionReview:
       type: object
-      required: [from, to, currency, entries, byMood, byMarketState, orders, annotated, wins, result]
+      required: [from, to, currency, entries, byMood, byMarketState, orders, annotated, wins, result, mistakes]
       properties:
         from: { type: integer, format: int64 }
         to: { type: integer, format: int64 }
@@ -1417,6 +1418,21 @@ components:
         wins: { type: integer }
         result: { type: integer, format: int64 }
         expectancyRx100: { type: [integer, 'null'], format: int64, description: 'Average R × 100 over the orders with a planned risk' }
+        mistakes:
+          type: array
+          description: Trading mistakes found in the period (field guide, table B), in time order. Names what happened; not advice.
+          items: { $ref: '#/components/schemas/ReviewMistake' }
+    ReviewMistake:
+      type: object
+      required: [code, instrument, at, detail]
+      properties:
+        code:
+          type: string
+          enum: [B1_CHASING_A_MOVE, B2_BEFORE_REPORT, B4_WIDE_SPREAD, B6_AVERAGING_DOWN, B7_NO_EXIT_PLAN, B8_SIZE_AFTER_LOSS, B10_REVENGE]
+          description: Row of the field guide's table B; the client words it
+        instrument: { type: string }
+        at: { type: integer, format: int64, description: 'Simulation time (ms) it happened; B7: the end of the period' }
+        detail: { type: string, description: 'The numbers behind it, key=value separated by spaces (minor units, qty, bps, ms); not display text' }
     AssistantQuestion:
       type: object
       required: [question]
