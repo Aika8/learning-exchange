@@ -672,3 +672,10 @@ Build and CI
   (unreadable, and not pasteable into `make repl`), or reusing `DifferentialTest.compare` (private and fails through
   `fail()`; changing an existing test is outside the task's rules) — so for now the trade comparison lives in two
   places, see `docs/backlog/tech-debt/2026-11-25-LE-010-1.md`.
+- LE-052 — `Goals.place` ids: the spots of Spark Harbour already exist (`harbour.gd` `HARBOUR_SPOTS`), so goals use
+  them instead of the fallback names: `provisions` (not `market`), `exchange` for the Ladder and the Anchor (both are
+  in the exchange hall, not `ladder`), `ship` (not `pier`), `mara`, `chronicler`, and `ferry` for EXPLORE. Choices
+  the task left open: in PORT after trading today the goal is READ_CHRONICLE (staying is the choice of not sailing);
+  in SAILING the goal is SAIL_OR_STAY leading back to PORT; from day 2 without a trade the port goal is EXPLORE
+  (no action) and TRADING without a trade offers SAIL_OR_STAY instead of FIRST_ORDER. Not taken: a new context fact
+  for "met Mara" or "sailed today" (GameFlow does not carry them). All cheap to change in `goals.gd`.
