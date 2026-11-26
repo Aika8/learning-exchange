@@ -749,6 +749,12 @@ Build and CI
   and why …» and «what does spread mean» find «spread»; matching a name (incl. Russian word forms) is the adapter's
   job. Options not taken: append the numbers after a definition; match terms anywhere in the question. «решено без
   Айки — отменяется так: правьте `TemplateAssistant.answer`/`define` и `TemplateDefinitionTest`.»
+- LE-097: the app's glossary adapter `app.assistant.CatalogueGlossary` matches a term by its whole name only (real or
+  lore, ru or en), compared lower-case, with punctuation and hyphens as spaces, «ё» as «е» and no leading a/an/the
+  («stop loss» = «Stop-loss», «the Chasm» = «chasm»); a bracket in a name is optional («налог на доход» finds «Налог
+  на доход (ИПН 10%)»). Russian word forms («спреда», «плечом») are not matched yet — they get «I don't know that
+  word». Options not taken: stemming or prefix matching (false hits like «стоп» → «стоп-лосс»). «решено без Айки —
+  отменяется так: правьте `CatalogueGlossary.key` и конструктор.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
