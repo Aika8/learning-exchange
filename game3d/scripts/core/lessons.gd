@@ -115,3 +115,32 @@ static func spread(bid: int, ask: int) -> Dictionary:
 	var mid := (bid + ask) / 2
 	@warning_ignore("integer_division")
 	return {"abs": ask - bid, "bps": (ask - bid) * 10000 / mid}
+
+
+# --- Losses compound too (field guide A13) ----------------------------------------------------------------------
+
+## A series of moves applied to the running balance: each move of `moves_bps` (−1000 = −10%) is one round trip, and
+## `fee_bps` is charged on the balance after it. The result is the product of multipliers, not the sum of the moves:
+## −10% then +10% leaves less than the start. Every step rounds down (integer division of non-negative numbers), so
+## the result never flatters the trader. A move of −100% or worse empties the balance; it stays at 0.
+static func series_after(start: int, moves_bps: Array, fee_bps: int) -> int:
+	var v := maxi(start, 0)
+	for m in moves_bps:
+		var mult := maxi(10000 + int(m), 0)
+		@warning_ignore("integer_division")
+		v = v * mult / 10000
+		@warning_ignore("integer_division")
+		v = v * maxi(10000 - fee_bps, 0) / 10000
+	return v
+
+
+## The gain in bps that brings a loss of `loss_bps` back to the start: loss / (1 − loss). −10% needs +11.11%
+## (1111), −50% needs +100% (10000). Rounds down, so the answer is at most 1 bp short of the exact gain.
+## A loss of 100% or more cannot be recovered: returns -1. No loss (≤ 0) needs no gain: returns 0.
+static func needed_to_recover_bps(loss_bps: int) -> int:
+	if loss_bps <= 0:
+		return 0
+	if loss_bps >= 10000:
+		return -1
+	@warning_ignore("integer_division")
+	return loss_bps * 10000 / (10000 - loss_bps)
