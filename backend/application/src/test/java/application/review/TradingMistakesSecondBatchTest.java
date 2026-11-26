@@ -101,13 +101,42 @@ class TradingMistakesSecondBatchTest {
     }
 
     @Test
-    void b4UsualSpreadOrTooFewSnapshotsIsNoFinding() {
-        quote(FROM + MIN, 9_990, 10_010);
-        quote(FROM + 2 * MIN, 9_980, 10_020);
-        buy(FROM + 2 * MIN + 1, 5, 10_020); // only two snapshots: no usual spread yet
-        quote(FROM + 3 * MIN, 9_990, 10_010);
-        quote(FROM + 4 * MIN, 9_975, 10_025); // 50 < 3 × 20
-        buy(FROM + 4 * MIN + 1, 5, 10_025);
+    void b4UsualSpreadIsNoFinding() {
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_990, 10_010);   // 20
+        quote(FROM + 3 * MIN, 9_975, 10_025);   // 50 < 3 × 20
+        buy(FROM + 3 * MIN + 1, 5, 10_025);
+
+        assertEquals(List.of(), find(B4_WIDE_SPREAD));
+    }
+
+    @Test
+    void b4TwoSnapshotsAreTooFewForAUsualSpread() {
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_970, 10_030);   // 60: three times 20, but two snapshots give no session median
+        buy(FROM + 2 * MIN + 1, 5, 10_030);
+
+        assertEquals(List.of(), find(B4_WIDE_SPREAD));
+    }
+
+    @Test
+    void b4AThirdSnapshotMakesTheSameEntryAFinding() {
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_970, 10_030);   // 60
+        buy(FROM + 2 * MIN + 1, 5, 10_030);
+        quote(FROM + 3 * MIN, 9_990, 10_010);   // 20: now the session's median is 20
+
+        assertEquals(List.of(new Mistake(B4_WIDE_SPREAD, SILK, FROM + 2 * MIN + 1,
+                "spread=60 median=20 quotedAt=" + (FROM + 2 * MIN))), find(B4_WIDE_SPREAD));
+    }
+
+    @Test
+    void b4AWideSpreadOnlyAfterTheEntryIsNoFinding() {
+        quote(FROM + MIN, 9_990, 10_010);       // 20
+        quote(FROM + 2 * MIN, 9_990, 10_010);   // 20
+        quote(FROM + 3 * MIN, 9_990, 10_010);   // 20: what the buyer saw
+        buy(FROM + 3 * MIN + 1, 5, 10_010);
+        quote(FROM + 4 * MIN, 9_900, 10_100);   // 200, but only after the entry
 
         assertEquals(List.of(), find(B4_WIDE_SPREAD));
     }
