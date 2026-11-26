@@ -704,3 +704,44 @@ Build and CI
   kind); resting limit sells do not count. Margin positions are ignored. `detail` is key=value numbers, not copy —
   the wording is Aika's (LE-058). Not taken: notional size (needs a price for market orders), a per-order realised
   profit of our own (would duplicate the statement's average cost).
+
+## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
+
+- Intent 01 amended: agents may change `backend/engine` and add tests (Aika: «нет пускай движок тоже правит»), with
+  the old tests and the invariants only added to and every fix shipped with a test that failed before it. LE-090
+  is therefore done by hand.
+- Nothing in the queue waits for Aika (Aika: «меня ничего не должно ждать»). A question gets the author's
+  recommendation or the easiest-to-undo option, logged here; how `game3d` looks and anything that needs money,
+  keys or outside accounts is not queued at all (`docs/backlog/AFTER-HOLIDAY.md`).
+- Questions of the queue-writing agents, decided without Aika on 2026-11-26 by their authors' recommendations
+  (each «решено без Айки — отменяется» as written):
+  - Lore names for the field guide's glossary terms and evidence labels: agents draft them from the world bible's
+    sea vocabulary (LE-315, LE-316); undo — one YAML line each.
+  - "One bet per theme": the company is the theme, measured through funds (LE-306); no `sector` field yet.
+  - The field guide's measurements reach `/session-review` as a `measures` block, contract first (LE-399).
+  - Checks before entry: API only for now (LE-302); no client shows them yet.
+  - "Approved" leaves the game's words: Mara writes the plan down (LE-390).
+  - Dawn liquidity: bots quote wider and thinner at the start of the sim day, ADR first (LE-400, LE-401).
+  - Trailing stop and time stop stay glossary terms, not new order kinds.
+  - ArchUnit keeps `application.review` pure (LE-402).
+  - Journal: a torn last line is cut off and kept aside on start, ADR first (LE-397, LE-398).
+  - AdviceGuard: "hold X" about an instrument is advice too (LE-163, LE-164).
+  - Mutation threshold files are named after their task (`le-1NN.txt`); the helper reads every file (LE-017 note).
+  - Engine: a valid account id is one rule in `Exchange.openAccount` (LE-394); one holders helper for coupons and
+    dividends (LE-395); reopening a redeemed bond is ignored (LE-396).
+  - Web default language for an unknown device language is ru (LE-391); the mobile book's spread uses
+    `spreadInfo` (LE-392); the two mobile bps helpers stay, pinned to agree (LE-393).
+  - ATR stop distance rounds down on mobile and up on web: kept as is and documented here, because the mobile rule
+    is pinned by an old test (`clients/mobile/test/finance.test.mjs:43`) and old tests are only added to.
+  - Account nudges: mobile and web keep their own refetch rules.
+  - Screenshot checks run in the cloud and by hand, not in CI (they would need a `Makefile` target and a CI job).
+  - Maven Central 429 in the cloud: the executor and reviewer retry Gradle up to three times (prompts); no mirror.
+  - The three copies of the engine-vs-reference walk in old tests stay (they are frozen).
+  - Journal growth: nothing until LE-354 measures it.
+  - M4 quests: as Chronicler answers for now (LE-352, LE-378, LE-379); quest cards are Aika's after the holiday.
+  - The dev server's network interface: unchanged (it changes how the phone reaches the laptop) — after the holiday.
+  - Resting orders at an ex-date stay as they are.
+  - Goals in the running game, the chronicle scene calling `/session-review`, an Anchor set away from Spark Harbour:
+    they need `game3d/scripts/*.gd` outside `core/`, which the gate keeps for Aika — after the holiday.
+  - Amber Cliff has no paid job yet: goal texts say "a day without trading" and never promise pay. Day 1 sends a
+    player who sailed off without provisions home first. Island goal chains in LE-202 are drafts.

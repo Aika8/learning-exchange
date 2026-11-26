@@ -87,16 +87,21 @@ Aika is away and answers nothing. When a run meets a question the task and the f
 
 1. **Look for the answer first**: the task, `docs/backlog/QUESTIONS-BEFORE-LEAVE.md` (Aika's answers), the intents,
    ADRs, `DECISIONS.md`, `docs/design/README.md`.
-2. **Cheap to undo → decide and go on.** Take the option that is easiest to undo later (smaller change, behind a
-   name that is easy to find, no new dependency, no new public contract). Write it in `DECISIONS.md` under the
+2. **Decide and go on — nothing waits for Aika** (her words, 2026-11-26: «меня ничего не должно ждать»). Take the
+   recommendation of whoever wrote the task or the question; without one, the option that is easiest to undo
+   (smaller change, behind a name that is easy to find, no new dependency). Write it in `DECISIONS.md` under the
    heading `## Backlog run (December 2026)` as one bullet: the task id, the question, the choice, the options not
-   taken and why — so Aika can reverse it in a minute.
-3. **Costly to undo → park.** Costly means any of: a new or changed public contract (`api/*.yaml`) not asked for by
-   the task; a new runtime dependency; a database/journal format change; anything an ADR would be needed for
-   (CLAUDE.md: costly-to-reverse decisions get an ADR first); deleting or renaming public things; lore, look or
-   copy of the game; money rules. Then do not do it: comment the question with 2–3 options and a recommendation on
-   the PR (or open an issue titled `[parked] <task id>: <question>` with the label `parked` when there is no PR),
-   and stop. The next run takes the next task.
+   taken, and «решено без Айки — отменяется так: …».
+3. **Costly to undo → still decide, but leave a trail.** A new or changed public contract, a new runtime dependency,
+   a journal format change, anything an ADR is needed for: write the ADR first as `Proposed` (CLAUDE.md), name the
+   decision in the PR's first line, then implement. Lore names and game copy are drafts marked in `DECISIONS.md`.
+4. **Not done at all, and not parked either** — skip the task with a one-line `report-stop --kind refused`: anything
+   that changes how `game3d` looks (Aika judges it by eye against her sheets), anything that needs money, keys,
+   sign-ups or outside accounts. Park only for technical reasons (repeated failure, broken environment, budget).
+
+The engine (`backend/engine`) may be changed (Aika, 2026-11-26), on the same terms as all code: existing tests and the
+invariants of intents 01/02 are only added to; every engine fix comes with a test that failed before it; the engine
+stays framework-free and deterministic; money stays integer minor units.
 
 Never: ask in the chat and wait (nobody answers), weaken or delete a test to get green, touch a protected path,
 spend money, sign up anywhere, use a real brand or real credentials, give investment advice.

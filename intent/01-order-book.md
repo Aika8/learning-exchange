@@ -16,9 +16,12 @@ price. Deterministic, single-threaded, no persistence, no API.
 None yet. Consumers later: account/positions, bots, REST, assistant.
 
 ## Constraints
-Java 25, Gradle, JUnit 5. Package `engine` and its tests are written by
-Aika; the agent does not create or edit them. In-memory only by design
-(journal comes in the next increment).
+Java 25, Gradle, JUnit 5. Package `engine` was written by Aika. Since
+2026-11-26 (her decision for the cloud backlog run) agents may change the
+engine's code and add tests, on these terms: existing tests and the invariants
+below are only added to, never weakened; every fix comes with a test that
+failed before it; the engine stays framework-free and deterministic. In-memory
+only by design (journal comes in the next increment).
 
 ## Out of scope
 Accounts, positions, money, bots, REST, persistence, multiple instruments,
