@@ -770,6 +770,12 @@ Build and CI
   (part of `npm test`) rejects `node:fs`; adding `@types/node` is outside the task's paths. Options not taken: add
   `@types/node`; inline the code list in the test (would not notice a new constant). «решено без Айки — отменяется
   так: правьте значения `errors.*` в `clients/web/src/i18n/{ru,en}.json`.»
+- LE-088: four glossary terms (`trailing-take-profit`, `atr`, `fund-ter`, `price-level`). Real terms and ru lore
+  names are the world bible §6 table, first letter capitalised like the neighbouring entries. English lore names are
+  lore drafts, Aika reviews: «the Fair-wind sail» (Попутный парус), «Wave height» (высота волны), «Fund keeping fee»
+  (плата за ведение фонда), «a Rung» (ступень — the game's own word, `FORM_LIMIT_LORE` «step onto a rung»). The
+  definitions are drafts too. Options not taken: leave English lore names empty (the six-strings test forbids it);
+  invent new lore words. «решено без Айки — отменяется так: правьте эти четыре записи в `docs/lore/glossary.yaml`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
