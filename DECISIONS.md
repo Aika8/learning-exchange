@@ -763,6 +763,13 @@ Build and CI
   sits in the screen (no hook in `hooks.ts`, outside the task's paths). Options not taken: search definitions in both
   languages; show the example line from the account history. «решено без Айки — отменяется так: правьте
   `glossaryRows` и `clients/mobile/test/glossary.test.mjs`.»
+- LE-099: web refusal messages, copy draft, Aika reviews. The mobile twin (AUTO-20261125-5) was not merged yet, so
+  the four new `errors` keys and the new `INSUFFICIENT_FUNDS` text are taken word for word from the proposal
+  (`docs/backlog/proposals/2026-11-25-user.md`, mobile item) — mobile should copy the same sentences. The test reads
+  `Rejection.java` through Vite's `?raw` import instead of `node:fs`: the web client has no Node typings and `tsc -b`
+  (part of `npm test`) rejects `node:fs`; adding `@types/node` is outside the task's paths. Options not taken: add
+  `@types/node`; inline the code list in the test (would not notice a new constant). «решено без Айки — отменяется
+  так: правьте значения `errors.*` в `clients/web/src/i18n/{ru,en}.json`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
