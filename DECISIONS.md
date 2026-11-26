@@ -740,6 +740,15 @@ Build and CI
   `docs/design/comic-script.md` regenerated with `game3d/tools/comic_script.py`. «решено без Айки — отменяется так:
   верните шесть ячеек в `game3d/i18n/strings.csv` и `talk.csv`, перегенерируйте comic-script и удалите
   `test_flow_way_back.gd`.»
+- LE-096: assistant copy draft, Aika reviews. A term question («что такое / what is …») with a known term answers
+  only «real name — definition» (Chronicler: «lore name (real name) — definition»), without the numbers; an unknown
+  word says «Этого слова я пока не знаю — вот ваши цифры.» / «I don't know that word yet — here are your numbers.»
+  and then the usual answer. The no-argument `TemplateAssistant()` keeps the old behaviour (no «unknown word» line),
+  so LE-089's tests and the app stay as they were until LE-097. The template passes the port the phrase after the
+  question words (lower-case, no punctuation, no leading a/an/the) and tries its first 4, 3, 2, 1 words, so «spread
+  and why …» and «what does spread mean» find «spread»; matching a name (incl. Russian word forms) is the adapter's
+  job. Options not taken: append the numbers after a definition; match terms anywhere in the question. «решено без
+  Айки — отменяется так: правьте `TemplateAssistant.answer`/`define` и `TemplateDefinitionTest`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 

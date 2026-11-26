@@ -1,8 +1,12 @@
 package application.assistant;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * The assistant without a key: picks a topic by keywords and fills fixed ru/en sentences with the computed facts.
@@ -15,6 +19,29 @@ public final class TemplateAssistant implements Assistant {
 
     enum Topic { EXPECTATIONS, COSTS, GAME, SUMMARY }
 
+    /** «What is X?» in ru and en; group 1 is what follows the question words. */
+    private static final Pattern TERM_QUESTION = Pattern.compile(
+            "(?s).*?(?:что такое|что значит|что означает|объясни|what is|what's|what does|explain|meaning of)\\s+(.*)");
+
+    /** The longest phrase (in words) tried as a term name; the glossary's longest names have four words. */
+    private static final int MAX_TERM_WORDS = 4;
+
+    private final GlossaryTerms glossary;
+    /** False for the old constructor: a term question then gets the usual answer, with no «I don't know that word». */
+    private final boolean hasGlossary;
+
+    /** Without a glossary: term questions get the usual answer from the numbers, as before LE-096. */
+    public TemplateAssistant() {
+        this.glossary = GlossaryTerms.empty();
+        this.hasGlossary = false;
+    }
+
+    /** With a glossary: «what is X?» answers with X's name and definition, or says the word is unknown. */
+    public TemplateAssistant(GlossaryTerms glossary) {
+        this.glossary = glossary == null ? GlossaryTerms.empty() : glossary;
+        this.hasGlossary = glossary != null;
+    }
+
     @Override
     public Answer answer(Question q, Facts f) {
         boolean en = q.english();
@@ -23,6 +50,18 @@ public final class TemplateAssistant implements Assistant {
             parts.add(en ? "I don't say what to buy or sell. Here is what your own numbers show."
                     : "Я не говорю, что покупать или продавать. Вот что показывают ваши собственные цифры.");
         }
+        Optional<String> asked = termAsked(q.text());
+        if (asked.isPresent()) {
+            Optional<GlossaryTerms.Term> term = lookUp(asked.get(), q.lang());
+            if (term.isPresent()) {
+                parts.add(define(term.get(), q.persona()));
+                return new Answer(String.join(" ", parts), Source.TEMPLATE, null, Assistant.disclaimer(q.lang()), false, f.facts());
+            }
+            if (hasGlossary) {
+                parts.add(en ? "I don't know that word yet — here are your numbers."
+                        : "Этого слова я пока не знаю — вот ваши цифры.");
+            }
+        }
         switch (topic(q, f)) {
             case EXPECTATIONS -> expectations(f, en, parts);
             case COSTS -> costs(f, en, parts);
@@ -30,6 +69,41 @@ public final class TemplateAssistant implements Assistant {
             case SUMMARY -> summary(f, en, parts);
         }
         return new Answer(String.join(" ", parts), Source.TEMPLATE, null, Assistant.disclaimer(q.lang()), false, f.facts());
+    }
+
+    /** The phrase after «что такое» / «what is» etc., lower-cased; empty when the question is not about a term. */
+    static Optional<String> termAsked(String text) {
+        if (text == null) {
+            return Optional.empty();
+        }
+        Matcher m = TERM_QUESTION.matcher(text.toLowerCase(Locale.ROOT));
+        if (!m.matches()) {
+            return Optional.empty();
+        }
+        String rest = m.group(1).replaceAll("[^\\p{L}\\p{N}\\s-]", " ").trim().replaceAll("\\s+", " ");
+        rest = rest.replaceFirst("^(a|an|the)\\s+", "");
+        return rest.isEmpty() ? Optional.empty() : Optional.of(rest);
+    }
+
+    /**
+     * Tries the asked phrase from its longest start to its first word, so «спред и почему я теряю деньги» and
+     * «what does spread mean» still find «спред» / «spread», and «stop loss order» finds «stop loss».
+     */
+    private Optional<GlossaryTerms.Term> lookUp(String asked, String lang) {
+        String[] words = asked.split(" ");
+        for (int n = Math.min(words.length, MAX_TERM_WORDS); n >= 1; n--) {
+            Optional<GlossaryTerms.Term> term = glossary.find(String.join(" ", Arrays.copyOf(words, n)), lang);
+            if (term.isPresent()) {
+                return term;
+            }
+        }
+        return Optional.empty();
+    }
+
+    private static String define(GlossaryTerms.Term t, Persona persona) {
+        return persona == Persona.CHRONICLER
+                ? t.loreName() + " (" + t.realName() + ") — " + t.definition()
+                : t.realName() + " — " + t.definition();
     }
 
     static Topic topic(Question q, Facts f) {
