@@ -721,6 +721,9 @@ Build and CI
   result if everything were closed at the last price is X SPARK.» Since `summary` ends with `costs`, the summary
   answer carries the spread sentence too. Wording taken verbatim from the user-run proposal. «решено без Айки —
   отменяется так: верните строки в `TemplateAssistant.costs/summary` и удалите `TemplateWordsExplainedTest`.»
+- LE-094: Mara's English name «Mara Anchor» (2 of 3 places already); easy to undo — one CSV cell. Options not taken:
+  «Mara of the Anchor» everywhere. «решено без Айки — отменяется так: верните en `WHO_MARA` в `game3d/i18n/talk.csv`
+  и удалите `game3d/tools/test_mara_name.py`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
