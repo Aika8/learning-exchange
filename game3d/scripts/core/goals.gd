@@ -61,3 +61,24 @@ static func next(state: int, ctx: Dictionary) -> Dictionary:
 static func _goal(goal: Id, place: String, action: int) -> Dictionary:
 	var id: String = Id.keys()[goal]
 	return {"id": id, "hint_key": "GOAL_" + id, "place": place, "action": action}
+
+
+## The goal that removes a refusal of GameFlow.refusal, so the HUD can say what to do instead of only "no".
+## The fact goals (provisions, plan, anchor) carry action NONE: the goal is the effect, wherever the player stands.
+## FLOW_NO_EDGE happens only away from Port, and every state has an edge back to Port: the goal leads there.
+## FLOW_NO_SAME has nothing to remove — the player is already there — so the goal is to look around.
+## An unknown key gets EXPLORE and an error, like an unknown state in next().
+static func for_refusal(key: String) -> Dictionary:
+	match key:
+		"FLOW_NEED_PROVISIONS":
+			return _goal(Id.BUY_PROVISIONS, "provisions", NONE)
+		"FLOW_NEED_PLAN":
+			return _goal(Id.PLAN_WITH_MARA, "mara", NONE)
+		"FLOW_NEED_ANCHOR":
+			return _goal(Id.SET_ANCHOR, "exchange", NONE)
+		"FLOW_NO_EDGE":
+			return _goal(Id.SAIL_OR_STAY, "ship", _S.PORT)
+		"FLOW_NO_SAME":
+			return _goal(Id.EXPLORE, "ferry", NONE)
+	push_error("Goals.for_refusal: unknown refusal %s" % key)
+	return _goal(Id.EXPLORE, "ferry", NONE)

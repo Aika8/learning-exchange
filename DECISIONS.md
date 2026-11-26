@@ -685,3 +685,8 @@ Build and CI
   "at the market" (the task's own example, though the spot sits on the deck by the debt house); SAIL_OR_STAY names the
   wheel of the «Wayfarer» and both options equally (no push to sail); EXPLORE names the packet boat by the pier, not a
   particular island. Not taken: naming Mara's surname or the Wind Exchange in full (longer lines). Edit the rows.
+- LE-055: `Goals.for_refusal(key)` has no state, so the fact goals it returns (BUY_PROVISIONS, PLAN_WITH_MARA,
+  SET_ANCHOR) carry action NONE — the goal is the effect, the HUD points at `place`. FLOW_NO_EDGE (only ever away from
+  Port; every state has an edge back to Port) → SAIL_OR_STAY with action PORT; FLOW_NO_SAME (nothing to remove) →
+  EXPLORE. An unknown key → EXPLORE plus push_error, like `next()`. Not taken: a new goal id such as RETURN_TO_PORT
+  (needs new hint copy, which is Aika's), or a `state` argument (the task gives the signature). All in `goals.gd`.
