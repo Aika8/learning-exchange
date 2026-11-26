@@ -776,6 +776,15 @@ Build and CI
   (плата за ведение фонда), «a Rung» (ступень — the game's own word, `FORM_LIMIT_LORE` «step onto a rung»). The
   definitions are drafts too. Options not taken: leave English lore names empty (the six-strings test forbids it);
   invent new lore words. «решено без Айки — отменяется так: правьте эти четыре записи в `docs/lore/glossary.yaml`.»
+- LE-058: `/session-review` gets a required `mistakes` array of `ReviewMistake {code, instrument, at, detail}` (Aika
+  said yes to the contract change). `code` is an enum of `TradingMistakes.Code` (a new code means adding it to the
+  enum and `make gen-api`, as LE-323 expects); `detail` stays key=value numbers, the client words each code. Wired in
+  `app.review.SessionMistakes`: `TradingMistakes.find` over `Journal.readAll()` on each call, the instruments of the
+  service and the savings product's `dayMillis`; the review DTO is assembled in `app.web.Dto` because the paths keep
+  `application` closed. No book snapshots are kept anywhere, so B4 is never reported by the API yet. Options not
+  taken: a plain string code (clients would lose the typed list); a live projection instead of reading the journal
+  (needs `application`). «решено без Айки — отменяется так: уберите `mistakes`/`ReviewMistake` из `api/openapi.yaml`,
+  `make gen-api`, верните `ApiController.sessionReview` к `Review` и удалите `app.review.SessionMistakes`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
