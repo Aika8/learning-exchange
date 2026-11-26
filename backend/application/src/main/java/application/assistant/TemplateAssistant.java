@@ -81,6 +81,9 @@ public final class TemplateAssistant implements Assistant {
                 + " SPARK in spread; tax due on the profit is " + money(tax) + " SPARK."
                 : "За период вы заплатили " + money(fees) + " SPARK комиссий и около " + money(spread)
                 + " SPARK спреда; налог с прибыли — " + money(tax) + " SPARK.");
+        out.add(en
+                ? "The spread is the gap between the best buy and sell prices; here, how much you gave up against the middle between them."
+                : "Спред — разница между лучшей ценой покупки и продажи; здесь — сколько вы отдали против середины между ними.");
     }
 
     private static void summary(Facts f, boolean en, List<String> out) {
@@ -91,8 +94,8 @@ public final class TemplateAssistant implements Assistant {
             long wins = f.number("review.wins").orElse(0L);
             long result = f.number("review.result").orElse(0L);
             out.add(en
-                    ? orders + " orders, " + wins + " in profit; the result against the last price is " + signedMoney(result) + " SPARK."
-                    : orders + " заявок, " + wins + " в плюсе; результат против последней цены " + signedMoney(result) + " SPARK.");
+                    ? orders + " orders, " + wins + " in profit; the result if everything were closed at the last price is " + signedMoney(result) + " SPARK."
+                    : orders + " заявок, " + wins + " в плюсе; результат, если бы всё закрыть по последней цене, " + signedMoney(result) + " SPARK.");
             f.number("review.expectancyRx100").ifPresent(r -> out.add(en
                     ? "Average result per planned risk: " + rx(r) + " R."
                     : "Средний результат на запланированный риск: " + rx(r) + " R."));

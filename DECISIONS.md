@@ -714,6 +714,13 @@ Build and CI
   is the reopening after an `EARNINGS_NIGHT` halt, during which orders are refused, so no price can rise "before the
   open". Not taken: rebuilding the book from the journal (would duplicate the engine's matching rules); treating the
   halt reopen as the open (no prices exist inside the halt). B5 waits for a market-hours/phases decision (intent 03).
+- LE-089: assistant copy draft, Aika reviews. `TemplateAssistant.costs` adds one sentence after the costs line:
+  ru «Спред — разница между лучшей ценой покупки и продажи; здесь — сколько вы отдали против середины между ними.» /
+  en «The spread is the gap between the best buy and sell prices; here, how much you gave up against the middle
+  between them.» `summary` now reads ru «…; результат, если бы всё закрыть по последней цене, X SPARK.» / en «…; the
+  result if everything were closed at the last price is X SPARK.» Since `summary` ends with `costs`, the summary
+  answer carries the spread sentence too. Wording taken verbatim from the user-run proposal. «решено без Айки —
+  отменяется так: верните строки в `TemplateAssistant.costs/summary` и удалите `TemplateWordsExplainedTest`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
