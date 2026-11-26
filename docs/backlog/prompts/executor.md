@@ -13,8 +13,9 @@ python3 scripts/backlog/backlog.py plan
 ```
 
 Read, in this order: `CLAUDE.md`, `docs/backlog/README.md` (above all "Rule for every run: do not wait for Aika"),
-and later only what your task needs. `java -version` must say 25 and `node --version` v24; if not, write that in
-your final message and stop — the environment is broken, not the task.
+and later only what your task needs. `java -version` must say 25 and `node --version` v24; if not, the environment is broken,
+not the task: run `python3 scripts/backlog/backlog.py report-stop --kind env --subject "step 0" --text "<the versions
+and the last 20 lines of /tmp/setup-env.log>"` and stop.
 
 `plan` prints one move. Do exactly that move:
 
@@ -136,6 +137,10 @@ Check out the PR's branch, `git merge origin/main`, resolve conflicts keeping bo
 another merged task did, park instead. Stop.
 
 ## 4. PARK
+
+Whatever the reason (refused at the start, budget spent, repeated failure, a question for Aika), also leave a visible
+trace: `python3 scripts/backlog/backlog.py report-stop --kind <refused|parked> --subject <task id> --text "<one
+paragraph: why, where it stopped, the question with options>"`.
 
 Comment on the PR (or, with no PR, open an issue `[parked] <task id>: <one line>` with
 `gh api -X POST repos/Aika8/learning-exchange/issues -f title=… -f body=… -f "labels[]=parked"`):

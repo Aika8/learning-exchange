@@ -20,6 +20,8 @@ The summary is written **even when** `docs/backlog/PAUSE` exists (say so at the 
 git log --since="$DAY 00:00 UTC" --until="$DAY 23:59 UTC" --format='%h %s' origin/main
 gh api "repos/Aika8/learning-exchange/pulls?state=all&per_page=100" > /tmp/prs.json      # merged/open/closed, labels
 gh api "repos/Aika8/learning-exchange/issues?state=open&labels=parked&per_page=100"
+gh api "repos/Aika8/learning-exchange/issues?state=open&labels=run-stopped&per_page=100"   # runs that had to stop
+gh api "repos/Aika8/learning-exchange/issues?state=open&labels=hold&per_page=100"          # guard pauses
 python3 scripts/backlog/backlog.py lint
 ```
 
@@ -33,6 +35,9 @@ how many tasks are left `todo` and ready; CI failures on `main`, if any
 
 ```markdown
 # <DAY> — summary
+
+**Stopped runs:** <every open issue labelled run-stopped or hold, one line each with its number — or "none". This
+line is always first: a run that stops at step 0 is otherwise invisible.>
 
 **In one line:** <the day's result, e.g. "6 tasks merged, 1 parked, queue 31 left; nothing needs you urgently">
 
