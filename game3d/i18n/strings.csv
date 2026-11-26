@@ -263,7 +263,7 @@ LESSON_FOG_TEXT,"Инфляция %s, ставка вклада %s, реальн
 LESSON_RISK,Правило Мары,Mara's rule
 LESSON_RISK_REAL,Риск 1% на сделку и R,1% risk per trade and R
 LESSON_RISK_TEXT,Риск до стопа %s = %s капитала. Это и есть 1R: результат сделки дальше считается в R.,Risk to the stop %s = %s of capital. That is 1R: the trade's result is counted in R from now on.
-LESSON_SPREAD,Пропасть,The Gap
+LESSON_SPREAD,Пропасть,The Chasm
 LESSON_SPREAD_REAL,Спред,Spread
 LESSON_SPREAD_TEXT,"Лучшая покупка %s, лучшая продажа %s. Между ними %s (%s) — столько стоит перейти рынок рыночной заявкой.","Best bid %s, best ask %s. Between them %s (%s) — what crossing the market with a market order costs."
 LESSON_FEES,Пошлина Биржи,The Exchange toll
