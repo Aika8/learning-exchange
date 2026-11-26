@@ -33,6 +33,9 @@ export default function Settings() {
         <Button testID="open-bonds" title={t('bonds.title')} color={c.accent} onPress={() => router.push('/bonds')} />
       </View>
       <View style={{ flexDirection: 'row' }}>
+        <Button testID="open-glossary" title={t('glossary.title')} color={c.accent} onPress={() => router.push('/glossary')} />
+      </View>
+      <View style={{ flexDirection: 'row' }}>
         <Button
           testID="logout"
           title={t('settings.logout')}
