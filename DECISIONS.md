@@ -679,3 +679,9 @@ Build and CI
   in SAILING the goal is SAIL_OR_STAY leading back to PORT; from day 2 without a trade the port goal is EXPLORE
   (no action) and TRADING without a trade offers SAIL_OR_STAY instead of FIRST_ORDER. Not taken: a new context fact
   for "met Mara" or "sailed today" (GameFlow does not carry them). All cheap to change in `goals.gd`.
+- LE-053: hint texts `GOAL_<ID>` for every `Goals` id in `game3d/i18n/strings.csv` — copy draft, Aika reviews.
+  Each is one sentence, action + place, real term in brackets once (подушка/emergency fund, торговый план/trading
+  plan, стакан заявок/order book, стоп-лосс/stop-loss, отчёт о сделках/trade report). Choices: provisions are bought
+  "at the market" (the task's own example, though the spot sits on the deck by the debt house); SAIL_OR_STAY names the
+  wheel of the «Wayfarer» and both options equally (no push to sail); EXPLORE names the packet boat by the pier, not a
+  particular island. Not taken: naming Mara's surname or the Wind Exchange in full (longer lines). Edit the rows.
