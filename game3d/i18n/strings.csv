@@ -329,3 +329,11 @@ RACE_TITLE,Остров гонок,Race Island
 PYRAMID_TITLE,Остров пирамиды,Pyramid Island
 PROMPT_PYRAMID_STAIRS,E — Лестница пирамиды,E — the pyramid's stairs
 PROMPT_TICKET_BOOTH,E — Билетная будка,E — the ticket booth
+GOAL_BUY_PROVISIONS,Купи провизию на шесть лун (финансовая подушка) на рынке.,Buy provisions for six moons (emergency fund) at the market.
+GOAL_PLAN_WITH_MARA,Составь план рейса (торговый план) с Марой у причала.,Make a voyage plan (trading plan) with Mara by the pier.
+GOAL_FIRST_ORDER,Поставь первую заявку на Лестнице (стакан заявок) в зале Биржи.,Place your first order on the Ladder (order book) in the Exchange hall.
+GOAL_SET_ANCHOR,Поставь Якорь (стоп-лосс) на свой груз в зале Биржи.,Set an Anchor (stop-loss) on your cargo in the Exchange hall.
+GOAL_SAIL_OR_STAY,Реши у штурвала «Попутчика»: выйти в рейс или остаться в Гавани.,At the wheel of the «Wayfarer» decide: sail out or stay in the Harbour.
+GOAL_READ_CHRONICLE,Вечером прочти у Летописца разбор дня (отчёт о сделках).,In the evening read the Chronicler's review of the day (trade report).
+GOAL_NEW_DAY,Закрой книгу дня у Летописца и начни новый день.,Close the book of the day with the Chronicler and start a new day.
+GOAL_EXPLORE,"Сядь на пакетбот у причала и побывай на острове, где ещё не был.",Take the packet boat by the pier and visit an island you have not seen.
