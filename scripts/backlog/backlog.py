@@ -17,6 +17,7 @@ Commands
   plan                         the executor's move for this run: PAUSED | PARK | FIX | REBASE | CI-RED |
                                WIP-LIMIT | NOTHING | NEW <task>
   review-queue                 the reviewer's move: PAUSED | REVIEW #n … | NOTHING
+  report-stop --kind K --subject S --text T   an issue (label run-stopped) for a run that had to stop
   prod-changes [--base REF]    changed non-test, non-doc files (the reviewer's "tests in a vacuum" check)
 """
 from __future__ import annotations
@@ -38,7 +39,7 @@ PROPOSALS_DIR = Path("docs/backlog/proposals")
 INTAKE_LOG = Path("docs/backlog/intake-log.md")
 DEFAULT_REPO = "Aika8/learning-exchange"
 MAX_DESCRIPTION_CHARS = 6000  # ≈ 1500 tokens
-MAX_INTAKE_PER_DAY = 5
+MAX_INTAKE_PER_DAY = 50  # Aika, 2026-11-26: proposals become tasks at once; the filter is by substance
 MAX_OPEN_AGENT_PRS = 3
 
 # Nobody but Aika changes these (an agent PR touching one is not merged, whatever its task says).
@@ -184,6 +185,11 @@ class Task:
         return re.findall(r"`([^`]+)`", self.fields.get("paths", ""))
 
     @property
+    def edits_tests(self) -> list[str]:
+        """Existing test files this one task may change — an exception Aika granted by name, task by task."""
+        return re.findall(r"`([^`]+)`", self.fields.get("edits-tests", ""))
+
+    @property
     def needs(self) -> list[str]:
         return [n.strip() for n in self.fields.get("needs", "").split(",") if n.strip()]
 
@@ -197,7 +203,7 @@ class Task:
 
 
 TASK_HEAD = re.compile(r"^### ([A-Z]+-[\w-]+) — (.+)$")
-FIELD = re.compile(r"^- ([a-z]+): (.*)$")
+FIELD = re.compile(r"^- ([a-z][a-z-]*): (.*)$")
 REQUIRED = ["status", "size", "paths", "verify", "expect"]
 STATUSES = {"todo", "waiting", "done", "dropped"}
 TOOLS = {"godot", "docker"}  # tools the cloud image may lack; a task that needs a missing one is not picked
@@ -260,6 +266,9 @@ def lint(tasks: list[Task]) -> list[str]:
                 errors.append(f"{where}: path {p} is protected or visual")
         if not re.search(r"`[^`]+`", t.fields.get("verify", "")):
             errors.append(f"{where}: verify must hold a command in backticks")
+        for e in t.edits_tests:
+            if e not in t.paths:
+                errors.append(f"{where}: edits-tests {e} must also be in paths")
         for n in t.needs:
             if n not in TOOLS:
                 errors.append(f"{where}: needs '{n}' is not one of {sorted(TOOLS)}")
@@ -431,7 +440,8 @@ def check_paths(branch: str, changes: list[Change], tasks: list[Task], root: Pat
                 problems.append(f"{p}: protected (only Aika changes it)")
             if visual(p):
                 problems.append(f"{p}: the game's look is not changed by cloud agents")
-            if c.status != "added" and matches(p, APPEND_ONLY):
+            if (c.status != "added" and matches(p, APPEND_ONLY)
+                    and not (kind == "task" and c.status == "modified" and p in task.edits_tests)):
                 problems.append(f"{p}: an existing test or quality gate is {c.status}; add a new file instead")
             if c.status != "added" and ADR_FILE.match(p) and not adr_is_open(p, root):
                 problems.append(f"{p}: an accepted ADR is never edited; supersede it with a new ADR")
@@ -831,6 +841,28 @@ def decide_reviewer(prs: list[dict], tasks: list[Task]) -> tuple[str, str]:
     return "NOTHING", "no green agent PR waits for a review"
 
 
+# ---------------------------------------------------------------- stops made visible
+
+STOP_LABEL = "run-stopped"
+
+
+def report_stop(kind: str, subject: str, text: str, dry_run: bool = False) -> str:
+    """A run that stops (broken environment, refused or parked task) leaves an issue, not only a notification.
+    One open issue per (kind, subject): a repeat adds a comment. The summary run lists them first."""
+    repo = repo_slug()
+    title = f"[stopped] {kind}: {subject}"
+    body = text.strip() + "\n\n<!-- backlog-stop -->"
+    if dry_run:
+        return title
+    issues = gh(f"repos/{repo}/issues?state=open&labels={STOP_LABEL}&per_page=100", paginate=True) or []
+    same = next((i for i in issues if i.get("title") == title and "pull_request" not in i), None)
+    if same:
+        gh(f"repos/{repo}/issues/{same['number']}/comments", method="POST", fields={"body": body})
+        return f"#{same['number']} (comment added)"
+    made = gh(f"repos/{repo}/issues", method="POST", fields={"title": title, "body": body, "labels[]": STOP_LABEL})
+    return f"#{made['number']}"
+
+
 # ---------------------------------------------------------------- CLI
 
 def main(argv: list[str] | None = None) -> int:
@@ -848,6 +880,10 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("prod-changes", help="reviewer: changed files that are not tests or docs (for the vacuum check)")
     s.add_argument("--base", default="origin/main")
     sub.add_parser("review-queue", help="reviewer: which PR to review in this run")
+    s = sub.add_parser("report-stop", help="any run: open (or add to) an issue saying why the run stopped")
+    s.add_argument("--kind", required=True, choices=["env", "refused", "parked", "limit", "other"])
+    s.add_argument("--subject", required=True, help="task id, PR number or 'step 0'")
+    s.add_argument("--text", required=True)
     s = sub.add_parser("scrub", help="Actions: remove the AI-attribution footer from the PR/comment of an event")
     s.add_argument("--event", default=os.environ.get("GITHUB_EVENT_PATH", "")); s.add_argument("--dry-run", action="store_true")
     a = ap.parse_args(argv)
@@ -859,6 +895,8 @@ def main(argv: list[str] | None = None) -> int:
         return 1
     if a.cmd == "automerge":
         return automerge(a.dry_run)
+    if a.cmd == "report-stop":
+        print(report_stop(a.kind, a.subject, a.text)); return 0
     if a.cmd == "scrub":
         return scrub_event(a.event, a.dry_run)
     if a.cmd == "intake":

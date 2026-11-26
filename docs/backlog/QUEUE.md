@@ -17,6 +17,170 @@ Rules for every task (the executor prompt repeats them): existing tests are neve
 are new files; money is integer minor units; the engine stays framework-free and deterministic; contract changes go
 to `api/*.yaml` first; nothing changes the look of `game3d`; `make test` stays green.
 
+## Aika's answers of 2026-11-26 and the proposals of 2026-11-25
+
+### LE-090 — Intent 01: agents may add engine tests; the engine's main code stays Aika's
+- status: todo
+- size: S
+- paths: `intent/01-order-book.md`
+- verify: `grep -n "add test files" intent/01-order-book.md`
+- expect: one line in the Constraints section says agents may add new test files for `engine`, never edit existing ones or the main code
+
+Aika's answer (2026-11-26, analyst's option A): the rule in `intent/01-order-book.md` (section "Constraints",
+"Package `engine` and its tests are written by Aika; the agent does not create or edit them") covers the **main**
+code of `engine`. Agents may **add** new test files; existing tests are never edited (the merge gate enforces it).
+Rewrite only that sentence, keeping the rest of the section. Add a bullet to `DECISIONS.md` under
+"Backlog run (December 2026)": "LE-090: intent 01 amended on Aika's answer of 2026-11-26."
+
+### LE-089 — Assistant: say what "spread" and "result against the last price" mean the first time
+- status: todo
+- source: docs/backlog/proposals/2026-11-25-user.md#3
+- size: S
+- paths: `backend/application/src/main/java/application/assistant/TemplateAssistant.java`, `backend/application/src/test/java/application/assistant/TemplateWordsExplainedTest.java`
+- verify: `./gradlew :backend:application:test --tests 'application.assistant.*'`
+- expect: green, the old `TemplateAndFallbackTest` unchanged; the new test shows the costs answer explains spread and the summary says what the result is measured against, in ru and en
+
+From the user run of 2026-11-25 (`docs/backlog/proposals/2026-11-25-user.md`, third proposal — read it, it has
+the exact sentences). In `costs(...)` keep every sentence and number and add one: ru «Спред — разница между лучшей
+ценой покупки и продажи; здесь — сколько вы отдали против середины между ними.» / en «The spread is the gap between
+the best buy and sell prices; here, how much you gave up against the middle between them.» In `summary(...)` change
+only the words between the counts and the number to ru «результат, если бы всё закрыть по последней цене, » / en
+«the result if everything were closed at the last price is ». Keep «N заявок, M в плюсе» untouched here (LE-092
+fixes the plural). The new test also asserts `new AdviceGuard().isAdvice(text)` is false. Log the copy in
+`DECISIONS.md` as "copy draft, Aika reviews".
+
+### LE-092 — Assistant: correct Russian plural for orders («1 заявка, 3 заявки, 5 заявок»)
+- status: todo
+- depends: LE-089
+- size: S
+- edits-tests: `backend/application/src/test/java/application/assistant/TemplateAndFallbackTest.java`, `backend/app/src/test/java/app/M4ContractTest.java`
+- paths: `backend/application/src/main/java/application/assistant/**`, `backend/application/src/test/java/application/assistant/RuPluralTest.java`, `backend/application/src/test/java/application/assistant/TemplateAndFallbackTest.java`, `backend/app/src/test/java/app/M4ContractTest.java`
+- verify: `./gradlew :backend:application:test --tests 'application.assistant.*' && ./gradlew :backend:app:test --tests 'app.M4ContractTest'`
+- expect: green; the summary says «3 заявки», «1 заявка», «5 заявок», «21 заявка»; the two old asserts now expect the correct forms
+
+Aika's answer (2026-11-26): a one-time exception — this task may change exactly two existing asserts that pin the
+wrong plural: `TemplateAndFallbackTest.java:43` («3 заявок» → «3 заявки») and `M4ContractTest.java:34`
+(«1 заявок» → «1 заявка»). Change nothing else in those two files. Add a small `RuPlural.of(n, one, few, many)`
+in `application.assistant` (rules: n%10==1 && n%100!=11 → one; n%10 in 2..4 && n%100 not in 12..14 → few; else many),
+use it in `TemplateAssistant.summary(...)` for «заявка» and anywhere else the template prints a Russian count
+(search the class). English stays «N orders» / «1 order». New `RuPluralTest`: 0, 1, 2, 4, 5, 11, 12, 14, 21, 22, 25,
+101, 111. Note in `DECISIONS.md` that the two asserts were edited on Aika's exception of 2026-11-26.
+
+### LE-093 — «the Chasm» is the English lore name of the spread everywhere
+- status: todo
+- size: S
+- paths: `docs/lore/glossary.yaml`, `game3d/i18n/strings.csv`, `game3d/i18n/talk.csv`, `docs/design/comic-script.md`, `backend/app/src/test/java/app/ChasmNameTest.java`
+- verify: `! git grep -n "the Gap\|The Gap\|Jump the Gap" -- docs/lore/glossary.yaml game3d/i18n docs/design/comic-script.md && python3 game3d/tools/check_data.py && ./gradlew :backend:app:test --tests 'app.CatalogueTest' --tests 'app.ChasmNameTest'`
+- expect: no «the Gap» as the spread's lore name is left; data checks and the catalogue test are green
+
+Aika's answer (2026-11-26): the English lore name of «Пропасть» (spread) is «the Chasm», as `LADDER_SPREAD_LORE`
+and `FORM_MARKET_LORE` («leap over the Chasm») already say. Change: `docs/lore/glossary.yaml` spread lore en «the Gap»
+→ «the Chasm» and the market order's «Jump the Gap» → «Leap over the Chasm»; `game3d/i18n/strings.csv`
+`LESSON_SPREAD` en «The Gap» → «The Chasm»; `game3d/i18n/talk.csv` `TALK_SAILOR3_1/2` «the Gap» → «the Chasm» (and
+the same two lines in `docs/design/comic-script.md`, which mirrors the talks). The **real** term «gap» (price gap,
+`CHR_GAP_THROUGH`, `LESSON_GAP`, «the gap to what was expected») stays — only the spread's lore name changes.
+Do not touch `game3d/tests/` (a fixture there uses «the Gap» as sample data). New test `ChasmNameTest` (load the
+glossary as `CatalogueTest` does): the spread's lore en is «the Chasm».
+
+### LE-094 — Mara's English name is «Mara Anchor» everywhere
+- status: todo
+- size: S
+- paths: `game3d/i18n/talk.csv`, `game3d/tools/test_mara_name.py`
+- verify: `python3 game3d/tools/check_data.py && python3 -m unittest game3d/tools/test_mara_name.py`
+- expect: green; every English mention of Mara's full name in `game3d/i18n/*.csv` and `game/i18n/strings.csv` is «Mara Anchor»
+
+«Mara Anchor» is used in two places of three (`HARBOUR_MARA`, `PLAN_LORE`); `talk.csv` `WHO_MARA` says «Mara of the
+Anchor». Change `WHO_MARA` en to «Mara Anchor». Leave the concept sheet title in `docs/design/` alone (it is the
+sheet's name). Write in `DECISIONS.md` under the backlog heading: "LE-094: Mara's English name «Mara Anchor» (2 of 3
+places already); easy to undo — one CSV cell." New `game3d/tools/test_mara_name.py` (unittest, stdlib csv): no
+English cell in `game3d/i18n/*.csv` or `game/i18n/strings.csv` contains «Mara of the Anchor».
+
+### LE-095 — Day one: Mara and the hints name provisions on the pier as the first step
+- status: todo
+- source: docs/backlog/proposals/2026-11-25-user.md#5
+- size: S
+- needs: godot
+- paths: `game3d/i18n/strings.csv`, `game3d/tests/unit/test_flow_way_back.gd`
+- verify: `make test-game3d && python3 game3d/tools/check_data.py`
+- expect: all GUT tests pass; the new test shows every state except PORT may go to PORT with an empty context, and from PORT no move is refused with `FLOW_NO_EDGE`
+
+Aika's answer (2026-11-26, the user run's option (c)): Mara's greeting and the goal line both name provisions as the
+first step, and no hint sends the player "to the market" — the provisions are the crates on the pier
+(`game3d/scripts/harbour.gd`, `PROMPT_PROVISIONS`). Change only these values in `game3d/i18n/strings.csv` (keys stay):
+`HARBOUR_MARA` — keep the sentence and append ru «Но сначала — провизия на шесть лун: ящики на причале. Потом план
+со мной.» / en «But first — provisions for six moons: the crates on the pier. Then a plan with me.»;
+`GOAL_BUY_PROVISIONS` ru «Купи провизию на шесть лун (финансовая подушка) — ящики на причале.» / en «Buy provisions for
+six moons (emergency fund) — the crates on the pier.»; `MARA_PROVISIONS_FIRST`, `FLOW_NEED_PROVISIONS` and
+`FLOW_NO_EDGE` exactly as in the fifth proposal of `docs/backlog/proposals/2026-11-25-user.md`. Keep the CSV quoting
+of neighbouring rows. New GUT test `test_flow_way_back.gd` as that proposal describes. Log every text in
+`DECISIONS.md` as "copy draft — Aika may rewrite".
+
+### LE-096 — Assistant answers «what is X?» from the glossary (application side)
+- status: todo
+- source: docs/backlog/proposals/2026-11-25-user.md#4
+- size: S
+- paths: `backend/application/src/main/java/application/assistant/**`, `backend/application/src/test/java/application/assistant/TemplateDefinitionTest.java`
+- verify: `./gradlew :backend:application:test --tests 'application.assistant.*'`
+- expect: green; «Что такое спред?», «What is a stop-loss?» get the term's real name and definition (lore name too for the Chronicler persona); an unknown term gets «I don't know that word yet — here are your numbers»; «Как прошла сессия?» is unchanged
+
+Aika's answer (2026-11-26): the assistant answers a term question from the glossary (option a; a mobile glossary
+screen is LE-098). Add a port `GlossaryTerms` in `application.assistant` (find a term by a word in ru or en: id,
+real name, lore name, definition) and pass it to `TemplateAssistant` (constructor; keep the old constructor working
+with an empty glossary so existing tests stay untouched). When the lower-cased question matches
+`(что такое|что значит|что означает|объясни|what is|what's|what does|explain|meaning of)` and a term matches, answer
+with real name — definition (Chronicler: «lore name (real name) — definition»). The advice guard still runs first.
+Test with an in-memory glossary of three terms. Do not wire it into `backend/app` (LE-097).
+
+### LE-097 — Wire the glossary into the assistant in the app
+- status: todo
+- depends: LE-096
+- size: S
+- paths: `backend/app/src/main/java/app/**`, `backend/app/src/test/java/app/AssistantGlossaryContractTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.AssistantGlossaryContractTest' --tests 'app.M4ContractTest'`
+- expect: green; `POST /assistant/ask` with «Что такое спред?» answers with the glossary's definition of spread and validates against the contract
+
+Implement `GlossaryTerms` from LE-096 in `backend/app` over the catalogue that already loads `docs/lore/glossary.yaml`
+(read `bff` / `Catalogue`; reuse the loaded data — do not parse the YAML a second time) and pass it to the
+`TemplateAssistant` bean. New contract test in the style of `M4ContractTest`. No contract change.
+
+### LE-098 — Mobile: a glossary screen from /bff/mobile/glossary (logic and test)
+- status: todo
+- size: S
+- paths: `clients/mobile/src/app/glossary.tsx`, `clients/mobile/src/glossary.ts`, `clients/mobile/test/glossary.test.mjs`, `clients/mobile/src/i18n/ru.json`, `clients/mobile/src/i18n/en.json`
+- verify: `cd clients/mobile && npm ci && npm test`
+- expect: green; the new test covers search (ru/en, case-insensitive), sorting and the real-name-first rule
+
+Aika's answer (2026-11-26, option b after a): the mobile app gets a «Словарь» screen. The design canvas is
+`docs/design/canvas/S10-Glossary.dc.html` — follow its layout with the existing components and theme tokens; no new
+styles. The endpoint `/bff/mobile/glossary` exists (`api/openapi.yaml`). Put the logic (filter by query, sort by real
+name in the current language) in `src/glossary.ts` with `node --test` tests; the screen only renders. In the mobile
+app only real terms are shown (intent 02: the app knows nothing of the game), so ignore lore names. i18n keys for the
+title and the search placeholder in ru and en. Do not add a tab or change navigation beyond one entry from settings.
+
+### LE-099 — Web: a readable message for every refusal code
+- status: todo
+- source: docs/backlog/proposals/2026-11-25-user.md#2
+- size: S
+- paths: `clients/web/src/i18n/ru.json`, `clients/web/src/i18n/en.json`, `clients/web/src/i18n/errors.test.ts`
+- verify: `cd clients/web && npm ci && npx vitest run src/i18n`
+- expect: green; the new test finds `errors.<CODE>` in ru and en for every constant of `backend/engine/src/main/java/engine/Rejection.java`
+
+From the user run of 2026-11-25 — the second proposal of `docs/backlog/proposals/2026-11-25-user.md` has the full
+text; follow it. Copy the wording of the mobile task AUTO-20261125-5 when it is merged (same codes, same sentences in
+both clients); if it is not merged yet, write the four missing keys yourself and log them as "copy draft".
+
+### LE-088 — Glossary: four terms the app and game use but never define
+- status: todo
+- source: docs/backlog/proposals/2026-11-25-user.md#6
+- size: S
+- paths: `docs/lore/glossary.yaml`, `backend/app/src/test/java/app/GlossaryHasToolTermsTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.CatalogueTest' --tests 'app.GlossaryHasToolTermsTest'`
+- expect: green; the new test finds the ids `trailing-take-profit`, `atr`, `fund-ter`, `price-level`
+
+From the user run of 2026-11-25 — the sixth proposal of `docs/backlog/proposals/2026-11-25-user.md` has the full
+text (real terms, ru lore names from world bible §6, English lore drafts). Follow it. English lore names are drafts:
+log each in `DECISIONS.md` as "lore draft, Aika reviews".
+
 ## Engine: model-based testing (intent 01 and 02 as properties)
 
 ### LE-001 — A generator of random valid order-book actions
@@ -283,15 +447,14 @@ snapshots) and B5 (a buy in the first sim hour after a rise before the open, if 
 has no such phase, skip B5 and say so in `DECISIONS.md`). New test file only; the first batch's tests stay untouched.
 
 ### LE-058 — Show the mistakes in the session review (API and clients)
-- status: waiting
-- waits: Aika's yes on the contract change and on the review texts (docs/teaching/field-guide-lessons.md, section C)
+- status: todo
 - depends: LE-056
 - size: S
 - paths: `api/openapi.yaml`, `backend/app/src/main/java/**`, `backend/app/src/test/java/app/MistakesContractTest.java`, `clients/web/src/api/schema.d.ts`, `clients/mobile/src/api/schema.d.ts`
 - verify: `./gradlew :backend:app:test --tests 'app.MistakesContractTest' --tests 'app.ContractTest'`
 - expect: green
 
-Add `mistakes` to the `/session-review` response (contract first), filled from `TradingMistakes`; regenerate client
+Aika said yes on 2026-11-26 to the contract change and the review texts. Add `mistakes` to the `/session-review` response (contract first), filled from `TradingMistakes`; regenerate client
 types. The screens that show them are a separate decision.
 
 ### LE-059 — Losses compound too: series sums for the lessons
