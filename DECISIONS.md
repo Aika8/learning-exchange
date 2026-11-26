@@ -755,6 +755,14 @@ Build and CI
   на доход (ИПН 10%)»). Russian word forms («спреда», «плечом») are not matched yet — they get «I don't know that
   word». Options not taken: stemming or prefix matching (false hits like «стоп» → «стоп-лосс»). «решено без Айки —
   отменяется так: правьте `CatalogueGlossary.key` и конструктор.»
+- LE-098: the mobile «Словарь» screen (`clients/mobile/src/glossary.ts`). Search is a case-insensitive substring
+  match («ё» as «е») on the real name in ru and in en whatever the app language, and on the definition in the app
+  language; «real name first» = terms matched by their name come before those matched only by the definition, each
+  group sorted by the real name in the app language (`Intl.Collator`), then by id. Lore names are ignored (intent 02).
+  The canvas's per-term «У вас: …» example line is not shown: the contract `GlossaryTerm` has no such field. The query
+  sits in the screen (no hook in `hooks.ts`, outside the task's paths). Options not taken: search definitions in both
+  languages; show the example line from the account history. «решено без Айки — отменяется так: правьте
+  `glossaryRows` и `clients/mobile/test/glossary.test.mjs`.»
 - LE-099: web refusal messages, copy draft, Aika reviews. The mobile twin (AUTO-20261125-5) was not merged yet, so
   the four new `errors` keys and the new `INSUFFICIENT_FUNDS` text are taken word for word from the proposal
   (`docs/backlog/proposals/2026-11-25-user.md`, mobile item) — mobile should copy the same sentences. The test reads
