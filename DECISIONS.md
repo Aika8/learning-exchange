@@ -755,6 +755,13 @@ Build and CI
   на доход (ИПН 10%)»). Russian word forms («спреда», «плечом») are not matched yet — they get «I don't know that
   word». Options not taken: stemming or prefix matching (false hits like «стоп» → «стоп-лосс»). «решено без Айки —
   отменяется так: правьте `CatalogueGlossary.key` и конструктор.»
+- LE-099: web refusal messages, copy draft, Aika reviews. The mobile twin (AUTO-20261125-5) was not merged yet, so
+  the four new `errors` keys and the new `INSUFFICIENT_FUNDS` text are taken word for word from the proposal
+  (`docs/backlog/proposals/2026-11-25-user.md`, mobile item) — mobile should copy the same sentences. The test reads
+  `Rejection.java` through Vite's `?raw` import instead of `node:fs`: the web client has no Node typings and `tsc -b`
+  (part of `npm test`) rejects `node:fs`; adding `@types/node` is outside the task's paths. Options not taken: add
+  `@types/node`; inline the code list in the test (would not notice a new constant). «решено без Айки — отменяется
+  так: правьте значения `errors.*` в `clients/web/src/i18n/{ru,en}.json`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 

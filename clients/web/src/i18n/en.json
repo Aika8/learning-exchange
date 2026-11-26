@@ -97,7 +97,7 @@
     "INVALID_NAME": "Name: letters, digits, space, _ or -, up to 32",
     "INVALID_ORDER": "Invalid order parameters",
     "INVALID_AMOUNT": "Invalid amount",
-    "INSUFFICIENT_FUNDS": "Insufficient funds",
+    "INSUFFICIENT_FUNDS": "Not enough free funds: a buy reserves price × quantity + fee, and money in open orders is taken",
     "NO_LIQUIDITY": "No opposite orders",
     "UNKNOWN_INSTRUMENT": "Unknown instrument",
     "UNKNOWN_ORDER": "Order not found",
@@ -108,7 +108,11 @@
     "NETWORK": "Server unreachable — is make dev running?",
     "LEVERAGE_NOT_ALLOWED": "Leverage not allowed for this instrument",
     "UNKNOWN_POSITION": "Position not found",
-    "UNKNOWN_DEPOSIT": "Deposit not found"
+    "UNKNOWN_DEPOSIT": "Deposit not found",
+    "MARKET_CLOSED": "Trading in this instrument is halted right now",
+    "DEFAULTED": "The issuer has defaulted — not available",
+    "ALREADY_ANNOTATED": "This order already has a trade-journal note",
+    "NOTHING_TO_PAY": "Nothing to pay"
   },
   "instrument": {
     "label": "Instrument",
