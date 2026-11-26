@@ -724,6 +724,22 @@ Build and CI
 - LE-094: Mara's English name «Mara Anchor» (2 of 3 places already); easy to undo — one CSV cell. Options not taken:
   «Mara of the Anchor» everywhere. «решено без Айки — отменяется так: верните en `WHO_MARA` в `game3d/i18n/talk.csv`
   и удалите `game3d/tools/test_mara_name.py`.»
+- LE-095: day-one copy draft — Aika may rewrite. Provisions (the crates on the pier) are named as the first step:
+  `HARBOUR_MARA` (2D client) and the last balloon `TALK_MARA_FIRST_6` append ru «Но сначала — провизия на шесть лун:
+  ящики на причале. Потом план со мной.» / en «But first — provisions for six moons: the crates on the pier. Then a
+  plan with me.»; `GOAL_BUY_PROVISIONS` ru «Купи провизию на шесть лун (финансовая подушка) — ящики на причале.» / en
+  «Buy provisions for six moons (emergency fund) — the crates on the pier.»; `MARA_PROVISIONS_FIRST` ru «Мара: «Без
+  провизии на шесть лун (финансовой подушки) в рейс не пойдёшь. Ящики с провизией — на причале.»» / en «Mara: «No
+  voyage without provisions for six moons (an emergency fund). The provision crates are on the pier.»»;
+  `FLOW_NEED_PROVISIONS` ru «Сначала провизия на шесть лун (финансовая подушка) — ящики на причале.» / en «First
+  provisions for six moons (emergency fund) — the crates on the pier.»; `FLOW_NO_EDGE` ru «Сначала вернись в порт.» /
+  en «First go back to port.» (true by `GameFlow.EDGES`, pinned by `test_flow_way_back.gd`). Question: with the
+  appended sentence the en balloon `TALK_MARA_FIRST_6` was 153 characters, over `ComicScript.MAX_CHARS` (150).
+  Choice: drop «Показывай план.» / «Show me your plan.» from that balloon — the new last sentence already says the
+  plan comes next. Options not taken: raise `MAX_CHARS`; split into a new balloon/panel (the task says text only).
+  `docs/design/comic-script.md` regenerated with `game3d/tools/comic_script.py`. «решено без Айки — отменяется так:
+  верните шесть ячеек в `game3d/i18n/strings.csv` и `talk.csv`, перегенерируйте comic-script и удалите
+  `test_flow_way_back.gd`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
