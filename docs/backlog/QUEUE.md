@@ -821,3 +821,111 @@ mobile BFF, place a too-large order and print the rejection message as the user 
 at the statement, ask the assistant "what is a stop order?" (template answer without a key). Print each response's
 user-visible text (not raw JSON) so the run can judge clarity. `run-local.sh` starts and always stops `make dev
 PORT=8091 JOURNAL=memory`, like `scripts/smoke/run-local.sh` (reuse it if LE-026 made it reusable; do not copy).
+
+## Added by intake
+
+Appended by `scripts/backlog/backlog.py intake`, at most 5 a day.
+
+### AUTO-20261125-1 — Property: every trade is at the resting order's price
+- status: todo
+- size: S
+- paths: `backend/engine/src/test/java/engine/model/MakerPricePropertyTest.java`
+- verify: `./gradlew :backend:engine:test --tests 'engine.model.MakerPricePropertyTest'`
+- expect: green over 200 seeds × 500 actions; the test also asserts it met at least one trade where the taker's limit was strictly better than the maker's price (so "maker price" and "taker limit" were told apart)
+- source: docs/backlog/proposals/2026-11-25-analyst.md#1
+- added: 2026-11-25
+
+Why: intent/01-order-book.md:13 promises "Trades are produced with the resting order's price", but no test checks it. `OrderBookInvariantsTest.java:72-75` only checks the taker's limit is not crossed, and queued LE-006 checks only that the price "lies within both orders' limits" — a book that traded at the taker's limit would pass both.
+
+New test class in package `engine.model`, test sources only. Read `Runner.java` and `TimePriorityPropertyTest.java`
+in the same folder first and reuse their style (JUnit loop over seeds 1..200, `ActionGen.generate(seed, 500)`,
+`Runner.run(...)`, seed and step index in every failure message).
+
+For each step with trades, take the Runner's live-order map of the step *before* (`Step.live()` of the previous
+step; empty before step 0). For each `Trade t`: the maker id is `t.sellOrderId()` when `t.aggressorSide()` is BUY,
+else `t.buyOrderId()`. Assert the maker is in that previous live map and `t.price() == maker.price()`. Also assert
+that the taker id (the other side of the trade) equals `step.orderId()`. Count trades where the taker was a
+`SubmitLimit` whose limit differs from `t.price()`, and assert that count > 0 at the end (non-vacuous).
+Do not edit any existing file (existing tests are append-only). No `Pattern:` comment needed.
+
+### AUTO-20261125-2 — ArchUnit: bots never reach the ledger, the accounts or the clock control
+- status: todo
+- size: S
+- paths: `backend/app/src/test/java/app/arch/BotsHaveNoPrivilegesTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.arch.BotsHaveNoPrivilegesTest'`
+- expect: green; the rules fail if a class in `bots..` is made to use one of the forbidden types or methods (check by hand once, do not commit the breaking change)
+- source: docs/backlog/proposals/2026-11-25-analyst.md#2
+- added: 2026-11-25
+
+Why: intent/02-platform.md invariant 3 ("Bots have no privileges a human client does not have") and docs/adr/0007-bots-are-api-clients.md:9,31. `backend/app/src/test/java/app/ArchitectureTest.java:29-32` forbids only `engine.Exchange`, `engine.OrderBook` and `application.ExchangeService`; `engine.Accounts`, `engine.Ledger` and `engine.Command` (state changes outside the port's checks) and `TradingService.setClock` (moves time for every client) are not covered, while `backend/bots/build.gradle:5` puts all of `application` and `engine` on the bots' classpath.
+
+New ArchUnit test class `app.arch.BotsHaveNoPrivilegesTest` (ArchUnit is already on the test classpath of
+`backend/app`; copy the annotations of `ArchitectureTest.java`: `@AnalyzeClasses(packages = {"engine",
+"application", "bots", "app"}, importOptions = ImportOption.DoNotIncludeTests.class)`). Rules on classes in
+`bots..`: no dependency on `engine.Accounts`, `engine.Ledger`, `engine.Command` (and its nested types); no call to
+`application.TradingService.setClock` (any overload). Today's bots only import `engine.Order`, `engine.Event`,
+`engine.OrderView`, `engine.Balance` and the port, so it should pass as is. If today's code breaks a rule, do not
+weaken the rule: park the task with the class and line. Do not edit `ArchitectureTest.java`. Coordinate nothing
+with LE-013/LE-014: they add other files in the same folder.
+
+### AUTO-20261125-3 — Property: the bare order book is deterministic
+- status: todo
+- size: S
+- paths: `backend/engine/src/test/java/engine/model/OrderBookDeterminismPropertyTest.java`
+- verify: `./gradlew :backend:engine:test --tests 'engine.model.OrderBookDeterminismPropertyTest'`
+- expect: green over 200 seeds × 500 actions; two runs of one action list give equal step lists, two different seeds give different ones
+- source: docs/backlog/proposals/2026-11-25-analyst.md#3
+- added: 2026-11-25
+
+Why: CLAUDE.md "Engine … is framework-free and deterministic" and intent/02-platform.md invariant 4 (replay gives the same state) are tested only at the `Exchange`/journal level (`ExchangePropertiesTest.java:44`, `M2aPropertiesTest.java:50`); nothing shows the `OrderBook` itself returns the same ids, trades and depth for the same input — the replay checks in `MarketRemainderPropertyTest`/`CancelPropertyTest` compare only ids and depth, not trades.
+
+New test class in package `engine.model`. For seeds 1..200: `List<Action> a = ActionGen.generate(seed, 500)`;
+assert `Runner.run(a).equals(Runner.run(a))` (all types in `Runner.Step` are records or unmodifiable collections,
+so `equals` compares values); on failure, find and print the first differing step index with both steps. Also
+assert that seed 1 and seed 2 give different step lists (non-vacuous). Read `Runner.java` first; do not edit it.
+
+### AUTO-20261125-4 — Market data: a trade queued before a tick goes out in that tick
+- status: todo
+- size: S
+- paths: `backend/app/src/test/java/app/ws/TradeWithinOneTickTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.ws.TradeWithinOneTickTest'`
+- expect: green and deterministic (no sleeps, no real clock): after `onEvents([TradeExecuted])` and one call of `tick()`, the subscribed session has received a `trades` message for that instrument
+- source: docs/backlog/proposals/2026-11-25-analyst.md#4
+- added: 2026-11-25
+
+Why: intent/02-platform.md invariant 2 says "within one market-data tick" (`MarketDataHub.java:45`, 100 ms), but the only test, `WebSocketTest.java:97`, allows 1 000 ms ("a tick or so", i.e. ten ticks) through real sockets and timing. A unit test of `MarketDataHub.tick()` (package-private, `MarketDataHub.java:149`) can check the invariant exactly.
+
+New test in package `app.ws` (same package as `MarketDataHub`, so `tick()` is reachable). Read `MarketDataHub.java`
+(constructor, `onEvents`, `handleTextMessage`, `tick`) and `WebSocketTest.java` (how a client subscribes; message
+shapes) first. Build the hub with a real `application.ExchangeService` in memory if it is cheap to construct (look
+at how `backend/app` tests or `app.config` build it), else a `java.lang.reflect.Proxy` of `TradingService`
+returning empty lists/defaults; `new DevAuth(market)`; a `JsonMapper` as the app builds it. Subscribe a fake
+`WebSocketSession` (a `Proxy` recording `sendMessage` calls) to the instrument's trades channel through
+`handleTextMessage`, call `onEvents(List.of(<a TradeExecuted>))`, then `tick()` once, and assert a trades message
+was sent. Stop the hub's scheduler at the end (`stop()` is package-private) — and if its background ticker can
+race your direct `tick()` call, assert "sent by the time `tick()` returns" rather than "sent by this call".
+If the hub cannot be built without Spring or without changing main code, park the task and say why; do not
+change main code.
+
+### AUTO-20261125-5 — Mobile: a readable message for every refusal code, and a test that keeps it so
+- status: todo
+- size: S
+- paths: `clients/mobile/src/i18n/ru.json`, `clients/mobile/src/i18n/en.json`, `clients/mobile/test/errors.test.mjs`
+- verify: `cd clients/mobile && npm ci && npm test`
+- expect: green; the new test reads every constant of `backend/engine/src/main/java/engine/Rejection.java` and finds `errors.<CODE>` in both `ru.json` and `en.json`; it fails if a constant is added there without a message
+- source: docs/backlog/proposals/2026-11-25-user.md#1
+- added: 2026-11-25
+
+Why: the engine can refuse with 18 codes (`Rejection.java`), the mobile catalogue `errors` has only 14 of them — `MARKET_CLOSED`, `DEFAULTED`, `ALREADY_ANNOTATED`, `NOTHING_TO_PAY` are missing. `clients/mobile/src/components/OrderTicket.tsx:77` calls `t(\`errors.${e.code}\`)` with no `defaultValue`, so an order on a halted market (`Exchange.java:367-368`, `MARKET_CLOSED`) shows the raw key «errors.MARKET_CLOSED» to the person. Also «Недостаточно средств» / «Insufficient funds» (`errors.INSUFFICIENT_FUNDS`) leaves a newcomer guessing: I had 100 000 SPARK and did not know a limit buy reserves price × quantity + fee, or that money in my open orders is already taken.
+
+Add four keys under `errors` in both files (one short sentence, real terms only — the app knows no lore):
+`MARKET_CLOSED` «Торги по этому инструменту сейчас остановлены» / «Trading in this instrument is halted right now»;
+`DEFAULTED` «Эмитент объявил дефолт — операция недоступна» / «The issuer has defaulted — not available»;
+`ALREADY_ANNOTATED` «У этой заявки уже есть запись в журнале сделок» / «This order already has a trade-journal note»;
+`NOTHING_TO_PAY` «Платить нечего» / «Nothing to pay». Reword `INSUFFICIENT_FUNDS` to say why:
+«Недостаточно свободных средств: покупка резервирует цену × количество + комиссию, деньги в открытых заявках заняты» /
+«Not enough free funds: a buy reserves price × quantity + fee, and money in open orders is taken». Keep every other
+value as it is. New test `clients/mobile/test/errors.test.mjs` in the style of `test/i18n.test.mjs` (node:test,
+`readFileSync`): collect the enum constants with a regex over `Rejection.java` (lines that are only `NAME,` or `NAME`)
+and assert each is a key of `errors` in ru and en. Do not edit `test/i18n.test.mjs` or any component. Log the copy
+in `DECISIONS.md` as "copy draft, Aika reviews".
