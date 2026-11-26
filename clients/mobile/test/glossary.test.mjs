@@ -56,3 +56,10 @@ test('the app language maps to a glossary language', () => {
   assert.equal(langOf('kk'), 'ru');
   assert.equal(langOf(undefined), 'ru');
 });
+
+test('a name match sorting late alphabetically still comes before every definition-only match', () => {
+  // «Шаг цены» / «Price step» sorts after the other names, yet its name matches while the others match only by definition
+  const withTick = [...TERMS, term('tick', 'Шаг цены', 'Price step', 'Наименьшее изменение котировки.', 'The smallest move of a quote.')];
+  assert.deepEqual(ids(glossaryRows(withTick, 'цен', 'ru')), ['tick', 'gap', 'limit', 'spread', 'book', 'stop']);
+  assert.deepEqual(ids(glossaryRows(withTick, 'price', 'en')), ['tick', 'gap', 'limit', 'book', 'spread', 'stop']);
+});
