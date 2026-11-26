@@ -786,6 +786,11 @@ Build and CI
   (needs `application`). «решено без Айки — отменяется так: уберите `mistakes`/`ReviewMistake` из `api/openapi.yaml`,
   `make gen-api`, верните `ApiController.sessionReview` к `Review` и удалите `app.review.SessionMistakes`.»
 
+- LE-059: in `Lessons.series_after` each move is one round trip and the fee is charged on the balance after the move
+  (not on the turnover of both legs); a move of −100% or worse leaves 0. `needed_to_recover_bps` rounds down as the
+  task says (−10% → 1111, a hair short of the exact 11.11…%) and returns -1 for a loss of 100% or more. «решено без
+  Айки — отменяется так: поменять две функции в `game3d/scripts/core/lessons.gd` и их тест `test_lessons_series.gd`.»
+
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
 - Intent 01 amended: agents may change `backend/engine` and add tests (Aika: «нет пускай движок тоже правит»), with
