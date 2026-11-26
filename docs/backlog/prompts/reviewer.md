@@ -96,7 +96,8 @@ gh api -X POST repos/Aika8/learning-exchange/issues/<n>/comments -F body=@/tmp/r
   `gh api -X POST repos/Aika8/learning-exchange/issues -f title="[tech-debt] <one line>" -f body="<where, what,
   why it matters, found while reviewing #<n>>" -f "labels[]=tech-debt"`.
 - fail → label `needs-fix` instead. If `fixes` is 2 or more (two fix rounds already used), label `parked`
-  instead and write in the comment what Aika must decide.
+  instead and write in the comment what Aika must decide; then also run
+  `python3 scripts/backlog/backlog.py report-stop --kind parked --subject <task id> --text "<why, the question>"`.
 
 Classify findings like the executor (`docs/backlog/TECH-DEBT.md`): a regression inside the change → a "no" answer;
 the task itself wrong → fail and say "park: <reason>"; outside the task → "Out of scope", not a failure. A new test

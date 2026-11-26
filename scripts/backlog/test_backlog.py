@@ -235,13 +235,17 @@ class IntakeTest(unittest.TestCase):
     def proposal(self, title, size="S", paths="`clients/web/src/x.ts`", verify="`cd clients/web && npm test`"):
         return f"### {title}\n- size: {size}\n- paths: {paths}\n- verify: {verify}\n- expect: green\n\nWhy and what.\n\n"
 
-    def test_cap_of_five_and_filters(self):
+    def test_filters_and_cap(self):
         good = "".join(self.proposal(f"Good {i}") for i in range(7))
         bad = self.proposal("Big", size="M") + self.proposal("CI", paths="`.github/workflows/ci.yml`") + \
             self.proposal("No cmd", verify="run the tests") + self.proposal("First")
         (self.root / "docs/backlog/proposals/2026-12-03-analyst.md").write_text(bad)
         (self.root / "docs/backlog/proposals/2026-12-03-user.md").write_text(good)
-        acc, rej = b.intake("2026-12-03", self.root)
+        orig, b.MAX_INTAKE_PER_DAY = b.MAX_INTAKE_PER_DAY, 5
+        try:
+            acc, rej = b.intake("2026-12-03", self.root)
+        finally:
+            b.MAX_INTAKE_PER_DAY = orig
         self.assertEqual(len(acc), 5)
         text = "\n".join(rej)
         for why in ["not size S", "protected", "no command", "same title", "daily cap"]:
@@ -249,10 +253,12 @@ class IntakeTest(unittest.TestCase):
         tasks = b.parse_tasks((self.root / "docs/backlog/QUEUE.md").read_text())
         self.assertEqual(b.lint(tasks), [])
         self.assertEqual(tasks[-1].id, "AUTO-20261203-5")
-        # idempotent: a second run the same day adds nothing
+        # idempotent for what was taken; what the cap held back enters on the next run
         acc2, _ = b.intake("2026-12-03", self.root)
-        self.assertEqual(acc2, [])
-        self.assertEqual(len(b.parse_tasks((self.root / "docs/backlog/QUEUE.md").read_text())), len(tasks))
+        self.assertEqual(len(acc2), 2)
+
+    def test_the_real_cap_does_not_hold_back_a_normal_day(self):
+        self.assertGreaterEqual(b.MAX_INTAKE_PER_DAY, 20)
 
 
 class RealQueueTest(unittest.TestCase):
@@ -273,6 +279,28 @@ class GlobTest(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class EditsTestsExceptionTest(unittest.TestCase):
+    def test_a_named_existing_test_may_be_modified_by_that_task_only(self):
+        q = QUEUE.replace("- paths: `clients/mobile/src/**`",
+                          "- edits-tests: `clients/mobile/test/old.test.mjs`\n- paths: `clients/mobile/src/**`, `clients/mobile/test/old.test.mjs`")
+        tasks = b.parse_tasks(q)
+        self.assertEqual(b.lint(tasks), [])
+        ok = b.check_paths("claude/le-002", [b.Change("modified", "clients/mobile/test/old.test.mjs")], tasks)
+        self.assertEqual(ok, [])
+        gone = b.check_paths("claude/le-002", [b.Change("removed", "clients/mobile/test/old.test.mjs")], tasks)
+        self.assertTrue(any("existing test" in x for x in gone))
+        other = b.check_paths("claude/le-002", [b.Change("modified", "clients/mobile/test/other.test.mjs")],
+                              b.parse_tasks(q.replace("`clients/mobile/test/old.test.mjs`\n", "`x`\n")))
+        self.assertTrue(other)
+
+    def test_edits_tests_must_be_in_paths(self):
+        q = QUEUE.replace("- paths: `clients/mobile/src/**`", "- edits-tests: `clients/mobile/test/old.test.mjs`\n- paths: `clients/mobile/src/**`")
+        self.assertTrue(any("must also be in paths" in e for e in b.lint(b.parse_tasks(q))))
+
+    def test_report_stop_title(self):
+        self.assertEqual(b.report_stop("env", "step 0", "java MISSING", dry_run=True), "[stopped] env: step 0")
 
 
 class ScrubTest(unittest.TestCase):
