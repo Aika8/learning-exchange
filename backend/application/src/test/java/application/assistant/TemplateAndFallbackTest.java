@@ -40,7 +40,7 @@ class TemplateAndFallbackTest {
     @Test
     void summaryUsesTheReviewAndNeverAdvises() {
         var a = template.answer(new Assistant.Question("Как прошла сессия?", "ru", null), FACTS);
-        assertTrue(a.text().contains("3 заявок, 1 в плюсе"), a.text());
+        assertTrue(a.text().contains("3 заявки, 1 в плюсе"), a.text());
         assertTrue(a.text().contains("−25.00 SPARK"), a.text());
         assertTrue(a.text().contains("−1.40 R"), a.text());
         assertFalse(new AdviceGuard().isAdvice(a.text()), a.text());

@@ -95,7 +95,7 @@ public final class TemplateAssistant implements Assistant {
             long result = f.number("review.result").orElse(0L);
             out.add(en
                     ? orders + " orders, " + wins + " in profit; the result if everything were closed at the last price is " + signedMoney(result) + " SPARK."
-                    : orders + " заявок, " + wins + " в плюсе; результат, если бы всё закрыть по последней цене, " + signedMoney(result) + " SPARK.");
+                    : orders + " " + RuPlural.of(orders, "заявка", "заявки", "заявок") + ", " + wins + " в плюсе; результат, если бы всё закрыть по последней цене, " + signedMoney(result) + " SPARK.");
             f.number("review.expectancyRx100").ifPresent(r -> out.add(en
                     ? "Average result per planned risk: " + rx(r) + " R."
                     : "Средний результат на запланированный риск: " + rx(r) + " R."));

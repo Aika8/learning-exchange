@@ -31,7 +31,7 @@ class M4ContractTest extends ContractTest {
 
         JsonNode a = call("POST", "/assistant/ask", me, "{\"question\":\"Как прошла сессия?\",\"lang\":\"ru\"}", 200, "AssistantAnswer");
         assertEquals("TEMPLATE", a.get("source").asString());
-        assertTrue(a.get("answer").asString().contains("1 заявок"), a.toString());
+        assertTrue(a.get("answer").asString().contains("1 заявка"), a.toString());
         assertTrue(a.get("disclaimer").asString().contains("не инвестиционный совет"));
 
         JsonNode advice = call("POST", "/assistant/ask", me, "{\"question\":\"Should I buy SILK?\",\"lang\":\"en\"}", 200, "AssistantAnswer");
