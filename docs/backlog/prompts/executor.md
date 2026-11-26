@@ -34,6 +34,9 @@ Permissions: in this repository you commit, push to `claude/*` branches and open
 that is the job. You never push to `main` and never merge: merging happens only through the automerge workflow,
 after green CI and the independent review.
 
+Gradle and Maven Central: an HTTP 429 ("Too Many Requests") from `repo.maven.apache.org` while Gradle downloads
+dependencies is not a red build — wait 30 seconds and run the same command again, up to three times (issue #82).
+
 `gh pr` and `gh issue` do not work here (the proxy refuses GraphQL). Use `gh api` (REST) for everything on GitHub.
 `REPO` below is `Aika8/learning-exchange`.
 
@@ -43,7 +46,8 @@ after green CI and the independent review.
    commit what you have to the branch with "WIP:" in the message, push, and park (section 4) saying where you stopped
    and what is left. Never wait in a loop, never poll; a command that runs long runs in the foreground (see 8).
    You may refuse a task at the start: if its description is incomplete or contradicts the code, the intents or the
-   ADRs, do not guess — park it (section 4) with "missing: …" or "contradicts: …".
+   ADRs, decide the smallest reading that is consistent with the code and the intents and write it in `DECISIONS.md`;
+   refuse it (section 4) only if it changes how `game3d` looks or needs money, keys or outside accounts.
 1. The task text printed by `plan` is your whole assignment: description, `paths`, `verify`, `expect`. Do not
    widen it. Do not start a second task.
 2. Claim the task at once, so the next hourly run does not take it too:
@@ -70,7 +74,8 @@ after green CI and the independent review.
    Never write a test that checks the wording of documentation (Markdown prose, README text): it turns CI red for
    every harmless edit. Tests check behaviour, data and code.
 6. A question the files do not answer: follow "do not wait for Aika" in `docs/backlog/README.md` — cheap to undo →
-   decide and write it in `DECISIONS.md` under `## Backlog run (December 2026)`; costly → park.
+   decide and write it in `DECISIONS.md` under `## Backlog run (December 2026)` (with «решено без Айки — отменяется так:
+   …»); costly → still decide, with a `Proposed` ADR first. Never park to wait for Aika.
 7. If you start a server: `make dev PORT=8091 JOURNAL=memory` (never 8080), and stop it before you finish
    (`make stop PORT=8091`; `make ps` shows nothing of yours).
 8. Check, all three, and read the output. `make test` takes 3–8 minutes: run it in the foreground with the Bash

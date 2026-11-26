@@ -23,6 +23,9 @@ through the automerge workflow after green CI and your pass.
 Long commands (Gradle, `make`): run them in the foreground with the Bash `timeout` set to 600000; never end your
 turn while a command is still running (an ended turn ends the run).
 
+Gradle and Maven Central: an HTTP 429 ("Too Many Requests") from `repo.maven.apache.org` while Gradle downloads
+dependencies is not a red build — wait 30 seconds and run the same command again, up to three times (issue #82).
+
 Use `gh api` (REST) only; `gh pr` does not work here. Read `CLAUDE.md` and the section "Rule for every run" of
 `docs/backlog/README.md`.
 
