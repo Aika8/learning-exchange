@@ -26,3 +26,11 @@ Written by `scripts/backlog/backlog.py intake` (GitHub Actions, daily): which pr
 - accepted: AUTO-20261126-9 ← docs/backlog/proposals/2026-11-26-user.md#6 «Mobile: ru and en name the same thing, and the currency tab is not called «Exchange»»
 - accepted: AUTO-20261126-10 ← issue#113#1 «Session review and its mistakes come from one sequencer call»
 - accepted: AUTO-20261126-11 ← docs/backlog/tech-debt/2026-11-27-LE-405-1.md#1 «Make the session review use the one-bank-day "after a loss" window»
+
+## 2026-11-27
+- accepted: AUTO-20261127-1 ← docs/backlog/proposals/2026-11-27-analyst.md#1 «Assistant: «А что такое спред?» and «Can you explain spread?» are term questions again»
+- accepted: AUTO-20261127-2 ← docs/backlog/proposals/2026-11-27-analyst.md#2 «ArchUnit: the engine also never reads ZonedDateTime/OffsetDateTime/LocalTime now, Math.random, ThreadLocalRandom, SecureRandom or UUID.randomUUID»
+- accepted: AUTO-20261127-3 ← docs/backlog/proposals/2026-11-27-analyst.md#3 «ArchUnit: money is never a double in the API DTOs and the bots either»
+- accepted: AUTO-20261127-4 ← docs/backlog/proposals/2026-11-27-analyst.md#4 «ArchUnit: production code never calls the five-sim-minute overloads of TradingMistakes.find»
+- accepted: AUTO-20261127-5 ← docs/backlog/proposals/2026-11-27-analyst.md#5 «Assistant cache: an answer the template gave because Claude failed is not kept»
+- accepted: AUTO-20261127-6 ← docs/backlog/proposals/2026-11-27-analyst.md#6 «Assistant cache: two identical questions at the same moment reach the delegate once»
