@@ -5595,3 +5595,147 @@ Then keep a `Map<Key, CompletableFuture<Answer>>` of calls in flight: the first 
 calls the delegate outside the lock; others with the same key wait for it. On an exception or a `null` answer remove the
 in-flight entry and cache nothing (as now: the waiting caller gets the same exception or `null`). Different keys never
 wait for each other. LRU size and the key stay as they are. One bullet in `DECISIONS.md`.
+
+### AUTO-20261127-7 — Login with a Cyrillic name works: the dev token is ASCII
+- status: todo
+- size: S
+- paths: `backend/app/src/main/java/app/web/DevAuth.java`, `backend/app/src/test/java/app/DevAuthNonAsciiNameTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.DevAuthNonAsciiNameTest' --tests 'app.ContractTest' --tests 'app.WebSocketTest'`
+- expect: green; the new test logs in as «Асель», gets a token of ASCII characters only, and `GET /api/v1/me` with that token answers 200 with name «Асель»; a Latin name («Aika») still gets exactly `dev-acc-aika`
+- source: docs/backlog/proposals/2026-11-27-user.md#1
+- added: 2026-11-27
+- priority: bug
+
+Why: `POST /api/v1/auth/dev-login {"name":"Асель"}` answers 200 with `"token":"dev-acc-асель"`. A browser cannot put that in a header: `fetch` throws «Cannot convert argument to a ByteString … greater than 255» before the request leaves, so the mobile home shows «Добрый день, …» and «Сервер недоступен», and the web ticket says «Сервер недоступен — запущен ли make dev?» — while the server runs. `curl` with the same token gets `UNAUTHORIZED` «missing or unknown dev token». Nothing on the login screen says «Latin letters only», and a newcomer here has a Cyrillic name.
+
+Read `DevAuth.java` first. `tokenFor(accountId)` returns `PREFIX + URLEncoder.encode(accountId, UTF_8)`;
+`accountId(headerOrToken)` takes the part after `PREFIX`, decodes it with `URLDecoder.decode(…, UTF_8)` (an
+`IllegalArgumentException` from a broken `%` sequence → `Unauthorized`), then looks the account up as now. An ASCII
+id like `acc-aika` encodes to itself, so every existing token, journal and bot keeps working; account ids do not
+change (they stay `acc-асель`). The WebSocket hub (`MarketDataHub`) already URL-decodes the `?token=` value once
+and clients `encodeURIComponent` it, so the encoded token survives that path; do not change the hub. Clients and the
+contract are unchanged (the token is an opaque string). The new test is a `@SpringBootTest` like `ContractTest`:
+login «Асель», assert every char of the token is < 128, `GET /me` with it → 200; plus a unit check that
+`tokenFor("acc-aika")` is `dev-acc-aika`. In `DECISIONS.md`: «решено без Айки: Cyrillic names broke login; options
+(a) percent-encode the token, (b) refuse non-Latin names, (c) transliterate the id; chosen (a): no new refusal, ids and
+old tokens unchanged; undo by reverting DevAuth».
+
+### AUTO-20261127-8 — Depositing an asset nobody trades is refused
+- status: todo
+- size: S
+- paths: `backend/app/src/main/java/app/web/ApiController.java`, `backend/app/src/test/java/app/DepositUnknownAssetContractTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.DepositUnknownAssetContractTest' --tests 'app.ContractTest' --tests 'app.M2bContractTest' --tests 'app.M2cContractTest'`
+- expect: green; `POST /me/deposits {"asset":"USD","amount":100}` answers 404 `UNKNOWN_INSTRUMENT` and `/me` has no `USD` line; `{"asset":"SPARK",…}`, `SILK`, `FORGE`, `HBND` deposits still answer 200
+- source: docs/backlog/proposals/2026-11-27-user.md#2
+- added: 2026-11-27
+- priority: bug
+
+Why: on the API walk `POST /api/v1/me/deposits {"asset":"USD","amount":100}` answered 200 and `/me` then showed `{"asset":"USD","available":100}`; the statement lists «DEPOSIT USD 100». A newcomer who types the real currency they know now owns a balance no instrument can trade or sell — money that is there and useless, with no message.
+
+In `ApiController.deposit` (line ~59), before `market.deposit(…)`: if `body.asset()` is neither the `base` nor the
+`quote` of any of `market.instruments()`, throw the same rejection the controller uses for an unknown instrument
+(`UNKNOWN_INSTRUMENT`, mapped by `ApiErrors`). Do it in the web adapter, not in the engine: bots (`BotFactory`) and
+journal replay call `deposit` too, and must not change. No new problem code, so the contract and the clients stay
+as they are. The new test follows `M2bContractTest` (`call(...)` validated against `api/openapi.yaml`). In
+`DECISIONS.md`: «решено без Айки: which code for an unknown deposit asset; options UNKNOWN_INSTRUMENT / INVALID_AMOUNT
+/ a new UNKNOWN_ASSET; chosen UNKNOWN_INSTRUMENT: no contract change and the amount is not what is wrong; undo by
+removing the check».
+
+### AUTO-20261127-9 — Mobile: the order ticket shows what you have, and an old refusal goes away when you change the order
+- status: todo
+- size: S
+- paths: `clients/mobile/src/components/OrderTicket.tsx`, `clients/mobile/src/i18n/ru.json`, `clients/mobile/src/i18n/en.json`, `clients/mobile/test/ticket-available.test.mjs`
+- verify: `cd clients/mobile && npm ci && npm test`
+- expect: green; the new test finds `ticket.available` in ru and en and finds in `OrderTicket.tsx` that `setResult(null)` runs when the type, price or quantity changes
+- source: docs/backlog/proposals/2026-11-27-user.md#3
+- added: 2026-11-27
+
+Why: in the mobile ticket («Покупка SILK») I typed too much and got «Недостаточно средств». The ticket shows «Сумма ≈ 999 999,00 SPARK» but not what I have, so I did not know by how much I was over. Then I switched to «Рыночная» and lowered the amount to ≈ 101,96 SPARK — the red «Недостаточно средств» stayed under the new, affordable order until I sent it.
+
+In `OrderTicket.tsx`: under «Сумма» / «Комиссия» add one row `ticket.available` — ru «Доступно», en «Available» —
+with the available balance from the `['me']` query that the ticket's screen already loads (for a buy: the quote
+asset, e.g. SPARK; for a sell: the base asset, e.g. SILK), formatted like the other rows. Clear `result`
+(`setResult(null)`) whenever side, type, price or quantity change (`watch` is already there). Change no refusal text
+(that is LE-099 / AUTO-20261125-5 territory). The new test reads the files as text like `test/i18n.test.mjs` does.
+
+### AUTO-20261127-10 — Mobile: a filled order says how much was bought and where its price is
+- status: todo
+- size: S
+- paths: `clients/mobile/src/components/OrderTicket.tsx`, `clients/mobile/src/i18n/ru.json`, `clients/mobile/src/i18n/en.json`, `clients/mobile/test/ticket-placed.test.mjs`
+- verify: `cd clients/mobile && npm ci && npm test`
+- expect: green; the new test finds `ticket.placedFilled` in ru and en, each with `{{qty}}` and `{{asset}}`, and the ru text names «Выписк»
+- source: docs/backlog/proposals/2026-11-27-user.md#4
+- added: 2026-11-27
+
+Why: after a market buy the ticket said only «Заявка №55503: Исполнена». The first question of a newcomer is «what did I pay?»; the answer (1 × 101,96, комиссия 0,10, спред 0,11) is in «Выписка», two screens away, and nothing says so. The order the API returns has `filledQty` but no average price (`price` is 0 for a market order), so the ticket cannot show the price itself.
+
+When the placed order has `filledQty > 0`, show `ticket.placedFilled` instead of `ticket.placed`: ru «Заявка №{{id}}:
+{{status}} — {{qty}} {{asset}}. Цена, комиссия и спред — в Выписке.», en «Order #{{id}}: {{status}} — {{qty}}
+{{asset}}. Price, fee and spread are in the Statement.» (`qty` formatted with the instrument's `qtyScale`, `asset` =
+the base). An order with nothing filled keeps `ticket.placed`. Words only; no new navigation.
+
+### AUTO-20261127-11 — Game: while sailing, the goal says how to come back, not «sail out» again
+- status: todo
+- size: S
+- paths: `game3d/scripts/core/goals.gd`, `game3d/i18n/strings.csv`, `game3d/tests/unit/test_goal_at_sea.gd`
+- verify: `make test-game3d && python3 game3d/tools/check_data.py`
+- expect: all GUT tests pass; the new test: `Goals.next(GameFlow.State.SAILING, {...})` has id `BACK_TO_PORT`, place "ship", action `GameFlow.State.PORT`, and `GOAL_BACK_TO_PORT` has ru and en
+- source: docs/backlog/proposals/2026-11-27-user.md#5
+- added: 2026-11-27
+- needs: godot
+
+Why: walking the first day, at the wheel the goal is `GOAL_SAIL_OR_STAY` «Реши у штурвала «Попутчика»: выйти в рейс или остаться в Гавани.» I choose to sail. Now I am at sea (`goals.gd` `_S.SAILING`) and the goal is the same sentence again — «выйти в рейс или остаться» — although I already went out. I would not know that the next step is to come back to port and then go to the Chronicler.
+
+In `goals.gd` append `BACK_TO_PORT` at the **end** of `enum Id` (do not reorder) and make `_S.SAILING` return
+`_goal(Id.BACK_TO_PORT, "ship", _S.PORT)`. Add `GOAL_BACK_TO_PORT` to `strings.csv`: ru «Ты в рейсе: время идёт,
+груз (позиция) остаётся открытым. Вернись к причалу у штурвала — вечером Летописец покажет итог дня.» / en «You are
+at sea: time passes and your cargo (position) stays open. Steer back to the pier — in the evening the Chronicler
+shows how the day went.» The first-day walk in `test_first_day.gd` still reaches the chronicle (the goal's action
+is PORT, as before). Text and goal logic only; nothing about how it is shown. Do not edit existing tests. Mark the
+text in `DECISIONS.md` as "copy draft, Aika reviews".
+
+### AUTO-20261127-12 — Game: the first-order goal says what an order is
+- status: todo
+- size: S
+- paths: `game3d/i18n/strings.csv`, `game3d/tools/test_first_order_words.py`
+- verify: `python3 -m unittest discover -s game3d/tools -p 'test_*.py' && python3 game3d/tools/check_data.py`
+- expect: green; the new test finds «сколько» and «цен» in ru `GOAL_FIRST_ORDER` and «how many» and «price» in en
+- source: docs/backlog/proposals/2026-11-27-user.md#6
+- added: 2026-11-27
+
+Why: `GOAL_FIRST_ORDER` «Поставь первую заявку на Лестнице (стакан заявок) в зале Биржи.» explains the Ladder but not «заявка» itself. As a newcomer I do not know that an order is «what to buy or sell, how many, at what price», so I would stand at the Ladder not knowing what to type.
+
+Change only that one row: ru «Поставь первую заявку (что купить или продать, сколько и по какой цене) на Лестнице
+(стакан заявок) в зале Биржи.» / en «Place your first order (what to buy or sell, how many, at what price) on the
+Ladder (order book) in the Exchange hall.» Do not name an instrument and do not say which side to take (no advice;
+LE-238 checks that hints never name an instrument). The test reads `strings.csv` with `csv.DictReader`, stdlib only.
+Log it in `DECISIONS.md` as "copy draft, Aika reviews".
+
+### AUTO-20261127-13 — Mobile: the currency account is not counted in «шт.»
+- status: todo
+- size: S
+- paths: `clients/mobile/src/app/home.tsx`, `clients/mobile/src/i18n/ru.json`, `clients/mobile/src/i18n/en.json`, `clients/mobile/test/home-currency.test.mjs`
+- verify: `cd clients/mobile && npm ci && npm test`
+- expect: green; the new test finds that the `balance-AMBER` row in `home.tsx` does not use `home.pcs`, and that ru and en `home.fxUnit` exist and name the real currency («доллар» / «dollar»)
+- source: docs/backlog/proposals/2026-11-27-user.md#7
+- added: 2026-11-27
+
+Why: on the home screen: «Валютный счёт — AMBER · 0 шт.» Money is not counted in pieces, and AMBER is not explained here; only the instrument list, two screens later, says «Валютная пара AMBER/SPARK (как USD/KZT)». Rule: the lore name always next to the real term.
+
+In `home.tsx` the AMBER row uses a new key `home.fxUnit`: ru «{{amount}} AMBER (учебный доллар)», en «{{amount}}
+AMBER (practice dollar)», with `amount` formatted like the other balances (not `home.pcs`). `home.pcs` stays for
+shares (SILK). Words only.
+
+### AUTO-20261127-14 — Mobile: the trade-journal example is not trader jargon
+- status: todo
+- size: S
+- paths: `clients/mobile/src/i18n/ru.json`, `clients/mobile/src/i18n/en.json`, `clients/mobile/test/journal-placeholder.test.mjs`
+- verify: `cd clients/mobile && npm ci && npm test`
+- expect: green; the new test checks that `journal.whyPlaceholder` contains neither «пробой» nor «breakout» and is not empty in ru and en
+- source: docs/backlog/proposals/2026-11-27-user.md#8
+- added: 2026-11-27
+
+Why: the first thing in the ticket's «Дневник сделки» is the field «Почему вхожу» with the example «например, пробой диапазона» (en «e.g. breakout above the range»). A newcomer does not know what a range breakout is, and the example should show *how to write a reason*, not teach a trading signal.
+
+Change only `journal.whyPlaceholder`: ru «например, хочу проверить, как исполняется лимитная заявка», en «e.g. I want to
+see how a limit order gets filled». It names a learning reason, not a market signal, so it cannot read as advice.
