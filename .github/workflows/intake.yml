@@ -20,14 +20,14 @@ permissions:
   contents: write
   issues: write
 
-concurrency:
-  group: intake
-  cancel-in-progress: false
-
 jobs:
   intake:
     if: github.event_name != 'issues' || contains(github.event.issue.labels.*.name, 'tech-debt')
     runs-on: ubuntu-latest
+    # Job-level, so an unrelated issue event (skipped by the `if`) never replaces a pending run that matters.
+    concurrency:
+      group: intake
+      cancel-in-progress: false
     timeout-minutes: 3
     steps:
       - uses: actions/checkout@v4
@@ -65,4 +65,4 @@ jobs:
         if: steps.pause.outputs.paused != 'true'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 scripts/backlog/backlog.py close-issues /tmp/accepted.txt
+        run: python3 scripts/backlog/backlog.py close-issues

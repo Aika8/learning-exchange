@@ -5,11 +5,12 @@ queued task she writes) decides what to do with them.
 
 Each finding is its own file, so parallel PRs never conflict: `docs/backlog/tech-debt/<YYYY-MM-DD>-<task id>-<n>.md`,
 added in the PR of the task during which it was found. It is written **as a proposal** (`docs/backlog/PROPOSALS.md`),
-so the intake turns it into a task by itself — behaviour bugs first:
+so the intake turns it into a task by itself — behaviour bugs first. `kind` is `bug` (wrong behaviour, picked
+first) or `debt` (everything else):
 
 ```markdown
 ### <short imperative title of the fix>
-- kind: bug            (bug = wrong behaviour, picked first; debt = everything else)
+- kind: bug
 - size: S
 - paths: `the/file/to/fix.java`, `the/new/test/FixTest.java`
 - verify: `<command>`

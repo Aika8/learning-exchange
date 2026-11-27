@@ -41,5 +41,5 @@ What to do, in plain words, self-contained: what to read first, what to change, 
 ```
 
 Field order does not matter; a blank line ends the fields. Larger ideas (size M or L), questions for Aika and
-things that need a screen go in the same file under `## For Aika`, as plain bullets with no `###` heading, so the
+things that need a screen go in the same file under `## After the holiday`, as plain bullets with no `###` heading, so the
 intake never picks them up.

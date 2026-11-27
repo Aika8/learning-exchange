@@ -290,16 +290,26 @@ class TechDebtIntakeTest(unittest.TestCase):
         acc2, _ = b.intake("2026-11-27", self.root, issues)   # idempotent
         self.assertEqual(acc2, [])
 
-    def test_closing_reads_only_issue_sources(self):
-        calls = []
+    def test_an_issue_closes_only_when_all_its_proposals_are_tasks(self):
+        two = self.DEBT + "\n" + self.DEBT.replace("Stop below zero", "Second thing").replace("- size: S", "- size: M")
+        issues = [{"number": 7, "body": two}, {"number": 8, "body": self.DEBT.replace("Stop below zero", "Other")}]
+        b.intake("2026-11-27", self.root, issues)
+        tasks = b.parse_tasks((self.root / "docs/backlog/QUEUE.md").read_text())
+        self.assertEqual([n for n, _ in b.issues_to_close(issues, tasks)], [8])
+
+    def test_kind_with_a_comment_and_strangers(self):
+        noted = self.DEBT.replace("- kind: bug", "- kind: bug            (bug = wrong behaviour)")
+        (self.root / "docs/backlog/tech-debt/x.md").write_text(noted)
+        b.intake("2026-11-27", self.root, [])
+        t = b.parse_tasks((self.root / "docs/backlog/QUEUE.md").read_text())[-1]
+        self.assertEqual(t.fields.get("priority"), "bug")
         orig = b.gh
-        b.gh = lambda path, method="GET", fields=None, paginate=False: calls.append((method, path, fields)) or {}
+        b.gh = lambda *a, **k: [{"number": 1, "author_association": "NONE", "body": ""},
+                                {"number": 2, "author_association": "OWNER", "body": ""}]
         try:
-            b.close_taken_issues("o/r", ["AUTO-20261127-1 ← issue#31#1 «x»",
-                                         "AUTO-20261127-2 ← docs/backlog/tech-debt/a.md#1 «y»"])
+            self.assertEqual([i["number"] for i in b.open_debt_issues("o/r")], [2])
         finally:
             b.gh = orig
-        self.assertEqual([c[:2] for c in calls], [("POST", "repos/o/r/issues/31/comments"), ("PATCH", "repos/o/r/issues/31")])
 
 
 class RealQueueTest(unittest.TestCase):

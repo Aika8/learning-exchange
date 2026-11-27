@@ -570,8 +570,9 @@ def intake(day: str, root: Path = ROOT, issues: list[dict] | None = None) -> tup
         if src in taken_sources:
             continue
         probs = proposal_problems(p, tasks)
-        if p.fields.get("kind") and p.fields["kind"] not in ("bug", "debt", "proposal"):
-            probs.append(f"kind '{p.fields['kind']}' is not bug, debt or proposal")
+        kind = (p.fields.get("kind") or "").split()[0] if p.fields.get("kind") else ""
+        if kind and kind not in ("bug", "debt", "proposal"):
+            probs.append(f"kind '{kind}' is not bug, debt or proposal")
         if not probs and already_today + len(accepted) >= MAX_INTAKE_PER_DAY:
             probs = [f"daily cap of {MAX_INTAKE_PER_DAY} reached"]
         if probs:
@@ -580,7 +581,7 @@ def intake(day: str, root: Path = ROOT, issues: list[dict] | None = None) -> tup
         new_id = f"AUTO-{day.replace('-', '')}-{already_today + len(accepted) + 1}"
         fields = {"status": "todo", "size": "S", "paths": p.fields["paths"],
                   "verify": p.fields["verify"], "expect": p.fields["expect"], "source": src, "added": day}
-        if p.fields.get("kind") == "bug":
+        if kind == "bug":
             fields["priority"] = "bug"   # behaviour bugs are picked before everything else (next_task)
         for extra in ("depends", "needs"):
             if p.fields.get(extra):
@@ -607,19 +608,38 @@ def intake(day: str, root: Path = ROOT, issues: list[dict] | None = None) -> tup
     return accepted, rejected
 
 
+TRUSTED_AUTHORS = {"OWNER", "MEMBER", "COLLABORATOR"}
+
+
 def open_debt_issues(repo: str) -> list[dict]:
+    """Open `tech-debt` issues written by the owner or collaborators (the runs act as Aika) — never by strangers."""
     items = gh(f"repos/{repo}/issues?state=open&labels=tech-debt&per_page=100", paginate=True) or []
-    return [i for i in items if "pull_request" not in i]
+    return [i for i in items if "pull_request" not in i and i.get("author_association", "OWNER") in TRUSTED_AUTHORS]
 
 
-def close_taken_issues(repo: str, accepted: list[str]) -> None:
-    """After the queue commit is pushed: close each tech-debt issue that became a task, saying which."""
-    for line in accepted:
-        m = re.match(r"^(AUTO-[\w-]+) ← issue#(\d+)#", line)
-        if m:
-            gh(f"repos/{repo}/issues/{m.group(2)}/comments", method="POST",
-               fields={"body": f"Became task {m.group(1)} in docs/backlog/QUEUE.md (intake)."})
-            gh(f"repos/{repo}/issues/{m.group(2)}", method="PATCH", fields={"state": "closed"})
+def issues_to_close(issues: list[dict], tasks: list[Task]) -> list[tuple[int, list[str]]]:
+    """An issue is closed only when every proposal in it is already a task (in the pushed queue)."""
+    by_source = {t.fields.get("source"): t.id for t in tasks if t.fields.get("source")}
+    out = []
+    for i in issues:
+        props = parse_proposals(scrub_attribution(i.get("body") or ""))
+        srcs = [f"issue#{i['number']}#{p.id.split('-')[1]}" for p in props]
+        if srcs and all(s in by_source for s in srcs):
+            out.append((i["number"], [by_source[s] for s in srcs]))
+    return out
+
+
+def close_taken_issues(repo: str, root: Path = ROOT) -> None:
+    """After the queue commit is pushed: close each tech-debt issue all of whose proposals are tasks. Re-checked on
+    every run, so an issue a failed run left open is closed by the next one; one bad issue never stops the others."""
+    tasks = parse_tasks((root / QUEUE).read_text(encoding="utf-8"))
+    for number, ids in issues_to_close(open_debt_issues(repo), tasks):
+        try:
+            gh(f"repos/{repo}/issues/{number}/comments", method="POST",
+               fields={"body": f"Became task(s) {', '.join(ids)} in docs/backlog/QUEUE.md (intake)."})
+            gh(f"repos/{repo}/issues/{number}", method="PATCH", fields={"state": "closed"})
+        except RuntimeError as e:
+            print(f"issue #{number}: not closed ({e}); the next intake run tries again")
 
 
 # ---------------------------------------------------------------- attribution
@@ -922,7 +942,7 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("intake"); s.add_argument("--date", default=dt.date.today().isoformat())
     s.add_argument("--issues", action="store_true", help="also read open tech-debt issues (GitHub)")
     s.add_argument("--accepted-out", help="write the accepted lines here (for close-issues after the push)")
-    s = sub.add_parser("close-issues"); s.add_argument("accepted_file")
+    s = sub.add_parser("close-issues"); s.add_argument("accepted_file", nargs="?", help="unused; kept for old callers")
     s = sub.add_parser("automerge"); s.add_argument("--dry-run", action="store_true")
     sub.add_parser("plan", help="executor: what to do in this run (one line: MOVE detail)")
     s = sub.add_parser("prod-changes", help="reviewer: changed files that are not tests or docs (for the vacuum check)")
@@ -948,15 +968,20 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "scrub":
         return scrub_event(a.event, a.dry_run)
     if a.cmd == "intake":
-        acc, rej = intake(a.date, issues=open_debt_issues(repo_slug()) if a.issues else None)
+        issues = None
+        if a.issues:
+            try:
+                issues = open_debt_issues(repo_slug())
+            except RuntimeError as e:   # GitHub down must not hold back the day's proposals
+                print(f"tech-debt issues not read: {e}")
+        acc, rej = intake(a.date, issues=issues)
         if a.accepted_out:
             with open(a.accepted_out, "a", encoding="utf-8") as fh:
                 fh.write("".join(x + "\n" for x in acc))
         print("\n".join([f"accepted: {x}" for x in acc] + [f"not taken: {x}" for x in rej]) or "nothing")
         return 0
     if a.cmd == "close-issues":
-        p = Path(a.accepted_file)
-        close_taken_issues(repo_slug(), p.read_text(encoding="utf-8").splitlines() if p.exists() else [])
+        close_taken_issues(repo_slug())
         return 0
 
     if a.cmd == "prod-changes":
