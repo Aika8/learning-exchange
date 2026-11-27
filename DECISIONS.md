@@ -797,6 +797,13 @@ Build and CI
   map with a one-line reason. Not taken: also banning money-named locals (ArchUnit cannot see locals) or
   pre-listing names "just in case". Решено без Айки — отменяется так: добавить запись в `RATIO_ALLOW_LIST` или
   удалить тест.
+- LE-017: what the mutation gate does when `backend/quality-gates/<gate>/` holds no `*.txt` (or a file that is not one
+  integer 0..100) — chosen: the build fails with a message naming the folder, so a gate cannot vanish silently. Not
+  taken: treating it as threshold 0 (deleting files would then switch the gate off). Also chosen: PIT core 1.30.2 and
+  `pitest-junit5-plugin` 1.2.3 (latest on Maven Central) with plugin `info.solidsoft.pitest` 1.19.0, threads = all
+  cores, no `*PropertiesTest` / `*PropertyTest` exclusion (the full run takes about 3 minutes, under the 10-minute
+  limit). Решено без Айки — отменяется так: in `ext.mutationThreshold` of the root `build.gradle` return 0 instead of
+  throwing; change the versions in `ext.applyMutationGate`.
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
