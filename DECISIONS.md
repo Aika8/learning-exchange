@@ -827,6 +827,13 @@ Build and CI
   too. Read as: that case is tested, and so are two cases that do fail before the fix — an entry 2 bank days after a
   loss with `day-millis=60000` is not revenge, an entry 0.9 bank day after a loss with `day-millis=600000` (9 sim
   minutes) is. «решено без Айки — отменяется так: delete the two extra tests in `SessionMistakesWindowTest.java`.»
+- LE-409: Mara's balloon `TALK_MARA_FIRST_6` with «(a moon is a month of expenses)» came to 166 characters, over the
+  150-character balloon limit (`comic_script.gd` MAX_CHARS). Chosen: keep every idea and shorten the English wording —
+  «distance to the stop» → «stop distance», «the crates on the pier» → «pier crates» (148 characters); the Russian
+  line fits as it is (149). Not taken: dropping «Then a plan with me.» (loses the next step), raising the limit
+  (out of the task's paths, changes how balloons cover the picture). Решено без Айки — отменяется так: вернуть
+  прежние слова в `game3d/i18n/talk.csv` (нужно будет убрать что-то другое, чтобы влезть в 150) и перегенерировать
+  `docs/design/comic-script.md` (`python3 game3d/tools/comic_script.py`).
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
