@@ -851,6 +851,12 @@ Build and CI
   expenses): crates next to me. Then the plan.» (148) — both keep LE-407's «рядом со мной» / "next to me"; «тут» and
   "the … right here" dropped to fit 150. Решено без Айки — отменяется так: поменять слова строки `TALK_MARA_FIRST_6`
   в `talk.csv` и перегенерировать `comic-script.md`.
+- AUTO-20261127-8: `POST /me/deposits` of an asset that is neither the base nor the quote of any instrument (e.g.
+  `USD`) is refused in the web adapter (`ApiController.deposit`), not in the engine — bots and journal replay deposit
+  through the same port and stay as they are. Which code: options UNKNOWN_INSTRUMENT / INVALID_AMOUNT / a new
+  UNKNOWN_ASSET; chosen UNKNOWN_INSTRUMENT (404): no contract change and the amount is not what is wrong. The
+  contract does not list 404 for this operation yet (the response is still a valid `Problem`). Решено без Айки —
+  отменяется так: убрать проверку в `ApiController.deposit`.
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
