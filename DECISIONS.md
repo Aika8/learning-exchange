@@ -834,6 +834,11 @@ Build and CI
   Options not taken: moving the crates (changes how game3d looks); naming the debt chest (it is farther than Mara).
   «решено без Айки — отменяется так: revert the LE-407 commit in `strings.csv`, `talk.csv`, `comic-script.md` and
   delete the test.»
+- AUTO-20261126-11: the task's expect ("a revenge entry 0.9 bank day after a loss with `day-millis=60000` is found
+  by `SessionMistakes`, failed before the fix") cannot fail before the fix: 54 s is inside the old 5-sim-minute window
+  too. Read as: that case is tested, and so are two cases that do fail before the fix — an entry 2 bank days after a
+  loss with `day-millis=60000` is not revenge, an entry 0.9 bank day after a loss with `day-millis=600000` (9 sim
+  minutes) is. «решено без Айки — отменяется так: delete the two extra tests in `SessionMistakesWindowTest.java`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
