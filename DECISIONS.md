@@ -804,6 +804,13 @@ Build and CI
   cores, no `*PropertiesTest` / `*PropertyTest` exclusion (the full run takes about 3 minutes, under the 10-minute
   limit). Решено без Айки — отменяется так: in `ext.mutationThreshold` of the root `build.gradle` return 0 instead of
   throwing; change the versions in `ext.applyMutationGate`.
+- LE-405: how the "after a loss" window (B8/B10) becomes one bank day — chosen: `TradingMistakes.AFTER_LOSS_BANK_DAYS = 1`,
+  `TradingMistakes.afterLossWindow(dayMillis)` and a new `find(…, quotes, afterLossWindow)` overload; the old
+  overloads keep `AFTER_LOSS_WINDOW = 5 * SIM_MINUTE` as the default, so existing tests stay as they are. The only
+  production caller, `app.review.SessionMistakes`, is outside the task's paths, so it still uses the old window until
+  it passes `afterLossWindow(dayMillis)` (tech debt `docs/backlog/tech-debt/2026-11-27-LE-405-1.md`). Not taken:
+  changing the default (breaks the existing B8/B10 tests, which use `DAY = 60_000`). «решено без Айки — отменяется
+  так: вернуть константу (удалить перегрузку и `afterLossWindow`)».
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
