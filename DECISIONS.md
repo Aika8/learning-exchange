@@ -853,3 +853,19 @@ Build and CI
   the whole file each time); a `count()` on the `Journal` port (changes `backend/application` and both adapters).
   Решено без Айки — отменяется так: delete `CountingJournal` and the controller, give the `journal` bean back the
   type `Journal`, drop `/health` and `Health` from `api/openapi.yaml` and rerun `make gen-api`.
+- Decided without Aika on 2026-11-27 (her standing words «меня ничего не должно ждать»; each undone as said):
+  - LE-092: the plural exception also covers `TemplateWordsExplainedTest.java:47` (option A); LE-092 is unparked.
+  - CI runs the games' GUT tests in a `game` job with a headless Godot (option A); automerge waits for every check.
+  - Intake: up to 50 a day in every document (option A).
+  - "After a loss" = one bank day, not five sim minutes (option Б, LE-405).
+  - Term questions only when the phrase starts the question or names a glossary term, with "my" numbers added (LE-406).
+  - The provisions crates: the words follow the place in the code (LE-407); the glossary gets a home-screen entry
+    (LE-408); Mara says a moon is a month of expenses (LE-409); the dead game3d key `HARBOUR_MARA` goes (LE-410).
+  - Splitting Mara's first talk and a captain's reply to the child's chest line need new comic panels
+    (`game3d/data/talks.json`), so they are in `docs/backlog/AFTER-HOLIDAY.md`.
+  - B5 "buy before the open" stays as LE-057 built it until the sim has an open (ADR-0041 brings dawn liquidity).
+  - Tech debt in two copies of the engine clock rule (`docs/backlog/tech-debt/2026-11-27-LE-013-1.md`): kept, the
+    old test is frozen.
+  - Tech debt becomes tasks through intake (files and `tech-debt` issues in the proposal format; `kind: bug` first);
+    intake runs after every automerge sweep that merged something and on tech-debt issues, cron as a fallback.
+  - Maven Central 429: Gradle retries up to 8 times from 3 s (`gradle.properties`); undo by deleting the two lines.

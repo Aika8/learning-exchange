@@ -96,8 +96,9 @@ gh api -X POST repos/Aika8/learning-exchange/issues/<n>/comments -F body=@/tmp/r
 
 - pass → `gh api -X POST repos/Aika8/learning-exchange/issues/<n>/labels -f "labels[]=review:pass"`. With a pass
   there is no fix round to turn "Out of scope" findings into files, so open one issue per finding instead:
-  `gh api -X POST repos/Aika8/learning-exchange/issues -f title="[tech-debt] <one line>" -f body="<where, what,
-  why it matters, found while reviewing #<n>>" -f "labels[]=tech-debt"`.
+  `gh api -X POST repos/Aika8/learning-exchange/issues -f title="[tech-debt] <one line>" -F body=@/tmp/debt.md -f "labels[]=tech-debt"`,
+  where `/tmp/debt.md` is written in the format of `docs/backlog/TECH-DEBT.md` (`### title`, `kind: bug|debt`,
+  `size`, `paths`, `verify`, `expect`, `why`): the intake then turns it into a task by itself, bugs first.
 - fail → label `needs-fix` instead. If `fixes` is 2 or more (two fix rounds already used), label `parked`
   instead and write in the comment what Aika must decide; then also run
   `python3 scripts/backlog/backlog.py report-stop --kind parked --subject <task id> --text "<why, the question>"`.

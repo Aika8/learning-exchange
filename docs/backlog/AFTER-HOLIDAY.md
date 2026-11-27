@@ -13,5 +13,11 @@ outside accounts, or touch a protected path. Nothing in the queue waits for any 
 - **The dev server's interface**: `make dev` listens on every interface; localhost-only changes how the phone connects.
 - **Mara's provisions as a drawn panel** (today only the text of her last balloon says it).
 - **Screenshot checks in CI**: a `make screenshots` target and a CI job, once they have been stable for a week.
-- **Gradle against Maven Central 429** at the root: a warm cache or a mirror in `scripts/cloud/setup-env.sh`.
+- **Gradle against Maven Central 429** at the root: retries are in `gradle.properties` now; removing the cause needs
+  the Gradle dependency cache to survive between cloud sessions. That is only possible through the environment's
+  Setup script (claude.ai → Code → environment `Default` → Setup script): its result is snapshotted, so a script that
+  also downloads the three repositories' dependencies once would keep `~/.gradle`. Not verified that a setup script
+  can reach the private repositories; it is an environment setting, so Aika's.
+- **Mara's first talk split into smaller lessons, and the captain's answer to the child's chest line**: both need new
+  comic panels in `game3d/data/talks.json` (the user run of 2026-11-26).
 - **Live market data (ADR-0015)**: needs the terms of use of the data sources checked.

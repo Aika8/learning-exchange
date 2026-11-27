@@ -6,8 +6,11 @@ on a branch `claude/proposals-<role>-<YYYY-MM-DD>`, and opens a PR. Automerge me
 adds only that one file. (One file per run instead of one shared file: two runs a day appending to the same file
 would conflict.)
 
-Once a day the intake workflow (code, `scripts/backlog/backlog.py intake`) moves **at most 5** proposals of that
-day into `QUEUE.md`, as tasks `AUTO-<YYYYMMDD>-<n>`. A proposal is taken only if all of these hold:
+The intake workflow (code, `scripts/backlog/backlog.py intake`) moves up to **50** items a day into `QUEUE.md`, as
+tasks `AUTO-<YYYYMMDD>-<n>`, from three sources in this one format: the day's proposals, every tech-debt note in
+`docs/backlog/tech-debt/` and every open GitHub issue labelled `tech-debt`. It runs after every automerge sweep that
+merged something, when a tech-debt issue is opened or edited, and by cron as a fallback. `kind: bug` makes the task
+`priority: bug`: it is picked before any other ready task. An item is taken only if all of these hold:
 
 - `size: S` — one run can do it (≤ ~60 minutes, one PR, a few files);
 - `paths`: narrow globs in backticks, none protected (CI, Makefile, CLAUDE.md, backlog rules) and none visual
@@ -38,5 +41,5 @@ What to do, in plain words, self-contained: what to read first, what to change, 
 ```
 
 Field order does not matter; a blank line ends the fields. Larger ideas (size M or L), questions for Aika and
-things that need a screen go in the same file under `## For Aika`, as plain bullets with no `###` heading, so the
+things that need a screen go in the same file under `## After the holiday`, as plain bullets with no `###` heading, so the
 intake never picks them up.

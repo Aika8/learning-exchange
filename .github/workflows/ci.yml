@@ -1,6 +1,5 @@
-# CI: `make test` on every push and pull request — backend, web and mobile unit tests and type checks.
-# No Godot here (the game's GUT tests are skipped by the Makefile; `check-game3d-data` still checks that the game's
-# data files are in the repository and whole) and no E2E (they need a running backend and a browser).
+# CI: `make test` on every push and pull request — backend, web and mobile unit tests and type checks — and, in a
+# second job, the games' GUT tests with a headless Godot. No E2E (they need a running backend and a browser).
 # See DECISIONS.md, "M2a".
 name: ci
 
@@ -40,3 +39,21 @@ jobs:
         with:
           name: test-reports
           path: backend/*/build/reports/tests/
+
+  # The games' GUT tests, headless (Aika's decision of 2026-11-27, option A of the summary of 2026-11-26: agents
+  # prove game logic with GUT, so CI must run it). Godot 4.7.2 from its GitHub release; the CC0 art is not fetched,
+  # so tests that need it stay pending, as on a fresh clone.
+  game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Godot 4.7.2 (headless)
+        run: |
+          curl -fsSL --retry 3 -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          sudo install -m 0755 /tmp/godot/Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
+          godot --headless --version
+      - run: make test-game
+      - run: make test-game3d
