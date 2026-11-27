@@ -845,3 +845,11 @@ Build and CI
   cached, a `null` answer neither. Options not taken: adding the account to `Question` (changes every caller), keying
   on the account alone (wrong language). Решено без Айки — отменяется так: drop `lang`/`persona` from
   `CachingAssistant.Key`, or move the account into `Assistant.Question` and remove `forAccount`.
+- LE-016: how `GET /api/v1/health` is served and where `journalEvents` comes from — chosen: a plain
+  `app.web.HealthController`, no Spring Actuator (one more runtime dependency and its own endpoint tree for one
+  endpoint), and the count from `app.journal.CountingJournal`, a decorator around the journal bean that takes the
+  size of the replay at start and adds every appended batch (the `Journal` port stays as it is; the file is not read
+  again on every probe). Options not taken: Actuator's `/actuator/health`; `journal.readAll().size()` per call (reads
+  the whole file each time); a `count()` on the `Journal` port (changes `backend/application` and both adapters).
+  Решено без Айки — отменяется так: delete `CountingJournal` and the controller, give the `journal` bean back the
+  type `Journal`, drop `/health` and `Health` from `api/openapi.yaml` and rerun `make gen-api`.
