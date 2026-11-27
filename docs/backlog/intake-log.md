@@ -42,3 +42,4 @@ Written by `scripts/backlog/backlog.py intake` (GitHub Actions, daily): which pr
 - accepted: AUTO-20261127-12 ← docs/backlog/proposals/2026-11-27-user.md#6 «Game: the first-order goal says what an order is»
 - accepted: AUTO-20261127-13 ← docs/backlog/proposals/2026-11-27-user.md#7 «Mobile: the currency account is not counted in «шт.»»
 - accepted: AUTO-20261127-14 ← docs/backlog/proposals/2026-11-27-user.md#8 «Mobile: the trade-journal example is not trader jargon»
+- not taken (not a small checkable task): docs/backlog/tech-debt/2026-11-27-LE-410-1.md#1 «Make WebSocketTest's trade message arrive reliably (the flake is back)»: not size S
