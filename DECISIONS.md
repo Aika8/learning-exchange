@@ -851,6 +851,14 @@ Build and CI
   expenses): crates next to me. Then the plan.» (148) — both keep LE-407's «рядом со мной» / "next to me"; «тут» and
   "the … right here" dropped to fit 150. Решено без Айки — отменяется так: поменять слова строки `TALK_MARA_FIRST_6`
   в `talk.csv` и перегенерировать `comic-script.md`.
+- AUTO-20261127-1: lead-in words before a term question (a regression of LE-406). After optional punctuation, any
+  number of words from a fixed list (`LEAD_IN_WORDS` in `TemplateAssistant.java`) may come before the question words,
+  each followed by spaces/punctuation: ru «а», «ну», «и», «так», «скажи», «скажите», «подскажи», «подскажите»,
+  «пожалуйста», «объясните»; en «so», «and», «ok», «okay», «please», «can you», «could you», «tell me». «объясните» is
+  also a question word («объясните спред»). Options not taken: any one or two words before the question words, or
+  back to «anywhere» — both bring back «…, объясни, как прошла сессия» cases LE-406 removed. A word not on the list
+  («Скажи честно, что такое…») still makes it an ordinary question. Решено без Айки — отменяется так: revert this
+  commit in `TemplateAssistant.java` and delete `TermQuestionLeadInTest.java`.
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 

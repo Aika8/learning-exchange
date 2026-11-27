@@ -19,9 +19,14 @@ public final class TemplateAssistant implements Assistant {
 
     enum Topic { EXPECTATIONS, COSTS, GAME, SUMMARY }
 
-    /** «What is X?» in ru and en, the question words starting the question; group 1 is what follows them. */
+    /** Words that may come before the question words without making it another question: «а что такое…», «can you explain…». */
+    private static final String LEAD_IN_WORDS = "а|ну|и|так|скажи|скажите|подскажи|подскажите|пожалуйста|объясните"
+            + "|so|and|ok|okay|please|can\\s+you|could\\s+you|tell\\s+me";
+
+    /** «What is X?» in ru and en, the question words starting the question after lead-ins; group 1 is what follows them. */
     private static final Pattern TERM_QUESTION = Pattern.compile(
-            "(?s)[^\\p{L}\\p{N}]*(?:что такое|что значит|что означает|объясни|what is|what's|what does|explain|meaning of)"
+            "(?s)[^\\p{L}\\p{N}]*(?:(?:" + LEAD_IN_WORDS + ")[^\\p{L}\\p{N}]+)*"
+            + "(?:что такое|что значит|что означает|объясните|объясни|what is|what's|what does|explain|meaning of)"
             + "[^\\p{L}\\p{N}]+(.*)");
 
     /** A phrase that starts with a question word asks how or why, not for a word: «объясни, как прошла сессия». */
