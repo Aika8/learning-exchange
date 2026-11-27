@@ -790,6 +790,13 @@ Build and CI
   (not on the turnover of both legs); a move of −100% or worse leaves 0. `needed_to_recover_bps` rounds down as the
   task says (−10% → 1111, a hair short of the exact 11.11…%) and returns -1 for a loss of 100% or more. «решено без
   Айки — отменяется так: поменять две функции в `game3d/scripts/core/lessons.gd` и их тест `test_lessons_series.gd`.»
+- LE-014: which money-named fields may be floating-point — the ratio allow-list in `app.arch.MoneyTypesTest` is
+  empty: no field or record component in `engine..` / `application..` whose name contains price, amount, balance,
+  fee, cash, qty or money is `double`/`float`/`Double`/`Float`/`BigDecimal` today (the only doubles are local
+  variables in `BondMath` and `EconomySchedule`, which the rule does not see). A future ratio field goes into the
+  map with a one-line reason. Not taken: also banning money-named locals (ArchUnit cannot see locals) or
+  pre-listing names "just in case". Решено без Айки — отменяется так: добавить запись в `RATIO_ALLOW_LIST` или
+  удалить тест.
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
