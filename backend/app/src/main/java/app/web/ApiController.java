@@ -62,6 +62,12 @@ public class ApiController {
         if (body == null || body.asset() == null || body.amount() == null) {
             throw new BadRequest("asset and amount are required");
         }
+        // Only here, not in the engine: bots and journal replay deposit through the same port and must not change.
+        boolean traded = market.instruments().stream()
+                .anyMatch(i -> i.base().equals(body.asset()) || i.quote().equals(body.asset()));
+        if (!traded) {
+            throw new application.CommandRejected(engine.Rejection.UNKNOWN_INSTRUMENT);
+        }
         market.deposit(id, body.asset(), body.amount());
         return details(id);
     }
