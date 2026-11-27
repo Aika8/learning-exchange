@@ -21,3 +21,9 @@ outside accounts, or touch a protected path. Nothing in the queue waits for any 
 - **Mara's first talk split into smaller lessons, and the captain's answer to the child's chest line**: both need new
   comic panels in `game3d/data/talks.json` (the user run of 2026-11-26).
 - **Live market data (ADR-0015)**: needs the terms of use of the data sources checked.
+- **Two-stage review with separate narrow reviewers** (Podlodka lesson, 2026-11-27): today one independent reviewer
+  run judges a PR on every dimension at once. The club's finding is that quality rises when review is split into
+  independent passes by *different* agents (conventions, then task-correctness, then an adversarial behaviour pass)
+  and the gate requires each to pass. Worth it but heavier — it touches `backlog.py review-queue`, the verdict
+  markers and `automerge.yml`, so it waits until you can watch the gate. The cheap half landed now: the reviewer's
+  adversarial second look in `prompts/reviewer.md`.
