@@ -5463,3 +5463,19 @@ Why: `app.review.SessionMistakes` calls `TradingMistakes.find(journal.readAll(),
 Read `app.review.SessionMistakes` and how `/session-review` builds its answer. Make both parts come from one
 `sequencer.call` over the same events (the smallest change: read the journal inside the same call that reads the
 review projection). Write the failing consistency test first. Do not change `TradingMistakes` or the contract.
+
+### AUTO-20261126-11 — Make the session review use the one-bank-day "after a loss" window
+- status: todo
+- size: S
+- paths: `backend/app/src/main/java/app/review/SessionMistakes.java`, `backend/app/src/test/java/app/review/SessionMistakesWindowTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.review.*'`
+- expect: green; the new test (a revenge entry 0.9 bank day after a loss with `day-millis=60000` is found by `SessionMistakes`) failed before the fix
+- source: docs/backlog/tech-debt/2026-11-27-LE-405-1.md#1
+- added: 2026-11-26
+- priority: bug
+
+Why: `backend/app/src/main/java/app/review/SessionMistakes.java:28` — calls the 6-argument `TradingMistakes.find`, which keeps the old 5-sim-minute window (five bank days when `day-millis=60000`); LE-405 added the bank-day window but could not touch this file (outside its paths); found by LE-405, executor, 2026-11-27
+
+In `SessionMistakes.find`, call `TradingMistakes.find(events, instruments, accountId, from, to, dayMillis, List.of(),
+TradingMistakes.afterLossWindow(dayMillis))` with `dayMillis = market.savingsProduct().dayMillis()`. Add a new test
+for it; do not change existing ones.

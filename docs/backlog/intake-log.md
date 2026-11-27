@@ -25,3 +25,4 @@ Written by `scripts/backlog/backlog.py intake` (GitHub Actions, daily): which pr
 - accepted: AUTO-20261126-8 ← docs/backlog/proposals/2026-11-26-user.md#5 «Mobile: a limit order says what it does, like the market order already does»
 - accepted: AUTO-20261126-9 ← docs/backlog/proposals/2026-11-26-user.md#6 «Mobile: ru and en name the same thing, and the currency tab is not called «Exchange»»
 - accepted: AUTO-20261126-10 ← issue#113#1 «Session review and its mistakes come from one sequencer call»
+- accepted: AUTO-20261126-11 ← docs/backlog/tech-debt/2026-11-27-LE-405-1.md#1 «Make the session review use the one-bank-day "after a loss" window»
