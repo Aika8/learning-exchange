@@ -34,3 +34,11 @@ Written by `scripts/backlog/backlog.py intake` (GitHub Actions, daily): which pr
 - accepted: AUTO-20261127-4 ← docs/backlog/proposals/2026-11-27-analyst.md#4 «ArchUnit: production code never calls the five-sim-minute overloads of TradingMistakes.find»
 - accepted: AUTO-20261127-5 ← docs/backlog/proposals/2026-11-27-analyst.md#5 «Assistant cache: an answer the template gave because Claude failed is not kept»
 - accepted: AUTO-20261127-6 ← docs/backlog/proposals/2026-11-27-analyst.md#6 «Assistant cache: two identical questions at the same moment reach the delegate once»
+- accepted: AUTO-20261127-7 ← docs/backlog/proposals/2026-11-27-user.md#1 «Login with a Cyrillic name works: the dev token is ASCII»
+- accepted: AUTO-20261127-8 ← docs/backlog/proposals/2026-11-27-user.md#2 «Depositing an asset nobody trades is refused»
+- accepted: AUTO-20261127-9 ← docs/backlog/proposals/2026-11-27-user.md#3 «Mobile: the order ticket shows what you have, and an old refusal goes away when you change the order»
+- accepted: AUTO-20261127-10 ← docs/backlog/proposals/2026-11-27-user.md#4 «Mobile: a filled order says how much was bought and where its price is»
+- accepted: AUTO-20261127-11 ← docs/backlog/proposals/2026-11-27-user.md#5 «Game: while sailing, the goal says how to come back, not «sail out» again»
+- accepted: AUTO-20261127-12 ← docs/backlog/proposals/2026-11-27-user.md#6 «Game: the first-order goal says what an order is»
+- accepted: AUTO-20261127-13 ← docs/backlog/proposals/2026-11-27-user.md#7 «Mobile: the currency account is not counted in «шт.»»
+- accepted: AUTO-20261127-14 ← docs/backlog/proposals/2026-11-27-user.md#8 «Mobile: the trade-journal example is not trader jargon»
