@@ -58,6 +58,9 @@ export default function Home() {
         <Button testID="go-achievements" title={t('home.achievements')} color={c.textSecondary} onPress={() => router.push('/achievements')} />
         <Button testID="go-plan" title={t('home.plan')} color={c.textSecondary} onPress={() => router.push('/plan')} />
       </View>
+      <View style={{ flexDirection: 'row' }}>
+        <Button testID="open-glossary-home" title={t('glossary.title')} color={c.accent} onPress={() => router.push('/glossary')} />
+      </View>
     </Screen>
   );
 }

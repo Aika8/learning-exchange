@@ -593,7 +593,8 @@ export interface paths {
          * @description Every order I placed in the period, with its journal note when I wrote one. Result of an order = what its
          *     fills earned against the last price (or against the price I later sold/bought back at), fees included; R =
          *     result / planned risk when the note gives the risk. Grouped by mood and by market state, so the review can
-         *     show "my FOMO trades lost 1.4 R on average". Not advice: it describes what happened.
+         *     show "my FOMO trades lost 1.4 R on average". `mistakes` lists the field guide's trading mistakes (table B) found
+         *     in the period. Not advice: it describes what happened.
          */
         get: operations["getSessionReview"];
         put?: never;
@@ -671,6 +672,23 @@ export interface paths {
         };
         /** My achievements, shared by the app and the game (a projection of my account's events) */
         get: operations["listAchievements"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liveness and readiness for a container health check; no auth */
+        get: operations["getHealth"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1147,6 +1165,15 @@ export interface components {
             /** @description Oldest first */
             lines: components["schemas"]["StatementLine"][];
             totals: components["schemas"]["StatementTotals"];
+        };
+        Health: {
+            /** @enum {string} */
+            status: "UP";
+            /**
+             * Format: int64
+             * @description Events in the journal (since start, including replayed history)
+             */
+            journalEvents: number;
         };
         Clock: {
             /**
@@ -1655,6 +1682,23 @@ export interface components {
              * @description Average R × 100 over the orders with a planned risk
              */
             expectancyRx100?: number | null;
+            /** @description Trading mistakes found in the period (field guide, table B), in time order. Names what happened; not advice. */
+            mistakes: components["schemas"]["ReviewMistake"][];
+        };
+        ReviewMistake: {
+            /**
+             * @description Row of the field guide's table B; the client words it
+             * @enum {string}
+             */
+            code: "B1_CHASING_A_MOVE" | "B2_BEFORE_REPORT" | "B4_WIDE_SPREAD" | "B6_AVERAGING_DOWN" | "B7_NO_EXIT_PLAN" | "B8_SIZE_AFTER_LOSS" | "B10_REVENGE";
+            instrument: string;
+            /**
+             * Format: int64
+             * @description Simulation time (ms) it happened; B7: the end of the period
+             */
+            at: number;
+            /** @description The numbers behind it, key=value separated by spaces (minor units, qty, bps, ms); not display text */
+            detail: string;
         };
         AssistantQuestion: {
             question: string;
@@ -2846,6 +2890,26 @@ export interface operations {
                 };
             };
             401: components["responses"]["Problem"];
+        };
+    };
+    getHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The server is up and its journal is readable */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
         };
     };
     getClock: {

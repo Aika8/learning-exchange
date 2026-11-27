@@ -1,6 +1,6 @@
 keys,ru,en
 WHO_CAPTAIN,Капитан,Captain
-WHO_MARA,Мара Якорная,Mara of the Anchor
+WHO_MARA,Мара Якорная,Mara Anchor
 WHO_OLVA,Ольва Перо,Olva Quill
 WHO_CHRONICLER,Летописец,The Chronicler
 WHO_KEEPER,Хозяйка рынка,The post keeper
@@ -18,7 +18,7 @@ TALK_MARA_FIRST_2,"Якорь?","The Anchor?"
 TALK_MARA_FIRST_3,"Стоп-лосс. Цена, на которой ты выходишь из рейса, если ветер против тебя.","A stop-loss. The price at which you leave the trade if the wind turns against you."
 TALK_MARA_FIRST_4,"Правило одного процента: за один рейс ты рискуешь не больше 1% казны.","The one-per-cent rule: on one voyage you risk no more than 1% of your capital."
 TALK_MARA_FIRST_5,"Значит, размер груза считают от Якоря, а не наоборот…","So the size of the cargo is worked out from the Anchor, not the other way round…"
-TALK_MARA_FIRST_6,"Верно. Размер позиции = риск ÷ расстояние до стопа. Показывай план.","Right. Position size = risk ÷ distance to the stop. Show me your plan."
+TALK_MARA_FIRST_6,"Верно. Размер позиции = риск ÷ расстояние до стопа. Но сначала — провизия на шесть лун: ящики тут, рядом со мной. Потом — план.","Right. Position size = risk ÷ distance to the stop. But first — provisions for six moons: the crates right here next to me. Then the plan."
 TALK_OLVA_CONSENSUS_1,"Счётчики Гильдии посчитали ожидания по Кузне. Это консенсус-прогноз.","The Guild Counters have their expectations for the Forge. That is the consensus forecast."
 TALK_OLVA_CONSENSUS_2,"Прибыль на акцию (EPS) {eps}, выручка {revenue}.","Earnings per share (EPS) {eps}, revenue {revenue}."
 TALK_OLVA_CONSENSUS_3,"А если ведомость выйдет хорошей, но хуже этого числа?","And if the report is good, but below that number?"
@@ -39,8 +39,8 @@ TALK_SAILOR_2,"Ветер у нас — это поток заявок. Куда
 TALK_SAILOR2_1,"Барометр падает. По-учёному — растёт волатильность.","The Barometer is falling. The learned word is: volatility is rising."
 TALK_SAILOR2_2,"Буря — это плохо?","Is a storm bad?"
 TALK_SAILOR2_3,"Буря — это просто большие волны. Плохо — выйти в неё с лишним грузом.","A storm is only big waves. Bad is sailing into one with too much cargo."
-TALK_SAILOR3_1,"Сорок лет хожу мимо Пропасти. Между лучшей покупкой и лучшей продажей — спред.","Forty years I have walked past the Gap. Between the best bid and the best ask lies the spread."
-TALK_SAILOR3_2,"Чем шире Пропасть, тем дороже прыжок. Рыночная заявка платит её целиком.","The wider the Gap, the dearer the jump. A market order pays all of it."
+TALK_SAILOR3_1,"Сорок лет хожу мимо Пропасти. Между лучшей покупкой и лучшей продажей — спред.","Forty years I have walked past the Chasm. Between the best bid and the best ask lies the spread."
+TALK_SAILOR3_2,"Чем шире Пропасть, тем дороже прыжок. Рыночная заявка платит её целиком.","The wider the Chasm, the dearer the jump. A market order pays all of it."
 TALK_CHILD_1,"Капитан! А почему монеты в сундуке тускнеют?","Captain! Why do the coins in the chest go dull?"
 TALK_CHILD_2,"Это туман — инфляция. На ту же монету через год купишь меньше.","That is the fog — inflation. The same coin buys less a year from now."
 TALK_CHILD_3,"Значит, сундук — не самое надёжное место…","So the chest is not the safest place after all…"

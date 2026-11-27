@@ -47,8 +47,14 @@ public final class TradingMistakes {
     static final long SPREAD_FACTOR = 3;
     /** B4: below three snapshots a session median of the spread means nothing. */
     static final int MIN_QUOTES = 3;
-    /** B8/B10: a decision this soon after a closed loss is still the loss talking (field guide: "within minutes"). */
+    /**
+     * B8/B10, old default: a decision this soon after a closed loss is still the loss talking (field guide: "within
+     * minutes"). With {@code day-millis=60000} it is five bank days, so callers that know the bank day pass
+     * {@link #afterLossWindow(long)} instead (LE-405).
+     */
     static final long AFTER_LOSS_WINDOW = 5 * SIM_MINUTE;
+    /** B8/B10: "after a loss" is this many bank days (LE-405, DECISIONS.md). */
+    static final long AFTER_LOSS_BANK_DAYS = 1;
     /** B8: twice the usual size is a jump nobody plans by accident. */
     static final long SIZE_FACTOR = 2;
     /** B8: below three earlier orders "usual size" means nothing. */
@@ -78,6 +84,22 @@ public final class TradingMistakes {
      */
     public static List<Mistake> find(List<Event> events, List<Instrument> instruments, String account, long from, long to,
                                      long dayMillis, List<Quote> quotes) {
+        return find(events, instruments, account, from, to, dayMillis, quotes, AFTER_LOSS_WINDOW);
+    }
+
+    /** The B8/B10 window of one bank day ({@link #AFTER_LOSS_BANK_DAYS} times {@code dayMillis}). */
+    public static long afterLossWindow(long dayMillis) {
+        return AFTER_LOSS_BANK_DAYS * dayMillis;
+    }
+
+    /**
+     * As {@link #find(List, List, String, long, long, long, List)}, with the B8/B10 window given.
+     *
+     * @param afterLossWindow how long after a closed loss an entry still counts as "after the loss", in simulation
+     *                        milliseconds, inclusive; {@link #afterLossWindow(long)} gives one bank day
+     */
+    public static List<Mistake> find(List<Event> events, List<Instrument> instruments, String account, long from, long to,
+                                     long dayMillis, List<Quote> quotes, long afterLossWindow) {
         Map<String, List<Quote>> sessionQuotes = new HashMap<>();
         quotes.stream()
                 .filter(q -> inSession(q.ts(), from, to) && q.bid() > 0 && q.ask() > q.bid())
@@ -140,7 +162,7 @@ public final class TradingMistakes {
                     if (filledOrders.contains(o.orderId()) && inSession(o.ts(), from, to)) {
                         enteredInSession.add(o.instrument());
                         long sinceLoss = o.ts() - lastLossAt;
-                        if (lastLossAt != Long.MIN_VALUE && sinceLoss <= AFTER_LOSS_WINDOW && earlier.size() >= MIN_EARLIER_ORDERS) {
+                        if (lastLossAt != Long.MIN_VALUE && sinceLoss <= afterLossWindow && earlier.size() >= MIN_EARLIER_ORDERS) {
                             long median = median(earlier);
                             if (o.qty() >= SIZE_FACTOR * median) {
                                 out.add(new Mistake(Code.B8_SIZE_AFTER_LOSS, o.instrument(), o.ts(), "qty=" + o.qty()
@@ -148,7 +170,7 @@ public final class TradingMistakes {
                             }
                         }
                         Long lossAt = lastLossAtByInstrument.get(o.instrument());
-                        if (lossAt != null && o.ts() - lossAt <= AFTER_LOSS_WINDOW) {
+                        if (lossAt != null && o.ts() - lossAt <= afterLossWindow) {
                             out.add(new Mistake(Code.B10_REVENGE, o.instrument(), o.ts(), "lossAgoMs=" + (o.ts() - lossAt)
                                     + " loss=" + lastLossByInstrument.get(o.instrument())));
                         }

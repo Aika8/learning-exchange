@@ -36,10 +36,12 @@ public class ApiController {
 
     private final TradingService market;
     private final DevAuth auth;
+    private final app.review.SessionMistakes mistakes;
 
-    public ApiController(TradingService market, DevAuth auth) {
+    public ApiController(TradingService market, DevAuth auth, app.review.SessionMistakes mistakes) {
         this.market = market;
         this.auth = auth;
+        this.mistakes = mistakes;
     }
 
     @PostMapping("/auth/dev-login")
@@ -122,11 +124,13 @@ public class ApiController {
     static final java.util.List<String> MOODS = java.util.List.of("CALM", "CONFIDENT", "ANXIOUS", "FOMO", "REVENGE", "BORED");
 
     @GetMapping("/session-review")
-    public application.SessionReviewProjection.Review sessionReview(
+    public Dto.SessionReviewDto sessionReview(
             @RequestHeader(value = "Authorization", required = false) String authz,
             @RequestParam(required = false) Long from, @RequestParam(required = false) Long to) {
         String id = auth.accountId(authz);
-        return market.sessionReview(id, from == null ? 0 : from, to == null ? market.clock().now() + 1 : to);
+        long start = from == null ? 0 : from;
+        long end = to == null ? market.clock().now() + 1 : to;
+        return Dto.SessionReviewDto.of(market.sessionReview(id, start, end), mistakes.find(id, start, end));
     }
 
     @DeleteMapping("/orders/{orderId}")

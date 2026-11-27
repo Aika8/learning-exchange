@@ -187,4 +187,21 @@ public final class Dto {
                             t.taxWithheld()));
         }
     }
+    /** {@code GET /session-review}: the trade-journal review plus the trading mistakes of the period (LE-058). */
+    public record SessionReviewDto(long from, long to, String currency, List<application.SessionReviewProjection.Entry> entries,
+                                   List<application.SessionReviewProjection.Group> byMood,
+                                   List<application.SessionReviewProjection.Group> byMarketState, int orders, int annotated,
+                                   int wins, long result, Long expectancyRx100, List<MistakeDto> mistakes) {
+        public static SessionReviewDto of(application.SessionReviewProjection.Review r,
+                                          List<application.review.TradingMistakes.Mistake> mistakes) {
+            return new SessionReviewDto(r.from(), r.to(), r.currency(), r.entries(), r.byMood(), r.byMarketState(), r.orders(),
+                    r.annotated(), r.wins(), r.result(), r.expectancyRx100(), mistakes.stream().map(MistakeDto::of).toList());
+        }
+    }
+
+    public record MistakeDto(String code, String instrument, long at, String detail) {
+        static MistakeDto of(application.review.TradingMistakes.Mistake m) {
+            return new MistakeDto(m.code().name(), m.instrument(), m.at(), m.detail());
+        }
+    }
 }

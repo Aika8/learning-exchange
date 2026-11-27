@@ -583,5 +583,10 @@
     "notEnough": "Not enough history yet ({{count}} days).",
     "honest": "Statistics of this simulated series only. Past prices do not tell future ones; DCA lowers the regret of a bad start, a lump sum is in the market longer.",
     "parts": "parts: {{count}}"
+  },
+  "glossary": {
+    "title": "Glossary",
+    "search": "Search",
+    "empty": "Nothing found."
   }
 }

@@ -721,6 +721,124 @@ Build and CI
   result if everything were closed at the last price is X SPARK.» Since `summary` ends with `costs`, the summary
   answer carries the spread sentence too. Wording taken verbatim from the user-run proposal. «решено без Айки —
   отменяется так: верните строки в `TemplateAssistant.costs/summary` и удалите `TemplateWordsExplainedTest`.»
+- LE-094: Mara's English name «Mara Anchor» (2 of 3 places already); easy to undo — one CSV cell. Options not taken:
+  «Mara of the Anchor» everywhere. «решено без Айки — отменяется так: верните en `WHO_MARA` в `game3d/i18n/talk.csv`
+  и удалите `game3d/tools/test_mara_name.py`.»
+- LE-095: day-one copy draft — Aika may rewrite. Provisions (the crates on the pier) are named as the first step:
+  `HARBOUR_MARA` (2D client) and the last balloon `TALK_MARA_FIRST_6` append ru «Но сначала — провизия на шесть лун:
+  ящики на причале. Потом план со мной.» / en «But first — provisions for six moons: the crates on the pier. Then a
+  plan with me.»; `GOAL_BUY_PROVISIONS` ru «Купи провизию на шесть лун (финансовая подушка) — ящики на причале.» / en
+  «Buy provisions for six moons (emergency fund) — the crates on the pier.»; `MARA_PROVISIONS_FIRST` ru «Мара: «Без
+  провизии на шесть лун (финансовой подушки) в рейс не пойдёшь. Ящики с провизией — на причале.»» / en «Mara: «No
+  voyage without provisions for six moons (an emergency fund). The provision crates are on the pier.»»;
+  `FLOW_NEED_PROVISIONS` ru «Сначала провизия на шесть лун (финансовая подушка) — ящики на причале.» / en «First
+  provisions for six moons (emergency fund) — the crates on the pier.»; `FLOW_NO_EDGE` ru «Сначала вернись в порт.» /
+  en «First go back to port.» (true by `GameFlow.EDGES`, pinned by `test_flow_way_back.gd`). Question: with the
+  appended sentence the en balloon `TALK_MARA_FIRST_6` was 153 characters, over `ComicScript.MAX_CHARS` (150).
+  Choice: drop «Показывай план.» / «Show me your plan.» from that balloon — the new last sentence already says the
+  plan comes next. Options not taken: raise `MAX_CHARS`; split into a new balloon/panel (the task says text only).
+  `docs/design/comic-script.md` regenerated with `game3d/tools/comic_script.py`. «решено без Айки — отменяется так:
+  верните шесть ячеек в `game3d/i18n/strings.csv` и `talk.csv`, перегенерируйте comic-script и удалите
+  `test_flow_way_back.gd`.»
+- LE-096: assistant copy draft, Aika reviews. A term question («что такое / what is …») with a known term answers
+  only «real name — definition» (Chronicler: «lore name (real name) — definition»), without the numbers; an unknown
+  word says «Этого слова я пока не знаю — вот ваши цифры.» / «I don't know that word yet — here are your numbers.»
+  and then the usual answer. The no-argument `TemplateAssistant()` keeps the old behaviour (no «unknown word» line),
+  so LE-089's tests and the app stay as they were until LE-097. The template passes the port the phrase after the
+  question words (lower-case, no punctuation, no leading a/an/the) and tries its first 4, 3, 2, 1 words, so «spread
+  and why …» and «what does spread mean» find «spread»; matching a name (incl. Russian word forms) is the adapter's
+  job. Options not taken: append the numbers after a definition; match terms anywhere in the question. «решено без
+  Айки — отменяется так: правьте `TemplateAssistant.answer`/`define` и `TemplateDefinitionTest`.»
+- LE-097: the app's glossary adapter `app.assistant.CatalogueGlossary` matches a term by its whole name only (real or
+  lore, ru or en), compared lower-case, with punctuation and hyphens as spaces, «ё» as «е» and no leading a/an/the
+  («stop loss» = «Stop-loss», «the Chasm» = «chasm»); a bracket in a name is optional («налог на доход» finds «Налог
+  на доход (ИПН 10%)»). Russian word forms («спреда», «плечом») are not matched yet — they get «I don't know that
+  word». Options not taken: stemming or prefix matching (false hits like «стоп» → «стоп-лосс»). «решено без Айки —
+  отменяется так: правьте `CatalogueGlossary.key` и конструктор.»
+- LE-098: the mobile «Словарь» screen (`clients/mobile/src/glossary.ts`). Search is a case-insensitive substring
+  match («ё» as «е») on the real name in ru and in en whatever the app language, and on the definition in the app
+  language; «real name first» = terms matched by their name come before those matched only by the definition, each
+  group sorted by the real name in the app language (`Intl.Collator`), then by id. Lore names are ignored (intent 02).
+  The canvas's per-term «У вас: …» example line is not shown: the contract `GlossaryTerm` has no such field. The query
+  sits in the screen (no hook in `hooks.ts`, outside the task's paths). Options not taken: search definitions in both
+  languages; show the example line from the account history. «решено без Айки — отменяется так: правьте
+  `glossaryRows` и `clients/mobile/test/glossary.test.mjs`.»
+- LE-099: web refusal messages, copy draft, Aika reviews. The mobile twin (AUTO-20261125-5) was not merged yet, so
+  the four new `errors` keys and the new `INSUFFICIENT_FUNDS` text are taken word for word from the proposal
+  (`docs/backlog/proposals/2026-11-25-user.md`, mobile item) — mobile should copy the same sentences. The test reads
+  `Rejection.java` through Vite's `?raw` import instead of `node:fs`: the web client has no Node typings and `tsc -b`
+  (part of `npm test`) rejects `node:fs`; adding `@types/node` is outside the task's paths. Options not taken: add
+  `@types/node`; inline the code list in the test (would not notice a new constant). «решено без Айки — отменяется
+  так: правьте значения `errors.*` в `clients/web/src/i18n/{ru,en}.json`.»
+- LE-088: four glossary terms (`trailing-take-profit`, `atr`, `fund-ter`, `price-level`). Real terms and ru lore
+  names are the world bible §6 table, first letter capitalised like the neighbouring entries. English lore names are
+  lore drafts, Aika reviews: «the Fair-wind sail» (Попутный парус), «Wave height» (высота волны), «Fund keeping fee»
+  (плата за ведение фонда), «a Rung» (ступень — the game's own word, `FORM_LIMIT_LORE` «step onto a rung»). The
+  definitions are drafts too. Options not taken: leave English lore names empty (the six-strings test forbids it);
+  invent new lore words. «решено без Айки — отменяется так: правьте эти четыре записи в `docs/lore/glossary.yaml`.»
+- LE-058: `/session-review` gets a required `mistakes` array of `ReviewMistake {code, instrument, at, detail}` (Aika
+  said yes to the contract change). `code` is an enum of `TradingMistakes.Code` (a new code means adding it to the
+  enum and `make gen-api`, as LE-323 expects); `detail` stays key=value numbers, the client words each code. Wired in
+  `app.review.SessionMistakes`: `TradingMistakes.find` over `Journal.readAll()` on each call, the instruments of the
+  service and the savings product's `dayMillis`; the review DTO is assembled in `app.web.Dto` because the paths keep
+  `application` closed. No book snapshots are kept anywhere, so B4 is never reported by the API yet. Options not
+  taken: a plain string code (clients would lose the typed list); a live projection instead of reading the journal
+  (needs `application`). «решено без Айки — отменяется так: уберите `mistakes`/`ReviewMistake` из `api/openapi.yaml`,
+  `make gen-api`, верните `ApiController.sessionReview` к `Review` и удалите `app.review.SessionMistakes`.»
+
+- LE-059: in `Lessons.series_after` each move is one round trip and the fee is charged on the balance after the move
+  (not on the turnover of both legs); a move of −100% or worse leaves 0. `needed_to_recover_bps` rounds down as the
+  task says (−10% → 1111, a hair short of the exact 11.11…%) and returns -1 for a loss of 100% or more. «решено без
+  Айки — отменяется так: поменять две функции в `game3d/scripts/core/lessons.gd` и их тест `test_lessons_series.gd`.»
+- LE-014: which money-named fields may be floating-point — the ratio allow-list in `app.arch.MoneyTypesTest` is
+  empty: no field or record component in `engine..` / `application..` whose name contains price, amount, balance,
+  fee, cash, qty or money is `double`/`float`/`Double`/`Float`/`BigDecimal` today (the only doubles are local
+  variables in `BondMath` and `EconomySchedule`, which the rule does not see). A future ratio field goes into the
+  map with a one-line reason. Not taken: also banning money-named locals (ArchUnit cannot see locals) or
+  pre-listing names "just in case". Решено без Айки — отменяется так: добавить запись в `RATIO_ALLOW_LIST` или
+  удалить тест.
+- LE-017: what the mutation gate does when `backend/quality-gates/<gate>/` holds no `*.txt` (or a file that is not one
+  integer 0..100) — chosen: the build fails with a message naming the folder, so a gate cannot vanish silently. Not
+  taken: treating it as threshold 0 (deleting files would then switch the gate off). Also chosen: PIT core 1.30.2 and
+  `pitest-junit5-plugin` 1.2.3 (latest on Maven Central) with plugin `info.solidsoft.pitest` 1.19.0, threads = all
+  cores, no `*PropertiesTest` / `*PropertyTest` exclusion (the full run takes about 3 minutes, under the 10-minute
+  limit). Решено без Айки — отменяется так: in `ext.mutationThreshold` of the root `build.gradle` return 0 instead of
+  throwing; change the versions in `ext.applyMutationGate`.
+- LE-405: how the "after a loss" window (B8/B10) becomes one bank day — chosen: `TradingMistakes.AFTER_LOSS_BANK_DAYS = 1`,
+  `TradingMistakes.afterLossWindow(dayMillis)` and a new `find(…, quotes, afterLossWindow)` overload; the old
+  overloads keep `AFTER_LOSS_WINDOW = 5 * SIM_MINUTE` as the default, so existing tests stay as they are. The only
+  production caller, `app.review.SessionMistakes`, is outside the task's paths, so it still uses the old window until
+  it passes `afterLossWindow(dayMillis)` (tech debt `docs/backlog/tech-debt/2026-11-27-LE-405-1.md`). Not taken:
+  changing the default (breaks the existing B8/B10 tests, which use `DAY = 60_000`). «решено без Айки — отменяется
+  так: вернуть константу (удалить перегрузку и `afterLossWindow`)».
+
+- LE-406: what makes a question a term question (summary of 2026-11-26, item 5, option В). The question words
+  («что такое», «объясни», «what is» …) must start the question (only punctuation before them). A glossary term at
+  the start of the rest answers with its definition; if the rest is also about the asker (my/mine/I/me/lost/paid,
+  мой…/я/мне/меня/мной, потерял…/заплатил…), the topic's numbers follow the definition. With no term found, the
+  «I don't know that word» line comes only when the rest is at most 4 words, does not start with a question word
+  (как/почему/сколько/how/why/what …) and is not about the asker — so «What is my result?» and «Объясни, как прошла
+  сессия» get the usual answer. The last two conditions are this run's reading of "the rest is the term": the task's
+  expect needs them (both rests are short). Options not taken: a fixed list of whole phrases; asking the glossary
+  for every word. «решено без Айки — отменяется так: revert the LE-406 commit in `TemplateAssistant.java` and delete
+  `TermQuestionShapeTest.java`.»
+- LE-407: where the provisions crates are said to stand. In the code the named spot nearest to
+  `HARBOUR_SPOTS["provisions"]` (37, 10.4) is Mara (30, 8) at 7.4 m — not the debt chest (12.8 m) and not the ship at
+  the pier end (12.7 m); the crates are on the wharf deck, not on the pier. So the copy draft (Aika may rewrite) says
+  "next to Mara", and Mara herself says "next to me": `GOAL_BUY_PROVISIONS` / `FLOW_NEED_PROVISIONS` ru «… — ящики
+  рядом с Марой.» / en «… — the crates next to Mara.»; `MARA_PROVISIONS_FIRST` ru «… Ящики с провизией — тут, рядом
+  со мной.» / en «… The provision crates are right here next to me.»; `TALK_MARA_FIRST_6` ru «… провизия на шесть
+  лун: ящики тут, рядом со мной. Потом — план.» / en «… the crates right here next to me. Then the plan.»
+  (`comic-script.md` regenerated). `test_provisions_place_words.gd` computes the nearest spot, so moving the crates
+  turns it red until the words follow. The dead `HARBOUR_MARA` still says "on the pier" — LE-410 removes it.
+  Options not taken: moving the crates (changes how game3d looks); naming the debt chest (it is farther than Mara).
+  «решено без Айки — отменяется так: revert the LE-407 commit in `strings.csv`, `talk.csv`, `comic-script.md` and
+  delete the test.»
+- AUTO-20261126-11: the task's expect ("a revenge entry 0.9 bank day after a loss with `day-millis=60000` is found
+  by `SessionMistakes`, failed before the fix") cannot fail before the fix: 54 s is inside the old 5-sim-minute window
+  too. Read as: that case is tested, and so are two cases that do fail before the fix — an entry 2 bank days after a
+  loss with `day-millis=60000` is not revenge, an entry 0.9 bank day after a loss with `day-millis=600000` (9 sim
+  minutes) is. «решено без Айки — отменяется так: delete the two extra tests in `SessionMistakesWindowTest.java`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
@@ -762,3 +880,34 @@ Build and CI
     they need `game3d/scripts/*.gd` outside `core/`, which the gate keeps for Aika — after the holiday.
   - Amber Cliff has no paid job yet: goal texts say "a day without trading" and never promise pay. Day 1 sends a
     player who sailed off without provisions home first. Island goal chains in LE-202 are drafts.
+- LE-015: the `Assistant` port carries no account id, so `CachingAssistant` adds `answer(accountId, question, facts)`
+  and `forAccount(id)` (a port view bound to one account); the plain port call uses an empty account id. The key also
+  holds the question's language and persona — otherwise an English question could get a cached Russian answer, or the
+  Chronicler the Helper's. Facts are hashed with SHA-256 of `Facts.asData()`; a failed (exception) delegate call is not
+  cached, a `null` answer neither. Options not taken: adding the account to `Question` (changes every caller), keying
+  on the account alone (wrong language). Решено без Айки — отменяется так: drop `lang`/`persona` from
+  `CachingAssistant.Key`, or move the account into `Assistant.Question` and remove `forAccount`.
+- LE-016: how `GET /api/v1/health` is served and where `journalEvents` comes from — chosen: a plain
+  `app.web.HealthController`, no Spring Actuator (one more runtime dependency and its own endpoint tree for one
+  endpoint), and the count from `app.journal.CountingJournal`, a decorator around the journal bean that takes the
+  size of the replay at start and adds every appended batch (the `Journal` port stays as it is; the file is not read
+  again on every probe). Options not taken: Actuator's `/actuator/health`; `journal.readAll().size()` per call (reads
+  the whole file each time); a `count()` on the `Journal` port (changes `backend/application` and both adapters).
+  Решено без Айки — отменяется так: delete `CountingJournal` and the controller, give the `journal` bean back the
+  type `Journal`, drop `/health` and `Health` from `api/openapi.yaml` and rerun `make gen-api`.
+- Decided without Aika on 2026-11-27 (her standing words «меня ничего не должно ждать»; each undone as said):
+  - LE-092: the plural exception also covers `TemplateWordsExplainedTest.java:47` (option A); LE-092 is unparked.
+  - CI runs the games' GUT tests in a `game` job with a headless Godot (option A); automerge waits for every check.
+  - Intake: up to 50 a day in every document (option A).
+  - "After a loss" = one bank day, not five sim minutes (option Б, LE-405).
+  - Term questions only when the phrase starts the question or names a glossary term, with "my" numbers added (LE-406).
+  - The provisions crates: the words follow the place in the code (LE-407); the glossary gets a home-screen entry
+    (LE-408); Mara says a moon is a month of expenses (LE-409); the dead game3d key `HARBOUR_MARA` goes (LE-410).
+  - Splitting Mara's first talk and a captain's reply to the child's chest line need new comic panels
+    (`game3d/data/talks.json`), so they are in `docs/backlog/AFTER-HOLIDAY.md`.
+  - B5 "buy before the open" stays as LE-057 built it until the sim has an open (ADR-0041 brings dawn liquidity).
+  - Tech debt in two copies of the engine clock rule (`docs/backlog/tech-debt/2026-11-27-LE-013-1.md`): kept, the
+    old test is frozen.
+  - Tech debt becomes tasks through intake (files and `tech-debt` issues in the proposal format; `kind: bug` first);
+    intake runs after every automerge sweep that merged something and on tech-debt issues, cron as a fallback.
+  - Maven Central 429: Gradle retries up to 8 times from 3 s (`gradle.properties`); undo by deleting the two lines.

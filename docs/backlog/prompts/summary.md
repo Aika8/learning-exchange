@@ -44,17 +44,19 @@ line is always first: a run that stops at step 0 is otherwise invisible.>
 ## Merged
 - LE-0xx <title> (#n) — <one line: what is now true>
 
-## Waiting for you (each: the question, 2–3 options, a recommendation)
-1. …
+## Решено без тебя — посмотри после отпуска
+- <task or proposal>: <the question> → <the choice> — <how to undo> (every decision of the day from DECISIONS.md
+  and from the proposals' `why: решено без Айки`; nothing in the queue waits for you)
 
-## Decisions taken without you (cheap to undo)
-- <task>: <choice> — <how to undo>
+## После отпуска
+- <only what the run cannot do at all: the look of game3d, money/keys/accounts — from docs/backlog/AFTER-HOLIDAY.md
+  and the proposals' `## After the holiday`; or "ничего нового">
 
 ## Open / stuck
 - #n <branch>: <why>
 
 ## Numbers
-Queue: <done>/<total>, ready <n>, waiting for Aika <n>. Proposals: <in>/<out> (intake). CI on main: <green/red>.
+Queue: <done>/<total>, ready <n>, bugs first <n>. Proposals: <in>/<out> (intake). CI on main: <green/red>.
 ```
 
 Language: Russian, unless `docs/backlog/QUESTIONS-BEFORE-LEAVE.md` answer A12 says otherwise (the headings above

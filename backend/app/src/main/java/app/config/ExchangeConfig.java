@@ -1,5 +1,6 @@
 package app.config;
 
+import app.journal.CountingJournal;
 import app.journal.FileJournal;
 import application.ExchangeService;
 import application.InMemoryJournal;
@@ -33,8 +34,9 @@ public class ExchangeConfig {
     }
 
     @Bean
-    Journal journal(ExchangeProperties props) {
-        return "memory".equals(props.journal()) ? new InMemoryJournal() : new FileJournal(Path.of(props.journal()));
+    CountingJournal journal(ExchangeProperties props) {
+        Journal store = "memory".equals(props.journal()) ? new InMemoryJournal() : new FileJournal(Path.of(props.journal()));
+        return new CountingJournal(store);
     }
 
     @Bean(destroyMethod = "close")
