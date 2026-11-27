@@ -5447,3 +5447,19 @@ Set exactly: `tabs.fx` en «Currency»; `size.long` ru «Покупка (лон�
 `mood.FOMO` en «Fear of missing out (FOMO)», ru «Страх упустить (FOMO)»; `marketState.RANGE` ru «Боковик (без
 тренда)», en «Range (no trend)». Nothing else. New `test/same-words.test.mjs` (node:test, `readFileSync`) asserting
 these values. Do not touch the web client or any component. Log in `DECISIONS.md` as "copy draft, Aika reviews".
+
+### AUTO-20261126-10 — Session review and its mistakes come from one sequencer call
+- status: todo
+- size: S
+- paths: `backend/app/src/main/java/app/review/**`, `backend/app/src/test/java/app/review/SessionMistakesConsistencyTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.review.*'`
+- expect: green; the new test interleaves trades with `GET /session-review` and every answer's `mistakes` refer only to orders that its `entries` also contain; the test failed before the fix
+- source: issue#113#1
+- added: 2026-11-26
+- priority: bug
+
+Why: `app.review.SessionMistakes` calls `TradingMistakes.find(journal.readAll(), …)` outside the sequencer on every `GET /session-review`, so the review and its mistakes may see a batch apart (found while doing LE-058; docs/backlog/tech-debt/2026-11-26-LE-058-1.md).
+
+Read `app.review.SessionMistakes` and how `/session-review` builds its answer. Make both parts come from one
+`sequencer.call` over the same events (the smallest change: read the journal inside the same call that reads the
+review projection). Write the failing consistency test first. Do not change `TradingMistakes` or the contract.
