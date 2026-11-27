@@ -170,7 +170,7 @@ FLOW_CHRONICLE,Разбор,Review
 FLOW_CHRONICLE_LORE,летопись,the chronicle
 FLOW_NEED_ANCHOR,Груз без Якоря (стоп-лосса) — Мара не выпустит в море.,Cargo with no Anchor (stop-loss) — Mara won't let you sail.
 FLOW_NEED_PLAN,Сначала план сделки у Мары.,First a trade plan with Mara.
-FLOW_NEED_PROVISIONS,Сначала провизия на шесть лун (финансовая подушка) — ящики на причале.,First provisions for six moons (emergency fund) — the crates on the pier.
+FLOW_NEED_PROVISIONS,Сначала провизия на шесть лун (финансовая подушка) — ящики рядом с Марой.,First provisions for six moons (emergency fund) — the crates next to Mara.
 FLOW_NO_EDGE,Сначала вернись в порт.,First go back to port.
 FLOW_NO_SAME,Уже здесь.,Already here.
 HALL_ANCHOR,Поставить стоп-лосс,Place the stop-loss
@@ -195,7 +195,7 @@ MARA_NO_ANCHOR,Нет стоп-лосса (Якоря).,No stop-loss (Anchor).
 MARA_NO_CAPITAL,Нет капитала.,No capital.
 MARA_NO_QTY,Не указан объём.,No size.
 MARA_OK,Мара одобрила план.,Mara approved the plan.
-MARA_PROVISIONS_FIRST,Мара: «Без провизии на шесть лун (финансовой подушки) в рейс не пойдёшь. Ящики с провизией — на причале.»,Mara: «No voyage without provisions for six moons (an emergency fund). The provision crates are on the pier.»
+MARA_PROVISIONS_FIRST,"Мара: «Без провизии на шесть лун (финансовой подушки) в рейс не пойдёшь. Ящики с провизией — тут, рядом со мной.»","Mara: «No voyage without provisions for six moons (an emergency fund). The provision crates are right here next to me.»"
 MARA_TOO_MUCH_RISK,Риск больше 1% капитала — уменьши объём или придвинь стоп.,Risk is over 1% of capital — cut the size or move the stop.
 OLVA_CONSENSUS,"Ольва Перо: «Консенсус по Кузне: EPS %s, выручка %s. Рынок торгует сюрприз — разницу с этим числом.»","Olva Quill: «Forge consensus: EPS %s, revenue %s. The market trades the surprise — the difference from this number.»"
 OLVA_LAST,Ольва Перо: «Сезон %s: EPS %s при консенсусе %s. Ждём новых ожиданий.»,Olva Quill: «Season %s: EPS %s against a consensus of %s. Waiting for new expectations.»
@@ -329,7 +329,7 @@ RACE_TITLE,Остров гонок,Race Island
 PYRAMID_TITLE,Остров пирамиды,Pyramid Island
 PROMPT_PYRAMID_STAIRS,E — Лестница пирамиды,E — the pyramid's stairs
 PROMPT_TICKET_BOOTH,E — Билетная будка,E — the ticket booth
-GOAL_BUY_PROVISIONS,Купи провизию на шесть лун (финансовая подушка) — ящики на причале.,Buy provisions for six moons (emergency fund) — the crates on the pier.
+GOAL_BUY_PROVISIONS,Купи провизию на шесть лун (финансовая подушка) — ящики рядом с Марой.,Buy provisions for six moons (emergency fund) — the crates next to Mara.
 GOAL_PLAN_WITH_MARA,Составь план рейса (торговый план) с Марой у причала.,Make a voyage plan (trading plan) with Mara by the pier.
 GOAL_FIRST_ORDER,Поставь первую заявку на Лестнице (стакан заявок) в зале Биржи.,Place your first order on the Ladder (order book) in the Exchange hall.
 GOAL_SET_ANCHOR,Поставь Якорь (стоп-лосс) на свой груз в зале Биржи.,Set an Anchor (stop-loss) on your cargo in the Exchange hall.
