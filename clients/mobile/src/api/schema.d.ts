@@ -680,6 +680,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/health": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Liveness and readiness for a container health check; no auth */
+        get: operations["getHealth"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/clock": {
         parameters: {
             query?: never;
@@ -1148,6 +1165,15 @@ export interface components {
             /** @description Oldest first */
             lines: components["schemas"]["StatementLine"][];
             totals: components["schemas"]["StatementTotals"];
+        };
+        Health: {
+            /** @enum {string} */
+            status: "UP";
+            /**
+             * Format: int64
+             * @description Events in the journal (since start, including replayed history)
+             */
+            journalEvents: number;
         };
         Clock: {
             /**
@@ -2864,6 +2890,26 @@ export interface operations {
                 };
             };
             401: components["responses"]["Problem"];
+        };
+    };
+    getHealth: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The server is up and its journal is readable */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Health"];
+                };
+            };
         };
     };
     getClock: {
