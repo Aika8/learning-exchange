@@ -851,6 +851,13 @@ Build and CI
   expenses): crates next to me. Then the plan.» (148) — both keep LE-407's «рядом со мной» / "next to me"; «тут» and
   "the … right here" dropped to fit 150. Решено без Айки — отменяется так: поменять слова строки `TALK_MARA_FIRST_6`
   в `talk.csv` и перегенерировать `comic-script.md`.
+- AUTO-20261127-7: Cyrillic names broke login — the dev token `dev-acc-асель` is not ASCII, so a browser cannot put
+  it in a header. Options: (a) percent-encode the account id in the token, (b) refuse non-Latin names, (c)
+  transliterate the id. Chosen (a): no new refusal, account ids and old ASCII tokens unchanged (`acc-aika` encodes to
+  itself); a broken `%` escape answers 401. The WebSocket hub still URL-decodes `?token=` once and clients
+  `encodeURIComponent` it, so the encoded token survives that path. A pre-existing id with a literal `+` or `%` (a name
+  typed with those signs) would need a fresh login, since `+` now decodes to a space. Решено без Айки — отменяется так:
+  revert `backend/app/src/main/java/app/web/DevAuth.java` and pick (b) or (c).
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
