@@ -17,6 +17,85 @@ Rules for every task (the executor prompt repeats them): existing tests are neve
 are new files; money is integer minor units; the engine stays framework-free and deterministic; contract changes go
 to `api/*.yaml` first; nothing changes the look of `game3d`; `make test` stays green.
 
+## Fix first and the decisions of 2026-11-27 (decided without Aika; see DECISIONS.md)
+
+### LE-406 — Assistant: a term question is a question about a word, not any sentence with «what is»
+- status: todo
+- priority: bug
+- source: issue#95
+- size: S
+- paths: `backend/application/src/main/java/application/assistant/TemplateAssistant.java`, `backend/application/src/test/java/application/assistant/TermQuestionShapeTest.java`
+- verify: `./gradlew :backend:application:test --tests 'application.assistant.*'`
+- expect: green; «What is my result?», «Объясни, как прошла сессия» get the normal answer with no «I don't know that word» line; «Что такое спред?» still gets the glossary answer; «Что такое спред и сколько я на нём потерял?» gets the definition **and** the costs numbers
+
+Issue #95 (found reviewing #94): `TERM_QUESTION` matches anywhere, so ordinary questions start with «I don't know
+that word yet». Decided without Aika (the summary of 2026-11-26, item 5, option В; undo by reverting this commit):
+treat a question as a term question only when the phrase starts the question and the rest is at most 4 words
+(the term), or the term matches a glossary entry; when the question also asks about "my"/"мой"/"я"/"потерял"/
+"заплатил", add the topic's numbers after the definition. Failing test first. Do not change `AdviceGuard`.
+
+### LE-405 — Trading mistakes: "after a loss" means one bank day, not five sim minutes
+- status: todo
+- size: S
+- paths: `backend/application/src/main/java/application/review/TradingMistakes.java`, `backend/application/src/test/java/application/review/AfterLossWindowTest.java`
+- verify: `./gradlew :backend:application:test --tests 'application.review.*'`
+- expect: green; a revenge entry 0.9 bank day after a loss is found, one at 1.1 bank days is not, for two different `dayMillis`
+
+`AFTER_LOSS_WINDOW = 5 * SIM_MINUTE` (`TradingMistakes.java:51`) is five bank days when `day-millis=60000`. Decided
+without Aika (option Б of the summary of 2026-11-26, item 4 — simpler to undo): the window is a fixed number of bank
+days, `AFTER_LOSS_BANK_DAYS = 1`, times the bank day length passed in (`SavingsProduct.dayMillis` — read how the
+callers get it; add a parameter with the old behaviour as the default so existing tests stay untouched). Log in
+`DECISIONS.md` («отменяется: вернуть константу»).
+
+### LE-407 — The provisions crates: the words say where they really stand
+- status: todo
+- size: S
+- needs: godot
+- paths: `game3d/i18n/strings.csv`, `game3d/i18n/talk.csv`, `docs/design/comic-script.md`, `game3d/tests/unit/test_provisions_place_words.gd`
+- verify: `make test-game3d`
+- expect: all GUT tests pass; the new test reads `HARBOUR_SPOTS["provisions"]` and the nearest other spot, and the provisions texts name the place that is nearest in the code
+
+The user run of 2026-11-26 found the crates stand by the debt house, not on the pier deck (`game3d/scripts/harbour.gd:15`,
+`:279`). Decided without Aika (option A: fix the words, not the world): find which named spot is nearest to
+`HARBOUR_SPOTS["provisions"]`, and make `GOAL_BUY_PROVISIONS`, `FLOW_NEED_PROVISIONS`, `MARA_PROVISIONS_FIRST` and the
+last sentence of `TALK_MARA_FIRST_6` name that place (ru and en; mirror the talk in `comic-script.md`). If the pier
+really is the nearest, change nothing in the texts and let the test pin it. Copy draft in `DECISIONS.md`.
+
+### LE-408 — Mobile: the glossary is reachable from the home screen
+- status: todo
+- size: S
+- paths: `clients/mobile/src/app/home.tsx`, `clients/mobile/test/home-glossary-link.test.mjs`
+- verify: `cd clients/mobile && npm test`
+- expect: green; the home screen has a control with `testID="open-glossary-home"` that pushes `/glossary`; the settings entry stays
+
+Decided without Aika (the user run's option A of 2026-11-26): the «Словарь» is hidden in Settings. Add one entry
+on the home screen with the existing `Button`/link component and theme tokens, label `t('glossary.title')`. The test
+reads `home.tsx` as text (like `i18n.test.mjs` does) and checks the testID and the route. No new styles.
+
+### LE-409 — Mara says what a "moon" of provisions means
+- status: todo
+- size: S
+- paths: `game3d/i18n/talk.csv`, `docs/design/comic-script.md`, `game3d/tools/test_moon_word.py`
+- verify: `python3 game3d/tools/check_data.py && python3 -m unittest game3d/tools/test_moon_word.py`
+- expect: green; the first time Mara's talks mention «шесть лун» / "six moons", the same balloon says a moon is a month of expenses
+
+Decided without Aika (the user run's option A of 2026-11-26). In the first Mara talk balloon that says «шесть лун»
+(search `talk.csv`), add «(луна — месяц расходов)» / «(a moon is a month of expenses)»; mirror it in
+`comic-script.md`. Text only. The new test finds the first such balloon and checks both languages.
+
+### LE-410 — game3d: drop the dead key HARBOUR_MARA
+- status: todo
+- source: issue#93
+- size: S
+- needs: godot
+- paths: `game3d/i18n/strings.csv`, `game3d/tests/unit/test_no_dead_harbour_mara.gd`
+- verify: `make test-game3d && python3 game3d/tools/check_data.py`
+- expect: all GUT tests pass; `HARBOUR_MARA` is gone from `game3d/i18n/strings.csv` and nothing in `game3d/` reads it; the 2D client's own catalogue is untouched
+
+Issue #93: no script or scene in `game3d` reads `HARBOUR_MARA` (the 2D client loads `game/i18n/strings.csv`).
+Decided without Aika (the easier to undo: removing a key that nothing reads). First grep `game3d/` to prove no reader;
+if one exists, stop and keep the key. The new test scans `game3d/scripts` and `game3d/scenes` as text for the key.
+
 ## Aika's answers of 2026-11-26 and the proposals of 2026-11-25
 
 ### LE-090 — Intent 01: agents may add engine tests; the engine's main code stays Aika's
@@ -53,8 +132,8 @@ fixes the plural). The new test also asserts `new AdviceGuard().isAdvice(text)` 
 - status: todo
 - depends: LE-089
 - size: S
-- edits-tests: `backend/application/src/test/java/application/assistant/TemplateAndFallbackTest.java`, `backend/app/src/test/java/app/M4ContractTest.java`
-- paths: `backend/application/src/main/java/application/assistant/**`, `backend/application/src/test/java/application/assistant/RuPluralTest.java`, `backend/application/src/test/java/application/assistant/TemplateAndFallbackTest.java`, `backend/app/src/test/java/app/M4ContractTest.java`
+- edits-tests: `backend/application/src/test/java/application/assistant/TemplateAndFallbackTest.java`, `backend/app/src/test/java/app/M4ContractTest.java`, `backend/application/src/test/java/application/assistant/TemplateWordsExplainedTest.java`
+- paths: `backend/application/src/main/java/application/assistant/**`, `backend/application/src/test/java/application/assistant/RuPluralTest.java`, `backend/application/src/test/java/application/assistant/TemplateAndFallbackTest.java`, `backend/app/src/test/java/app/M4ContractTest.java`, `backend/application/src/test/java/application/assistant/TemplateWordsExplainedTest.java`
 - verify: `./gradlew :backend:application:test --tests 'application.assistant.*' && ./gradlew :backend:app:test --tests 'app.M4ContractTest'`
 - expect: green; the summary says «3 заявки», «1 заявка», «5 заявок», «21 заявка»; the two old asserts now expect the correct forms
 
@@ -65,6 +144,10 @@ in `application.assistant` (rules: n%10==1 && n%100!=11 → one; n%10 in 2..4 &&
 use it in `TemplateAssistant.summary(...)` for «заявка». Do not change other Russian counts such as «рейсов 2»: they
 are pinned by `TemplateAndFallbackTest.java:55`, which is not one of the two allowed edits. English stays «N orders» / «1 order». New `RuPluralTest`: 0, 1, 2, 4, 5, 11, 12, 14, 21, 22, 25,
 101, 111. Note in `DECISIONS.md` that the two asserts were edited on Aika's exception of 2026-11-26.
+
+Unparked 2026-11-27 (decided without Aika, option A of the summary of 2026-11-26): the exception also covers
+`TemplateWordsExplainedTest.java:47` («3 заявок» → «3 заявки»), added by LE-089 after the exception was given. Change
+only that string in that file. The code may already be on branch `claude/le-092` — continue from it.
 
 ### LE-093 — «the Chasm» is the English lore name of the spread everywhere
 - status: todo
@@ -5080,7 +5163,7 @@ Review note (independent review, 2026-11-26): the bank-day length is `SavingsPro
 
 ## Added by intake
 
-Appended by `scripts/backlog/backlog.py intake`, at most 5 a day.
+Appended by `scripts/backlog/backlog.py intake` (up to 50 a day; `priority: bug` is picked first).
 
 ### AUTO-20261125-1 — Property: every trade is at the resting order's price
 - status: todo
@@ -5364,3 +5447,19 @@ Set exactly: `tabs.fx` en «Currency»; `size.long` ru «Покупка (лон�
 `mood.FOMO` en «Fear of missing out (FOMO)», ru «Страх упустить (FOMO)»; `marketState.RANGE` ru «Боковик (без
 тренда)», en «Range (no trend)». Nothing else. New `test/same-words.test.mjs` (node:test, `readFileSync`) asserting
 these values. Do not touch the web client or any component. Log in `DECISIONS.md` as "copy draft, Aika reviews".
+
+### AUTO-20261126-10 — Session review and its mistakes come from one sequencer call
+- status: todo
+- size: S
+- paths: `backend/app/src/main/java/app/review/**`, `backend/app/src/test/java/app/review/SessionMistakesConsistencyTest.java`
+- verify: `./gradlew :backend:app:test --tests 'app.review.*'`
+- expect: green; the new test interleaves trades with `GET /session-review` and every answer's `mistakes` refer only to orders that its `entries` also contain; the test failed before the fix
+- source: issue#113#1
+- added: 2026-11-26
+- priority: bug
+
+Why: `app.review.SessionMistakes` calls `TradingMistakes.find(journal.readAll(), …)` outside the sequencer on every `GET /session-review`, so the review and its mistakes may see a batch apart (found while doing LE-058; docs/backlog/tech-debt/2026-11-26-LE-058-1.md).
+
+Read `app.review.SessionMistakes` and how `/session-review` builds its answer. Make both parts come from one
+`sequencer.call` over the same events (the smallest change: read the journal inside the same call that reads the
+review projection). Write the failing consistency test first. Do not change `TradingMistakes` or the contract.
