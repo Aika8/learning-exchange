@@ -9,7 +9,7 @@ import org.springframework.stereotype.Component;
 /**
  * Finds the trading mistakes (field guide, table B) of one person in one period for {@code GET /session-review}
  * (LE-058). The rule lives in {@link TradingMistakes}; this only hands it the journal, the instruments and the length
- * of a bank day. The journal does not keep book snapshots, so B4 (wide spread) is never found here (DECISIONS.md).
+ * of a bank day (also the B8/B10 "after a loss" window, LE-405). The journal does not keep book snapshots, so B4 (wide spread) is never found here (DECISIONS.md).
  *
  * <p>Reads the whole journal on every call: fine for a learning exchange, a projection would be the next step.
  */
@@ -25,7 +25,8 @@ public class SessionMistakes {
     }
 
     public List<TradingMistakes.Mistake> find(String accountId, long from, long to) {
-        return TradingMistakes.find(journal.readAll(), market.instruments(), accountId, from, to,
-                market.savingsProduct().dayMillis());
+        long dayMillis = market.savingsProduct().dayMillis();
+        return TradingMistakes.find(journal.readAll(), market.instruments(), accountId, from, to, dayMillis, List.of(),
+                TradingMistakes.afterLossWindow(dayMillis));
     }
 }
