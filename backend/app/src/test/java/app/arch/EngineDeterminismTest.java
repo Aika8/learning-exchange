@@ -1,6 +1,7 @@
 package app.arch;
 
 import static com.tngtech.archunit.core.domain.JavaCall.Predicates.target;
+import static com.tngtech.archunit.core.domain.properties.HasName.Predicates.name;
 import static com.tngtech.archunit.core.domain.properties.HasName.Predicates.nameStartingWith;
 import static com.tngtech.archunit.core.domain.properties.HasOwner.Predicates.With.owner;
 import static com.tngtech.archunit.core.domain.JavaClass.Predicates.assignableTo;
@@ -26,9 +27,9 @@ class EngineDeterminismTest {
 
     @ArchTest
     static final ArchRule engineNeverReadsTheWallClock = noClasses().that().resideInAPackage("engine..")
-            .should().callMethod(Instant.class, "now")
-            .orShould().callMethod(LocalDate.class, "now")
-            .orShould().callMethod(LocalDateTime.class, "now")
+            .should().callMethodWhere(target(owner(assignableTo(Instant.class))).and(target(name("now"))))
+            .orShould().callMethodWhere(target(owner(assignableTo(LocalDate.class))).and(target(name("now"))))
+            .orShould().callMethodWhere(target(owner(assignableTo(LocalDateTime.class))).and(target(name("now"))))
             .orShould().callMethodWhere(target(owner(assignableTo(Clock.class))).and(target(nameStartingWith("system"))))
             .orShould().callMethod(System.class, "currentTimeMillis")
             .orShould().callMethod(System.class, "nanoTime")
