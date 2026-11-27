@@ -1,3 +1,8 @@
+plugins {
+    // Mutation testing (LE-017). Not applied here: a module opts in with `rootProject.ext.applyMutationGate(...)`.
+    id 'info.solidsoft.pitest' version '1.19.0' apply false
+}
+
 subprojects {
     apply plugin: 'java'
 
@@ -23,5 +28,40 @@ subprojects {
         // after 15 minutes, and every JUnit Jupiter test after 2 minutes unless it declares its own @Timeout.
         timeout = java.time.Duration.ofMinutes(15)
         systemProperty 'junit.jupiter.execution.timeout.default', '2 m'
+    }
+}
+
+// Mutation gate (LE-017): applies PIT to a module and fails its `pitest` task below a threshold that can only rise.
+// The threshold is the MAXIMUM of the integers in every `*.txt` under backend/quality-gates/<gate>/, whatever the
+// file names; raising it means adding a file with a higher number (files there are append-only for agents).
+// Usage in a module's build.gradle:  rootProject.ext.applyMutationGate(project, 'mutation-engine', ['engine.*'])
+ext.mutationThreshold = { String gate ->
+    def dir = rootProject.file("backend/quality-gates/${gate}")
+    def files = dir.isDirectory() ? (dir.listFiles({ f -> f.isFile() && f.name.endsWith('.txt') } as FileFilter) ?: []) : []
+    if (files.length == 0) {
+        throw new GradleException("Mutation gate '${gate}': no *.txt threshold file in ${dir}")
+    }
+    files.collect { f ->
+        def text = f.text.trim()
+        if (!(text ==~ /\d{1,3}/) || text.toInteger() > 100) {
+            throw new GradleException("Mutation gate '${gate}': ${f.name} must hold one integer 0..100, got '${text}'")
+        }
+        text.toInteger()
+    }.max()
+}
+
+ext.applyMutationGate = { Project p, String gate, List<String> targets, List<String> excludedTests = [] ->
+    p.apply plugin: 'info.solidsoft.pitest'
+    p.pitest {
+        pitestVersion = '1.30.2'
+        junit5PluginVersion = '1.2.3'
+        targetClasses = targets
+        targetTests = targets
+        excludedTestClasses = excludedTests
+        mutationThreshold = rootProject.ext.mutationThreshold(gate)
+        threads = Runtime.runtime.availableProcessors()
+        outputFormats = ['HTML', 'XML']
+        timestampedReports = false
+        exportLineCoverage = false
     }
 }
