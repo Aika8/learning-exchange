@@ -70,7 +70,8 @@ dependencies is not a red build — wait 30 seconds and run the same command aga
    reason is unclear, leave it and say so in the PR.
 5. Findings, classified (see `docs/backlog/TECH-DEBT.md`): a regression inside your own change → fix it here; the
    task itself is wrong or contradicts the intent/ADRs → park it with the reason; anything outside the task's
-   scope → add a file `docs/backlog/tech-debt/<date>-<id>-<n>.md` in this PR and do **not** fix it.
+   scope → add a file `docs/backlog/tech-debt/<date>-<id>-<n>.md` in this PR, in the format of `docs/backlog/TECH-DEBT.md`
+   (`kind: bug` for wrong behaviour — the intake then queues it first), and do **not** fix it.
    Never write a test that checks the wording of documentation (Markdown prose, README text): it turns CI red for
    every harmless edit. Tests check behaviour, data and code.
 6. A question the files do not answer: follow "do not wait for Aika" in `docs/backlog/README.md` — cheap to undo →
@@ -149,7 +150,7 @@ paragraph: why, where it stopped, the question with options>"`.
 
 Comment on the PR (or, with no PR, open an issue `[parked] <task id>: <one line>` with
 `gh api -X POST repos/Aika8/learning-exchange/issues -f title=… -f body=… -f "labels[]=parked"`):
-what was tried, where it stopped, the question for Aika with 2–3 options and your recommendation. Add the label
+what was tried, where it stopped, and what the next run needs (a decision you took is written in `DECISIONS.md`, not asked). Add the label
 `parked` to the PR. Stop. The next run takes the next task.
 
 ## Final message of the run

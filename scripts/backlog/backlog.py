@@ -266,6 +266,8 @@ def lint(tasks: list[Task]) -> list[str]:
                 errors.append(f"{where}: path {p} is protected or visual")
         if not re.search(r"`[^`]+`", t.fields.get("verify", "")):
             errors.append(f"{where}: verify must hold a command in backticks")
+        if t.fields.get("priority") and t.fields["priority"] not in PRIORITIES:
+            errors.append(f"{where}: priority '{t.fields['priority']}' not in {sorted(PRIORITIES)}")
         for e in t.edits_tests:
             if e not in t.paths:
                 errors.append(f"{where}: edits-tests {e} must also be in paths")
@@ -386,8 +388,10 @@ def tool_available(name: str) -> bool:
 
 
 def next_task(tasks: list[Task], state: dict, has_tool=tool_available) -> Task | None:
+    """The first ready task in file order — but a ready `priority: bug` task always comes first."""
     st = task_states(tasks, state)
-    return next((t for t in tasks if st[t.id] == "ready" and all(has_tool(n) for n in t.needs)), None)
+    ready = [t for t in tasks if st[t.id] == "ready" and all(has_tool(n) for n in t.needs)]
+    return next((t for t in ready if t.fields.get("priority") == "bug"), None) or (ready[0] if ready else None)
 
 
 def open_agent_prs(state: dict) -> list[dict]:
@@ -538,48 +542,84 @@ def proposal_problems(p: Task, existing: list[Task]) -> list[str]:
     return probs
 
 
-def intake(day: str, root: Path = ROOT) -> tuple[list[str], list[str]]:
+TECH_DEBT_DIR = Path("docs/backlog/tech-debt")
+PRIORITIES = {"bug", "normal"}
+
+
+def intake_candidates(day: str, root: Path, issues: list[dict]):
+    """Everything that may become a task, in one format (a proposal: `### title` + fields):
+    the day's analyst/user proposals, every tech-debt file, every open `tech-debt` issue."""
+    for f in sorted((root / PROPOSALS_DIR).glob(f"{day}-*.md")):
+        for p in parse_proposals(f.read_text(encoding="utf-8")):
+            yield f"{f.relative_to(root)}#{p.id.split('-')[1]}", p
+    for f in sorted((root / TECH_DEBT_DIR).glob("*.md")):
+        for p in parse_proposals(f.read_text(encoding="utf-8")):
+            yield f"{f.relative_to(root)}#{p.id.split('-')[1]}", p
+    for i in issues:
+        for p in parse_proposals(scrub_attribution(i.get("body") or "")):
+            yield f"issue#{i['number']}#{p.id.split('-')[1]}", p
+
+
+def intake(day: str, root: Path = ROOT, issues: list[dict] | None = None) -> tuple[list[str], list[str]]:
     queue_file = root / QUEUE
     tasks = parse_tasks(queue_file.read_text(encoding="utf-8"))
     taken_sources = {t.fields.get("source") for t in tasks}
     already_today = sum(1 for t in tasks if t.fields.get("added") == day and t.fields.get("source"))
     accepted, rejected, new_text = [], [], ""
-    for f in sorted((root / PROPOSALS_DIR).glob(f"{day}-*.md")):
-        for p in parse_proposals(f.read_text(encoding="utf-8")):
-            src = f"{f.relative_to(root)}#{p.id.split('-')[1]}"
-            if src in taken_sources:
-                continue
-            probs = proposal_problems(p, tasks)
-            if not probs and already_today + len(accepted) >= MAX_INTAKE_PER_DAY:
-                probs = [f"daily cap of {MAX_INTAKE_PER_DAY} reached"]
-            if probs:
-                rejected.append(f"{src} «{p.title}»: {'; '.join(probs)}")
-                continue
-            new_id = f"AUTO-{day.replace('-', '')}-{already_today + len(accepted) + 1}"
-            fields = {"status": "todo", "size": "S", "paths": p.fields["paths"],
-                      "verify": p.fields["verify"], "expect": p.fields["expect"], "source": src, "added": day}
-            for extra in ("depends", "needs"):
-                if p.fields.get(extra):
-                    fields[extra] = p.fields[extra]
-            t = Task(new_id, p.title, fields,
-                     (f"Why: {p.fields['why']}\n\n" if p.fields.get("why") else "") + p.description)
-            accepted.append(f"{new_id} ← {src} «{p.title}»")
-            new_text += "\n" + t.text()
-            tasks.append(t)
+    for src, p in intake_candidates(day, root, issues or []):
+        if src in taken_sources:
+            continue
+        probs = proposal_problems(p, tasks)
+        if p.fields.get("kind") and p.fields["kind"] not in ("bug", "debt", "proposal"):
+            probs.append(f"kind '{p.fields['kind']}' is not bug, debt or proposal")
+        if not probs and already_today + len(accepted) >= MAX_INTAKE_PER_DAY:
+            probs = [f"daily cap of {MAX_INTAKE_PER_DAY} reached"]
+        if probs:
+            rejected.append(f"{src} «{p.title}»: {'; '.join(probs)}")
+            continue
+        new_id = f"AUTO-{day.replace('-', '')}-{already_today + len(accepted) + 1}"
+        fields = {"status": "todo", "size": "S", "paths": p.fields["paths"],
+                  "verify": p.fields["verify"], "expect": p.fields["expect"], "source": src, "added": day}
+        if p.fields.get("kind") == "bug":
+            fields["priority"] = "bug"   # behaviour bugs are picked before everything else (next_task)
+        for extra in ("depends", "needs"):
+            if p.fields.get(extra):
+                fields[extra] = p.fields[extra]
+        t = Task(new_id, p.title, fields,
+                 (f"Why: {p.fields['why']}\n\n" if p.fields.get("why") else "") + p.description)
+        accepted.append(f"{new_id} ← {src} «{p.title}»")
+        new_text += "\n" + t.text()
+        tasks.append(t)
     if new_text:
         body = queue_file.read_text(encoding="utf-8").rstrip("\n") + "\n"
         if "## Added by intake" not in body:
-            body += "\n## Added by intake\n\nAppended by `scripts/backlog/backlog.py intake`, at most "\
-                    f"{MAX_INTAKE_PER_DAY} a day.\n"
+            body += "\n## Added by intake\n\nAppended by `scripts/backlog/backlog.py intake`.\n"
         queue_file.write_text(body + new_text, encoding="utf-8")
     if accepted or rejected:
         log = root / INTAKE_LOG
         prev = log.read_text(encoding="utf-8") if log.exists() else "# Intake log\n"
-        entry = f"\n## {day}\n" + "".join(f"- accepted: {a}\n" for a in accepted) + \
-                "".join(f"- left for Aika: {r}\n" for r in rejected)
-        if f"\n## {day}\n" not in prev:
-            log.write_text(prev.rstrip("\n") + "\n" + entry, encoding="utf-8")
+        lines = [f"- accepted: {a}\n" for a in accepted] + \
+                [f"- not taken (not a small checkable task): {r}\n" for r in rejected]
+        new_lines = [l for l in lines if l not in prev]
+        if new_lines:
+            head = f"\n## {day}\n" if f"\n## {day}\n" not in prev else ""
+            log.write_text(prev.rstrip("\n") + "\n" + head + "".join(new_lines), encoding="utf-8")
     return accepted, rejected
+
+
+def open_debt_issues(repo: str) -> list[dict]:
+    items = gh(f"repos/{repo}/issues?state=open&labels=tech-debt&per_page=100", paginate=True) or []
+    return [i for i in items if "pull_request" not in i]
+
+
+def close_taken_issues(repo: str, accepted: list[str]) -> None:
+    """After the queue commit is pushed: close each tech-debt issue that became a task, saying which."""
+    for line in accepted:
+        m = re.match(r"^(AUTO-[\w-]+) ← issue#(\d+)#", line)
+        if m:
+            gh(f"repos/{repo}/issues/{m.group(2)}/comments", method="POST",
+               fields={"body": f"Became task {m.group(1)} in docs/backlog/QUEUE.md (intake)."})
+            gh(f"repos/{repo}/issues/{m.group(2)}", method="PATCH", fields={"state": "closed"})
 
 
 # ---------------------------------------------------------------- attribution
@@ -609,6 +649,8 @@ def scrub_event(event_path: str, dry_run: bool = False) -> int:
         target, path = ev["comment"], f"repos/{repo}/issues/comments/{ev['comment']['id']}"
     elif "pull_request" in ev:
         target, path = ev["pull_request"], f"repos/{repo}/pulls/{ev['pull_request']['number']}"
+    elif "issue" in ev:
+        target, path = ev["issue"], f"repos/{repo}/issues/{ev['issue']['number']}"
     else:
         return 0
     body = target.get("body") or ""
@@ -623,7 +665,7 @@ def scrub_event(event_path: str, dry_run: bool = False) -> int:
 
 # ---------------------------------------------------------------- automerge (GitHub Actions)
 
-AUX_CHECKS = {"merge", "reset-review", "intake", "guard", "scrub"}
+AUX_CHECKS = {"merge", "reset-review", "intake", "guard", "scrub", "close-issues"}
 
 
 def ci_state(runs: list[dict]) -> str:
@@ -634,8 +676,8 @@ def ci_state(runs: list[dict]) -> str:
     tests = [r for r in runs if r["name"] == "test"]
     if not tests:
         return "none"
-    if any(r["status"] != "completed" for r in tests):
-        return "pending"
+    if any(r["status"] != "completed" for r in runs if r["name"] not in AUX_CHECKS):
+        return "pending"   # e.g. the `game` job (GUT) still running while `test` is green
     latest = max(tests, key=lambda r: r.get("completed_at") or "")
     return "green" if latest["conclusion"] == "success" else "red"
 
@@ -781,6 +823,9 @@ def automerge(dry_run: bool = False) -> int:
             merged_one = automerge_one(repo, pr, tasks, dry_run, say)
         except Exception as e:  # one bad PR never blocks the others
             say(f"error, skipped: {e}")
+    if merged_one and os.environ.get("GITHUB_OUTPUT"):
+        with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as fh:
+            fh.write("merged=true\n")   # the workflow then runs intake: a merged proposal or note enters the queue now
     return 0
 
 
@@ -875,6 +920,9 @@ def main(argv: list[str] | None = None) -> int:
     s = sub.add_parser("check-paths"); s.add_argument("--branch", required=True)
     g = s.add_mutually_exclusive_group(required=True); g.add_argument("--base"); g.add_argument("--files")
     s = sub.add_parser("intake"); s.add_argument("--date", default=dt.date.today().isoformat())
+    s.add_argument("--issues", action="store_true", help="also read open tech-debt issues (GitHub)")
+    s.add_argument("--accepted-out", help="write the accepted lines here (for close-issues after the push)")
+    s = sub.add_parser("close-issues"); s.add_argument("accepted_file")
     s = sub.add_parser("automerge"); s.add_argument("--dry-run", action="store_true")
     sub.add_parser("plan", help="executor: what to do in this run (one line: MOVE detail)")
     s = sub.add_parser("prod-changes", help="reviewer: changed files that are not tests or docs (for the vacuum check)")
@@ -900,8 +948,15 @@ def main(argv: list[str] | None = None) -> int:
     if a.cmd == "scrub":
         return scrub_event(a.event, a.dry_run)
     if a.cmd == "intake":
-        acc, rej = intake(a.date)
-        print("\n".join([f"accepted: {x}" for x in acc] + [f"left for Aika: {x}" for x in rej]) or "nothing")
+        acc, rej = intake(a.date, issues=open_debt_issues(repo_slug()) if a.issues else None)
+        if a.accepted_out:
+            with open(a.accepted_out, "a", encoding="utf-8") as fh:
+                fh.write("".join(x + "\n" for x in acc))
+        print("\n".join([f"accepted: {x}" for x in acc] + [f"not taken: {x}" for x in rej]) or "nothing")
+        return 0
+    if a.cmd == "close-issues":
+        p = Path(a.accepted_file)
+        close_taken_issues(repo_slug(), p.read_text(encoding="utf-8").splitlines() if p.exists() else [])
         return 0
 
     if a.cmd == "prod-changes":
