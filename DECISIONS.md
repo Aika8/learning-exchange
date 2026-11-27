@@ -839,6 +839,12 @@ Build and CI
   too. Read as: that case is tested, and so are two cases that do fail before the fix — an entry 2 bank days after a
   loss with `day-millis=60000` is not revenge, an entry 0.9 bank day after a loss with `day-millis=600000` (9 sim
   minutes) is. «решено без Айки — отменяется так: delete the two extra tests in `SessionMistakesWindowTest.java`.»
+- LE-092: three existing asserts that pinned the wrong Russian plural were edited on Aika's exception of 2026-11-26
+  (`TemplateAndFallbackTest.java:43` «3 заявок» → «3 заявки», `M4ContractTest.java:34` «1 заявок» → «1 заявка») and
+  its extension of 2026-11-27, option A (`TemplateWordsExplainedTest.java:47` «3 заявок» → «3 заявки»). Nothing else in
+  those files changed. `RuPlural.of(n, one, few, many)` is used only for «заявка» in the summary; other counts
+  («рейсов 2») and English («N orders») stay as they were. `RuPlural` takes the absolute value of `n` (a negative count
+  is never passed today). «решено без Айки — отменяется так: drop the `Math.abs` in `RuPlural.of`.»
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 

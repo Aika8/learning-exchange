@@ -44,7 +44,7 @@ class TemplateWordsExplainedTest {
     @Test
     void summarySaysWhatTheResultIsMeasuredAgainstInRussian() {
         String t = ask("Как прошла сессия?", "ru").text();
-        assertTrue(t.contains("3 заявок, 1 в плюсе; результат, если бы всё закрыть по последней цене, −0.84 SPARK."), t);
+        assertTrue(t.contains("3 заявки, 1 в плюсе; результат, если бы всё закрыть по последней цене, −0.84 SPARK."), t);
         assertTrue(t.contains("Спред — разница"), t);
         assertFalse(new AdviceGuard().isAdvice(t), t);
     }
