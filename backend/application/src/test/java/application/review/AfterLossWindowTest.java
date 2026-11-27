@@ -1,6 +1,7 @@
 package application.review;
 
 import static application.review.TradingMistakes.Code.B10_REVENGE;
+import static application.review.TradingMistakes.Code.B8_SIZE_AFTER_LOSS;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import application.review.TradingMistakes.Mistake;
@@ -60,6 +61,40 @@ class AfterLossWindowTest {
     @ValueSource(longs = {60_000, 86_400_000})
     void anEntryMoreThanOneBankDayAfterALossIsNot(long dayMillis) {
         assertEquals(List.of(), revengeAfter(dayMillis, 11));
+    }
+
+    /**
+     * Three entries of the usual size, a loss, then an entry of twice the usual size {@code tenths}/10 bank days
+     * after the loss.
+     */
+    private List<Mistake> bigSizeAfter(long dayMillis, long tenths) {
+        for (long day = 1; day <= 3; day++) {
+            trade(day * dayMillis, Order.Side.BUY, 10, 10_000);
+            trade(day * dayMillis + 1, Order.Side.SELL, 10, 10_000);
+        }
+        long lossAt = 10 * dayMillis;
+        trade(lossAt - 1, Order.Side.BUY, 10, 10_000);
+        trade(lossAt, Order.Side.SELL, 10, 9_000);
+        long entry = lossAt + tenths * dayMillis / 10;
+        trade(entry, Order.Side.BUY, 20, 9_000);
+        trade(entry + 1, Order.Side.SELL, 20, 9_000);
+        List<Mistake> all = TradingMistakes.find(events, Instrument.ALL, ME, 0, 100 * dayMillis, dayMillis, List.of(),
+                TradingMistakes.afterLossWindow(dayMillis));
+        return all.stream().filter(m -> m.code() == B8_SIZE_AFTER_LOSS).toList();
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {60_000, 86_400_000})
+    void aBigEntryWithinOneBankDayOfALossIsSizeAfterLoss(long dayMillis) {
+        List<Mistake> found = bigSizeAfter(dayMillis, 9);
+        assertEquals(1, found.size(), found.toString());
+        assertEquals(10 * dayMillis + 9 * dayMillis / 10, found.get(0).at());
+    }
+
+    @ParameterizedTest
+    @ValueSource(longs = {60_000, 86_400_000})
+    void aBigEntryMoreThanOneBankDayAfterALossIsNot(long dayMillis) {
+        assertEquals(List.of(), bigSizeAfter(dayMillis, 11));
     }
 
     @ParameterizedTest
