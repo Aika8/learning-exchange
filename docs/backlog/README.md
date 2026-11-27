@@ -51,7 +51,7 @@ of each scheduled task is one line — the file holds the rest, so changing a pr
 | Run | Prompt file | When (UTC; Almaty = UTC+5) | Writes |
 |---|---|---|---|
 | Executor | `prompts/executor.md` | hourly at :07 (frequency set after the trial measurement) | branch `claude/<task id>`, a PR |
-| Reviewer | `prompts/reviewer.md` | hourly at :37 | a review comment and a label on one PR |
+| Reviewer | `prompts/reviewer.md` | hourly at :37 | one stage (task, then deep) of review on one PR |
 | Analyst | `prompts/analyst.md` | daily 16:20 | PR adding `proposals/<date>-analyst.md` |
 | User | `prompts/user.md` | daily 17:20 | PR adding `proposals/<date>-user.md` |
 | Intake | `.github/workflows/intake.yml` (code) | daily 21:50 | commit to `main`: QUEUE.md, intake-log.md |
@@ -69,16 +69,18 @@ hour costs little.
    `verify` and `make test`, checks paths with `backlog.py check-paths`, pushes, opens the PR with `gh api` (REST;
    `gh pr` uses GraphQL, which the cloud proxy refuses) and labels it `agent`.
 3. CI runs `make test`.
-4. Reviewer (another run, no shared context): when CI is green, answers yes/no questions about the diff against
-   the task. Pass → label `review:pass`. Fail → label `needs-fix` and the questions.
+4. Reviewer (another run, no shared context): when CI is green, reviews one of two independent stages — `dim=task`
+   (does the change do the task, keep conventions, pin behaviour with tests) then `dim=deep` (a cold adversarial
+   pass for runtime breakage), each by a different run. Task stage pass → label `review:task`; the deep stage that
+   follows → label `review:pass`. Any fail → label `needs-fix` and the questions.
 5. Executor of a later hour answers `needs-fix` or a red CI: at most 2 fix rounds, then the PR gets `parked` and
-   waits for Aika. A pushed fix removes `review:pass` (automerge.yml), so the reviewer looks again.
+   waits for Aika. A pushed fix removes `review:task` and `review:pass` (automerge.yml), so both stages run again.
 6. Automerge: PAUSE absent, branch and paths allowed, CI green on the head, branch up to date (if behind, it
    updates the branch; with no CI on the head it dispatches CI; a conflict → `needs-rebase`), and for a task:
-   `review:pass` plus a reviewer marker `verdict=pass sha=<that very head>` (only GitHub's own update-branch merges
+   `review:pass` plus reviewer markers `dim=task verdict=pass` and `dim=deep verdict=pass`, both on `sha=<that very head>` (only GitHub's own update-branch merges
    may follow the reviewed commit) → squash merge, then CI on `main`. A task is *done* when its PR is merged.
 
-Labels: `agent`, `review:pass`, `needs-fix`, `needs-rebase`, `parked` (waits for Aika), `blocked-paths` (touched
+Labels: `agent`, `review:task` (task stage passed), `review:pass` (both stages passed), `needs-fix`, `needs-rebase`, `parked` (waits for Aika), `blocked-paths` (touched
 a forbidden path; waits for Aika), `hold` (Aika's: do not touch). GitHub creates a label the first time it is used.
 
 ## Rule for every run: do not wait for Aika
