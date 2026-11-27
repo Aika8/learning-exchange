@@ -8,3 +8,6 @@ dependencies {
 dependencies {
     testImplementation 'net.jqwik:jqwik:1.10.2'
 }
+
+// Mutation testing (LE-018): `./gradlew :backend:application:pitest`; threshold in backend/quality-gates/mutation-application/.
+rootProject.ext.applyMutationGate(project, 'mutation-application', ['application.*'])

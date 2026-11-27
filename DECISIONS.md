@@ -858,6 +858,10 @@ Build and CI
   `encodeURIComponent` it, so the encoded token survives that path. A pre-existing id with a literal `+` or `%` (a name
   typed with those signs) would need a fresh login, since `+` now decodes to a space. Решено без Айки — отменяется так:
   revert `backend/app/src/main/java/app/web/DevAuth.java` and pick (b) or (c).
+- LE-018: "today's score rounded down" for `backend/application` — PIT prints 45 % (it rounds 545/1223 = 44.6 %),
+  the threshold file holds 44, the true score rounded down, so a re-run with one flaky kill still passes. No
+  `application.assistant.Claude*` class exists, so nothing is excluded. «решено без Айки — отменяется так: добавить
+  файл `backend/quality-gates/mutation-application/<имя>.txt` с 45».
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
