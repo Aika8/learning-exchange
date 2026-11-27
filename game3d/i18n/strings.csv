@@ -73,7 +73,6 @@ HARBOUR_TITLE,Гавань Искр,Spark Harbour
 HARBOUR_HELP,WASD — идти · Shift — бег · мышь — обзор · Tab — облёт камерой · V — стиль · E — действие,WASD — walk · Shift — run · mouse — look · Tab — fly the camera · V — style · E — interact
 HARBOUR_FLY,Облёт камерой (Tab — вернуться к капитану),Camera flight (Tab — back to the captain)
 HARBOUR_ACCOUNT,Счёт %s · %s,Account %s · %s
-HARBOUR_MARA,"Мара Якорная: «Мельница наверху — Ветряная Биржа. В её зале горит Лестница — по-вашему, стакан заявок. А у причала ждёт твой «Попутчик». Но сначала — провизия на шесть лун: ящики на причале. Потом план со мной.»","Mara Anchor: «The windmill up there is the Wind Exchange. The Ladder glows in its hall — the order book, as your world calls it. And your «Wayfarer» waits at the pier. But first — provisions for six moons: the crates on the pier. Then a plan with me.»"
 PROMPT_EXCHANGE,E — войти в зал Биржи,E — enter the Exchange hall
 PROMPT_SHIP,E — к штурвалу: выбрать курс,E — to the wheel: choose a course
 PROMPT_MARA,E — поговорить с Марой,E — talk to Mara
