@@ -822,6 +822,18 @@ Build and CI
   expect needs them (both rests are short). Options not taken: a fixed list of whole phrases; asking the glossary
   for every word. «решено без Айки — отменяется так: revert the LE-406 commit in `TemplateAssistant.java` and delete
   `TermQuestionShapeTest.java`.»
+- LE-407: where the provisions crates are said to stand. In the code the named spot nearest to
+  `HARBOUR_SPOTS["provisions"]` (37, 10.4) is Mara (30, 8) at 7.4 m — not the debt chest (12.8 m) and not the ship at
+  the pier end (12.7 m); the crates are on the wharf deck, not on the pier. So the copy draft (Aika may rewrite) says
+  "next to Mara", and Mara herself says "next to me": `GOAL_BUY_PROVISIONS` / `FLOW_NEED_PROVISIONS` ru «… — ящики
+  рядом с Марой.» / en «… — the crates next to Mara.»; `MARA_PROVISIONS_FIRST` ru «… Ящики с провизией — тут, рядом
+  со мной.» / en «… The provision crates are right here next to me.»; `TALK_MARA_FIRST_6` ru «… провизия на шесть
+  лун: ящики тут, рядом со мной. Потом — план.» / en «… the crates right here next to me. Then the plan.»
+  (`comic-script.md` regenerated). `test_provisions_place_words.gd` computes the nearest spot, so moving the crates
+  turns it red until the words follow. The dead `HARBOUR_MARA` still says "on the pier" — LE-410 removes it.
+  Options not taken: moving the crates (changes how game3d looks); naming the debt chest (it is farther than Mara).
+  «решено без Айки — отменяется так: revert the LE-407 commit in `strings.csv`, `talk.csv`, `comic-script.md` and
+  delete the test.»
 - AUTO-20261126-11: the task's expect ("a revenge entry 0.9 bank day after a loss with `day-millis=60000` is found
   by `SessionMistakes`, failed before the fix") cannot fail before the fix: 54 s is inside the old 5-sim-minute window
   too. Read as: that case is tested, and so are two cases that do fail before the fix — an entry 2 bank days after a

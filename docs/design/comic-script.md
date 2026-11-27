@@ -81,7 +81,7 @@ Comic book panel in the style of the attached sheet 06-comic-style: confident bl
 
 **Panel 3** — `game3d/art/comic/mara_first/2-3.jpg` — bottom-left, 16:9 (≈697×369), shot `two`
 
-- mara (happy): «Right. Position size = risk ÷ distance to the stop. But first — provisions for six moons: the crates on the pier. Then a plan with me.»
+- mara (happy): «Right. Position size = risk ÷ distance to the stop. But first — provisions for six moons: the crates right here next to me. Then the plan.»
 - attach: `06-comic-style.jpg`, `08-faces-mara.jpg`, `03-mara.jpg`, `07-faces-captain.jpg`, `01-captain.jpg`, `24-spark-harbour.jpg`, `25-props.jpg`
 
 ```text
