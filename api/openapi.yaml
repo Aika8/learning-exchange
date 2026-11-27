@@ -700,6 +700,17 @@ paths:
             application/json:
               schema: { type: array, items: { $ref: '#/components/schemas/Achievement' } }
         '401': { $ref: '#/components/responses/Problem' }
+  /health:
+    get:
+      operationId: getHealth
+      summary: Liveness and readiness for a container health check; no auth
+      security: []
+      responses:
+        '200':
+          description: The server is up and its journal is readable
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
   /clock:
     get:
       operationId: getClock
@@ -1039,6 +1050,12 @@ components:
           description: Oldest first
           items: { $ref: '#/components/schemas/StatementLine' }
         totals: { $ref: '#/components/schemas/StatementTotals' }
+    Health:
+      type: object
+      required: [status, journalEvents]
+      properties:
+        status: { type: string, enum: [UP] }
+        journalEvents: { type: integer, format: int64, minimum: 0, description: 'Events in the journal (since start, including replayed history)' }
     Clock:
       type: object
       required: [now, paused, speed]
