@@ -838,3 +838,10 @@ Build and CI
     they need `game3d/scripts/*.gd` outside `core/`, which the gate keeps for Aika — after the holiday.
   - Amber Cliff has no paid job yet: goal texts say "a day without trading" and never promise pay. Day 1 sends a
     player who sailed off without provisions home first. Island goal chains in LE-202 are drafts.
+- LE-015: the `Assistant` port carries no account id, so `CachingAssistant` adds `answer(accountId, question, facts)`
+  and `forAccount(id)` (a port view bound to one account); the plain port call uses an empty account id. The key also
+  holds the question's language and persona — otherwise an English question could get a cached Russian answer, or the
+  Chronicler the Helper's. Facts are hashed with SHA-256 of `Facts.asData()`; a failed (exception) delegate call is not
+  cached, a `null` answer neither. Options not taken: adding the account to `Question` (changes every caller), keying
+  on the account alone (wrong language). Решено без Айки — отменяется так: drop `lang`/`persona` from
+  `CachingAssistant.Key`, or move the account into `Assistant.Question` and remove `forAccount`.
