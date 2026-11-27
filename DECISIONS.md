@@ -798,6 +798,17 @@ Build and CI
   pre-listing names "just in case". Решено без Айки — отменяется так: добавить запись в `RATIO_ALLOW_LIST` или
   удалить тест.
 
+- LE-406: what makes a question a term question (summary of 2026-11-26, item 5, option В). The question words
+  («что такое», «объясни», «what is» …) must start the question (only punctuation before them). A glossary term at
+  the start of the rest answers with its definition; if the rest is also about the asker (my/mine/I/me/lost/paid,
+  мой…/я/мне/меня/мной, потерял…/заплатил…), the topic's numbers follow the definition. With no term found, the
+  «I don't know that word» line comes only when the rest is at most 4 words, does not start with a question word
+  (как/почему/сколько/how/why/what …) and is not about the asker — so «What is my result?» and «Объясни, как прошла
+  сессия» get the usual answer. The last two conditions are this run's reading of "the rest is the term": the task's
+  expect needs them (both rests are short). Options not taken: a fixed list of whole phrases; asking the glossary
+  for every word. «решено без Айки — отменяется так: revert the LE-406 commit in `TemplateAssistant.java` and delete
+  `TermQuestionShapeTest.java`.»
+
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
 - Intent 01 amended: agents may change `backend/engine` and add tests (Aika: «нет пускай движок тоже правит»), with
