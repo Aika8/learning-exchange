@@ -83,8 +83,8 @@
   },
   "settings": {
     "title": "Settings",
-    "language": "Язык / Language",
-    "ru": "Русский",
+    "language": "Language",
+    "ru": "Russian",
     "en": "English",
     "account": "Account",
     "logout": "Log out",
@@ -532,7 +532,7 @@
   },
   "achievements": {
     "title": "Achievements",
-    "intro": "Shared with the game «Летопись Ветров»: the same account, the same events.",
+    "intro": "Shared with the game «Chronicle of Winds»: the same account, the same events.",
     "FIRST_TRADE": {
       "title": "First trade",
       "desc": "One of your orders was filled"
