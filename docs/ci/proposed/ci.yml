@@ -1,0 +1,114 @@
+# PROPOSAL (LE-022), not active: a faster `.github/workflows/ci.yml`. The numbers behind each change are in
+# docs/ci/ci-timing.md (last 20 runs before 2026-11-28: median wall time 229 s, critical path = job `game`, 226 s,
+# of which `test_world_walk.gd` alone ~184 s). Adopting it means copying this file over .github/workflows/ci.yml in a
+# change Aika approves; agents do not touch .github/.
+#
+# Expected result: median wall time ~165-175 s instead of 229 s (-25 %), runner time +~15 s per run.
+#
+# CI: `make test` on every push and pull request — backend, web and mobile unit tests and type checks — and the
+# games' GUT tests with a headless Godot, split over two jobs. No E2E (they need a running backend and a browser).
+# See DECISIONS.md, "M2a".
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  # The automerge workflow re-runs CI on a branch it brought up to date with main (pushes made with GITHUB_TOKEN
+  # start no workflow by themselves). See docs/backlog/README.md.
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  # Unchanged, except the Gradle build cache. Not on the critical path (median 87 s vs 226 s for the games), so
+  # nothing here shortens a run; the build cache saves runner time and keeps headroom if the games get faster.
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+      - uses: gradle/actions/setup-gradle@v4
+      # CHANGE 1 — Gradle build cache. Today all 19 tasks of `./gradlew test` execute in every run (51 s in run
+      # 46088087791). setup-gradle already saves ~/.gradle/caches (which holds build-cache-1) from `main` and restores
+      # it read-only on branches, so with caching on, a PR that does not touch backend/ gets its compile and test
+      # tasks FROM-CACHE. Expected: ~51 s -> ~15 s on such PRs, 0 s saved when backend/ changes. Set in the user
+      # home so the repository's gradle.properties (and local builds) stay as they are.
+      - name: Gradle build cache on
+        run: mkdir -p ~/.gradle && echo 'org.gradle.caching=true' >> ~/.gradle/gradle.properties
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            clients/web/package-lock.json
+            clients/mobile/package-lock.json
+      # Not changed: caching node_modules would save <= 10 s (web npm ci 2 s, mobile 11 s) off the critical path, and
+      # the Makefile's .ci-stamp rule compares mtimes, which a restore after checkout gets wrong.
+      - run: make test
+      - name: Test reports
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-reports
+          path: backend/*/build/reports/tests/
+
+  # The games' GUT tests, headless (Aika's decision of 2026-11-27, option A of the summary of 2026-11-26: agents
+  # prove game logic with GUT, so CI must run it). Godot 4.7.2 from its GitHub release; the CC0 art is not fetched,
+  # so tests that need it stay pending, as on a fresh clone.
+  #
+  # CHANGE 2 — shard game3d's GUT run over two parallel jobs. `make test-game3d` is 208 s (median) and 74 % of it is
+  # one script, test_world_walk.gd (184 s of 247 s GUT time in run 46088087791). Job `game` keeps `make test-game`
+  # and runs every game3d script except that one (measured locally: 30 scripts, 178 tests, 71 s); job `game3d-walk`
+  # runs test_world_walk.gd alone. Expected: the critical path becomes `game3d-walk`, ~165-175 s instead of 226 s
+  # (-55..60 s per run); job `game` drops to ~85 s. Cost: one more job set-up (~10-15 s of runner time; minutes are
+  # free for this public repository on standard runners). Together the two jobs run exactly the 31 scripts / 189
+  # tests `make test-game3d` runs today; a new test_*.gd lands in `game` by itself (the list is built with ls).
+  # Both call GUT with `-gconfig=` so the dirs of .gutconfig.json do not add the whole folder back; -glog=1 and
+  # -gexit are the two other settings of that file (include_subdirs/prefix/suffix only matter with -gdir).
+  # When adopted, these two commands belong in the Makefile as targets (e.g. test-game3d-walk / test-game3d-rest),
+  # with `make test-game3d` still running everything locally.
+  game:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      # Not cached: the download takes 1-2 s.
+      - name: Godot 4.7.2 (headless)
+        run: |
+          curl -fsSL --retry 3 -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          sudo install -m 0755 /tmp/godot/Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
+          godot --headless --version
+      - run: make test-game
+      - name: game3d GUT, every script but test_world_walk.gd
+        working-directory: game3d
+        run: |
+          godot --headless --path . --import >/dev/null 2>&1 || true
+          tests=$(ls tests/unit/test_*.gd | grep -v '/test_world_walk\.gd$' | sed 's|^|res://|' | paste -sd, -)
+          godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 -gexit -gtest="$tests"
+
+  game3d-walk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Godot 4.7.2 (headless)
+        run: |
+          curl -fsSL --retry 3 -o /tmp/godot.zip \
+            https://github.com/godotengine/godot/releases/download/4.7.2-stable/Godot_v4.7.2-stable_linux.x86_64.zip
+          unzip -q /tmp/godot.zip -d /tmp/godot
+          sudo install -m 0755 /tmp/godot/Godot_v4.7.2-stable_linux.x86_64 /usr/local/bin/godot
+          godot --headless --version
+      - name: game3d GUT, test_world_walk.gd
+        working-directory: game3d
+        run: |
+          godot --headless --path . --import >/dev/null 2>&1 || true
+          godot --headless --path . -s addons/gut/gut_cmdln.gd -gconfig= -glog=1 -gexit \
+            -gtest=res://tests/unit/test_world_walk.gd
