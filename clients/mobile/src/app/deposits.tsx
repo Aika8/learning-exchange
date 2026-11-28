@@ -7,6 +7,8 @@ import { refetchAccount, useAccountNudges, useMe, useSavings } from '../hooks';
 import { bpsToPercent, ruleOf72Tenths } from '../finance';
 import { formatMinor, parseToMinor } from '../money';
 import { newIdempotencyKey } from '../m2b';
+import { bankDayLength, interestToDate, splitDeposits, tenthsText } from '../deposits';
+import { availableOf } from '../fx';
 import { type as typo, useColors } from '../theme/theme';
 import { Body, Button, Caption, Card, Screen, Title } from '../components/ui';
 import { Field, Line } from '../components/Field';
@@ -23,9 +25,8 @@ export default function Deposits() {
   const [amount, setAmount] = useState('');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
   const product = savings.data?.product;
-  const open = (savings.data?.deposits ?? []).filter((d) => d.status === 'OPEN');
-  const closed = (savings.data?.deposits ?? []).filter((d) => d.status === 'CLOSED').slice(0, 5);
-  const cash = me?.balances.find((b) => b.asset === 'SPARK')?.available;
+  const { open, closed } = splitDeposits(savings.data?.deposits);
+  const cash = availableOf(me?.balances, 'SPARK');
   const dec = i18n.language.startsWith('ru') ? ',' : '.';
   const fmt = (m: number) => `${formatMinor(m, 2, i18n.language)} SPARK`;
   const err = (e: unknown) => setMsg({ ok: false, text: t(`errors.${e instanceof ApiError ? e.code : 'NETWORK'}`, { defaultValue: t('errors.BAD_REQUEST') }) });
@@ -49,8 +50,8 @@ export default function Deposits() {
   });
 
   const years = product ? ruleOf72Tenths(product.rateBps) : null;
-  const sec = product ? Math.floor(product.dayMillis / 1000) : 0;
-  const dayLen = sec >= 3600 && sec % 3600 === 0 ? t('units.hours', { count: sec / 3600 }) : sec >= 60 && sec % 60 === 0 ? t('units.minutes', { count: sec / 60 }) : t('units.seconds', { count: sec });
+  const day = bankDayLength(product ? product.dayMillis : 0);
+  const dayLen = t(`units.${day.unit}`, { count: day.count });
 
   return (
     <Screen footer={<TabBar />}>
@@ -66,7 +67,7 @@ export default function Deposits() {
         <Card style={{ gap: 6 }}>
           <Body bold>{t('deposits.rule72Title')}</Body>
           <Caption color={c.textPrimary}>
-            {t('deposits.rule72', { rate: bpsToPercent(product.rateBps, dec), years: years !== null ? `${Math.floor(years / 10)}${dec}${years % 10}` : '—' })}
+            {t('deposits.rule72', { rate: bpsToPercent(product.rateBps, dec), years: tenthsText(years, dec) })}
           </Caption>
           <Caption testID="bank-day">{t('deposits.bankDay', { duration: dayLen })}</Caption>
         </Card>
@@ -83,7 +84,7 @@ export default function Deposits() {
               </Body>
             </View>
             <Line label={t('deposits.principal')} value={fmt(d.principal)} />
-            <Line label={t('deposits.interest')} value={`+${fmt(d.interest ?? d.balance - d.principal)}`} color={c.positive} />
+            <Line label={t('deposits.interest')} value={`+${fmt(interestToDate(d))}`} color={c.positive} />
             <Pressable testID={`deposit-close-${d.depositId}`} onPress={() => close.mutate(d.depositId)} hitSlop={8} style={{ alignSelf: 'flex-end' }}>
               <Text style={{ color: c.primary, fontWeight: '600' }}>{t('deposits.close')}</Text>
             </Pressable>

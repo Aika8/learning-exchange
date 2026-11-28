@@ -862,6 +862,15 @@ Build and CI
   the threshold file holds 44, the true score rounded down, so a re-run with one flaky kill still passes. No
   `application.assistant.Claude*` class exists, so nothing is excluded. «решено без Айки — отменяется так: добавить
   файл `backend/quality-gates/mutation-application/<имя>.txt` с 45».
+- LE-031: the task names "term left" and "early-close preview" for deposits, but `SavingsDeposit` in `api/openapi.yaml`
+  has no term (a deposit is open until closed, closing pays the balance) and the screen shows neither — so the helpers
+  cover what the screen computes: open/closed lists, interest to date, rule-of-72 years as text, bank-day length.
+  No new values on screen (the task forbids layout changes). The balance lookup `availableOf` lives in `src/fx.ts`
+  and the deposits screen imports it from there (one copy); the FX screen now takes `newIdempotencyKey()` from
+  `src/m2b.ts` instead of its own `Date.now()`+random key. Options not taken: inventing a term field (contract change
+  for nothing the server knows); a new shared `src/balances.ts` (outside the task's paths, see
+  `docs/backlog/tech-debt/2026-11-28-LE-031-1.md`). «решено без Айки — отменяется так: inline the helpers back into
+  `src/app/deposits.tsx` / `src/app/fx.tsx` and delete `src/deposits.ts`, `src/fx.ts` and their tests».
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
