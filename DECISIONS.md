@@ -862,6 +862,11 @@ Build and CI
   the threshold file holds 44, the true score rounded down, so a re-run with one flaky kill still passes. No
   `application.assistant.Claude*` class exists, so nothing is excluded. «решено без Айки — отменяется так: добавить
   файл `backend/quality-gates/mutation-application/<имя>.txt` с 45».
+- LE-029: the language switch in English shows "Language" / "Russian" / "English" (was "Язык / Language" and
+  "Русский"), and the achievements intro names the game «Chronicle of Winds» (its English title in `game/i18n/strings.csv`),
+  because the task says no en value has a Cyrillic letter. Not taken: an exception for language endonyms (the common
+  switch convention). «решено без Айки — отменяется так: put the old values back in `clients/mobile/src/i18n/en.json`
+  and give both checks in `clients/mobile/test/i18n-script.test.mjs` an allow-list for those keys».
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
