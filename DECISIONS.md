@@ -868,6 +868,13 @@ Build and CI
   `src/statement.ts`; no grouping or client-side sums were added, so the screen shows the same values. «A negative
   balance» is tested as a negative realised profit total (the statement has no balance field). Not taken: inventing
   day grouping (changes the screen). решено без Айки — отменяется так: add the missing helpers in a new task.
+- LE-032: the bonds and funds screens compute no finance — YTM, modified duration, the coupon schedule, TER, the
+  10-year TER cost (`tenYearCostBps`), NAV, premium and both returns all come from the server (engine M2b/M2c). Chosen:
+  move what the screens do decide (status badge colour, trade button only for ACTIVE, the `?id=` bond, «paid / left»,
+  premium colour and caption, holdings order and bar width, fund − basket gap with its colour and caption) into
+  `src/bonds.ts` / `src/funds.ts`; the gap is the one subtraction, display only, commented as such. No TER-over-a-period
+  or index-vs-active formula was added on the client (it would duplicate the server and change the screen). решено без
+  Айки — отменяется так: add a server field and show it, in a new task.
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
