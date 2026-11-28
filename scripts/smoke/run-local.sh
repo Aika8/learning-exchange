@@ -7,8 +7,14 @@ root="$(cd "$(dirname "$0")/../.." && pwd)"
 port="${SMOKE_PORT:-8091}"
 wait_s="${SMOKE_WAIT_SECONDS:-240}"
 [[ "$port" == 8080 ]] && { echo "smoke: refusing to use port 8080" >&2; exit 1; }
-log="$(mktemp -t smoke-dev.XXXXXX.log)"
 cd "$root" || exit 1
+# The port must be free before anything starts and before the trap is set: otherwise the health loop would test a
+# foreign server (code this run did not build) and the trap's `make stop` would kill a server this run never started.
+scripts/exchange-procs.sh check "$port" >&2 || { echo "smoke: FAIL — port $port is busy; not starting" >&2; exit 1; }
+if curl -s -o /dev/null --max-time 2 "http://localhost:$port/"; then
+  echo "smoke: FAIL — something already answers on port $port; not starting" >&2; exit 1
+fi
+log="$(mktemp -t smoke-dev.XXXXXX.log)"
 
 make -s dev PORT="$port" JOURNAL=memory >"$log" 2>&1 &
 dev_pid=$!
