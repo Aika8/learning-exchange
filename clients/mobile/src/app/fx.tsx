@@ -6,6 +6,8 @@ import { api, ApiError, call } from '../api/client';
 import { refetchAccount, useInstrument, useLiveMarket, useMe } from '../hooks';
 import { bpsToPercent, fxQuote, spreadInfo } from '../finance';
 import { formatMinor, parseToMinor } from '../money';
+import { newIdempotencyKey } from '../m2b';
+import { availableOf, bestPrices, sideWords } from '../fx';
 import { type as typo, useColors } from '../theme/theme';
 import { Body, Button, Caption, Card, Screen, Segmented, Title } from '../components/ui';
 import { Field, Line } from '../components/Field';
@@ -24,8 +26,8 @@ export default function FxScreen() {
   const [side, setSide] = useState<'BUY' | 'SELL'>('BUY');
   const [amount, setAmount] = useState('10');
   const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
-  const bid = book?.bids[0]?.price;
-  const ask = book?.asks[0]?.price;
+  const { bid, ask } = bestPrices(book);
+  const words = sideWords(side);
   const s = bid && ask ? spreadInfo(bid, ask) : null;
   const ps = inst?.priceScale ?? 2;
   const qty = parseToMinor(amount, inst?.qtyScale ?? 0);
@@ -33,13 +35,13 @@ export default function FxScreen() {
   const dec = i18n.language.startsWith('ru') ? ',' : '.';
   const rate = (m?: number) => (m ? formatMinor(m, ps, i18n.language) : '—');
   const money = (m: number) => `${formatMinor(m, ps, i18n.language)} SPARK`;
-  const bal = (a: string) => me?.balances.find((b) => b.asset === a)?.available;
+  const bal = (a: string) => availableOf(me?.balances, a);
 
   const send = useMutation({
     mutationFn: () =>
       call(
         api.POST('/orders', {
-          params: { header: { 'Idempotency-Key': `${Date.now()}-${Math.random().toString(36).slice(2)}` } },
+          params: { header: { 'Idempotency-Key': newIdempotencyKey() } },
           body: { instrument: FX, side, type: 'MARKET', qty: qty! },
         }),
       ),
@@ -82,7 +84,7 @@ export default function FxScreen() {
             <Line label={`${t('ticket.fee')} · ${inst ? bpsToPercent(inst.feeBps, dec) : ''}%`} value={money(q.fee)} />
             <Line label={t('fx.spreadCost')} value={money(q.spreadCost)} color={c.negative} testID="fx-spread-cost" />
             <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-              <Body bold>{t(side === 'BUY' ? 'fx.totalPay' : 'fx.totalGet')}</Body>
+              <Body bold>{t(words.total)}</Body>
               <Body bold num>
                 ≈ {money(q.total)}
               </Body>
@@ -98,7 +100,7 @@ export default function FxScreen() {
           </Text>
         )}
         <View style={{ flexDirection: 'row' }}>
-          <Button testID="fx-submit" title={t(side === 'BUY' ? 'fx.ctaBuy' : 'fx.ctaSell')} color={side === 'BUY' ? c.bid : c.ask} disabled={!q || send.isPending} onPress={() => send.mutate()} />
+          <Button testID="fx-submit" title={t(words.cta)} color={c[words.tone]} disabled={!q || send.isPending} onPress={() => send.mutate()} />
         </View>
       </Card>
       <Caption>{t('app.notAdvice')}</Caption>
