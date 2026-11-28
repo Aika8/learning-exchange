@@ -862,6 +862,12 @@ Build and CI
   the threshold file holds 44, the true score rounded down, so a re-run with one flaky kill still passes. No
   `application.assistant.Claude*` class exists, so nothing is excluded. «решено без Айки — отменяется так: добавить
   файл `backend/quality-gates/mutation-application/<имя>.txt` с 45».
+- LE-030: the task names day grouping, fee sums and filters, but `src/app/statement.tsx` has none of them — the server
+  sends the totals and the only filter is the «All / Today» period. Chosen: move what the screen does compute (period
+  start, query params, newest-40 lines, sign / colour token / spread caption / title key of a row) into
+  `src/statement.ts`; no grouping or client-side sums were added, so the screen shows the same values. «A negative
+  balance» is tested as a negative realised profit total (the statement has no balance field). Not taken: inventing
+  day grouping (changes the screen). решено без Айки — отменяется так: add the missing helpers in a new task.
 
 ## Backlog run (December 2026) — decided on Aika's answers of 2026-11-26
 
