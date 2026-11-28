@@ -8,6 +8,7 @@ import { Body, Button, Caption, Card, Screen, Title } from '../components/ui';
 import { Line } from '../components/Field';
 import { TabBar } from '../components/TabBar';
 import { useFmt } from '../components/format';
+import { canTrade, couponsPaidLeft, nextCoupon, selectedBond, statusTone } from '../bonds';
 
 /** Bonds (M2b): list, and the detail of one (`?id=`) with yield to maturity always shown and modified duration. */
 export default function BondsScreen() {
@@ -17,17 +18,18 @@ export default function BondsScreen() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const bonds = useBonds().data ?? [];
   const name = useDisplayName();
-  const bond = id ? bonds.find((b) => b.instrument === id) : undefined;
-  const statusColor = (b: Schemas['Bond']) => (b.status === 'DEFAULTED' ? c.negative : b.status === 'REDEEMED' ? c.textSecondary : c.positive);
+  const bond = selectedBond(bonds, id);
+  const statusColor = (b: Schemas['Bond']) => c[statusTone(b.status)];
 
   if (bond) {
+    const next = nextCoupon(bond);
     return (
       <Screen
         footer={
           <>
             <View style={{ flexDirection: 'row', gap: 8, padding: 12, backgroundColor: c.bg }}>
               <Button testID="bond-back" title={t('bonds.all')} color={c.textSecondary} onPress={() => router.setParams({ id: '' })} />
-              {bond.status === 'ACTIVE' && <Button testID="bond-trade" title={t('company.trade')} onPress={() => router.push({ pathname: '/instrument', params: { id: bond.instrument } })} />}
+              {canTrade(bond.status) && <Button testID="bond-trade" title={t('company.trade')} onPress={() => router.push({ pathname: '/instrument', params: { id: bond.instrument } })} />}
             </View>
             <TabBar />
           </>
@@ -53,8 +55,8 @@ export default function BondsScreen() {
           <Line label={t('bonds.maturity')} value={f.when(bond.maturityAt)} />
           <Line label={t('bonds.status')} value={t(`bondStatus.${bond.status}`)} color={statusColor(bond)} />
           <Line label={t('bonds.duration')} value={t('bonds.years', { v: f.x100(bond.durationX100) })} testID="bond-duration" />
-          <Line label={t('bonds.nextCoupon')} value={bond.nextCouponAt == null ? '—' : f.when(bond.nextCouponAt)} />
-          <Line label={t('bonds.couponsPaidLeft')} value={`${bond.couponsPaid} / ${bond.couponsLeft}`} />
+          <Line label={t('bonds.nextCoupon')} value={next == null ? '—' : f.when(next)} />
+          <Line label={t('bonds.couponsPaidLeft')} value={couponsPaidLeft(bond)} />
         </Card>
         <Card style={{ gap: 4 }}>
           <Body bold>{t('bonds.hintTitle')}</Body>
