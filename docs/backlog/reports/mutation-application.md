@@ -1,21 +1,37 @@
-# Mutation testing of the application module (LE-018)
+# Mutation testing of the application module (LE-018, LE-020)
 
 Run: `./gradlew :backend:application:pitest` — the same shared helper as the engine (LE-017,
 `rootProject.ext.applyMutationGate` in the root `build.gradle`): PIT 1.30.2, `pitest-junit5-plugin` 1.2.3, Gradle
 plugin `info.solidsoft.pitest` 1.19.0; Java 25, Gradle 9.5.1. HTML report: `backend/application/build/reports/pitest/index.html`.
 
-- **Mutation score: 44 %** — 545 of 1223 mutations killed, 44.6 % (PIT prints it rounded: 45 %) (2026-11-27,
-  `main` at aa49396).
-- **Threshold: 44** — `backend/quality-gates/mutation-application/001.txt` (the score rounded down). The build reads the
-  maximum of every `*.txt` in that folder; to raise it, add a new file with a higher number.
-- Line coverage of mutated classes: 1123/1500 (75 %); test strength (killed among covered): 59 %.
-- 109 tests examined, 2700 test runs (2.21 per mutation).
+- **Mutation score: 49 %** — 603 of 1223 mutations killed, 49.3 % (2026-11-28, LE-020, `main` at 3455854 plus the
+  tests in `application.mutation`). Before: 545 of 1223, 44.6 % (LE-018, 2026-11-27).
+- **Threshold: 49** — `backend/quality-gates/mutation-application/002.txt` (the score rounded down; `001.txt` = 44 stays).
+  The build reads the maximum of every `*.txt` in that folder; to raise it, add a new file with a higher number.
+- Line coverage of mutated classes: 1147/1500 (76 %); test strength (killed among covered): 65 %.
+- 111 tests examined, 2328 test runs (1.9 per mutation).
 - **Run time:** 1 min 54 s for PIT itself (1 min 51 s of mutation analysis), about 2 min 30 s for the Gradle task,
   all cores. Target `application.*`, all application tests; nothing is excluded — there is no
   `application.assistant.Claude*` class, and the jqwik properties are fast (slowest test 0.4 s).
 - Not part of `make test` (the `Makefile` is Aika's).
 
-## Mutations by class
+## LE-020: mutants killed
+
+New tests in `backend/application/src/test/java/application/mutation/` feed the read models events directly
+(`StatementProjectionMutationTest`, `AchievementsAndAtrMutationTest`), each named after the behaviour it pins.
+They kill 57 mutants in the priority classes, which now have no surviving and no uncovered mutant (58 in all, see below):
+
+| Class | Killed before | Killed now | What the new tests pin |
+|---|---:|---:|---|
+| `application.StatementProjection` | 59 / 104 | 104 / 104 | margin open/close/stop-out lines, savings lines, dividend tax line and withheld tax, coupons, redemption price and realised profit, basis of deposited base assets (before and after the first trade), margin trades outside the basis, average cost across partial sales, empty basis, period bounds, the 20 000-line cap, the quote looked up per instrument |
+| `application.AchievementsProjection` | 11 / 22 | 22 / 22 | stop placed / fired, five notes, three instruments, savings and dividend, sub-accounts count for nobody, a locked achievement shows no progress |
+| `application.Atr` | 24 / 25 | 25 / 25 | period 2 is allowed |
+| `application.Sequencer` | 6 / 6 | 6 / 6 | nothing left to kill |
+
+Equivalent mutants: none found in these four classes — every survivor there had a test that tells it apart.
+One extra kill (`EconomySchedule`, 61 → 62) comes from the new tests passing through it, not from a test aimed at it.
+
+## Mutations by class (LE-018 baseline, 2026-11-27)
 
 "Killed" includes timed-out mutants. "No coverage" means no test executes the mutated line.
 
@@ -69,7 +85,7 @@ plugin `info.solidsoft.pitest` 1.19.0; Java 25, Gradle 9.5.1. HTML report: `back
 | `application.economy.EconomyProjection$Dividend` | 1 | 1 | 0 | 0 |
 | **Total** | **1223** | **545** | **371** | **307** |
 
-Most survivors sit in the economy calendar: `application.economy.EconomySchedule` (129 of 190 survive) and
+After LE-018, most survivors sat in the economy calendar: `application.economy.EconomySchedule` (129 of 190 survive) and
 `application.economy.EconomyQueries` (61). Most mutations with no coverage are in `application.ExchangeService`
 (147) and `application.SessionReviewProjection` (47); `application.assistant.FactsCollector`,
 `application.economy.Funds` and `application.realworld.*` are not exercised by any application test at all. By
