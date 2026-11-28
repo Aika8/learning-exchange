@@ -8,6 +8,7 @@ import { Body, Button, Caption, Card, Screen, Title } from '../components/ui';
 import { Line } from '../components/Field';
 import { TabBar } from '../components/TabBar';
 import { useFmt } from '../components/format';
+import { basketGap, gapTone, premiumCaptionKey, premiumTone, sortedHoldings, vsBasketCaptionKey, weightBarPercent } from '../funds';
 
 /** Funds (M2c): the list, and a fund card with TER, NAV vs price (premium), holdings, fees paid and the fund against its own basket. */
 export default function FundsScreen() {
@@ -46,8 +47,7 @@ function FundList() {
 }
 
 function premiumColor(bps: number | null | undefined, c: ReturnType<typeof useColors>) {
-  if (bps == null || bps === 0) return c.textPrimary;
-  return bps > 0 ? c.warning : c.info;
+  return c[premiumTone(bps)];
 }
 
 function FundCard({ id }: { id: string }) {
@@ -75,8 +75,9 @@ function FundCard({ id }: { id: string }) {
       </Screen>
     );
   }
-  const holdings = fd.holdings.slice().sort((a, b) => b.weightBps - a.weightBps);
-  const gap = fd.fundReturnBps != null && fd.basketReturnBps != null ? fd.fundReturnBps - fd.basketReturnBps : null;
+  const holdings = sortedHoldings(fd.holdings);
+  const gap = basketGap(fd.fundReturnBps, fd.basketReturnBps);
+  const gapColor = gapTone(gap);
 
   return (
     <Screen footer={footer}>
@@ -96,7 +97,7 @@ function FundCard({ id }: { id: string }) {
         <Line label={t('funds.navPerUnit')} value={fd.navPerUnit == null ? '—' : f.money(fd.navPerUnit)} testID="fund-nav-unit" />
         <Line label={t('funds.unitPrice')} value={fd.lastPrice == null ? '—' : f.money(fd.lastPrice)} />
         <Line label={t('funds.premium')} value={fd.premiumBps == null ? '—' : f.signed(fd.premiumBps)} color={premiumColor(fd.premiumBps, c)} testID="fund-premium" />
-        <Caption>{t(fd.premiumBps == null ? 'funds.premiumNone' : fd.premiumBps > 0 ? 'funds.premiumAbove' : fd.premiumBps < 0 ? 'funds.premiumBelow' : 'funds.premiumZero')}</Caption>
+        <Caption>{t(premiumCaptionKey(fd.premiumBps))}</Caption>
         <Line label={t('funds.nav')} value={f.money(fd.nav)} />
         <Line label={t('funds.units')} value={f.money(fd.unitsOutstanding, 0, '')} />
       </Card>
@@ -111,7 +112,7 @@ function FundCard({ id }: { id: string }) {
               <Body bold num>{f.pct(h.weightBps)}</Body>
             </View>
             <View style={{ height: 4, backgroundColor: c.surfaceAlt, borderRadius: 2 }}>
-              <View style={{ height: 4, width: `${Math.min(100, Math.max(0, h.weightBps / 100))}%`, backgroundColor: c.primary, borderRadius: 2 }} />
+              <View style={{ height: 4, width: `${weightBarPercent(h.weightBps)}%`, backgroundColor: c.primary, borderRadius: 2 }} />
             </View>
             <Caption>
               {h.qty} × {h.price == null ? '—' : f.money(h.price)} = {f.money(h.value)}
@@ -125,9 +126,9 @@ function FundCard({ id }: { id: string }) {
       <Card style={{ gap: 6 }}>
         <Line label={t('funds.fundReturn')} value={fd.fundReturnBps == null ? '—' : f.signed(fd.fundReturnBps)} testID="fund-return" />
         <Line label={t('funds.basketReturn')} value={fd.basketReturnBps == null ? '—' : f.signed(fd.basketReturnBps)} testID="basket-return" />
-        <Line label={t('funds.difference')} value={gap == null ? '—' : f.signed(gap)} color={gap == null ? undefined : gap >= 0 ? c.positive : c.negative} />
+        <Line label={t('funds.difference')} value={gap == null ? '—' : f.signed(gap)} color={gapColor && c[gapColor]} />
         <Line label={t('funds.basketValue')} value={f.money(fd.basketValue)} />
-        <Caption>{t(gap == null ? 'funds.vsBasketLater' : 'funds.vsBasketHint')}</Caption>
+        <Caption>{t(vsBasketCaptionKey(gap))}</Caption>
       </Card>
       <Caption>{t('app.notAdvice')}</Caption>
     </Screen>
